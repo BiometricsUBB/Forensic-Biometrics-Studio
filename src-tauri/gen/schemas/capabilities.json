@@ -3,7 +3,7 @@
         "identifier": "default",
         "description": "Capability for the main window",
         "local": true,
-        "windows": ["main", "settings"],
+        "windows": ["main", "settings", "edit"],
         "permissions": [
             "core:default",
             "core:path:default",
@@ -28,6 +28,10 @@
                 "allow": ["**", "**/*", "/**/*"]
             },
             "fs:allow-write-text-file",
+            {
+                "identifier": "fs:allow-write-file",
+                "allow": ["**", "**/*", "/**/*"]
+            },
             "store:allow-set",
             "store:allow-get",
             "store:allow-save",

@@ -107,14 +107,23 @@ export type i18nTooltip = Recordify<
     | "Toggle scale mode"
     | "Toggle marking labels"
     | "Toggle viewport information"
+    | "Edit mode"
     | "Export marking types"
     | "Import marking types"
     | "Markings data saved"
     | "Failed to save markings data"
+    | "Image saved successfully"
+    | "Failed to save image: {{error}}"
+    | "Image saved successfully, but could not be reloaded due to path restrictions"
+    | "Save"
     | "Auto rotate"
     | "Rotation instructions"
     | "Calculate and align"
     | "Reset rotation panel"
+    | "Brightness"
+    | "Contrast"
+    | "Reset Zoom"
+    | "ImageLoadPermissionError"
 >;
 
 export type i18nDialog = Recordify<

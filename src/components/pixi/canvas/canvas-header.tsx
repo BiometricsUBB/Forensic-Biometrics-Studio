@@ -11,6 +11,7 @@ import {
     Save,
     FileInput,
     Info,
+    Edit,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
@@ -20,6 +21,8 @@ import { useTranslation } from "react-i18next";
 import { loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
 import { saveMarkingsDataWithDialog } from "@/lib/utils/viewport/saveMarkingsDataWithDialog";
 import { loadMarkingsDataWithDialog } from "@/lib/utils/viewport/loadMarkingsData";
+import { invoke } from "@tauri-apps/api/core";
+import { Sprite } from "pixi.js";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -160,6 +163,38 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
             </div>
 
             <div className="flex items-center gap-1.5">
+                <Toggle
+                    variant="outline"
+                    title={t("Edit mode", {
+                        ns: "tooltip",
+                    })}
+                    size="icon"
+                    disabled={!viewport.children.find(x => x instanceof Sprite)}
+                    onClick={async () => {
+                        try {
+                            // Get the sprite (image) from the viewport
+                            const sprite = viewport.children.find(
+                                x => x instanceof Sprite
+                            ) as Sprite | undefined;
+
+                            // Extract the image path from the sprite
+                            let imagePath: string | undefined;
+                            if (sprite) {
+                                // @ts-expect-error custom property should exist
+                                imagePath = sprite.path;
+                            }
+
+                            // Open the edit window with the image path (or null if no image)
+                            await invoke("open_edit_window", {
+                                imagePath: imagePath || null,
+                            });
+                        } catch (error) {
+                            // Silently fail - user can try again
+                        }
+                    }}
+                >
+                    <Edit size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
+                </Toggle>
                 <Toggle
                     variant="outline"
                     title={t("Toggle marking labels", {

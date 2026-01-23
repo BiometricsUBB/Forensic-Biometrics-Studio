@@ -155,6 +155,52 @@ function validateViewport(viewport: Viewport | null) {
         );
 }
 
+export async function saveMarkingsDataToPath(
+    viewport: Viewport,
+    filePath: string
+) {
+    try {
+        validateViewport(viewport);
+    } catch (error) {
+        showErrorDialog(error);
+        return;
+    }
+
+    const picture = viewport.children.find(x => x instanceof Sprite) as
+        | Sprite
+        | undefined;
+
+    const oppositePicture = (() => {
+        const canvasId = viewport.name as CanvasMetadata["id"] | null;
+        if (canvasId === null) return undefined;
+
+        const oppositeId = getOppositeCanvasId(canvasId);
+        const oppositeCanvas = getCanvas(oppositeId, true);
+        if (oppositeCanvas.viewport === null) return undefined;
+
+        const sprite = oppositeCanvas.viewport.children.find(
+            x => x instanceof Sprite
+        ) as Sprite | undefined;
+
+        if (sprite) {
+            return sprite;
+        }
+        return undefined;
+    })();
+
+    const data = await getData(viewport, picture, oppositePicture);
+    await writeTextFile(filePath, data);
+
+    const canvasId = viewport.name as CanvasMetadata["id"];
+    const leftHash = MarkingsStore(CANVAS_ID.LEFT).state.markingsHash;
+    const rightHash = MarkingsStore(CANVAS_ID.RIGHT).state.markingsHash;
+    GlobalStateStore.actions.unsavedChanges.markCanvasAsSaved(
+        canvasId,
+        leftHash,
+        rightHash
+    );
+}
+
 export async function saveMarkingsDataWithDialog(viewport: Viewport) {
     try {
         validateViewport(viewport);

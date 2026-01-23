@@ -33,6 +33,7 @@ export async function loadSprite(data: string | Uint8Array, name?: string) {
     sprite.hash = hash;
     sprite.name = name ?? (path === null ? null : path.pop() ?? null);
     // @ts-expect-error custom property
-    sprite.path = path === null ? null : path.join("/");
+    // Store the original file path, not the processed version
+    sprite.path = typeof data === "string" ? data : null;
     return sprite;
 }
