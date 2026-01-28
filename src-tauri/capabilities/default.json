@@ -37,6 +37,16 @@
         "dialog:allow-message",
         "dialog:allow-ask",
         "dialog:allow-confirm",
+        {
+            "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "name": "bin/sourceafis_cli",
+                    "sidecar": true,
+                    "args": true
+                }
+            ]
+        },
         "store:default",
         "dialog:default",
         "fs:default"
