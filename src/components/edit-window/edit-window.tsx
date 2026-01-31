@@ -14,6 +14,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
+import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
 
 export function EditWindow() {
     const { t } = useTranslation("tooltip");
@@ -34,6 +35,7 @@ export function EditWindow() {
 
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     // Helper function to find a unique file path
     const findUniqueFilePath = async (
@@ -86,25 +88,16 @@ export function EditWindow() {
 
     // Helper function to process image with filters
     const processImageWithFilters = async (
-        imagePath: string,
+        imgRef: React.RefObject<HTMLImageElement>,
         brightnessValue: number,
         contrastValue: number
     ): Promise<Uint8Array> => {
-        const imageBytes = await readFile(imagePath);
-        const blob = new Blob([imageBytes]);
-        const originalImageUrl = URL.createObjectURL(blob);
-
-        const img = new Image();
-        await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = reject;
-            img.src = originalImageUrl;
-        });
+        if (!imgRef.current) throw new Error("Image not loaded");
+        const img = imgRef.current;
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-            URL.revokeObjectURL(originalImageUrl);
             throw new Error("Failed to get canvas context");
         }
 
@@ -117,7 +110,6 @@ export function EditWindow() {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         ctx.filter = "none";
 
-        URL.revokeObjectURL(originalImageUrl);
 
         const editedBlob = await new Promise<Blob>((resolve, reject) => {
             canvas.toBlob(
@@ -291,6 +283,50 @@ export function EditWindow() {
             }
         };
     }, [imageUrl]);
+        
+    function syncCanvasToImage(img: HTMLImageElement, canvas: HTMLCanvasElement) {
+        if (!img || !canvas) return;
+
+        const dpr = 1;
+
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+
+        canvas.style.width = `${img.width}px`;
+        canvas.style.height = `${img.height}px`;
+        canvas.style.position = "absolute";
+        canvas.style.zIndex = "10";
+
+        const ctx = canvas.getContext("2d")!;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    useEffect(() => {
+        const img = imageRef.current;
+        const canvas = canvasRef.current;
+        if (!img || !canvas) return;
+
+        const sync = () => {
+            requestAnimationFrame(() => {
+            syncCanvasToImage(img, canvas);
+            });
+        };
+
+        const resizeObserver = new ResizeObserver(sync);
+        resizeObserver.observe(img);
+
+        if (img.complete) sync();
+        img.addEventListener("load", sync);
+
+        return () => {
+            resizeObserver.disconnect();
+            img.removeEventListener("load", sync);
+        };
+    }, [imageUrl]);
+
 
     const saveEditedImage = async () => {
         if (!imageUrl || !imagePath) {
@@ -300,7 +336,7 @@ export function EditWindow() {
         try {
             // Process image with filters
             const uint8Array = await processImageWithFilters(
-                imagePath,
+                imageRef,
                 brightness,
                 contrast
             );
@@ -466,6 +502,14 @@ export function EditWindow() {
                                 }}
                                 draggable={false}
                             />
+                            <canvas
+                                ref={canvasRef}
+                                className="absolute pointer-events-auto"
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transformOrigin: "center center",
+                                }}
+                            />
                             {zoom !== 1 && (
                                 <div className="absolute top-2 right-2">
                                     <Button
@@ -542,8 +586,13 @@ export function EditWindow() {
                                         <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
                                             {contrast}%
                                         </span>
-                                    </div>
+                                    </div>                                    
                                 </div>
+                                <div className="border-t border-border/30" />
+                                <div className="flex flex-col items-center w-full">
+                                    <ImageDpiControls imageRef={imageRef} canvasRef={canvasRef}/>
+                                </div>
+                                <div className="border-t border-border/30" />   
                             </div>
                         </div>
                     </>
