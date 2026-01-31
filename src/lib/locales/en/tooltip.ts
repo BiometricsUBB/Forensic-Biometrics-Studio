@@ -19,6 +19,8 @@ const d: Dictionary = {
     "Failed to save markings data": "Failed to save markings data",
     "Image saved successfully": "Image saved successfully",
     "Failed to save image: {{error}}": "Failed to save image: {{error}}",
+    "Image saved successfully, but could not be reloaded due to path restrictions":
+        "Image saved successfully, but could not be reloaded due to path restrictions",
     Save: "Save",
     "Auto rotate": "Manually rotate images using current alignment lines",
     "Reset rotation": "Reset image rotation",
@@ -26,6 +28,11 @@ const d: Dictionary = {
         "Mark a line between two identical points on each image starting from bottom, the lower point will be the rotation anchor and the upper will be used to calculate the rotation angle",
     "Calculate and align": "Calculate and align",
     "Reset rotation panel": "Reset rotation",
+    Brightness: "Brightness",
+    Contrast: "Contrast",
+    "Reset Zoom": "Reset Zoom",
+    ImageLoadPermissionError:
+        "The edited image was saved, but cannot be loaded due to path restrictions. Please try loading it manually.",
 };
 
 export default d;

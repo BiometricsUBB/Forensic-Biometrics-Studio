@@ -20,6 +20,8 @@ const d: Dictionary = {
     "Image saved successfully": "Obraz zapisany pomyślnie",
     "Failed to save image: {{error}}":
         "Nie udało się zapisać obrazu: {{error}}",
+    "Image saved successfully, but could not be reloaded due to path restrictions":
+        "Obraz zapisany pomyślnie, ale nie można go przeładować z powodu ograniczeń ścieżki",
     Save: "Zapisz",
     "Auto rotate":
         "automatycznie obróć obrazy używając aktualnych linii wyrównania",
@@ -28,6 +30,11 @@ const d: Dictionary = {
         "Oznacz linią dwa te same punkty na każdym obrazie rozpoczynając od dołu, dolny punkt będzie kotwicą obrotu a górny posłuży wyliczeniu kąta obrotu",
     "Calculate and align": "Oblicz i dopasuj",
     "Reset rotation panel": "Zresetuj rotację",
+    Brightness: "Jasność",
+    Contrast: "Kontrast",
+    "Reset Zoom": "Resetuj powiększenie",
+    ImageLoadPermissionError:
+        "Edytowany obraz został zapisany, ale nie można go załadować z powodu ograniczeń dostępności ścieżki. Spróbuj załadować go ręcznie.",
 };
 
 export default d;

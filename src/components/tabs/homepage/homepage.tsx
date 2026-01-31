@@ -1,4 +1,5 @@
 import { InformationTabs } from "@/components/information-tabs/information-tabs";
+import { useTranslation } from "react-i18next";
 import { CanvasContainer } from "@/components/pixi/canvas/container";
 import { CanvasHeader } from "@/components/pixi/canvas/canvas-header";
 import {
@@ -15,11 +16,15 @@ import { useMemo, useEffect } from "react";
 import { useKeyboardShortcuts } from "@/lib/hooks/useKeyboardShortcuts";
 import { VerticalToolbar } from "@/components/toolbar/vertical-toolbar";
 import { listen } from "@tauri-apps/api/event";
+import { readFile } from "@tauri-apps/plugin-fs";
 import { getCanvas } from "@/components/pixi/canvas/hooks/useCanvas";
 import { loadImage } from "@/lib/utils/viewport/loadImage";
+import { saveMarkingsDataToPath } from "@/lib/utils/viewport/saveMarkingsDataWithDialog";
 import { Sprite } from "pixi.js";
+import { Viewport } from "pixi-viewport";
 
 export function Homepage() {
+    const { t } = useTranslation("tooltip");
     useKeyboardShortcuts();
 
     const leftCanvasMetadata: CanvasMetadata = useMemo(
@@ -36,51 +41,125 @@ export function Homepage() {
         []
     );
 
-    // Listen for image reload requests from the edit window
-    useEffect(() => {
-        const setupListener = async () => {
-            return listen<string>("image-reload-requested", async event => {
-                const imagePath = event.payload;
+    // Helper function to check if error is forbidden/permission error
+    const isForbiddenError = (error: unknown): boolean => {
+        const errorMessage =
+            error instanceof Error ? error.message : String(error);
+        return (
+            errorMessage.toLowerCase().includes("forbidden") ||
+            errorMessage.toLowerCase().includes("not allowed") ||
+            errorMessage.toLowerCase().includes("permission")
+        );
+    };
 
-                // Check both viewports to find which one has this image
+    // Helper function to handle viewport reload
+    const handleViewportReload = async (
+        viewport: Viewport,
+        originalPath: string,
+        newPath: string
+    ): Promise<boolean> => {
+        const sprite = viewport.children.find(x => x instanceof Sprite) as
+            | Sprite
+            | undefined;
+
+        // @ts-expect-error custom property should exist
+        if (!sprite || sprite.path !== originalPath) {
+            return false;
+        }
+
+        try {
+            await readFile(newPath);
+        } catch (error) {
+            if (isForbiddenError(error)) {
+                const { showErrorDialog } = await import(
+                    "@/lib/errors/showErrorDialog"
+                );
+                showErrorDialog(t("ImageLoadPermissionError"));
+                return true;
+            }
+            throw error;
+        }
+
+        try {
+            const markingsFilePath = `${originalPath}.json`;
+            await saveMarkingsDataToPath(viewport, markingsFilePath);
+        } catch {
+            /* empty */
+        }
+
+        try {
+            await loadImage(newPath, viewport);
+            return true;
+        } catch (error) {
+            if (isForbiddenError(error)) {
+                const { showErrorDialog } = await import(
+                    "@/lib/errors/showErrorDialog"
+                );
+                showErrorDialog(t("ImageLoadPermissionError"));
+                return true;
+            }
+            throw error;
+        }
+    };
+
+    useEffect(() => {
+        let unlisten: (() => void) | undefined;
+        let isMounted = true;
+
+        const setupListener = async () => {
+            const unlistenFn = await listen<
+                | {
+                      originalPath: string;
+                      newPath: string;
+                  }
+                | string
+            >("image-reload-requested", async event => {
+                // Handle both old format (string) and new format (object with originalPath and newPath)
+                const originalPath =
+                    typeof event.payload === "string"
+                        ? event.payload
+                        : event.payload.originalPath;
+                const newPath =
+                    typeof event.payload === "string"
+                        ? event.payload
+                        : event.payload.newPath;
+
                 const leftCanvas = getCanvas(CANVAS_ID.LEFT, true);
                 const rightCanvas = getCanvas(CANVAS_ID.RIGHT, true);
 
-                // Check left viewport
+                // Try left viewport first
                 if (leftCanvas.viewport) {
-                    const sprite = leftCanvas.viewport.children.find(
-                        x => x instanceof Sprite
-                    ) as Sprite | undefined;
-
-                    // @ts-expect-error custom property should exist
-                    if (sprite && sprite.path === imagePath) {
-                        await loadImage(imagePath, leftCanvas.viewport);
-                        return;
-                    }
+                    const handled = await handleViewportReload(
+                        leftCanvas.viewport,
+                        originalPath,
+                        newPath
+                    );
+                    if (handled) return;
                 }
 
-                // Check right viewport
+                // Try right viewport
                 if (rightCanvas.viewport) {
-                    const sprite = rightCanvas.viewport.children.find(
-                        x => x instanceof Sprite
-                    ) as Sprite | undefined;
-
-                    // @ts-expect-error custom property should exist
-                    if (sprite && sprite.path === imagePath) {
-                        await loadImage(imagePath, rightCanvas.viewport);
-                    }
+                    await handleViewportReload(
+                        rightCanvas.viewport,
+                        originalPath,
+                        newPath
+                    );
                 }
             });
+
+            if (isMounted) {
+                unlisten = unlistenFn;
+            } else {
+                unlistenFn();
+            }
         };
 
-        let unlistenPromise: Promise<() => void> | null = null;
-        setupListener().then(unlisten => {
-            unlistenPromise = Promise.resolve(unlisten);
-        });
+        setupListener();
 
         return () => {
-            if (unlistenPromise) {
-                unlistenPromise.then(fn => fn());
+            isMounted = false;
+            if (unlisten) {
+                unlisten();
             }
         };
     }, []);
