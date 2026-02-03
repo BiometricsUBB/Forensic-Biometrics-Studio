@@ -218,11 +218,20 @@ export const MarkingsInfoTable = function <TData, TValue>({
                 overflow: "auto",
             }}
             totalCount={rows.length}
-            increaseViewportBy={{ top: 0, bottom: 200 }}
+            // Zwiększono margines renderowania, aby uniknąć ucinania rzędów podczas przewijania
+            increaseViewportBy={{ top: 0, bottom: 400 }}
             components={{
                 Table: TableComponent,
                 TableRow: TableRowComponent(rows, canvasId),
                 TableHead: TableHeadComponent,
+                // Dodano pustą stopkę, która wypycha ostatni wiersz do góry, zapobiegając jego ucinaniu
+                TableFoot: () => (
+                    <tfoot>
+                        <tr className="h-16 bg-transparent">
+                            <td colSpan={columns.length} />
+                        </tr>
+                    </tfoot>
+                )
             }}
             fixedHeaderContent={() =>
                 table.getHeaderGroups().map(headerGroup => (

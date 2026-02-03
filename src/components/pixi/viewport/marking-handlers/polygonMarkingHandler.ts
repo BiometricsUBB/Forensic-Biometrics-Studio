@@ -3,7 +3,7 @@ import { MarkingHandler } from "@/components/pixi/viewport/marking-handlers/mark
 import { FederatedPointerEvent } from "pixi.js";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { getNormalizedMousePosition } from "@/components/pixi/viewport/event-handlers/utils";
-import { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
+import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { Point } from "@/lib/markings/Point";
