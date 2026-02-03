@@ -33,40 +33,25 @@ export const Markings = memo(
             state => state.settings.markings.showLabels
         );
 
+        const calibration = MarkingsStore(canvasId).use(state => state.calibration);
+
         const { viewportWidthRatio, viewportHeightRatio } =
-            ShallowViewportStore(canvasId).use(
-                ({
-                    size: {
-                        screenWorldWidth,
-                        screenWorldHeight,
-                        worldWidth,
-                        worldHeight,
-                    },
-                }) => ({
-                    viewportWidthRatio: screenWorldWidth / worldWidth,
-                    viewportHeightRatio: screenWorldHeight / worldHeight,
-                })
-            );
+            ShallowViewportStore(canvasId).use(state => ({
+                viewportWidthRatio: state.size.screenWorldWidth / state.size.worldWidth,
+                viewportHeightRatio: state.size.screenWorldHeight / state.size.worldHeight,
+            }));
+
+        const markingTypes = MarkingTypesStore.use(state => state.types);
 
         const selectedMarkingLabel = MarkingsStore(canvasId).use(
             state => state.selectedMarkingLabel
         );
 
-        const markingTypes = MarkingTypesStore.use(state => state.types);
-
         const drawMarkings = useCallback(
             (g: PixiGraphics) => {
-                g.children
-                    .find(x => x.name === "markingsContainer")
-                    ?.destroy({
-                        children: true,
-                        texture: true,
-                        baseTexture: true,
-                    });
-
-                const markingsContainer = new PixiGraphics();
-                markingsContainer.name = "markingsContainer";
-                g.addChild(markingsContainer);
+                // FIX 1: Najważniejsza linijka - usuwa stare teksty przed rysowaniem nowych
+                g.removeChildren(); 
+                g.clear();
 
                 markings.forEach(marking => {
                     const markingType = markingTypes.find(
@@ -75,7 +60,7 @@ export const Markings = memo(
                     if (!markingType) return;
 
                     drawMarking(
-                        markingsContainer as PixiGraphics,
+                        g,
                         selectedMarkingLabel === marking.label,
                         marking,
                         markingType,
@@ -84,7 +69,7 @@ export const Markings = memo(
                         showMarkingLabels,
                         rotation,
                         centerX,
-                        centerY
+                        centerY,
                     );
                 });
 
@@ -102,6 +87,7 @@ export const Markings = memo(
                 rotation,
                 centerX,
                 centerY,
+                calibration,
             ]
         );
 

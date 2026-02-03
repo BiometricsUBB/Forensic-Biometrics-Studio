@@ -93,6 +93,11 @@ export type i18nObject = {
         Name: string;
         Keys: Recordify<THEMES>;
     };
+    // NOWA SEKCJA: Definicja typów dla kalibracji
+    Calibration: {
+        Unit: string;
+        Scale: string;
+    };
 };
 
 export type i18nTooltip = Recordify<

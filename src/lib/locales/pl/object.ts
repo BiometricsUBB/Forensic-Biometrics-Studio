@@ -18,6 +18,7 @@ const d: Dictionary = {
                     bounding_box: "Prostokąt (legacy)",
                     rectangle: "Prostokąt",
                     polygon: "Wielokąt",
+                    measurement: "Miarka",
                 },
             },
             typeId: "ID typu",
@@ -52,6 +53,11 @@ const d: Dictionary = {
             light_blue: "Jasny niebieski",
             dark_blue: "Ciemny niebieski",
         },
+    },
+    // New transaltions for Calibration
+    Calibration: {
+        Unit: "Jednostka",
+        Scale: "Pikseli na jednostkę",
     },
 };
 

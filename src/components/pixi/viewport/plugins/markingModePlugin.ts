@@ -15,6 +15,7 @@ import {
     BoundingBoxMarkingHandler,
     PolygonMarkingHandler,
     RectangleMarkingHandler,
+    MeasurementMarkingHandler,
 } from "@/components/pixi/viewport/marking-handlers";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { ViewportHandlerParams } from "../event-handlers/utils";
@@ -104,6 +105,7 @@ export class MarkingModePlugin extends Plugin {
             [MARKING_CLASS.BOUNDING_BOX]: BoundingBoxMarkingHandler,
             [MARKING_CLASS.POLYGON]: PolygonMarkingHandler,
             [MARKING_CLASS.RECTANGLE]: RectangleMarkingHandler,
+            [MARKING_CLASS.MEASUREMENT]: MeasurementMarkingHandler,
         };
 
         // eslint-disable-next-line security/detect-object-injection

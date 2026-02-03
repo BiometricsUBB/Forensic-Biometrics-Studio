@@ -1,6 +1,6 @@
 import { FederatedPointerEvent } from "pixi.js";
 // eslint-disable-next-line import/no-cycle
-import { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
+import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
 
 export abstract class MarkingHandler {
     // eslint-disable-next-line no-useless-constructor
