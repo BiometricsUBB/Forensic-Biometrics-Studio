@@ -3,6 +3,9 @@ param()
 # Copies SourceAFIS.Cli.exe to src-tauri/bin and renames it to match the active Tauri target triple.
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $cliRoot = Join-Path $repoRoot "..\\sourceafis-net\\SourceAFIS.Cli"
+if (-not (Test-Path $cliRoot)) {
+    $cliRoot = Join-Path $repoRoot "..\\SourceAFIS\\SourceAFIS.Cli"
+}
 $dstDir = Join-Path $repoRoot "src-tauri\\bin"
 
 if (-not (Test-Path $cliRoot)) {
@@ -20,11 +23,12 @@ if (-not (Test-Path $dstDir)) {
     New-Item -ItemType Directory -Path $dstDir | Out-Null
 }
 
-$publishDir = Join-Path $cliRoot "bin\\Release\\net7.0\\win-x64\\publish"
-$exe = Join-Path $publishDir "SourceAFIS.Cli.exe"
+$exe = Get-ChildItem -Path (Join-Path $cliRoot "bin\\Release") -Recurse -Filter "SourceAFIS.Cli.exe" |
+    Where-Object { $_.FullName -like "*\win-x64\publish\SourceAFIS.Cli.exe" } |
+    Select-Object -First 1 -ExpandProperty FullName
 
-if (-not (Test-Path $exe)) {
-    Write-Error "SourceAFIS.Cli.exe not found at: $exe`nBuild it with: dotnet publish ..\\sourceafis-net\\SourceAFIS.Cli\\SourceAFIS.Cli.csproj -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=false"
+if (-not $exe) {
+    Write-Error "SourceAFIS.Cli.exe publish output not found under: $cliRoot`nBuild it with: dotnet publish ..\\SourceAFIS\\SourceAFIS.Cli\\SourceAFIS.Cli.csproj -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=false"
     exit 1
 }
 
