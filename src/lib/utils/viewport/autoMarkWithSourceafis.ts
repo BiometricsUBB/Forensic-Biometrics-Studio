@@ -8,10 +8,35 @@ import {
     CanvasMetadata,
 } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { RayMarking } from "@/lib/markings/RayMarking";
 
 const TYPE_ID_RIDGE_ENDING = "e6cbde52-5a18-4236-8287-7a1daf941ba9";
 const TYPE_ID_BIFURCATION = "f47c4b97-2d62-4959-aa21-edebfa7a756a";
+
+function normalizeTypeName(value: string | undefined) {
+    return (value ?? "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+}
+
+function resolveSourceafisTypeId(kind: "ending" | "bifurcation") {
+    const existingTypes = MarkingTypesStore.state.types;
+    const desiredId =
+        kind === "ending" ? TYPE_ID_BIFURCATION : TYPE_ID_RIDGE_ENDING;
+    const desiredName =
+        kind === "ending" ? "bifurcation" : "ridgeending";
+
+    const match =
+        existingTypes.find(t => t.id === desiredId) ||
+        existingTypes.find(
+            t =>
+                normalizeTypeName(t.name) === desiredName ||
+                normalizeTypeName(t.displayName) === desiredName
+        );
+
+    return match?.id ?? null;
+}
 
 function getImagePathFromViewport(viewport: Viewport): string {
     const sprite = (() => {
@@ -154,10 +179,15 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
         let didLogSample = false;
         for (const minutia of minutiae) {
             const label = markingsStore.actions.labelGenerator.getLabel();
-            const typeId =
-                minutia.type === "ending"
-                    ? TYPE_ID_RIDGE_ENDING
-                    : TYPE_ID_BIFURCATION;
+            const typeId = resolveSourceafisTypeId(minutia.type);
+            if (!typeId) {
+                // eslint-disable-next-line no-console
+                console.warn(
+                    "Missing marking type for SourceAFIS minutia:",
+                    minutia.type
+                );
+                continue;
+            }
             const origin = { x: minutia.x, y: minutia.y };
             if (!didLogSample) {
                 // eslint-disable-next-line no-console
@@ -169,7 +199,7 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
                 });
                 didLogSample = true;
             }
-            const angleRad = minutia.direction;
+            const angleRad = minutia.direction - Math.PI / 2;
             const m = new RayMarking(label, origin, typeId, angleRad);
             markingsStore.actions.markings.addOne(m);
         }
