@@ -7,7 +7,19 @@ import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import { useCustomTheme } from "@/lib/hooks/useCustomTheme";
 import { CustomThemeStore } from "@/lib/stores/CustomTheme";
-import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
+import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
+
+const decodeUnicodeEscapes = (value: string) => {
+    let current = value;
+    const pattern = /\\u([0-9a-fA-F]{4})/g;
+    for (let i = 0; i < 10; i += 1) {
+        if (!pattern.test(current)) break;
+        current = current.replace(pattern, (_m, hex) =>
+            String.fromCharCode(parseInt(hex, 16))
+        );
+    }
+    return current;
+};
 
 const Homepage = lazy(() =>
     import("@/components/tabs/homepage/homepage").then(module => ({
@@ -26,31 +38,22 @@ export default function App() {
 
     useEffect(() => {
         CustomThemeStore.rehydrate();
-    }, []);
-
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.ctrlKey || event.metaKey) {
-                switch (event.key.toLowerCase()) {
-                    case "z":
-                        event.preventDefault(); 
-                        GlobalHistoryManager.undo();
-                        break;
-                    case "y":
-                        event.preventDefault();
-                        GlobalHistoryManager.redo();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
+        GlobalSettingsStore.use.persist?.rehydrate();
+        const report = GlobalSettingsStore.state.settings.report;
+        if (report) {
+            const normalized = {
+                ...report,
+                performedBy: decodeUnicodeEscapes(report.performedBy ?? ""),
+                department: decodeUnicodeEscapes(report.department ?? ""),
+                addressLine1: decodeUnicodeEscapes(report.addressLine1 ?? ""),
+                addressLine2: decodeUnicodeEscapes(report.addressLine2 ?? ""),
+                addressLine3: decodeUnicodeEscapes(report.addressLine3 ?? ""),
+                addressLine4: decodeUnicodeEscapes(report.addressLine4 ?? ""),
+            };
+            GlobalSettingsStore.actions.settings.report.setReportSettings(
+                normalized
+            );
+        }
     }, []);
 
     useSettingsSync();

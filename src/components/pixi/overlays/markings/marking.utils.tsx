@@ -347,22 +347,6 @@ const drawPolygonMarking = (
         drawLabel(g, String(label), relativeOrigin, size, textColor);
     }
 };
-type BlinkState = { label: number; until: number; periodMs: number } | null;
-
-let blinking: BlinkState = null;
-
-export const blinkMarking = (label: number, flashes = 3, periodMs = 150) => {
-    const durationMs = flashes * 2 * periodMs;
-    blinking = { label, until: Date.now() + durationMs, periodMs };
-};
-
-export const isBlinkActive = () => !!blinking && Date.now() < blinking.until;
-
-const isBlinkingThis = (label: number) =>
-    !!blinking && blinking.label === label && Date.now() < blinking.until;
-
-const shouldBlinkNow = (periodMs: number) =>
-    Math.floor(Date.now() / periodMs) % 2 === 0;
 
 export const drawMarking = (
     g: PixiGraphics,
@@ -377,10 +361,6 @@ export const drawMarking = (
     centerY: number = 0
 ) => {
     if (!markingType) return;
-
-    const emphasize = isBlinkingThis(marking.label)
-        ? shouldBlinkNow(blinking!.periodMs)
-        : isSelected;
 
     // Calculate the viewport position of the marking, based on zoom level
     const origin = marking.calculateOriginViewportPosition(
@@ -397,7 +377,7 @@ export const drawMarking = (
     if (marking instanceof PointMarking) {
         drawPointMarking(
             g,
-            emphasize,
+            isSelected,
             marking,
             markingType,
             markingViewportPosition,
@@ -406,7 +386,7 @@ export const drawMarking = (
     } else if (marking instanceof RayMarking) {
         drawRayMarking(
             g,
-            emphasize,
+            isSelected,
             marking,
             markingType,
             markingViewportPosition,
@@ -416,7 +396,7 @@ export const drawMarking = (
     } else if (marking instanceof LineSegmentMarking) {
         drawLineSegmentMarking(
             g,
-            emphasize,
+            isSelected,
             marking,
             markingType,
             markingViewportPosition,
@@ -434,7 +414,7 @@ export const drawMarking = (
     } else if (marking instanceof BoundingBoxMarking) {
         drawBoundingBoxMarking(
             g,
-            emphasize,
+            isSelected,
             marking,
             markingType,
             markingViewportPosition,
@@ -455,7 +435,7 @@ export const drawMarking = (
     ) {
         drawPolygonMarking(
             g,
-            emphasize,
+            isSelected,
             marking,
             markingType,
             markingViewportPosition,

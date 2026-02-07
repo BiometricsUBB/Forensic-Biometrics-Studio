@@ -7,9 +7,6 @@ import { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingMod
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
-import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
-import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
-
 
 export class BoundingBoxMarkingHandler extends MarkingHandler {
     private canvasId: CANVAS_ID;
@@ -60,20 +57,9 @@ export class BoundingBoxMarkingHandler extends MarkingHandler {
 
     handleLMBDown() {
         const { markingsStore } = this.plugin.handlerParams;
-        const markingToAdd = markingsStore.state.temporaryMarking as BoundingBoxMarking;
-
-        if (!markingToAdd) {
-            this.cleanup();
-            return;
-        }
-
-        const command = new AddOrUpdateMarkingCommand(
-            markingsStore.actions.markings, 
-            markingToAdd
+        markingsStore.actions.markings.addOne(
+            markingsStore.state.temporaryMarking as BoundingBoxMarking
         );
-        
-        GlobalHistoryManager.executeCommand(command); 
-
         this.cleanup();
     }
 }
