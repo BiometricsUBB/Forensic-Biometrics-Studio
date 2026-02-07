@@ -1,0 +1,4 @@
+const decodeUnicodeEscapes = (value: string) =>
+    value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
+        String.fromCharCode(parseInt(hex, 16))
+    );

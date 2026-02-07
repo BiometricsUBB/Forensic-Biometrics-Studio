@@ -7,6 +7,7 @@ import {
     i18nDialog,
     i18nModes,
     i18nDescription,
+    i18nReport,
 } from "@/lib/locales/translation";
 
 declare module "i18next" {
@@ -30,6 +31,7 @@ declare module "i18next" {
             description: i18nDescription;
             dialog: i18nDialog;
             modes: i18nModes;
+            report: i18nReport;
         };
     }
 }

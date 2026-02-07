@@ -10,12 +10,6 @@ import { useCallback, useMemo } from "react";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
-import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
-import {
-    RemoveMarkingCommand,
-    MergeMarkingsCommand,
-} from "@/lib/stores/History/MarkingCommands";
-
 /* eslint-disable sonarjs/no-duplicated-branches */
 export type EmptyMarking = {
     label: MarkingClass["label"];
@@ -54,13 +48,7 @@ export const useColumns = (
 
     const handleRemoveClick = useCallback(
         (marking: MarkingClass) => {
-            const store = MarkingsStore(id);
-            const command = new RemoveMarkingCommand(
-                store.actions.markings,
-                marking,
-                id
-            );
-            GlobalHistoryManager.executeCommand(command);
+            MarkingsStore(id).actions.markings.removeOneByLabel(marking.label);
         },
         [id]
     );
@@ -76,27 +64,11 @@ export const useColumns = (
             if (!pendingSel) {
                 GlobalStateStore.actions.merge.setPending(current);
             } else if (pendingSel.canvasId !== id) {
-                const localStore = MarkingsStore(pendingSel.canvasId);
-                const otherStore = MarkingsStore(id);
-
-                const localMarking = localStore.state.markings.find(
-                    m => m.label === pendingSel.label
+                MarkingsStore(pendingSel.canvasId).actions.markings.mergePair(
+                    pendingSel.label,
+                    id,
+                    marking.label
                 );
-                const otherMarking = otherStore.state.markings.find(
-                    m => m.label === marking.label
-                );
-
-                if (localMarking && otherMarking) {
-                    const command = new MergeMarkingsCommand(
-                        localStore.actions.markings,
-                        pendingSel.label,
-                        [...(localMarking.ids || [])],
-                        id,
-                        marking.label,
-                        [...(otherMarking.ids || [])]
-                    );
-                    GlobalHistoryManager.executeCommand(command);
-                }
                 GlobalStateStore.actions.merge.setPending(null);
             } else {
                 GlobalStateStore.actions.merge.setPending(current);

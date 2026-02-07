@@ -34,6 +34,14 @@ class StoreClass {
         });
     }
 
+    private setReportSettings(
+        callback: ActionProduceCallback<State["settings"]["report"], State>
+    ) {
+        this.state.set(draft => {
+            draft.settings.report = callback(draft.settings.report, draft);
+        });
+    }
+
     readonly actions = {
         settings: {
             language: {
@@ -56,6 +64,22 @@ class StoreClass {
                     this.setInterfaceSettings(
                         produce(settings => {
                             settings.theme = newTheme;
+                        })
+                    );
+                },
+            },
+            report: {
+                setReportSettings: (
+                    newSettings: State["settings"]["report"]
+                ) => {
+                    this.setReportSettings(() => newSettings);
+                },
+                updateReportSettings: (
+                    patch: Partial<State["settings"]["report"]>
+                ) => {
+                    this.setReportSettings(
+                        produce(settings => {
+                            Object.assign(settings, patch);
                         })
                     );
                 },

@@ -9,6 +9,9 @@ const d: Dictionary = {
     "Open settings": "Open settings",
     "Create and manage custom color themes":
         "Create and manage custom color themes",
+    "Configure report metadata": "Configure report metadata",
+    "Configure default report data": "Configure default report data",
+    "Generate PDF report": "Generate PDF report",
 };
 
 export default d;

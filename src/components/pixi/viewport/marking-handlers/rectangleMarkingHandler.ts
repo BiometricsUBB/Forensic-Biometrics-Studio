@@ -8,8 +8,6 @@ import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { Point } from "@/lib/markings/Point";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
-import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
-import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
 
 export class RectangleMarkingHandler extends MarkingHandler {
     private origin: Point | null = null;
@@ -100,19 +98,14 @@ export class RectangleMarkingHandler extends MarkingHandler {
             ),
         ];
 
-        const newMarking = new RectangleMarking(
-            markingsStore.state.temporaryMarking!.label,
-            adjustedOrigin,
-            markingsStore.state.temporaryMarking!.typeId,
-            points
+        markingsStore.actions.markings.addOne(
+            new RectangleMarking(
+                markingsStore.state.temporaryMarking!.label,
+                adjustedOrigin,
+                markingsStore.state.temporaryMarking!.typeId,
+                points
+            )
         );
-
-        const command = new AddOrUpdateMarkingCommand(
-            markingsStore.actions.markings,
-            newMarking
-        );
-        GlobalHistoryManager.executeCommand(command);
-
         this.cleanup();
     }
 }

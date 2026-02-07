@@ -5,6 +5,7 @@ import {
     LANGUAGES,
     THEMES,
 } from "@/lib/stores/GlobalSettings";
+import { ReportSettings } from "@/lib/stores/GlobalSettings/GlobalSettings.store";
 import { CustomThemeStore, CustomTheme } from "@/lib/stores/CustomTheme";
 import { applyCustomTheme } from "@/lib/hooks/useCustomTheme";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
@@ -15,7 +16,8 @@ type SettingsChangePayload =
     | { type: "language"; value: string }
     | { type: "theme"; value: string }
     | { type: "customTheme"; theme: CustomTheme | null }
-    | { type: "markingTypes"; types: MarkingType[] };
+    | { type: "markingTypes"; types: MarkingType[] }
+    | { type: "report"; value: ReportSettings };
 
 const SETTINGS_CHANGE_EVENT = "settings-change";
 
@@ -50,6 +52,10 @@ export const useSettingsSync = () => {
                     applyCustomTheme(theme);
                 } else if (payload.type === "markingTypes") {
                     MarkingTypesStore.use.setState({ types: payload.types });
+                } else if (payload.type === "report") {
+                    GlobalSettingsStore.actions.settings.report.setReportSettings(
+                        payload.value
+                    );
                 }
             }
         );
