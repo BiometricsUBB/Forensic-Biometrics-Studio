@@ -24,6 +24,7 @@ type Settings = {
     viewport: {
         locked: boolean;
         scaleSync: boolean;
+        rotationSync: boolean;
     };
 };
 
@@ -42,6 +43,7 @@ const INITIAL_STATE: State = {
         viewport: {
             locked: false,
             scaleSync: false,
+            rotationSync: false,
         },
     },
 };

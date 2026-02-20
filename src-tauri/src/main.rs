@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use tauri::Emitter;
 use tauri::Manager;
 use tauri::WebviewUrl;
 use tauri::WebviewWindowBuilder;
@@ -31,16 +32,24 @@ async fn close_splashscreen_if_exists(window: tauri::Window) {
 }
 
 #[tauri::command]
-async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
+async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -> Result<(), String> {
     if let Some(settings_window) = app.get_webview_window("settings") {
+        if let Some(cat) = &category {
+            settings_window.emit("settings-category-change", cat).map_err(|e| e.to_string())?;
+        }
         settings_window.set_focus().map_err(|e| e.to_string())?;
         return Ok(());
     }
 
+    let url = match &category {
+        Some(cat) => format!("index.html?window=settings&category={}", cat),
+        None => "index.html?window=settings".to_string(),
+    };
+
     WebviewWindowBuilder::new(
         &app,
         "settings",
-        WebviewUrl::App("index.html?window=settings".into()),
+        WebviewUrl::App(url.into()),
     )
     .title("Settings")
     .inner_size(600.0, 450.0)
@@ -61,7 +70,7 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-       .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             println!("{}, {argv:?}, {cwd}", app.package_info().name);
             let _ = app
                 .get_webview_window("main")

@@ -21,6 +21,10 @@ const d: Dictionary = {
         "Mark a line between two identical points on each image starting from bottom, the lower point will be the rotation anchor and the upper will be used to calculate the rotation angle",
     "Calculate and align": "Calculate and align",
     "Reset rotation panel": "Reset rotation",
+    "Rotate left": "Rotate left (-5°)",
+    "Rotate right": "Rotate right (+5°)",
+    "Reset rotation": "Reset rotation to 0°",
+    "Synchronize rotation": "Synchronize rotation between viewports",
 };
 
 export default d;

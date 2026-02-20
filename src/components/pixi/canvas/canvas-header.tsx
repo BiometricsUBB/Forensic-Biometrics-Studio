@@ -11,6 +11,9 @@ import {
     Save,
     FileInput,
     Info,
+    RotateCw,
+    RotateCcw,
+    RefreshCw,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
@@ -20,6 +23,11 @@ import { useTranslation } from "react-i18next";
 import { loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
 import { saveMarkingsDataWithDialog } from "@/lib/utils/viewport/saveMarkingsDataWithDialog";
 import { loadMarkingsDataWithDialog } from "@/lib/utils/viewport/loadMarkingsData";
+import {
+    applyRotationDelta,
+    resetRotation,
+} from "@/lib/utils/viewport/applyRotation";
+import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -45,6 +53,11 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
     const { setShowLabels } = markingsActions;
 
     const { setShowViewportInformation } = viewportActions;
+
+    const rotation = RotationStore(id).use(state => state.rotation);
+    const rotationDeg = Math.round(((rotation * 180) / Math.PI) * 10) / 10;
+
+    const ROTATION_STEP = (5 * Math.PI) / 180;
 
     const viewport = useGlobalViewport(id, { autoUpdate: true });
 
@@ -157,6 +170,54 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                     size="icon"
                     variant="outline"
                 />
+                <div className="h-5 w-px bg-border/40 mx-0.5" />
+
+                <Button
+                    title={t("Rotate left", { ns: "tooltip" })}
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                        applyRotationDelta(id, -ROTATION_STEP);
+                    }}
+                >
+                    <RotateCcw
+                        size={ICON.SIZE}
+                        strokeWidth={ICON.STROKE_WIDTH}
+                    />
+                </Button>
+
+                <Button
+                    title={t("Rotate right", { ns: "tooltip" })}
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                        applyRotationDelta(id, ROTATION_STEP);
+                    }}
+                >
+                    <RotateCw
+                        size={ICON.SIZE}
+                        strokeWidth={ICON.STROKE_WIDTH}
+                    />
+                </Button>
+
+                <span className="text-xs font-mono min-w-[3rem] text-center tabular-nums">
+                    {rotationDeg}°
+                </span>
+
+                <Button
+                    title={t("Reset rotation", { ns: "tooltip" })}
+                    size="icon"
+                    variant="outline"
+                    onClick={() => {
+                        resetRotation(id);
+                    }}
+                    disabled={rotation === 0}
+                >
+                    <RefreshCw
+                        size={ICON.SIZE}
+                        strokeWidth={ICON.STROKE_WIDTH}
+                    />
+                </Button>
             </div>
 
             <div className="flex items-center gap-1.5">

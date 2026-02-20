@@ -115,6 +115,10 @@ export type i18nTooltip = Recordify<
     | "Rotation instructions"
     | "Calculate and align"
     | "Reset rotation panel"
+    | "Rotate left"
+    | "Rotate right"
+    | "Reset rotation"
+    | "Synchronize rotation"
 >;
 
 export type i18nDialog = Recordify<

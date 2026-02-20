@@ -12,6 +12,7 @@ import { ViewportHandlerParams } from "./event-handlers/utils";
 import { handleMove, handleOppositeMove, handleZoom } from "./event-handlers";
 import { SelectionModePlugin } from "./plugins/selectionModePlugin";
 import { AutoRotatePlugin } from "./plugins/autoRotatePlugin";
+import { ManualRotatePlugin } from "./plugins/manualRotatePlugin";
 
 export type ViewportProps = {
     children?: ReactNode;
@@ -71,6 +72,11 @@ export const Viewport = forwardRef<PixiViewport, ViewportProps>(
                     viewport.plugins.add(
                         "autoRotate",
                         new AutoRotatePlugin(viewport, id)
+                    );
+
+                    viewport.plugins.add(
+                        "manualRotate",
+                        new ManualRotatePlugin(viewport, id)
                     );
 
                     viewport.on("childAdded", updateViewport);
