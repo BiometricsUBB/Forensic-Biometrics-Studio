@@ -21,6 +21,8 @@ export type i18nKeywords = Recordify<
     | "Remove"
     | "Add"
     | "Tools"
+    | "Edit Image"
+    | "Adjustments"
     | "About"
     | "Version"
     | "Description"

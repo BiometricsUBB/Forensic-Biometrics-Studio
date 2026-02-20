@@ -12,6 +12,8 @@ const d: Dictionary = {
     Remove: "Usuń",
     Add: "Dodaj",
     Tools: "Narzędzia",
+    "Edit Image": "Edycja obrazu",
+    Adjustments: "Dostosowania",
     About: "O aplikacji",
     Version: "Wersja",
     Description: "Opis",

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 
 export function EditWindow() {
-    const { t } = useTranslation("tooltip");
+    const { t } = useTranslation(["tooltip", "keywords"]);
     useSettingsSync();
 
     const [imagePath, setImagePath] = useState<string | null>(null);
@@ -410,26 +410,26 @@ export function EditWindow() {
                         />
                     </div>
                     <span className="text-sm font-medium text-foreground">
-                        Edit Image
+                        {t("Edit Image", { ns: "keywords" })}
                     </span>
                 </div>
                 <WindowControls />
             </Menubar>
 
-            <div className="flex flex-1 w-full overflow-hidden p-4 flex-col">
-                {error ? (
-                    <div className="text-center flex-1 flex items-center justify-center">
-                        <div>
-                            <p className="text-destructive text-lg font-medium mb-2">
-                                Error loading image
-                            </p>
-                            <p className="text-muted-foreground text-sm">
-                                {error}
-                            </p>
+            <div className="flex flex-1 w-full overflow-hidden flex-row">
+                <div className="flex flex-1 overflow-hidden p-4 flex-col">
+                    {error ? (
+                        <div className="text-center flex-1 flex items-center justify-center">
+                            <div>
+                                <p className="text-destructive text-lg font-medium mb-2">
+                                    Error loading image
+                                </p>
+                                <p className="text-muted-foreground text-sm">
+                                    {error}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                ) : imageUrl ? (
-                    <>
+                    ) : imageUrl ? (
                         <div
                             ref={containerRef}
                             className="flex-1 w-full flex items-center justify-center overflow-hidden mb-4 relative"
@@ -479,86 +479,93 @@ export function EditWindow() {
                                 </div>
                             )}
                         </div>
-                        <div className="w-full bg-background/70 backdrop-blur-sm border border-border/30 rounded-lg p-4 space-y-4">
-                            <div className="flex justify-center">
-                                <Button
-                                    onClick={saveEditedImage}
-                                    className="w-full max-w-md"
-                                    variant="default"
-                                    disabled={!imageUrl || !imagePath}
-                                >
-                                    <Save size={ICON.SIZE} className="mr-2" />
-                                    {t("Save", { ns: "tooltip" })}
-                                </Button>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="flex flex-col items-center space-y-2">
-                                    <Label
-                                        htmlFor="brightness"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Brightness", { ns: "tooltip" })}
-                                    </Label>
-                                    <div className="flex items-center gap-3 w-full max-w-md">
-                                        <Input
-                                            id="brightness"
-                                            type="range"
-                                            min="0"
-                                            max="200"
-                                            value={brightness}
-                                            onChange={e =>
-                                                setBrightness(
-                                                    Number(e.target.value)
-                                                )
-                                            }
-                                            className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                        <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
-                                            {brightness}%
-                                        </span>
-                                    </div>
-                                </div>
-                                <div className="flex flex-col items-center space-y-2">
-                                    <Label
-                                        htmlFor="contrast"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Contrast", { ns: "tooltip" })}
-                                    </Label>
-                                    <div className="flex items-center gap-3 w-full max-w-md">
-                                        <Input
-                                            id="contrast"
-                                            type="range"
-                                            min="0"
-                                            max="200"
-                                            value={contrast}
-                                            onChange={e =>
-                                                setContrast(
-                                                    Number(e.target.value)
-                                                )
-                                            }
-                                            className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                        />
-                                        <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
-                                            {contrast}%
-                                        </span>
-                                    </div>
-                                </div>
+                    ) : (
+                        <div className="text-center flex-1 flex items-center justify-center">
+                            <div>
+                                <p className="text-muted-foreground text-lg font-medium">
+                                    No image
+                                </p>
+                                <p className="text-muted-foreground/70 text-sm mt-2">
+                                    Load an image in the main window to edit it
+                                </p>
                             </div>
                         </div>
-                    </>
-                ) : (
-                    <div className="text-center flex-1 flex items-center justify-center">
-                        <div>
-                            <p className="text-muted-foreground text-lg font-medium">
-                                No image
-                            </p>
-                            <p className="text-muted-foreground/70 text-sm mt-2">
-                                Load an image in the main window to edit it
-                            </p>
+                    )}
+                </div>
+                <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col gap-4 p-4 pb-8 h-[calc(100vh-56px)] overflow-y-auto">
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            {t("Tools", { ns: "keywords" })}
+                        </h3>
+                        <Button
+                            onClick={saveEditedImage}
+                            className="w-full"
+                            variant="default"
+                            disabled={!imageUrl || !imagePath}
+                        >
+                            <Save size={ICON.SIZE} className="mr-2" />
+                            {t("Save", { ns: "tooltip" })}
+                        </Button>
+                    </div>
+
+                    <div className="border-t border-border/30" />
+
+                    <div className="flex flex-col gap-4">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            {t("Adjustments", { ns: "keywords" })}
+                        </h3>
+                        <div className="flex flex-col items-center space-y-2">
+                            <Label
+                                htmlFor="brightness"
+                                className="text-sm font-medium self-start"
+                            >
+                                {t("Brightness", { ns: "tooltip" })}
+                            </Label>
+                            <div className="flex items-center gap-3 w-full">
+                                <Input
+                                    id="brightness"
+                                    type="range"
+                                    min="0"
+                                    max="200"
+                                    value={brightness}
+                                    onChange={e =>
+                                        setBrightness(Number(e.target.value))
+                                    }
+                                    className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                                    disabled={!imageUrl}
+                                />
+                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
+                                    {brightness}%
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-center space-y-2">
+                            <Label
+                                htmlFor="contrast"
+                                className="text-sm font-medium self-start"
+                            >
+                                {t("Contrast", { ns: "tooltip" })}
+                            </Label>
+                            <div className="flex items-center gap-3 w-full">
+                                <Input
+                                    id="contrast"
+                                    type="range"
+                                    min="0"
+                                    max="200"
+                                    value={contrast}
+                                    onChange={e =>
+                                        setContrast(Number(e.target.value))
+                                    }
+                                    className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
+                                    disabled={!imageUrl}
+                                />
+                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
+                                    {contrast}%
+                                </span>
+                            </div>
                         </div>
                     </div>
-                )}
+                </div>
             </div>
         </main>
     );
