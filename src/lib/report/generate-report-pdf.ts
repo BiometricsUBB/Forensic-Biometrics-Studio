@@ -64,12 +64,13 @@ const LANDSCAPE = {
 
 const IMAGE_CELL_SIZE = 200;
 const ROWS_PER_PAGE = 4;
+const FULL_CIRCLE = Math.PI * 2;
+const CLOCKWISE_START_ANGLE = -Math.PI / 4;
 
 const getMimeTypeFromName = (name: string) => {
     const lower = name.toLowerCase();
     if (lower.endsWith(".png")) return "image/png";
-    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg"))
-        return "image/jpeg";
+    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
     if (lower.endsWith(".webp")) return "image/webp";
     if (lower.endsWith(".gif")) return "image/gif";
     if (lower.endsWith(".bmp")) return "image/bmp";
@@ -94,6 +95,16 @@ const md5Bytes = (bytes: Uint8Array) => {
 };
 
 const md5String = (value: string) => SparkMD5.hash(value);
+
+const toCssColor = (value: unknown, fallback: string) => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+        return `#${(value >>> 0).toString(16).padStart(6, "0").slice(-6)}`;
+    }
+    if (typeof value === "string" && value.trim().length > 0) {
+        return value;
+    }
+    return fallback;
+};
 
 const getSystemId = async () => {
     try {
@@ -135,11 +146,16 @@ const renderImageWithMarkings = async (
     imageBytes: Uint8Array,
     markings: MarkingClass[],
     markingTypes: MarkingType[],
-    sizeScale: number = 1
+    sizeScale: number,
+    options?: {
+        showMarkingLabels?: boolean;
+        markingsAlpha?: number;
+    }
 ) => {
     const bitmap = await createImageBitmap(new Blob([imageBytes]));
-    const width = bitmap.width;
-    const height = bitmap.height;
+    const { width, height } = bitmap;
+    const showMarkingLabels = options?.showMarkingLabels ?? true;
+    const markingsAlpha = options?.markingsAlpha ?? 1;
 
     const app = new PIXI.Application({
         width,
@@ -154,6 +170,7 @@ const renderImageWithMarkings = async (
     app.stage.addChild(sprite);
 
     const g = new PIXI.Graphics();
+    g.alpha = markingsAlpha;
     app.stage.addChild(g);
 
     const scaledTypes = markingTypes.map(type => ({
@@ -164,7 +181,18 @@ const renderImageWithMarkings = async (
     markings.forEach(marking => {
         const type = scaledTypes.find(t => t.id === marking.typeId);
         if (!type) return;
-        drawMarking(g, false, marking, type, 1, 1, true, 0, width / 2, height / 2);
+        drawMarking(
+            g,
+            false,
+            marking,
+            type,
+            1,
+            1,
+            showMarkingLabels,
+            0,
+            width / 2,
+            height / 2
+        );
     });
 
     const canvas = app.renderer.extract.canvas(app.stage);
@@ -178,10 +206,7 @@ const cropCanvas = (
     centerY: number,
     size: number
 ) => {
-    const safeSize = Math.max(
-        1,
-        Math.min(size, source.width, source.height)
-    );
+    const safeSize = Math.max(1, Math.min(size, source.width, source.height));
     const half = safeSize / 2;
     const sx = clamp(centerX - half, 0, source.width - safeSize);
     const sy = clamp(centerY - half, 0, source.height - safeSize);
@@ -199,9 +224,12 @@ const createOverviewCalloutImage = async (
     features: MarkingClass[]
 ) => {
     const bitmap = await createImageBitmap(new Blob([imageBytes]));
-    const margin = 40;
-    const width = bitmap.width;
-    const height = bitmap.height;
+    const { width, height } = bitmap;
+    const numberCircleRadius = Math.max(
+        12,
+        Math.round(Math.min(width, height) * 0.02)
+    );
+    const margin = Math.max(84, Math.round(Math.min(width, height) * 0.22));
     const canvas = document.createElement("canvas");
     canvas.width = width + margin * 2;
     canvas.height = height + margin * 2;
@@ -214,34 +242,99 @@ const createOverviewCalloutImage = async (
 
     const centerX = margin + width / 2;
     const centerY = margin + height / 2;
-    const labelRadius = Math.min(width, height) / 2 + margin * 0.6;
+    const baseLabelRadiusX = width / 2 + margin * 0.74;
+    const baseLabelRadiusY = height / 2 + margin * 0.74;
+    const labelSpacing = numberCircleRadius * 2 + 10;
+    const fontSize = Math.max(12, Math.round(numberCircleRadius * 1.1));
+    const placedLabels: Array<{ x: number; y: number }> = [];
+    const placementOrder = [...features]
+        .sort((a, b) => a.label - b.label)
+        .map((feature, index, arr) => {
+            const angle =
+                CLOCKWISE_START_ANGLE +
+                (index / Math.max(1, arr.length)) * FULL_CIRCLE;
+            return { feature, angle };
+        });
+    const angularOffsets = [0, 0.08, -0.08, 0.16, -0.16, 0.24, -0.24];
 
     ctx.strokeStyle = "#cc0000";
     ctx.fillStyle = "#cc0000";
-    ctx.lineWidth = 2.5;
-    ctx.font = "26px Arial";
+    ctx.lineWidth = 2.2;
+    ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
 
-    features.forEach((feature, idx) => {
+    placementOrder.forEach(({ feature, angle: slotAngle }) => {
         const fx = feature.origin.x + margin;
         const fy = feature.origin.y + margin;
-        const angle = Math.atan2(fy - centerY, fx - centerX);
-        const lx = centerX + Math.cos(angle) * labelRadius;
-        const ly = centerY + Math.sin(angle) * labelRadius;
+        const baseAngle = slotAngle;
+        const baseCos = Math.cos(baseAngle);
+        const baseSin = Math.sin(baseAngle);
+
+        let lx = centerX + baseCos * baseLabelRadiusX;
+        let ly = centerY + baseSin * baseLabelRadiusY;
+
+        let placed = false;
+        for (let ring = 0; ring < 12 && !placed; ring += 1) {
+            const radialBoost = ring * (numberCircleRadius + 6);
+            angularOffsets.some(angleOffset => {
+                const angle = baseAngle + angleOffset;
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                const candidateX =
+                    centerX + cos * (baseLabelRadiusX + radialBoost);
+                const candidateY =
+                    centerY + sin * (baseLabelRadiusY + radialBoost);
+                const safeX = clamp(
+                    candidateX,
+                    numberCircleRadius + 2,
+                    canvas.width - numberCircleRadius - 2
+                );
+                const safeY = clamp(
+                    candidateY,
+                    numberCircleRadius + 2,
+                    canvas.height - numberCircleRadius - 2
+                );
+                const isOutsideImage =
+                    safeX < margin ||
+                    safeX > margin + width ||
+                    safeY < margin ||
+                    safeY > margin + height;
+                const overlapsExisting = placedLabels.some(
+                    existing =>
+                        Math.hypot(existing.x - safeX, existing.y - safeY) <
+                        labelSpacing
+                );
+                if (isOutsideImage && !overlapsExisting) {
+                    lx = safeX;
+                    ly = safeY;
+                    placed = true;
+                    return true;
+                }
+                return false;
+            });
+        }
+        placedLabels.push({ x: lx, y: ly });
 
         ctx.beginPath();
         ctx.moveTo(fx, fy);
-        ctx.lineTo(lx, ly);
+        const dx = lx - fx;
+        const dy = ly - fy;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const lineEndX = lx - (dx / length) * numberCircleRadius;
+        const lineEndY = ly - (dy / length) * numberCircleRadius;
+        ctx.lineTo(lineEndX, lineEndY);
         ctx.stroke();
 
-        const label = String(idx + 1);
+        const label = String(feature.label);
         ctx.beginPath();
         ctx.fillStyle = "#ffffff";
-        ctx.arc(lx, ly, 14, 0, Math.PI * 2);
+        ctx.arc(lx, ly, numberCircleRadius, 0, FULL_CIRCLE);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = "#cc0000";
-        ctx.fillText(label, lx - 8, ly + 9);
+        ctx.fillText(label, lx, ly + 0.5);
     });
 
     return canvas.toDataURL("image/png");
@@ -250,14 +343,13 @@ const createOverviewCalloutImage = async (
 const ensureImagesLoaded = async (container: HTMLElement) => {
     const images = Array.from(container.querySelectorAll("img"));
     await Promise.all(
-        images.map(
-            img =>
-                img.complete
-                    ? Promise.resolve()
-                    : new Promise<void>(resolve => {
-                          img.onload = () => resolve();
-                          img.onerror = () => resolve();
-                      })
+        images.map(img =>
+            img.complete
+                ? Promise.resolve()
+                : new Promise<void>(resolve => {
+                      img.onload = () => resolve();
+                      img.onerror = () => resolve();
+                  })
         )
     );
 };
@@ -302,8 +394,29 @@ const createStyles = () => {
         .note { font-size: 11px; border-top: 1px solid #ddd; padding-top: 6px; }
         .table { width: 100%; border-collapse: collapse; font-size: 10px; }
         .table th, .table td { border: 1px solid #ccc; padding: 4px; vertical-align: middle; }
-        .feature-cell { display: flex; flex-direction: column; gap: 4px; }
-        .feature-index { font-weight: 700; }
+        .feature-cell { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+        .feature-index {
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--marker-text, #7a0000);
+            border: 2px solid var(--marker-ring, #cc0000);
+            box-shadow: 0 0 0 1px var(--marker-outline, #7a0000);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            line-height: 1;
+            font-weight: 700;
+            font-family: Arial, sans-serif;
+            transform: translateY(2px);
+        }
+        .feature-index-value {
+            display: inline-block;
+            line-height: 1;
+            transform: translateY(-7px);
+        }
         .feature-type { font-size: 9px; }
         .feature-image { width: ${IMAGE_CELL_SIZE}px; height: ${IMAGE_CELL_SIZE}px; object-fit: cover; border: 1px solid #ddd; }
         .footer { margin-top: auto; font-size: 10px; display: flex; justify-content: space-between; }
@@ -401,11 +514,11 @@ export const generateReportPdfWithDialog = async (
         const matched = options.includeMatchedOnly
             ? getMatchedFeatures(markingsLeft, markingsRight)
             : getPairedByLabel(markingsLeft, markingsRight);
-        const selectedFeatures = matched;
 
         stage = "read-image-meta";
         const leftMeta = await getImageMeta(leftSprite);
         const rightMeta = await getImageMeta(rightSprite);
+        const selectedFeatures = matched;
 
         stage = "image-data-urls";
         const leftOriginal = await toDataUrl(leftMeta.bytes, leftMeta.name);
@@ -437,6 +550,43 @@ export const generateReportPdfWithDialog = async (
             markingTypes,
             1.6
         );
+        const detailCrops = await Promise.all(
+            selectedFeatures.map(async feature => {
+                const [leftSingleCanvas, rightSingleCanvas] = await Promise.all(
+                    [
+                        renderImageWithMarkings(
+                            leftMeta.bytes,
+                            [feature.left],
+                            markingTypes,
+                            1.6,
+                            { showMarkingLabels: false, markingsAlpha: 0.45 }
+                        ),
+                        renderImageWithMarkings(
+                            rightMeta.bytes,
+                            [feature.right],
+                            markingTypes,
+                            1.6,
+                            { showMarkingLabels: false, markingsAlpha: 0.45 }
+                        ),
+                    ]
+                );
+
+                return {
+                    left: cropCanvas(
+                        leftSingleCanvas,
+                        feature.left.origin.x,
+                        feature.left.origin.y,
+                        IMAGE_CELL_SIZE
+                    ),
+                    right: cropCanvas(
+                        rightSingleCanvas,
+                        feature.right.origin.x,
+                        feature.right.origin.y,
+                        IMAGE_CELL_SIZE
+                    ),
+                };
+            })
+        );
 
         const leftImages: RenderedImages = {
             originalDataUrl: leftOriginal,
@@ -452,8 +602,7 @@ export const generateReportPdfWithDialog = async (
         stage = "report-metadata";
         const reportSettings = GlobalSettingsStore.state.settings.report;
         const reportDateTime =
-            options.reportDateTime?.trim() ||
-            formatReportDateTime(new Date());
+            options.reportDateTime?.trim() || formatReportDateTime(new Date());
         const systemId = await getSystemId();
         const reportIdInput = [
             reportDateTime,
@@ -471,7 +620,7 @@ export const generateReportPdfWithDialog = async (
             );
         const stripDiacritics = (value: string) => value;
 
-const performedBy = stripDiacritics(
+        const performedBy = stripDiacritics(
             decodeUnicodeEscapes(
                 options.performedBy?.trim() ||
                     reportSettings?.performedBy ||
@@ -480,9 +629,7 @@ const performedBy = stripDiacritics(
         );
         const department = stripDiacritics(
             decodeUnicodeEscapes(
-                options.department?.trim() ||
-                    reportSettings?.department ||
-                    "-"
+                options.department?.trim() || reportSettings?.department || "-"
             )
         );
         const addressFallback = [
@@ -496,9 +643,8 @@ const performedBy = stripDiacritics(
         const addressLines =
             options.addressLines?.map(line => line.trim()).filter(Boolean) ??
             [];
-        const address = (addressLines.length > 0
-            ? addressLines
-            : addressFallback
+        const address = (
+            addressLines.length > 0 ? addressLines : addressFallback
         ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
 
         const appVersion = await getVersion();
@@ -656,27 +802,31 @@ const performedBy = stripDiacritics(
             ) as HTMLTableSectionElement | null;
             if (!tableBody) return;
 
-            const featureType = markingTypes.find(
+            const featureTypeDefinition = markingTypes.find(
                 type => type.id === feature.left.typeId
-            )?.name;
-            const leftCrop = cropCanvas(
-                leftImages.selectedMarkingsCanvas,
-                feature.left.origin.x,
-                feature.left.origin.y,
-                IMAGE_CELL_SIZE
             );
-            const rightCrop = cropCanvas(
-                rightImages.selectedMarkingsCanvas,
-                feature.right.origin.x,
-                feature.right.origin.y,
-                IMAGE_CELL_SIZE
+            const featureType = featureTypeDefinition?.name;
+            const markerRing = toCssColor(
+                featureTypeDefinition?.backgroundColor,
+                "#cc0000"
             );
+            const markerOutline = toCssColor(
+                featureTypeDefinition?.textColor,
+                "#7a0000"
+            );
+            const leftCrop = detailCrops[idx].left;
+            const rightCrop = detailCrops[idx].right;
 
             const row = document.createElement("tr");
             row.innerHTML = `
             <td>
                     <div class="feature-cell">
-                        <div class="feature-index">${idx + 1}.</div>
+                        <div
+                            class="feature-index"
+                            style="--marker-ring: ${markerRing}; --marker-outline: ${markerOutline}; --marker-text: ${markerOutline};"
+                        >
+                            <span class="feature-index-value">${feature.left.label}</span>
+                        </div>
                     <div class="feature-type">${tReport("Feature type")} ${featureType ?? "-"}</div>
                 </div>
             </td>
@@ -735,8 +885,7 @@ const performedBy = stripDiacritics(
             }
         }
     } catch (error) {
-        const message =
-            error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         // eslint-disable-next-line no-console
         console.error(`[report] failed at ${stage}: ${message}`, error);
         throw new Error(`Report failed at ${stage}: ${message}`);
