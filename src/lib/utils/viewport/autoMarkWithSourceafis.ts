@@ -20,11 +20,18 @@ function normalizeTypeName(value: string | undefined) {
     return (value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function resolveSourceafisTypeId(kind: "ending" | "bifurcation") {
+export function resolveSourceafisTypeId(kind: string) {
     const existingTypes = MarkingTypesStore.state.types;
-    const desiredId =
-        kind === "ending" ? TYPE_ID_BIFURCATION : TYPE_ID_RIDGE_ENDING;
-    const desiredName = kind === "ending" ? "bifurcation" : "ridgeending";
+    let desiredId = TYPE_ID_RIDGE_ENDING;
+    let desiredName = "ridgeending";
+
+    if (kind === "ending") {
+        desiredId = TYPE_ID_RIDGE_ENDING;
+        desiredName = "ridgeending";
+    } else if (kind === "bifurcation") {
+        desiredId = TYPE_ID_BIFURCATION;
+        desiredName = "bifurcation";
+    }
 
     const match =
         existingTypes.find(t => t.id === desiredId) ||
