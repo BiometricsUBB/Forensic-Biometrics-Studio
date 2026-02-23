@@ -33,6 +33,8 @@ const d: Dictionary = {
     "Themes imported successfully": "Motywy zaimportowane pomyślnie",
     "Invalid themes file": "Nieprawidłowy plik motywów",
     "Failed to import themes": "Nie udało się zaimportować motywów",
+    Filters: "Filtry",
+    FeatureVisibility: "Widoczność cech",
 };
 
 export default d;
