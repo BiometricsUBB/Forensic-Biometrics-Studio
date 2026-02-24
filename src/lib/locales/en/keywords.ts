@@ -33,6 +33,8 @@ const d: Dictionary = {
     "Themes imported successfully": "Themes imported successfully",
     "Invalid themes file": "Invalid themes file",
     "Failed to import themes": "Failed to import themes",
+    Filters: "Filters",
+    FeatureVisibility: "Marking visibility",
     Report: "Report",
     "Report settings": "Report settings",
     "Report ID": "Report ID",

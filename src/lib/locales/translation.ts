@@ -42,6 +42,8 @@ export type i18nKeywords = Recordify<
     | "Themes imported successfully"
     | "Invalid themes file"
     | "Failed to import themes"
+    | "Filters"
+    | "FeatureVisibility"
     | "Report"
     | "Report settings"
     | "Report ID"

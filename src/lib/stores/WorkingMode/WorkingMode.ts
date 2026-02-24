@@ -1,3 +1,4 @@
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import {
     useWorkingModeStore as useStore,
     type State,
@@ -13,9 +14,11 @@ class StoreClass {
     readonly actions = {
         setWorkingMode: (mode: State["workingMode"]) => {
             this.state.setWorkingMode(mode!);
+            MarkingTypesStore.actions.visibility.reset();
         },
         resetWorkingMode: () => {
             this.state.resetWorkingMode();
+            MarkingTypesStore.actions.visibility.reset();
         },
     };
 }
