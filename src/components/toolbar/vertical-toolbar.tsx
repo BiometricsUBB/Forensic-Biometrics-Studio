@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
+import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
@@ -359,6 +360,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         </span>
                     </Toggle>
 
+                    <ReportDialog />
                     <Toggle
                         variant="outline"
                         className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
