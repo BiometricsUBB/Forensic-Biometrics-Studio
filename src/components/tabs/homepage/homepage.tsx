@@ -162,18 +162,18 @@ export function Homepage() {
     return (
         <ResizablePanelGroup
             direction="horizontal"
-            className="flex-grow overflow-hidden max-h-screen bg-[hsl(var(--background))]/40 gap-4 p-4"
+            className="flex-grow max-h-screen bg-[hsl(var(--background))]/40 gap-2 p-2 pb-2 overflow-visible"
         >
             <ResizablePanel defaultSize={80} minSize={50}>
-                <div className="h-full w-full bg-card backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-border/40 p-4">
+                <div className="h-full w-full bg-card backdrop-blur-3xl rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-border/40 p-2">
                     <ResizablePanelGroup
                         direction="horizontal"
-                        className="h-full gap-4"
+                        className="h-full gap-2"
                     >
                         <ResizablePanel defaultSize={50} minSize={20}>
                             <ResizablePanelGroup
                                 direction="vertical"
-                                className="overflow-hidden gap-3"
+                                className="overflow-hidden gap-1.5"
                             >
                                 <CanvasContext.Provider
                                     value={leftCanvasMetadata}
@@ -184,7 +184,7 @@ export function Homepage() {
                                     >
                                         <div className="flex flex-col h-full w-full bg-background rounded-lg overflow-hidden">
                                             <CanvasHeader />
-                                            <div className="flex-1 flex items-center justify-center">
+                                            <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
                                                 <CanvasContainer />
                                             </div>
                                         </div>
@@ -207,7 +207,7 @@ export function Homepage() {
                         <ResizablePanel defaultSize={50} minSize={20}>
                             <ResizablePanelGroup
                                 direction="vertical"
-                                className="overflow-hidden gap-3"
+                                className="overflow-hidden gap-1.5"
                             >
                                 <CanvasContext.Provider
                                     value={rightCanvasMetadata}
@@ -218,7 +218,7 @@ export function Homepage() {
                                     >
                                         <div className="flex flex-col h-full w-full bg-background rounded-lg overflow-hidden">
                                             <CanvasHeader />
-                                            <div className="flex-1 flex items-center justify-center">
+                                            <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">
                                                 <CanvasContainer />
                                             </div>
                                         </div>

@@ -4,6 +4,7 @@ import {
     CURSOR_MODES,
     DashboardToolbarStore,
 } from "@/lib/stores/DashboardToolbar";
+import { isManualRotateKeyDown } from "./manualRotatePlugin";
 
 export class SelectionModePlugin extends Plugin {
     private dragPlugin: Drag;
@@ -16,7 +17,7 @@ export class SelectionModePlugin extends Plugin {
     }
 
     public override down(event: FederatedPointerEvent): boolean {
-        if (!this.isSelectionModeActive()) {
+        if (!this.isSelectionModeActive() || isManualRotateKeyDown()) {
             return false;
         }
 

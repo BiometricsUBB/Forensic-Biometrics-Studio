@@ -17,6 +17,7 @@ import {
     RectangleMarkingHandler,
 } from "@/components/pixi/viewport/marking-handlers";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { isManualRotateKeyDown } from "./manualRotatePlugin";
 import { ViewportHandlerParams } from "../event-handlers/utils";
 
 export class MarkingModePlugin extends Plugin {
@@ -64,7 +65,11 @@ export class MarkingModePlugin extends Plugin {
     }
 
     private shouldHandleMarking(): boolean {
-        return this.isMarkingModeActive() && !this.spacePressed;
+        return (
+            this.isMarkingModeActive() &&
+            !this.spacePressed &&
+            !isManualRotateKeyDown()
+        );
     }
 
     private handleMouseDown = (e: FederatedPointerEvent): void => {

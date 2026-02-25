@@ -1,0 +1,31 @@
+:root {
+    /* Main */
+    --white: 0 0% 100%;
+    --black: 210 15% 10%;
+    --red: 0 70% 60%;
+
+    /* Light grays */
+    --gray-light-30: 210 10% 30%;
+    --gray-light-40: 210 10% 40%;
+    --gray-light-60: 210 10% 60%;
+    --gray-main: 210 15% 18%;
+
+    /* Dark grays */
+    --gray-dark-15: 210 15% 15%;
+    --gray-dark-20: 210 15% 20%;
+    --gray-dark-30: 210 3% 30%;
+    --gray-dark-60: 210 15% 60%;
+    --gray-dark-85: 210 15% 85%;
+    --gray-dark-95: 210 15% 95%;
+
+    /* Blue scale */
+    --blue-dark-15: 218 65% 15%;
+    --blue-dark-20: 218 65% 20%;
+    --blue-dark-26: 218 65% 26%;
+    --blue-dark-35: 218 55% 35%;
+    --blue-dark-40: 218 55% 40%;
+
+    --blue-light-50: 218 45% 50%;
+    --blue-light-70: 218 45% 70%;
+    --blue-light-85: 218 40% 85%;
+}

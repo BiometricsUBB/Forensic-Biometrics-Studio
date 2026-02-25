@@ -82,7 +82,7 @@ export function RotationPanel({ className, ...props }: RotationPanelProps) {
 
             <div className="flex flex-col gap-2">
                 <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
                     className="w-full"
                     disabled={!canApplyRotation}

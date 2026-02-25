@@ -10,7 +10,7 @@ const Menubar = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <MenubarPrimitive.Root
         ref={ref}
-        className={cn("text-foreground px-4 py-3", className)}
+        className={cn("text-foreground px-2 py-1.5", className)}
         {...props}
     />
 ));

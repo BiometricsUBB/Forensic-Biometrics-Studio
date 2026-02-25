@@ -4,11 +4,11 @@ import { ExternalLink } from "lucide-react";
 export function AboutSettings() {
     const { t } = useTranslation();
 
-    const appVersion = "0.6.3";
+    const appVersion = "0.6.5";
     const appName = "Biometrics Studio";
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 ml-1">
             <div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">
                     {t("About")}
@@ -25,7 +25,7 @@ export function AboutSettings() {
                         <img
                             src="/logo.svg"
                             alt="Logo"
-                            className="pointer-events-none select-none invert dark:invert-0"
+                            className="logo pointer-events-none select-none"
                             height={32}
                             width={32}
                         />
@@ -59,7 +59,7 @@ export function AboutSettings() {
                         href="https://github.com/BiometricsUBB/Biometrics-Studio"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-primary hover:underline"
+                        className="flex items-center gap-2 text-sm text-muted-foreground hover:underline"
                     >
                         <ExternalLink size={14} />
                         GitHub

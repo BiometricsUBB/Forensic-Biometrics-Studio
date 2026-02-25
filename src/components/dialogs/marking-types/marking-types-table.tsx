@@ -74,7 +74,7 @@ function MarkingTypesTable() {
                         <TableRow key={item.id}>
                             <TableCell>
                                 <Input
-                                    className="h-6 !p-0"
+                                    className="h-6 !p-0 text-center"
                                     title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                     type="text"
                                     value={item.displayName}
@@ -95,7 +95,7 @@ function MarkingTypesTable() {
                             <TableCell>
                                 {IS_DEV_ENVIRONMENT ? (
                                     <Input
-                                        className="h-6 !p-0"
+                                        className="h-6 !p-0 text-center"
                                         title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                         type="text"
                                         value={item.name}
@@ -111,7 +111,9 @@ function MarkingTypesTable() {
                                     </span>
                                 )}
                             </TableCell>
-                            <TableCell className={cn("p-1 cursor-default")}>
+                            <TableCell
+                                className={cn("p-1 cursor-default text-center")}
+                            >
                                 {t(
                                     `Marking.Keys.markingClass.Keys.${item.markingClass}`,
                                     {
@@ -147,9 +149,10 @@ function MarkingTypesTable() {
                             </TableCell>
                             <TableCell>
                                 <Input
-                                    className="w-10 h-6 !p-0"
+                                    className="w-24 h-6 !p-0 text-center"
                                     min={6}
                                     max={32}
+                                    width={12}
                                     title={`${t("MarkingType.Keys.size", { ns: "object" })}`}
                                     type="number"
                                     value={item.size}
@@ -203,10 +206,12 @@ function MarkingTypesTable() {
                                             );
                                         }}
                                     >
-                                        <Trash2
-                                            size={ICON.SIZE}
-                                            strokeWidth={ICON.STROKE_WIDTH}
-                                        />
+                                        <div className=" hover:text-destructive cursor-pointer">
+                                            <Trash2
+                                                size={ICON.SIZE}
+                                                strokeWidth={ICON.STROKE_WIDTH}
+                                            />
+                                        </div>
                                     </Toggle>
                                 </TableCell>
                             )}

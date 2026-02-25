@@ -23,7 +23,6 @@ const d: Dictionary = {
         "Image saved successfully, but could not be reloaded due to path restrictions",
     Save: "Save",
     "Auto rotate": "Manually rotate images using current alignment lines",
-    "Reset rotation": "Reset image rotation",
     "Rotation instructions":
         "Mark a line between two identical points on each image starting from bottom, the lower point will be the rotation anchor and the upper will be used to calculate the rotation angle",
     "Calculate and align": "Calculate and align",
@@ -33,6 +32,13 @@ const d: Dictionary = {
     "Reset Zoom": "Reset Zoom",
     ImageLoadPermissionError:
         "The edited image was saved, but cannot be loaded due to path restrictions. Please try loading it manually.",
+    "Generate report": "Generate report",
+    "Report generated": "Report generated",
+    "Failed to generate report": "Failed to generate report",
+    "Rotate left": "Rotate left (-5°)",
+    "Rotate right": "Rotate right (+5°)",
+    "Reset rotation": "Reset rotation to 0°",
+    "Synchronize rotation": "Synchronize rotation between viewports",
 };
 
 export default d;

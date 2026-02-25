@@ -48,6 +48,9 @@ const d: Dictionary = {
             system: "System",
             dark: "Dark",
             light: "Light",
+            dark_gray: "Dark gray",
+            light_blue: "Light blue",
+            dark_blue: "Dark blue",
         },
     },
 };

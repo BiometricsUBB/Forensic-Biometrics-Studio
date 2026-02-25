@@ -12,7 +12,7 @@ export function Menu() {
     return (
         <Menubar
             className={cn(
-                "flex justify-between w-screen items-center min-h-[56px]"
+                "flex justify-between w-screen items-center min-h-[40px]"
             )}
             data-tauri-drag-region
         >
@@ -22,7 +22,7 @@ export function Menu() {
                     <img
                         src="/logo.svg"
                         alt="Logo"
-                        className="pointer-events-none select-none invert"
+                        className="logo pointer-events-none select-none"
                         height={ICON.SIZE}
                         width={ICON.SIZE}
                     />

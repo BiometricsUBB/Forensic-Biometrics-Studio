@@ -65,14 +65,16 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
             .sort((a, b) => a.label - b.label)
             .map(m =>
                 // if any id exists on this side - show full object, otherwise placeholder
-                m.ids.some(id => thisIds.has(id)) ? m : { label: m.label }
+                m.ids.some(markingId => thisIds.has(markingId))
+                    ? m
+                    : { label: m.label }
             ) as EmptyableMarking[];
 
         return fillMissingLabels(combinedMarkings);
-    }, [storeMarkings, storeOppositeMarkings, id]);
+    }, [storeMarkings, storeOppositeMarkings]);
 
     return (
-        <div className="w-full h-fit py-0.5">
+        <div className="w-full h-full overflow-hidden">
             <MarkingsInfoTable
                 canvasId={id}
                 selectedMarking={selectedMarking}

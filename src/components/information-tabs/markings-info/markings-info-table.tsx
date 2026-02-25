@@ -31,19 +31,25 @@ import { triggerPostMoveFlash } from "@atlaskit/pragmatic-drag-and-drop-flourish
 import { sleep } from "@/lib/utils/misc/sleep";
 import { EmptyableMarking } from "./markings-info-table-columns";
 
-// Original Table is wrapped with a <div> (see https://ui.shadcn.com/docs/components/table#radix-:r24:-content-manual),
-// but here we don't want it, so let's use a new component with only <table> tag
 const TableComponent = forwardRef<
     HTMLTableElement,
     HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
     <table
         ref={ref}
-        className={cn("w-full caption-bottom text-sm bg-card/10", className)}
+        className={cn("w-full caption-bottom text-sm", className)}
         {...props}
     />
 ));
 TableComponent.displayName = "TableComponent";
+
+const TableHeadComponent = forwardRef<
+    HTMLTableSectionElement,
+    HTMLAttributes<HTMLTableSectionElement>
+>((props, ref) => (
+    <thead ref={ref} className="sticky top-0 bg-card !z-20" {...props} />
+));
+TableHeadComponent.displayName = "TableHeadComponent";
 
 const TableRowComponent = <TData,>(rows: Row<TData>[], canvasId: CANVAS_ID) => {
     return function useTableRow(props: HTMLAttributes<HTMLTableRowElement>) {
@@ -78,9 +84,10 @@ const TableRowComponent = <TData,>(rows: Row<TData>[], canvasId: CANVAS_ID) => {
             <TableRow
                 ref={ref}
                 key={row.id}
-                className={cn("last:border-b-0 cursor-pointer", {
-                    "hover:bg-accent/45 bg-accent/75": isSelected,
-                })}
+                className={cn(
+                    "last:border-b-0 cursor-pointer transition-colors hover:bg-accent/45",
+                    isSelected && "bg-accent/75"
+                )}
                 data-state={isSelected && "selected"}
                 onClickCapture={() => {
                     if (selectedMarkingLabel === marking.label) {
@@ -104,7 +111,14 @@ const TableRowComponent = <TData,>(rows: Row<TData>[], canvasId: CANVAS_ID) => {
                 {...props}
             >
                 {cells.map(cell => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                        key={cell.id}
+                        style={{ width: cell.column.getSize() }}
+                        className={cn(
+                            cell.column.id === "actions" &&
+                                "sticky left-0 bg-card z-10"
+                        )}
+                    >
                         {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -119,7 +133,7 @@ const TableRowComponent = <TData,>(rows: Row<TData>[], canvasId: CANVAS_ID) => {
 function SortingIndicator({ isSorted }: { isSorted: SortDirection | false }) {
     if (!isSorted) return null;
     return (
-        <div className="relative w-0 right-0">
+        <div className="relative w-0 left-1">
             {
                 {
                     asc: "↑",
@@ -200,17 +214,19 @@ export const MarkingsInfoTable = function <TData, TValue>({
             followOutput
             style={{
                 height,
-                scrollbarGutter: "stable both-edges",
+                overflow: "auto",
             }}
             totalCount={rows.length}
+            increaseViewportBy={{ top: 0, bottom: 200 }}
             components={{
                 Table: TableComponent,
                 TableRow: TableRowComponent(rows, canvasId),
+                TableHead: TableHeadComponent,
             }}
             fixedHeaderContent={() =>
                 table.getHeaderGroups().map(headerGroup => (
                     <TableRow
-                        className={cn("bg-card hover:bg-muted border-b-0")}
+                        className={cn("bg-card border-b")}
                         key={headerGroup.id}
                     >
                         {headerGroup.headers.map(header => {
@@ -218,9 +234,12 @@ export const MarkingsInfoTable = function <TData, TValue>({
                                 <TableHead
                                     key={header.id}
                                     colSpan={header.colSpan}
-                                    style={{
-                                        width: header.getSize(),
-                                    }}
+                                    style={{ width: header.getSize() }}
+                                    className={cn(
+                                        "text-center text-card-foreground whitespace-nowrap",
+                                        header.id === "actions" &&
+                                            "sticky left-0 bg-card z-10"
+                                    )}
                                 >
                                     {header.isPlaceholder ? null : (
                                         <div

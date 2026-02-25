@@ -2,7 +2,7 @@
 export const IS_DEV_ENVIRONMENT = import.meta.env.MODE === "development";
 
 export const ICON = {
-    SIZE: 24,
+    SIZE: 20,
     STROKE_WIDTH: 2,
 } as const;
 

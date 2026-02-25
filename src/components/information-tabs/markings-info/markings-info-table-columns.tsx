@@ -6,7 +6,7 @@ import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext"
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { useTranslation } from "react-i18next";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
@@ -46,36 +46,43 @@ export const useColumns = (
 ): ColumnDef<EmptyableMarking, Element>[] => {
     const { t } = useTranslation();
 
-    const handleRemoveClick = (marking: MarkingClass) => {
-        MarkingsStore(id).actions.markings.removeOneByLabel(marking.label);
-    };
+    const handleRemoveClick = useCallback(
+        (marking: MarkingClass) => {
+            MarkingsStore(id).actions.markings.removeOneByLabel(marking.label);
+        },
+        [id]
+    );
 
-    const handleMergeClick = (marking: MarkingClass) => {
-        const current = {
-            canvasId: id,
-            label: marking.label,
-        };
-        const pendingSel = GlobalStateStore.state.pendingMerge;
+    const handleMergeClick = useCallback(
+        (marking: MarkingClass) => {
+            const current = {
+                canvasId: id,
+                label: marking.label,
+            };
+            const pendingSel = GlobalStateStore.state.pendingMerge;
 
-        if (!pendingSel) {
-            GlobalStateStore.actions.merge.setPending(current);
-        } else if (pendingSel.canvasId !== id) {
-            MarkingsStore(pendingSel.canvasId).actions.markings.mergePair(
-                pendingSel.label,
-                id,
-                marking.label
-            );
-            GlobalStateStore.actions.merge.setPending(null);
-        } else {
-            GlobalStateStore.actions.merge.setPending(current);
-        }
-    };
+            if (!pendingSel) {
+                GlobalStateStore.actions.merge.setPending(current);
+            } else if (pendingSel.canvasId !== id) {
+                MarkingsStore(pendingSel.canvasId).actions.markings.mergePair(
+                    pendingSel.label,
+                    id,
+                    marking.label
+                );
+                GlobalStateStore.actions.merge.setPending(null);
+            } else {
+                GlobalStateStore.actions.merge.setPending(current);
+            }
+        },
+        [id]
+    );
 
     return useMemo(
         () =>
             [
                 {
                     id: "actions",
+                    size: 60,
                     cell: ({ row }) => {
                         const marking = row.original;
                         const oppositeId = getOppositeCanvasId(id);
@@ -94,11 +101,10 @@ export const useColumns = (
                             pending &&
                             pending.canvasId === id &&
                             pending.label === marking.label;
-                        /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                         return (
                             /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                             <div
-                                className="flex gap-0.5"
+                                className="flex gap-1 items-center"
                                 onClick={e => {
                                     e.stopPropagation();
                                 }}
@@ -117,6 +123,7 @@ export const useColumns = (
                                             }
                                         >
                                             <Trash2
+                                                className="hover:text-destructive"
                                                 size={ICON.SIZE}
                                                 strokeWidth={ICON.STROKE_WIDTH}
                                             />
@@ -125,6 +132,7 @@ export const useColumns = (
                                             title="Merge"
                                             size="sm-icon"
                                             variant="outline"
+                                            className="ml-2 py-0"
                                             pressed={!!isPendingHere}
                                             disabled={hasCounterpart}
                                             onClickCapture={() =>
@@ -134,6 +142,11 @@ export const useColumns = (
                                             }
                                         >
                                             <Link2
+                                                className={
+                                                    isPendingHere
+                                                        ? "text-green-500"
+                                                        : ""
+                                                }
                                                 size={ICON.SIZE}
                                                 strokeWidth={ICON.STROKE_WIDTH}
                                             />
@@ -147,6 +160,7 @@ export const useColumns = (
                 {
                     accessorKey: "label",
                     header: t("Marking.Keys.label", { ns: "object" }),
+                    size: 80,
                     cell: info =>
                         formatCell(info, ({ row: { original: marking } }) => (
                             <div className="flex flex-row gap-1">
@@ -157,6 +171,7 @@ export const useColumns = (
                 {
                     accessorKey: "type",
                     header: t("MarkingType.Keys.name", { ns: "object" }),
+                    size: 120,
                     cell: info =>
                         formatCell(info, ({ row }) => {
                             const marking = row.original.typeId;
@@ -168,6 +183,7 @@ export const useColumns = (
                     header: t("Marking.Keys.markingClass.Name", {
                         ns: "object",
                     }),
+                    size: 100,
                     cell: info =>
                         formatCell(info, ({ row }) => {
                             const marking = row.original;
@@ -180,6 +196,6 @@ export const useColumns = (
                         }),
                 },
             ] as ColumnDef<EmptyableMarking, Element>[],
-        [t, id]
+        [t, id, handleRemoveClick, handleMergeClick]
     );
 };

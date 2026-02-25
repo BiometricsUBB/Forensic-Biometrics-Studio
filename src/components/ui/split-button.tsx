@@ -51,12 +51,11 @@ export function SplitButton({
         default: "h-9 px-4 py-2",
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        icon: "h-8 w-8",
     };
 
     return (
         <div className={cn("inline-flex rounded-md", className)}>
-            {/* Main button */}
             <button
                 type="button"
                 onClick={mainAction.onClick}
@@ -77,7 +76,6 @@ export function SplitButton({
                 )}
             </button>
 
-            {/* Dropdown button */}
             <DropdownMenu>
                 <DropdownMenuTrigger
                     type="button"
@@ -86,7 +84,7 @@ export function SplitButton({
                         buttonBaseClasses,
                         // eslint-disable-next-line security/detect-object-injection
                         variantClasses[variant],
-                        "h-9 px-2 rounded-l-none border-l border-input"
+                        "h-8 px-1.5 rounded-l-none border-l border-input"
                     )}
                 >
                     <ChevronDown size={14} strokeWidth={ICON.STROKE_WIDTH} />

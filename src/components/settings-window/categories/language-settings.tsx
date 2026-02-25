@@ -19,7 +19,7 @@ export function LanguageSettings() {
     };
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 ml-1">
             <div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">
                     {t("Language")}
@@ -43,10 +43,11 @@ export function LanguageSettings() {
                                 onClick={() => handleLanguageChange(value)}
                                 className={cn(
                                     "flex items-center justify-between px-4 py-3 rounded-lg transition-all",
-                                    "border hover:bg-primary/10",
+                                    "hover:bg-secondary",
+                                    "focus:outline-none",
                                     isSelected
-                                        ? "bg-primary/20 border-primary/50"
-                                        : "border-border/30"
+                                        ? "bg-secondary text-primary-foreground border border-primary/30"
+                                        : "text-foreground/80 border border-border/30"
                                 )}
                             >
                                 <span className="text-sm font-medium text-foreground">

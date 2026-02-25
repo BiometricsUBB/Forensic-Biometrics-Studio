@@ -36,6 +36,9 @@ export default function SelectMode({
                     {Object.values(WORKING_MODE).map(mode => (
                         <Button
                             key={mode}
+                            variant="outline"
+                            size="lg"
+                            className="w-full"
                             onClick={() => {
                                 setCurrentWorkingMode(mode);
                             }}

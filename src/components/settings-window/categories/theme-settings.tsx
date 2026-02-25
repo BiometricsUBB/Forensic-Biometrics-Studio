@@ -34,6 +34,9 @@ const themeIcons: Record<THEMES, React.ReactNode> = {
     [THEMES.LIGHT]: <Sun size={18} />,
     [THEMES.DARK]: <Moon size={18} />,
     [THEMES.SYSTEM]: <Monitor size={18} />,
+    [THEMES.DARK_GRAY]: <Moon size={18} />,
+    [THEMES.DARK_BLUE]: <Moon size={18} />,
+    [THEMES.LIGHT_BLUE]: <Sun size={18} />,
 };
 
 function hslToHex(hsl: string): string {
@@ -163,7 +166,7 @@ function ThemeEditor({ theme, onClose }: ThemeEditorProps) {
     const colorKeys = Object.keys(THEME_COLOR_LABELS) as (keyof ThemeColors)[];
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 ml-1">
             <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold">{t("Edit Theme")}</h3>
                 <Button variant="ghost" size="icon" onClick={onClose}>
@@ -171,7 +174,7 @@ function ThemeEditor({ theme, onClose }: ThemeEditorProps) {
                 </Button>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 ml-1">
                 <label htmlFor="theme-name" className="text-sm font-medium">
                     {t("Theme Name")}
                 </label>
@@ -296,7 +299,7 @@ export function ThemeSettings() {
     }
 
     return (
-        <div className="flex flex-col gap-4 overflow-y-auto">
+        <div className="flex flex-col gap-4 overflow-y-auto ml-1">
             <div>
                 <h2 className="text-lg font-semibold text-foreground mb-1">
                     {t("Theme")}
@@ -320,10 +323,11 @@ export function ThemeSettings() {
                             onClick={() => handleThemeChange(value)}
                             className={cn(
                                 "flex items-center justify-between px-4 py-3 rounded-lg transition-all",
-                                "border hover:bg-primary/10",
+                                "hover:bg-secondary",
+                                "focus:outline-none",
                                 isSelected
-                                    ? "bg-primary/20 border-primary/50"
-                                    : "border-border/30"
+                                    ? "bg-secondary text-primary-foreground border border-primary/30"
+                                    : "text-foreground/80 border border-border/30"
                             )}
                         >
                             <div className="flex items-center gap-3">
