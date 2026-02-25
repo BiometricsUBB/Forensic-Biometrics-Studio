@@ -23,7 +23,6 @@ import {
 import { ICON } from "@/lib/utils/const";
 import { useTranslation } from "react-i18next";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
-import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import {
     DropdownMenu,
@@ -32,10 +31,10 @@ import {
     DropdownMenuPortal,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
 import { MeasurementPanel } from "./measurement-panel";
-import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
@@ -379,22 +378,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             }
                         }}
                     >
-                        <Ruler 
-                          className="flex-shrink-0"
-                            size={ICON.SIZE}
-                            strokeWidth={ICON.STROKE_WIDTH}
-                        />
-                    <ReportDialog />
-                    <Toggle
-                        variant="outline"
-                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
-                        pressed={isRotationSync}
-                        onClick={
-                            DashboardToolbarStore.actions.settings.viewport
-                                .toggleRotationSync
-                        }
-                    >
-                        <RotateCw
+                        <Ruler
                             className="flex-shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
@@ -414,6 +398,24 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     >
                         <MeasurementPanel />
                     </div>
+
+                    <ReportDialog />
+
+                    <Toggle
+                        variant="outline"
+                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        pressed={isRotationSync}
+                        onClick={
+                            DashboardToolbarStore.actions.settings.viewport
+                                .toggleRotationSync
+                        }
+                    >
+                        <RotateCw
+                            className="flex-shrink-0"
+                            size={ICON.SIZE}
+                            strokeWidth={ICON.STROKE_WIDTH}
+                        />
+                        <span className="text-sm text-left leading-tight">
                             {t("Synchronize rotation", {
                                 ns: "tooltip",
                             })}

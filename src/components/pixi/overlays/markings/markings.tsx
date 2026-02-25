@@ -50,7 +50,7 @@ export const Markings = memo(
             state => state.calibration
         );
 
-        
+        const { viewportWidthRatio, viewportHeightRatio } =
             ShallowViewportStore(canvasId).use(state => ({
                 viewportWidthRatio:
                     state.size.screenWorldWidth / state.size.worldWidth,

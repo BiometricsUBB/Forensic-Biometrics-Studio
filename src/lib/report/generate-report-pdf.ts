@@ -188,6 +188,7 @@ const renderImageWithMarkings = async (
             1,
             1,
             showMarkingLabels,
+            undefined,
             0,
             width / 2,
             height / 2
