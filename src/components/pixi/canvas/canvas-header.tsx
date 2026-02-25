@@ -11,6 +11,7 @@ import {
     Save,
     FileInput,
     Info,
+    Edit,
     RotateCw,
     RotateCcw,
     RefreshCw,
@@ -23,6 +24,8 @@ import { useTranslation } from "react-i18next";
 import { loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
 import { saveMarkingsDataWithDialog } from "@/lib/utils/viewport/saveMarkingsDataWithDialog";
 import { loadMarkingsDataWithDialog } from "@/lib/utils/viewport/loadMarkingsData";
+import { invoke } from "@tauri-apps/api/core";
+import { Sprite } from "pixi.js";
 import {
     applyRotationDelta,
     resetRotation,
@@ -221,6 +224,35 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
             </div>
 
             <div className="flex items-center gap-1.5">
+                <Toggle
+                    variant="outline"
+                    title={t("Edit mode", {
+                        ns: "tooltip",
+                    })}
+                    size="icon"
+                    disabled={!viewport.children.find(x => x instanceof Sprite)}
+                    onClick={async () => {
+                        try {
+                            const sprite = viewport.children.find(
+                                x => x instanceof Sprite
+                            ) as Sprite | undefined;
+
+                            let imagePath: string | undefined;
+                            if (sprite) {
+                                // @ts-expect-error custom property
+                                imagePath = sprite.path;
+                            }
+
+                            await invoke("open_edit_window", {
+                                imagePath: imagePath || null,
+                            });
+                        } catch {
+                            /* empty */
+                        }
+                    }}
+                >
+                    <Edit size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
+                </Toggle>
                 <Toggle
                     variant="outline"
                     title={t("Toggle marking labels", {

@@ -9,6 +9,12 @@ import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import { listen } from "@tauri-apps/api/event";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
 import { Point } from "@/lib/markings/Point";
+import { Sprite } from "pixi.js";
+import { loadSprite } from "@/lib/utils/viewport/loadSprite";
+import {
+    emitFitEvents,
+    fitWorld,
+} from "@/components/pixi/canvas/utils/fit-viewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import { Canvas } from "./canvas";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
@@ -77,6 +83,63 @@ export function CanvasContainer({ ...props }: CanvasContainerProps) {
 
         setupTauriFileDropListener();
     }, [viewport, id]);
+
+    useEffect(() => {
+        if (!viewport) return undefined;
+
+        let cancelled = false;
+        const setupReloadListener = async () =>
+            listen<{
+                originalPath: string;
+                newPath: string;
+            }>("image-reload-requested", async event => {
+                if (cancelled) return;
+
+                const { originalPath, newPath } = event.payload;
+                const sprite = viewport.children.find(
+                    x => x instanceof Sprite
+                ) as (Sprite & { path?: string }) | undefined;
+
+                if (
+                    !sprite?.path ||
+                    sprite.path.replace(/[\\/]/g, "/") !==
+                        originalPath.replace(/[\\/]/g, "/")
+                ) {
+                    return;
+                }
+
+                sprite.destroy({
+                    children: true,
+                    texture: true,
+                    baseTexture: true,
+                });
+
+                const newSprite = await loadSprite(newPath);
+                newSprite.anchor.set(0, 0);
+                newSprite.pivot.set(newSprite.width / 2, newSprite.height / 2);
+                newSprite.position.set(
+                    newSprite.width / 2,
+                    newSprite.height / 2
+                );
+                viewport.addChildAt(newSprite, 0);
+                fitWorld(viewport);
+                emitFitEvents(viewport, "fit-world");
+            });
+
+        let unlistenFn: (() => void) | null = null;
+        setupReloadListener().then(fn => {
+            if (cancelled) {
+                fn();
+            } else {
+                unlistenFn = fn;
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            unlistenFn?.();
+        };
+    }, [viewport]);
 
     return (
         <div

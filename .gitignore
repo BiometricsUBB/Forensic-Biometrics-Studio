@@ -38,3 +38,5 @@ next-env.d.ts
 
 # local dev files
 /public/images/*.json
+# vite cache
+.vite/
