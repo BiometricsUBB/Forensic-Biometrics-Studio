@@ -1,0 +1,80 @@
+{
+    "$schema": "https://schema.tauri.app/config/2",
+    "productName": "biometrics-studio",
+    "version": "0.6.3",
+    "identifier": "com.biometrics-studio.app",
+    "build": {
+        "beforeBuildCommand": "pnpm build",
+        "beforeDevCommand": "pnpm dev",
+        "frontendDist": "../dist",
+        "devUrl": "http://localhost:1420"
+    },
+    "app": {
+        "windows": [
+            {
+                "title": "Biometrics Studio",
+                "label": "main",
+                "width": 1280,
+                "height": 720,
+                "minWidth": 640,
+                "minHeight": 360,
+                "resizable": true,
+                "fullscreen": false,
+                "alwaysOnTop": false,
+                "center": true,
+                "decorations": false,
+                "transparent": true,
+                "visible": false
+            },
+            {
+                "title": "Biometrics Studio",
+                "label": "splashscreen",
+                "url": "splashscreen.html",
+                "shadow": false,
+                "width": 384,
+                "height": 216,
+                "resizable": false,
+                "maximizable": false,
+                "minimizable": false,
+                "closable": false,
+                "center": true,
+                "alwaysOnTop": false,
+                "decorations": false,
+                "transparent": true,
+                "visible": true
+            }
+        ],
+        "security": {
+            "csp": null
+        }
+    },
+    "bundle": {
+        "active": true,
+        "category": "DeveloperTool",
+        "copyright": "",
+        "targets": "all",
+        "externalBin": ["bin/sourceafis_cli"],
+        "icon": [
+            "../public/logo_32.png",
+            "../public/logo_128.png",
+            "../public/logo_256.png",
+            "../public/logo_512.png",
+            "../public/logo.ico"
+        ],
+        "windows": {
+            "certificateThumbprint": null,
+            "digestAlgorithm": "sha256",
+            "timestampUrl": ""
+        },
+        "longDescription": "",
+        "resources": { "../presets/**/*": "presets/" },
+        "shortDescription": "",
+        "linux": {
+            "deb": {
+                "depends": []
+            }
+        }
+    }
+}
+
+

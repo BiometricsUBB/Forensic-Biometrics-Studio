@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils/shadcn";
+﻿import { cn } from "@/lib/utils/shadcn";
 import { HTMLAttributes } from "react";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import {
@@ -28,6 +28,7 @@ import {
     resetRotation,
 } from "@/lib/utils/viewport/applyRotation";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
+import { autoMarkWithSourceafis } from "@/lib/utils/viewport/autoMarkWithSourceafis";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -125,6 +126,24 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
 
                 <div className="h-5 w-px bg-border/40 mx-0.5" />
 
+                <Button
+                    title="Auto-mark (SourceAFIS)"
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                        try {
+                            // eslint-disable-next-line no-console
+                            console.log("Auto-mark clicked - starting sidecar");
+                            await autoMarkWithSourceafis(viewport);
+                        } catch (error) {
+                            // eslint-disable-next-line no-console
+                            console.error("Auto-mark failed:", error);
+                        }
+                    }}
+                >
+                    Auto-mark (SourceAFIS)
+                </Button>
+
                 <SplitButton
                     mainAction={{
                         label: t("Fit world", { ns: "tooltip" }),
@@ -201,7 +220,7 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                 </Button>
 
                 <span className="text-xs font-mono min-w-[3rem] text-center tabular-nums">
-                    {rotationDeg}°
+                    {rotationDeg}&deg;
                 </span>
 
                 <Button
