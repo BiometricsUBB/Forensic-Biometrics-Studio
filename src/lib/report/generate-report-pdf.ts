@@ -98,6 +98,7 @@ const md5String = (value: string) => SparkMD5.hash(value);
 
 const toCssColor = (value: unknown, fallback: string) => {
     if (typeof value === "number" && Number.isFinite(value)) {
+        // eslint-disable-next-line no-bitwise
         return `#${(value >>> 0).toString(16).padStart(6, "0").slice(-6)}`;
     }
     if (typeof value === "string" && value.trim().length > 0) {
@@ -118,7 +119,7 @@ const getSystemId = async () => {
 const getSpritePath = async (sprite: PIXI.Sprite) => {
     // @ts-expect-error custom property
     const path = sprite.path as string | null;
-    const name = sprite.name;
+    const { name } = sprite;
     if (!path || !name) return null;
     return join(path, name);
 };
@@ -277,6 +278,7 @@ const createOverviewCalloutImage = async (
         let placed = false;
         for (let ring = 0; ring < 12 && !placed; ring += 1) {
             const radialBoost = ring * (numberCircleRadius + 6);
+            // eslint-disable-next-line no-loop-func
             angularOffsets.some(angleOffset => {
                 const angle = baseAngle + angleOffset;
                 const cos = Math.cos(angle);
@@ -347,8 +349,12 @@ const ensureImagesLoaded = async (container: HTMLElement) => {
             img.complete
                 ? Promise.resolve()
                 : new Promise<void>(resolve => {
-                      img.onload = () => resolve();
-                      img.onerror = () => resolve();
+                      img.addEventListener("load", () => resolve(), {
+                          once: true,
+                      });
+                      img.addEventListener("error", () => resolve(), {
+                          once: true,
+                      });
                   })
         )
     );
@@ -457,6 +463,7 @@ const createFigurePage = (
     return page;
 };
 
+/* eslint-disable sonarjs/cognitive-complexity */
 export const generateReportPdfWithDialog = async (
     options: ReportGenerationOptions
 ) => {
@@ -465,7 +472,7 @@ export const generateReportPdfWithDialog = async (
     let languageChanged = false;
     try {
         stage = "check-working-mode";
-        const workingMode = WorkingModeStore.state.workingMode;
+        const { workingMode } = WorkingModeStore.state;
         if (workingMode !== WORKING_MODE.FINGERPRINT) {
             throw new Error(
                 "Report generation is available only for fingerprints."
@@ -778,6 +785,7 @@ export const generateReportPdfWithDialog = async (
         selectedFeatures.forEach((feature, idx) => {
             const pageIndex = Math.floor(idx / ROWS_PER_PAGE);
             const targetIndex = detailsStartIndex + pageIndex;
+            // eslint-disable-next-line security/detect-object-injection
             if (!pages[targetIndex]) {
                 const page = createPage();
                 page.innerHTML = `
@@ -794,9 +802,11 @@ export const generateReportPdfWithDialog = async (
                 </table>
                 ${createFooter(targetIndex + 1, reportId, tReport)}
             `;
+                // eslint-disable-next-line security/detect-object-injection
                 pages[targetIndex] = page;
             }
 
+            // eslint-disable-next-line security/detect-object-injection
             const tableBody = pages[targetIndex].querySelector(
                 "tbody"
             ) as HTMLTableSectionElement | null;
@@ -814,8 +824,10 @@ export const generateReportPdfWithDialog = async (
                 featureTypeDefinition?.textColor,
                 "#7a0000"
             );
-            const leftCrop = detailCrops[idx].left;
-            const rightCrop = detailCrops[idx].right;
+            // eslint-disable-next-line security/detect-object-injection
+            const leftCrop = detailCrops[idx]?.left;
+            // eslint-disable-next-line security/detect-object-injection
+            const rightCrop = detailCrops[idx]?.right;
 
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -853,17 +865,26 @@ export const generateReportPdfWithDialog = async (
                 )
             );
 
-            for (const canvas of renderedPages) {
-                const pngBytes = canvas.toDataURL("image/png");
-                const image = await pdf.embedPng(pngBytes);
-                const page = pdf.addPage([canvas.width, canvas.height]);
+            const pdfEmbeddings = await Promise.all(
+                renderedPages.map(async canvas => {
+                    const pngBytes = canvas.toDataURL("image/png");
+                    const image = await pdf.embedPng(pngBytes);
+                    return {
+                        image,
+                        width: canvas.width,
+                        height: canvas.height,
+                    };
+                })
+            );
+            pdfEmbeddings.forEach(({ image, width, height }) => {
+                const page = pdf.addPage([width, height]);
                 page.drawImage(image, {
                     x: 0,
                     y: 0,
-                    width: canvas.width,
-                    height: canvas.height,
+                    width,
+                    height,
                 });
-            }
+            });
 
             stage = "save-pdf";
             const pdfBytes = await pdf.save();
@@ -891,3 +912,4 @@ export const generateReportPdfWithDialog = async (
         throw new Error(`Report failed at ${stage}: ${message}`);
     }
 };
+/* eslint-enable sonarjs/cognitive-complexity */

@@ -1,4 +1,4 @@
-﻿import { cn } from "@/lib/utils/shadcn";
+import { cn } from "@/lib/utils/shadcn";
 import { HTMLAttributes } from "react";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import {
@@ -14,6 +14,7 @@ import {
     RotateCw,
     RotateCcw,
     RefreshCw,
+    Wand2,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
@@ -119,30 +120,31 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 loadMarkingsDataWithDialog(viewport);
                             },
                         },
+                        {
+                            label: "Auto-mark (SourceAFIS)",
+                            icon: (
+                                <Wand2
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: async () => {
+                                try {
+                                    // eslint-disable-next-line no-console
+                                    console.log(
+                                        "Auto-mark clicked - starting sidecar"
+                                    );
+                                    await autoMarkWithSourceafis(viewport);
+                                } catch (error) {
+                                    // eslint-disable-next-line no-console
+                                    console.error("Auto-mark failed:", error);
+                                }
+                            },
+                        },
                     ]}
                     size="icon"
                     variant="outline"
                 />
-
-                <div className="h-5 w-px bg-border/40 mx-0.5" />
-
-                <Button
-                    title="Auto-mark (SourceAFIS)"
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                        try {
-                            // eslint-disable-next-line no-console
-                            console.log("Auto-mark clicked - starting sidecar");
-                            await autoMarkWithSourceafis(viewport);
-                        } catch (error) {
-                            // eslint-disable-next-line no-console
-                            console.error("Auto-mark failed:", error);
-                        }
-                    }}
-                >
-                    Auto-mark (SourceAFIS)
-                </Button>
 
                 <SplitButton
                     mainAction={{

@@ -26,8 +26,6 @@ const decodeUnicodeEscapes = (value: string) => {
     return current;
 };
 
-const stripDiacritics = (value: string) => value;
-
 export function ReportSettings() {
     const { t } = useTranslation();
     const reportSettings =
@@ -64,13 +62,6 @@ export function ReportSettings() {
                 decodeUnicodeEscapes(normalized.addressLine4 ?? "")
             ),
         };
-        const needsUpdate =
-            current.addressLine3 === undefined ||
-            current.addressLine4 === undefined ||
-            current.addressLine2 === undefined ||
-            current.addressLine1 === undefined ||
-            current.department === undefined ||
-            current.performedBy === undefined;
         GlobalSettingsStore.actions.settings.report.setReportSettings(decoded);
     }, []);
 
@@ -100,7 +91,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-performed-by"
-                        value={decodeUnicodeEscapes(reportSettings.performedBy ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.performedBy ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 performedBy: e.target.value,
@@ -116,7 +109,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-department"
-                        value={decodeUnicodeEscapes(reportSettings.department ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.department ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 department: e.target.value,
@@ -132,7 +127,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-address-1"
-                        value={decodeUnicodeEscapes(reportSettings.addressLine1 ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.addressLine1 ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 addressLine1: e.target.value,
@@ -148,7 +145,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-address-2"
-                        value={decodeUnicodeEscapes(reportSettings.addressLine2 ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.addressLine2 ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 addressLine2: e.target.value,
@@ -164,7 +163,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-address-3"
-                        value={decodeUnicodeEscapes(reportSettings.addressLine3 ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.addressLine3 ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 addressLine3: e.target.value,
@@ -180,7 +181,9 @@ export function ReportSettings() {
                     </Label>
                     <Input
                         id="report-address-4"
-                        value={decodeUnicodeEscapes(reportSettings.addressLine4 ?? "")}
+                        value={decodeUnicodeEscapes(
+                            reportSettings.addressLine4 ?? ""
+                        )}
                         onChange={e =>
                             updateReportSettings({
                                 addressLine4: e.target.value,
