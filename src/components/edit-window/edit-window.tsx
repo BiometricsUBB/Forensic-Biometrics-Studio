@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
 import { Edit, Save } from "lucide-react";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit } from "@tauri-apps/api/event";
 import { readFile, writeFile, exists } from "@tauri-apps/plugin-fs";
-import { getCurrentWindow } from "@tauri-apps/api/window";
 import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
@@ -302,48 +301,19 @@ export function EditWindow() {
                 throw new Error(`File was not created at path: ${finalPath}`);
             }
 
-            const appWindow = getCurrentWindow();
-            await appWindow.emit("image-reload-requested", {
+            await emit("image-reload-requested", {
                 originalPath: imagePath,
                 newPath: finalPath,
             });
 
+            // Update the edit window preview directly from the data we already have
+            // instead of re-reading from disk (which may fail due to FS scope restrictions)
+            setImagePath(finalPath);
+            const blob = new Blob([uint8Array], { type: "image/png" });
+            const url = URL.createObjectURL(blob);
+            setImageUrl(url);
+
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
-
-            try {
-                const newImageBytes = await readFile(finalPath);
-
-                setImagePath(finalPath);
-
-                setError(null);
-                const blob = new Blob([newImageBytes]);
-                const url = URL.createObjectURL(blob);
-                setImageUrl(url);
-                setZoom(1);
-                setPan({ x: 0, y: 0 });
-            } catch (reloadErr) {
-                const reloadErrorMessage =
-                    reloadErr instanceof Error
-                        ? reloadErr.message
-                        : String(reloadErr);
-
-                const isForbiddenError =
-                    reloadErrorMessage.toLowerCase().includes("forbidden") ||
-                    reloadErrorMessage.toLowerCase().includes("not allowed") ||
-                    reloadErrorMessage.toLowerCase().includes("permission");
-
-                if (isForbiddenError) {
-                    toast.warning(
-                        t(
-                            "Image saved successfully, but could not be reloaded due to path restrictions"
-                        )
-                    );
-                } else {
-                    toast.warning(
-                        `${t("Image saved successfully")} (Reload failed: ${reloadErrorMessage})`
-                    );
-                }
-            }
         } catch (err) {
             const errorMessage =
                 err instanceof Error ? err.message : String(err);

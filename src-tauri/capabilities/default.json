@@ -21,7 +21,10 @@
             "identifier": "fs:allow-exists",
             "allow": ["**", "**/*", "/**/*"]
         },
-        "fs:allow-read-file",
+        {
+            "identifier": "fs:allow-read-file",
+            "allow": ["**", "**/*", "/**/*"]
+        },
         {
             "identifier": "fs:allow-read-text-file",
             "allow": ["**", "**/*", "/**/*"]
