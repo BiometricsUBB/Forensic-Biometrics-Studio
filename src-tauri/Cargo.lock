@@ -242,6 +242,8 @@ dependencies = [
  "tauri-plugin-window-state",
  "tauri-runtime",
  "tauri-runtime-wry",
+ "uuid",
+ "winreg",
 ]
 
 [[package]]
@@ -3735,9 +3737,7 @@ dependencies = [
 
 [[package]]
 name = "tauri-plugin-single-instance"
-version = "2.3.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "acba6b5ca527a96cdfcc96ae09b09ccb91ddff5e33978ca6873b96ea16bb404c"
+version = "2.0.0"
 dependencies = [
  "serde",
  "serde_json",

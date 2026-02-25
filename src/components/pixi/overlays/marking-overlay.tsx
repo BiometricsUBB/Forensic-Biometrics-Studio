@@ -3,6 +3,7 @@ import { MarkingsStore } from "@/lib/stores/Markings";
 import { AutoRotateStore } from "@/lib/stores/AutoRotate/AutoRotate";
 import { MeasurementStore } from "@/lib/stores/Measurement/Measurement";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { ShallowViewportStore } from "@/lib/stores/ShallowViewport";
 import * as PIXI from "pixi.js";
 import { CanvasMetadata } from "../canvas/hooks/useCanvasContext";
@@ -28,6 +29,12 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
         (oldState, newState) => {
             return oldState.hash === newState.hash;
         }
+    );
+
+    const hiddenTypes = MarkingTypesStore.use(state => state.hiddenTypes);
+
+    const visibleMarkings = markings.filter(
+        marking => !hiddenTypes.includes(marking.typeId)
     );
 
     const temporaryMarking = MarkingsStore(canvasId).use(
@@ -87,7 +94,7 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
         <Container position={getViewportPosition(viewport)}>
             <Markings
                 canvasId={canvasId}
-                markings={markings}
+                markings={visibleMarkings}
                 rotation={rotation}
                 centerX={centerX}
                 centerY={centerY}

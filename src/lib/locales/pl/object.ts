@@ -6,8 +6,8 @@ const d: Dictionary = {
         Keys: {
             ids: "ID-y",
             label: "Znacznik",
-            angleRad: "Kąt",
-            origin: "Źródło",
+            angleRad: "K\u0105t",
+            origin: "\u0179r\u00f3d\u0142o",
             endpoint: "Koniec",
             markingClass: {
                 Name: "Klasa adnotacji",
@@ -25,8 +25,8 @@ const d: Dictionary = {
         },
         Actions: {
             merge: {
-                enabled: "Połącz adnotacje",
-                disabled: "Nie można połączyć - znaleziono pasujące ID",
+                enabled: "Po\u0142\u0105cz adnotacje",
+                disabled: "Nie mo\u017cna po\u0142\u0105czy\u0107 - znaleziono pasuj\u0105ce ID",
             },
         },
     },
@@ -38,7 +38,7 @@ const d: Dictionary = {
             name: "Nazwa",
             markingClass: "Klasa adnotacji",
             category: "Kategoria",
-            backgroundColor: "Kolor tła",
+            backgroundColor: "Kolor t\u0142a",
             textColor: "Kolor tekstu",
             size: "Rozmiar",
         },

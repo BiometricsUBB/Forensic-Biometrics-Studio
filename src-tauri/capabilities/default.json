@@ -1,78 +1,51 @@
 {
-  "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": [
-    "main",
-    "settings"
-  ],
-  "permissions": [
-    "core:default",
-    "core:path:default",
-    "core:event:default",
-    "core:window:default",
-    "core:window:allow-close",
-    "core:window:allow-minimize",
-    "core:window:allow-toggle-maximize",
-    "core:window:allow-start-dragging",
-    "core:app:default",
-    "core:image:default",
-    "core:resources:default",
-    "core:menu:default",
-    "core:tray:default",
-    "os:default",
-    "dialog:default",
-    "dialog:allow-open",
-    "dialog:allow-save",
-    "dialog:allow-message",
-    "dialog:allow-ask",
-    "dialog:allow-confirm",
-    "store:default",
-    "store:allow-set",
-    "store:allow-get",
-    "store:allow-save",
-    "store:allow-load",
-    "store:allow-delete",
-    "fs:default",
-    {
-      "identifier": "fs:allow-read-file",
-      "allow": [
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "default",
+    "description": "Capability for the main window",
+    "windows": ["main", "settings", "edit"],
+    "permissions": [
+        "core:default",
+        "core:path:default",
+        "core:event:default",
+        "core:window:default",
+        "core:window:allow-close",
+        "core:window:allow-minimize",
+        "core:window:allow-toggle-maximize",
+        "core:window:allow-start-dragging",
+        "core:app:default",
+        "core:image:default",
+        "core:resources:default",
+        "core:menu:default",
+        "core:tray:default",
         {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-write-file",
-      "allow": [
+            "identifier": "fs:allow-exists",
+            "allow": ["**", "**/*", "/**/*"]
+        },
         {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-read-text-file",
-      "allow": [
+            "identifier": "fs:allow-read-file",
+            "allow": ["**", "**/*", "/**/*"]
+        },
         {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-write-text-file",
-      "allow": [
+            "identifier": "fs:allow-read-text-file",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        "fs:allow-write-text-file",
         {
-          "path": "**"
-        }
-      ]
-    },
-    {
-      "identifier": "fs:allow-exists",
-      "allow": [
-        {
-          "path": "**"
-        }
-      ]
-    }
-  ]
+            "identifier": "fs:allow-write-file",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        "store:allow-set",
+        "store:allow-get",
+        "store:allow-save",
+        "store:allow-load",
+        "store:allow-delete",
+        "dialog:allow-open",
+        "dialog:allow-save",
+        "dialog:allow-message",
+        "dialog:allow-ask",
+        "dialog:allow-confirm",
+        "store:default",
+        "dialog:default",
+        "fs:default"
+    ]
 }

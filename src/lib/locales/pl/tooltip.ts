@@ -12,10 +12,17 @@ const d: Dictionary = {
     "Toggle marking labels": "Przełącz szczegóły adnotacji",
     "Toggle viewport information": "Przełącz informacje viewportu",
     "Toggle scale mode": "Przełącz tryb skalowania",
+    "Edit mode": "Tryb edycji",
     "Export marking types": "Eksportuj typy adnotacji",
     "Import marking types": "Importuj typy adnotacji",
     "Markings data saved": "Dane adnotacji zapisano pomyślnie",
     "Failed to save markings data": "Nie udało się zapisać danych adnotacji",
+    "Image saved successfully": "Obraz zapisany pomyślnie",
+    "Failed to save image: {{error}}":
+        "Nie udało się zapisać obrazu: {{error}}",
+    "Image saved successfully, but could not be reloaded due to path restrictions":
+        "Obraz zapisany pomyślnie, ale nie można go przeładować z powodu ograniczeń ścieżki",
+    Save: "Zapisz",
     "Auto rotate":
         "automatycznie obróć obrazy używając aktualnych linii wyrównania",
     "Rotation instructions":
@@ -25,6 +32,18 @@ const d: Dictionary = {
     "Measurement instructions":
         "Narysuj linię pomiędzy dwoma punktami na obrazie, aby zmierzyć odległość",
     "Clear measurement": "Wyczyść miarkę",
+    Brightness: "Jasność",
+    Contrast: "Kontrast",
+    "Reset Zoom": "Resetuj powiększenie",
+    ImageLoadPermissionError:
+        "Edytowany obraz został zapisany, ale nie można go załadować z powodu ograniczeń dostępności ścieżki. Spróbuj załadować go ręcznie.",
+    "Generate report": "Generuj raport",
+    "Report generated": "Raport wygenerowany",
+    "Failed to generate report": "Nie udało się wygenerować raportu",
+    "Rotate left": "Obróć w lewo (-5°)",
+    "Rotate right": "Obróć w prawo (+5°)",
+    "Reset rotation": "Zresetuj rotację do 0°",
+    "Synchronize rotation": "Synchronizuj rotację między widokami",
 };
 
 export default d;

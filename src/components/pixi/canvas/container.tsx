@@ -6,9 +6,16 @@ import { ICON } from "@/lib/utils/const";
 import { loadImage, loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
 import { useTranslation } from "react-i18next";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
+import { MarkingsStore } from "@/lib/stores/Markings/Markings";
 import { listen } from "@tauri-apps/api/event";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
 import { Point } from "@/lib/markings/Point";
+import { Sprite } from "pixi.js";
+import { loadSprite } from "@/lib/utils/viewport/loadSprite";
+import {
+    emitFitEvents,
+    fitWorld,
+} from "@/components/pixi/canvas/utils/fit-viewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import { Canvas } from "./canvas";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
@@ -69,13 +76,83 @@ export function CanvasContainer({ ...props }: CanvasContainerProps) {
                 }
             );
 
-            // Cleanup listener when component unmounts
             return () => {
                 unlisten();
             };
         };
 
         setupTauriFileDropListener();
+    }, [viewport, id]);
+
+    useEffect(() => {
+        if (!viewport) return undefined;
+
+        let cancelled = false;
+        const setupReloadListener = async () =>
+            listen<{
+                originalPath: string;
+                newPath: string;
+            }>("image-reload-requested", async event => {
+                if (cancelled) return;
+
+                const { originalPath, newPath } = event.payload;
+                const sprite = viewport.children.find(
+                    x => x instanceof Sprite
+                ) as (Sprite & { path?: string }) | undefined;
+
+                if (
+                    !sprite?.path ||
+                    sprite.path.replace(/[\\/]/g, "/") !==
+                        originalPath.replace(/[\\/]/g, "/")
+                ) {
+                    return;
+                }
+
+                const oldWidth = sprite.width;
+                const oldHeight = sprite.height;
+
+                sprite.destroy({
+                    children: true,
+                    texture: true,
+                    baseTexture: true,
+                });
+
+                const newSprite = await loadSprite(newPath);
+                newSprite.anchor.set(0, 0);
+                newSprite.pivot.set(newSprite.width / 2, newSprite.height / 2);
+                newSprite.position.set(
+                    newSprite.width / 2,
+                    newSprite.height / 2
+                );
+                viewport.addChildAt(newSprite, 0);
+                fitWorld(viewport);
+                emitFitEvents(viewport, "fit-world");
+
+                if (
+                    oldWidth > 0 &&
+                    oldHeight > 0 &&
+                    (newSprite.width !== oldWidth ||
+                        newSprite.height !== oldHeight)
+                ) {
+                    const scaleX = newSprite.width / oldWidth;
+                    const scaleY = newSprite.height / oldHeight;
+                    MarkingsStore(id).actions.markings.scaleAll(scaleX, scaleY);
+                }
+            });
+
+        let unlistenFn: (() => void) | null = null;
+        setupReloadListener().then(fn => {
+            if (cancelled) {
+                fn();
+            } else {
+                unlistenFn = fn;
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            unlistenFn?.();
+        };
     }, [viewport, id]);
 
     return (
