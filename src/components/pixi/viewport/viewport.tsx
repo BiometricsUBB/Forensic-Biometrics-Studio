@@ -78,6 +78,9 @@ export const Viewport = forwardRef<PixiViewport, ViewportProps>(
                     viewport.plugins.add(
                         "measurement",
                         new MeasurementPlugin(viewport, id)
+                    );
+
+                    viewport.plugins.add(
                         "manualRotate",
                         new ManualRotatePlugin(viewport, id)
                     );
