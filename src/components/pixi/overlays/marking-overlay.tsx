@@ -1,6 +1,7 @@
 import { Container } from "@pixi/react";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { AutoRotateStore } from "@/lib/stores/AutoRotate/AutoRotate";
+import { MeasurementStore } from "@/lib/stores/Measurement/Measurement";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { ShallowViewportStore } from "@/lib/stores/ShallowViewport";
 import * as PIXI from "pixi.js";
@@ -39,6 +40,16 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
     );
 
     const finishedAutoRotateLine = AutoRotateStore.use(
+        // eslint-disable-next-line security/detect-object-injection
+        state => state.finishedLines[canvasId]
+    );
+
+    const tempMeasurementLine = MeasurementStore.use(
+        // eslint-disable-next-line security/detect-object-injection
+        state => state.tempLines[canvasId]
+    );
+
+    const finishedMeasurementLine = MeasurementStore.use(
         // eslint-disable-next-line security/detect-object-injection
         state => state.finishedLines[canvasId]
     );
@@ -108,6 +119,28 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
                 <Markings
                     canvasId={canvasId}
                     markings={[finishedAutoRotateLine]}
+                    alpha={1}
+                    rotation={rotation}
+                    centerX={centerX}
+                    centerY={centerY}
+                />
+            )}
+            {/* If measurement line is being drawn, display it */}
+            {tempMeasurementLine && (
+                <Markings
+                    canvasId={canvasId}
+                    markings={[tempMeasurementLine]}
+                    alpha={1}
+                    rotation={rotation}
+                    centerX={centerX}
+                    centerY={centerY}
+                />
+            )}
+            {/* If finished measurement line exists, display it */}
+            {finishedMeasurementLine && (
+                <Markings
+                    canvasId={canvasId}
+                    markings={[finishedMeasurementLine]}
                     alpha={1}
                     rotation={rotation}
                     centerX={centerX}

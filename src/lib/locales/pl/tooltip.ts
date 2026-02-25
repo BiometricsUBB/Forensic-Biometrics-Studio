@@ -22,6 +22,9 @@ const d: Dictionary = {
         "Oznacz linią dwa te same punkty na każdym obrazie rozpoczynając od dołu, dolny punkt będzie kotwicą obrotu a górny posłuży wyliczeniu kąta obrotu",
     "Calculate and align": "Oblicz i dopasuj",
     "Reset rotation panel": "Zresetuj rotację",
+    "Measurement instructions":
+        "Narysuj linię pomiędzy dwoma punktami na obrazie, aby zmierzyć odległość",
+    "Clear measurement": "Wyczyść miarkę",
 };
 
 export default d;

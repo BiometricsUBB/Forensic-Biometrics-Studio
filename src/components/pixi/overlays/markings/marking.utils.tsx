@@ -15,9 +15,7 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
 import { Point } from "@/lib/markings/Point";
-
-// Jeśli masz zdefiniowany typ Calibration w store, możesz go tu zaimportować lub użyć lokalnej definicji
-type Calibration = { unit: "px" | "mm"; pixelsPerUnit: number; };
+import { Calibration } from "@/lib/stores/Markings/Markings.store";
 
 const transformPoint = (
     point: Point,
@@ -70,7 +68,7 @@ const drawLabel = (
     });
     label.x = position.x;
     label.y = position.y;
-    
+
     if (centered) {
         label.anchor.set(0.5, 0.5);
         const bg = new PixiGraphics();
@@ -95,12 +93,11 @@ const lineWidth = 2;
 const lineLength = 4;
 const shadowWidth = 0.5;
 
-// --- ZMODYFIKOWANA FUNKCJA RYSOWANIA MIARKI ---
 const drawMeasurementMarking = (
     g: PixiGraphics,
     selected: boolean,
-    { origin, endpoint }: LineSegmentMarking, 
-    { textColor, size }: MarkingType, 
+    { origin, endpoint }: LineSegmentMarking,
+    { textColor, size }: MarkingType,
     relativeOrigin: Point,
     relativeEndpoint: Point,
     calibration?: Calibration
@@ -108,22 +105,22 @@ const drawMeasurementMarking = (
     const { x, y } = relativeOrigin;
     const { x: ex, y: ey } = relativeEndpoint;
 
-    // 1. Oblicz dystans
     const dxReal = endpoint.x - origin.x;
     const dyReal = endpoint.y - origin.y;
     const distPx = Math.sqrt(dxReal * dxReal + dyReal * dyReal);
-    
-    // Nie rysuj jeśli miarka jest zbyt krótka (np. dopiero zaczynasz klikać)
+
     if (distPx < 0.1) return;
 
-    // 2. Formatuj tekst (z uwzględnieniem kalibracji jeśli jest)
     let textToDisplay = `${distPx.toFixed(2)} px`;
-    if (calibration && calibration.unit === "mm" && calibration.pixelsPerUnit > 0) {
+    if (
+        calibration &&
+        calibration.unit === "mm" &&
+        calibration.pixelsPerUnit > 0
+    ) {
         const distMm = distPx / calibration.pixelsPerUnit;
         textToDisplay = `${distMm.toFixed(2)} mm`;
     }
 
-    // 3. Rysuj linię miarki
     if (selected) {
         g.lineStyle(size + 4, 0x0000ff, 0.3);
         g.moveTo(x, y).lineTo(ex, ey);
@@ -132,7 +129,6 @@ const drawMeasurementMarking = (
     g.lineStyle(2, textColor);
     g.moveTo(x, y).lineTo(ex, ey);
 
-    // 4. Rysuj "wąsy" na końcach (opcjonalne, dla lepszego wyglądu)
     const angle = Math.atan2(ey - y, ex - x);
     const perpAngle = angle - Math.PI / 2;
     const tickSize = 10;
@@ -147,35 +143,31 @@ const drawMeasurementMarking = (
     drawTick(x, y);
     drawTick(ex, ey);
 
-    // 5. Rysuj Tekst POŚRODKU i NAD linią
     const midX = (x + ex) / 2;
     const midY = (y + ey) / 2;
-    
-    // Przesunięcie tekstu prostopadle do linii (nad linię)
-    const textOffset = 15; // odległość tekstu od linii
+
+    const textOffset = 15;
     const textX = midX + Math.cos(perpAngle) * textOffset;
     const textY = midY + Math.sin(perpAngle) * textOffset;
 
-    // Styl tekstu
     const style = new TextStyle({
         fontSize: 14,
-        fill: 0xffffff, // Biały tekst
-        fontFamily: "Arial", // Bezpieczny font
+        fill: 0xffffff,
+        fontFamily: "Arial",
         fontWeight: "bold",
         stroke: 0x000000,
-        strokeThickness: 3, // Czarny obrys dla kontrastu
+        strokeThickness: 3,
     });
 
     const label = new Text(textToDisplay, style);
-    label.anchor.set(0.5, 0.5); // Wycentruj tekst względem punktu zaczepienia
+    label.anchor.set(0.5, 0.5);
     label.x = textX;
     label.y = textY;
-    label.resolution = 2; // Lepsza jakość
+    label.resolution = 2;
 
-    // Tło pod tekst (opcjonalne, dla lepszej czytelności)
     const bgPadding = 4;
     g.lineStyle(0);
-    g.beginFill(0x000000, 0.6); // Półprzezroczyste czarne tło
+    g.beginFill(0x000000, 0.6);
     g.drawRoundedRect(
         textX - label.width / 2 - bgPadding,
         textY - label.height / 2 - bgPadding,
@@ -185,11 +177,8 @@ const drawMeasurementMarking = (
     );
     g.endFill();
 
-    // Dodaj tekst do sceny
     g.addChild(label);
 };
-
-// --- POZOSTAŁE FUNKCJE (BEZ ZMIAN) ---
 
 const drawPointMarking = (
     g: PixiGraphics,
@@ -479,10 +468,10 @@ export const drawMarking = (
     viewportWidthRatio: number,
     viewportHeightRatio: number,
     showMarkingLabels?: boolean,
+    calibration?: Calibration,
     rotation: number = 0,
     centerX: number = 0,
-    centerY: number = 0,
-    calibration?: Calibration
+    centerY: number = 0
 ) => {
     if (!markingType) return;
 
@@ -533,7 +522,9 @@ export const drawMarking = (
                 markingType,
                 markingViewportPosition,
                 transformPoint(
-                    (marking as LineSegmentMarking).calculateEndpointViewportPosition(
+                    (
+                        marking as LineSegmentMarking
+                    ).calculateEndpointViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio
                     ),
@@ -553,7 +544,9 @@ export const drawMarking = (
                 markingType,
                 markingViewportPosition,
                 transformPoint(
-                    (marking as LineSegmentMarking).calculateEndpointViewportPosition(
+                    (
+                        marking as LineSegmentMarking
+                    ).calculateEndpointViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio
                     ),
@@ -573,7 +566,9 @@ export const drawMarking = (
                 markingType,
                 markingViewportPosition,
                 transformPoint(
-                    (marking as BoundingBoxMarking).calculateEndpointViewportPosition(
+                    (
+                        marking as BoundingBoxMarking
+                    ).calculateEndpointViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio
                     ),
@@ -604,7 +599,6 @@ export const drawMarking = (
             break;
 
         default:
-            console.warn(`Unsupported marking class: ${marking.markingClass}`);
             break;
     }
 };

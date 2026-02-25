@@ -6,6 +6,7 @@ import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext"
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { useTranslation } from "react-i18next";
 import { useCallback, useMemo } from "react";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
@@ -189,24 +190,38 @@ export const useColumns = (
                     cell: info =>
                         formatCell(info, ({ row }) => {
                             const marking = row.original;
-                            
+
                             let className = t(
                                 `Marking.Keys.markingClass.Keys.${marking.markingClass}`,
                                 { ns: "object" }
                             );
-                            
-                            if (!className || className.includes("Marking.Keys")) {
-                                className = marking.markingClass === MARKING_CLASS.MEASUREMENT ? "Miarka" : marking.markingClass;
+
+                            if (
+                                !className ||
+                                className.includes("Marking.Keys")
+                            ) {
+                                className =
+                                    marking.markingClass ===
+                                    MARKING_CLASS.MEASUREMENT
+                                        ? "Miarka"
+                                        : marking.markingClass;
                             }
 
-                            // Wyświetlanie wyniku tylko w PX, bez pobierania kalibracji
-                            if (marking.markingClass === MARKING_CLASS.MEASUREMENT) {
-                                const measure = marking as any; 
-                                
+                            if (
+                                marking.markingClass ===
+                                MARKING_CLASS.MEASUREMENT
+                            ) {
+                                const measure =
+                                    marking as unknown as LineSegmentMarking;
+
                                 if (measure.origin && measure.endpoint) {
-                                    const dx = measure.endpoint.x - measure.origin.x;
-                                    const dy = measure.endpoint.y - measure.origin.y;
-                                    const pixelDistance = Math.sqrt(dx * dx + dy * dy);
+                                    const dx =
+                                        measure.endpoint.x - measure.origin.x;
+                                    const dy =
+                                        measure.endpoint.y - measure.origin.y;
+                                    const pixelDistance = Math.sqrt(
+                                        dx * dx + dy * dy
+                                    );
 
                                     return `${className} (${pixelDistance.toFixed(2)} px)`;
                                 }

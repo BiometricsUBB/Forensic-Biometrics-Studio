@@ -12,6 +12,7 @@ export const enum CURSOR_MODES {
     SELECTION = "selection",
     MARKING = "marking",
     AUTOROTATE = "autorotate",
+    MEASUREMENT = "measurement",
 }
 
 type Settings = {

@@ -15,7 +15,6 @@ import {
     BoundingBoxMarkingHandler,
     PolygonMarkingHandler,
     RectangleMarkingHandler,
-    MeasurementMarkingHandler,
 } from "@/components/pixi/viewport/marking-handlers";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { ViewportHandlerParams } from "../event-handlers/utils";
@@ -98,24 +97,31 @@ export class MarkingModePlugin extends Plugin {
         const type = MarkingTypesStore.actions.selectedType.get();
         if (!type) return;
 
-        const MARKING_HANDLERS = {
+        type MarkingHandlerConstructor = new (
+            plugin: MarkingModePlugin,
+            typeId: string,
+            startEvent: FederatedPointerEvent
+        ) => MarkingHandler;
+
+        const MARKING_HANDLERS: Partial<
+            Record<MARKING_CLASS, MarkingHandlerConstructor>
+        > = {
             [MARKING_CLASS.POINT]: PointMarkingHandler,
             [MARKING_CLASS.RAY]: RayMarkingHandler,
             [MARKING_CLASS.LINE_SEGMENT]: LineSegmentMarkingHandler,
             [MARKING_CLASS.BOUNDING_BOX]: BoundingBoxMarkingHandler,
             [MARKING_CLASS.POLYGON]: PolygonMarkingHandler,
             [MARKING_CLASS.RECTANGLE]: RectangleMarkingHandler,
-            [MARKING_CLASS.MEASUREMENT]: MeasurementMarkingHandler,
         };
 
         // eslint-disable-next-line security/detect-object-injection
-        const MarkingHandler = MARKING_HANDLERS[type.markingClass];
+        const MarkingHandlerClass = MARKING_HANDLERS[type.markingClass];
 
-        if (!MarkingHandler) {
+        if (!MarkingHandlerClass) {
             throw new Error(`Unsupported marking class: ${type.markingClass}`);
         }
 
-        this.currentHandler = new MarkingHandler(this, type.id, e);
+        this.currentHandler = new MarkingHandlerClass(this, type.id, e);
 
         this.addEventListeners();
     }

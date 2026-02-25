@@ -16,10 +16,12 @@ import {
     RotateCw,
     Crosshair,
     Settings,
+    Ruler,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { useTranslation } from "react-i18next";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import {
     DropdownMenu,
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
+import { MeasurementPanel } from "./measurement-panel";
 
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
@@ -43,7 +46,9 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const { locked: isViewportLocked, scaleSync: isViewportScaleSync } =
         DashboardToolbarStore.use(state => state.settings.viewport);
 
-    const availableMarkingTypes = MarkingTypesStore.use(state => state.types);
+    const availableMarkingTypes = MarkingTypesStore.use(state =>
+        state.types.filter(t => t.markingClass !== MARKING_CLASS.MEASUREMENT)
+    );
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
 
@@ -277,6 +282,43 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             })}
                         </span>
                     </Toggle>
+
+                    <Toggle
+                        variant="outline"
+                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        pressed={cursorMode === CURSOR_MODES.MEASUREMENT}
+                        onClick={() => {
+                            if (cursorMode === CURSOR_MODES.MEASUREMENT) {
+                                DashboardToolbarStore.actions.settings.cursor.setCursorMode(
+                                    CURSOR_MODES.SELECTION
+                                );
+                            } else {
+                                DashboardToolbarStore.actions.settings.cursor.setCursorMode(
+                                    CURSOR_MODES.MEASUREMENT
+                                );
+                            }
+                        }}
+                    >
+                        <Ruler
+                            className="flex-shrink-0"
+                            size={ICON.SIZE}
+                            strokeWidth={ICON.STROKE_WIDTH}
+                        />
+                        <span className="text-sm text-left leading-tight">
+                            {t("Mode.Measurement", { ns: "cursor" })}
+                        </span>
+                    </Toggle>
+
+                    <div
+                        className={cn(
+                            "overflow-hidden transition-all duration-300 ease-in-out",
+                            cursorMode === CURSOR_MODES.MEASUREMENT
+                                ? "max-h-96 opacity-100 mt-2"
+                                : "max-h-0 opacity-0"
+                        )}
+                    >
+                        <MeasurementPanel />
+                    </div>
                 </div>
             </div>
         </div>

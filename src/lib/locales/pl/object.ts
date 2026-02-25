@@ -54,7 +54,6 @@ const d: Dictionary = {
             dark_blue: "Ciemny niebieski",
         },
     },
-    // New transaltions for Calibration
     Calibration: {
         Unit: "Jednostka",
         Scale: "Pikseli na jednostkę",

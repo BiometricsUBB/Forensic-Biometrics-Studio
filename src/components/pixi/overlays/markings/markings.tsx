@@ -3,11 +3,26 @@ import { Graphics as PixiGraphics } from "pixi.js";
 import { memo, useCallback, useRef } from "react";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
+import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { MarkingType } from "@/lib/markings/MarkingType";
 import { ShallowViewportStore } from "@/lib/stores/ShallowViewport";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { CANVAS_ID } from "../../canvas/hooks/useCanvasContext";
 import { drawMarking, isBlinkActive } from "./marking.utils";
+
+const MEASUREMENT_TOOL_TYPE_ID = "__measurement__";
+
+const MEASUREMENT_TOOL_MARKING_TYPE: MarkingType = {
+    id: MEASUREMENT_TOOL_TYPE_ID,
+    name: "measurement-tool",
+    displayName: "Measurement",
+    markingClass: MARKING_CLASS.MEASUREMENT,
+    backgroundColor: "#ffff00",
+    textColor: "#ffff00",
+    size: 2,
+    category: "fingerprint" as MarkingType["category"],
+};
 
 export type MarkingsProps = {
     markings: MarkingClass[];
@@ -33,12 +48,16 @@ export const Markings = memo(
             state => state.settings.markings.showLabels
         );
 
-        const calibration = MarkingsStore(canvasId).use(state => state.calibration);
+        const calibration = MarkingsStore(canvasId).use(
+            state => state.calibration
+        );
 
         const { viewportWidthRatio, viewportHeightRatio } =
             ShallowViewportStore(canvasId).use(state => ({
-                viewportWidthRatio: state.size.screenWorldWidth / state.size.worldWidth,
-                viewportHeightRatio: state.size.screenWorldHeight / state.size.worldHeight,
+                viewportWidthRatio:
+                    state.size.screenWorldWidth / state.size.worldWidth,
+                viewportHeightRatio:
+                    state.size.screenWorldHeight / state.size.worldHeight,
             }));
 
         const markingTypes = MarkingTypesStore.use(state => state.types);
@@ -49,14 +68,18 @@ export const Markings = memo(
 
         const drawMarkings = useCallback(
             (g: PixiGraphics) => {
-                // FIX 1: Najważniejsza linijka - usuwa stare teksty przed rysowaniem nowych
-                g.removeChildren(); 
+                g.removeChildren();
                 g.clear();
 
                 markings.forEach(marking => {
-                    const markingType = markingTypes.find(
-                        t => t.id === marking.typeId
-                    );
+                    let markingType: MarkingType | undefined;
+                    if (marking.typeId === MEASUREMENT_TOOL_TYPE_ID) {
+                        markingType = MEASUREMENT_TOOL_MARKING_TYPE;
+                    } else {
+                        markingType = markingTypes.find(
+                            t => t.id === marking.typeId
+                        );
+                    }
                     if (!markingType) return;
 
                     drawMarking(
@@ -67,9 +90,10 @@ export const Markings = memo(
                         viewportWidthRatio,
                         viewportHeightRatio,
                         showMarkingLabels,
+                        calibration,
                         rotation,
                         centerX,
-                        centerY,
+                        centerY
                     );
                 });
 
