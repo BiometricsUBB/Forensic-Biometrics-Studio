@@ -433,6 +433,31 @@ class StoreClass {
                         state.push(...markings);
                     })
                 ),
+            scaleAll: (scaleX: number, scaleY: number) => {
+                this.setMarkingsAndUpdateHash(markings => {
+                    markings.forEach(m => {
+                        m.origin.x *= scaleX;
+                        m.origin.y *= scaleY;
+                        if (
+                            m instanceof LineSegmentMarking ||
+                            m instanceof BoundingBoxMarking
+                        ) {
+                            m.endpoint.x *= scaleX;
+                            m.endpoint.y *= scaleY;
+                        }
+                        if (
+                            m instanceof PolygonMarking ||
+                            m instanceof RectangleMarking
+                        ) {
+                            m.points.forEach(p => {
+                                p.x *= scaleX;
+                                p.y *= scaleY;
+                            });
+                        }
+                    });
+                    return markings;
+                });
+            },
         },
         temporaryMarking: {
             setTemporaryMarking: (marking: MarkingClass | null) =>

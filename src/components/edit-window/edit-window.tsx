@@ -13,6 +13,7 @@ import { readFile, writeFile, exists } from "@tauri-apps/plugin-fs";
 import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
+import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
 
 export function EditWindow() {
     const { t } = useTranslation(["tooltip", "keywords"]);
@@ -20,6 +21,10 @@ export function EditWindow() {
 
     const [imagePath, setImagePath] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [imageName, setImageName] = useState<string | null>(null);
+    const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
+        null
+    );
     const [error, setError] = useState<string | null>(null);
     const [brightness, setBrightness] = useState<number>(100);
     const [contrast, setContrast] = useState<number>(100);
@@ -33,6 +38,7 @@ export function EditWindow() {
 
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const findUniqueFilePath = async (
         directory: string,
@@ -78,25 +84,16 @@ export function EditWindow() {
     };
 
     const processImageWithFilters = async (
-        imagePath: string,
+        imgRef: React.RefObject<HTMLImageElement>,
         brightnessValue: number,
         contrastValue: number
     ): Promise<Uint8Array> => {
-        const imageBytes = await readFile(imagePath);
-        const blob = new Blob([imageBytes]);
-        const originalImageUrl = URL.createObjectURL(blob);
-
-        const img = new Image();
-        await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = reject;
-            img.src = originalImageUrl;
-        });
+        if (!imgRef.current) throw new Error("Image not loaded");
+        const img = imgRef.current;
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-            URL.revokeObjectURL(originalImageUrl);
             throw new Error("Failed to get canvas context");
         }
 
@@ -108,8 +105,6 @@ export function EditWindow() {
         }
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         ctx.filter = "none";
-
-        URL.revokeObjectURL(originalImageUrl);
 
         const editedBlob = await new Promise<Blob>((resolve, reject) => {
             canvas.toBlob(
@@ -167,6 +162,7 @@ export function EditWindow() {
             const blob = new Blob([imageBytes]);
             const url = URL.createObjectURL(blob);
             setImageUrl(url);
+            setImageName(await basename(path));
             setZoom(1);
             setPan({ x: 0, y: 0 });
         } catch (err) {
@@ -267,6 +263,57 @@ export function EditWindow() {
         };
     }, [imageUrl]);
 
+    useEffect(() => {
+        const img = imageRef.current;
+        if (!img) return undefined;
+        const updateSize = () => {
+            setImageSize({ w: img.naturalWidth, h: img.naturalHeight });
+        };
+        if (img.complete && img.naturalWidth) updateSize();
+        img.addEventListener("load", updateSize);
+        return () => img.removeEventListener("load", updateSize);
+    }, [imageUrl]);
+
+    function syncCanvasToImage(img: HTMLImageElement, cvs: HTMLCanvasElement) {
+        if (!img || !cvs) return;
+
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+
+        Object.assign(cvs, { width, height });
+        Object.assign(cvs.style, {
+            width: `${img.width}px`,
+            height: `${img.height}px`,
+            position: "absolute",
+            zIndex: "10",
+        });
+
+        const ctx = cvs.getContext("2d")!;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    useEffect(() => {
+        const img = imageRef.current;
+        const canvas = canvasRef.current;
+        if (!img || !canvas) return undefined;
+
+        const sync = () => {
+            requestAnimationFrame(() => syncCanvasToImage(img, canvas));
+        };
+
+        const resizeObserver = new ResizeObserver(sync);
+        resizeObserver.observe(img);
+
+        if (img.complete) sync();
+        img.addEventListener("load", sync);
+
+        return () => {
+            resizeObserver.disconnect();
+            img.removeEventListener("load", sync);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageUrl]);
+
     const saveEditedImage = async () => {
         if (!imageUrl || !imagePath) {
             return;
@@ -274,7 +321,7 @@ export function EditWindow() {
 
         try {
             const uint8Array = await processImageWithFilters(
-                imagePath,
+                imageRef,
                 brightness,
                 contrast
             );
@@ -306,9 +353,8 @@ export function EditWindow() {
                 newPath: finalPath,
             });
 
-            // Update the edit window preview directly from the data we already have
-            // instead of re-reading from disk (which may fail due to FS scope restrictions)
             setImagePath(finalPath);
+            setImageName(await basename(finalPath));
             const blob = new Blob([uint8Array], { type: "image/png" });
             const url = URL.createObjectURL(blob);
             setImageUrl(url);
@@ -406,6 +452,14 @@ export function EditWindow() {
                                 }}
                                 draggable={false}
                             />
+                            <canvas
+                                ref={canvasRef}
+                                className="absolute pointer-events-none"
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transformOrigin: "center center",
+                                }}
+                            />
                             {zoom !== 1 && (
                                 <div className="absolute top-2 right-2">
                                     <Button
@@ -433,6 +487,27 @@ export function EditWindow() {
                     )}
                 </div>
                 <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col gap-4 p-4 pb-8 h-[calc(100vh-56px)] overflow-y-auto">
+                    {imageName && (
+                        <div className="flex flex-col gap-1">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                Info
+                            </h3>
+                            <p
+                                className="text-xs text-foreground truncate"
+                                title={imageName}
+                            >
+                                {imageName}
+                            </p>
+                            {imageSize && (
+                                <p className="text-xs text-muted-foreground">
+                                    {imageSize.w} × {imageSize.h} px
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="border-t border-border/30" />
+
                     <div className="flex flex-col gap-2">
                         <h3 className="text-sm font-semibold text-muted-foreground">
                             {t("Tools", { ns: "keywords" })}
@@ -504,6 +579,18 @@ export function EditWindow() {
                                 </span>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="border-t border-border/30" />
+
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            DPI
+                        </h3>
+                        <ImageDpiControls
+                            imageRef={imageRef}
+                            canvasRef={canvasRef}
+                        />
                     </div>
                 </div>
             </div>
