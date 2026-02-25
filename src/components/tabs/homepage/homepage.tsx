@@ -41,7 +41,6 @@ export function Homepage() {
         []
     );
 
-    // Helper function to check if error is forbidden/permission error
     const isForbiddenError = (error: unknown): boolean => {
         const errorMessage =
             error instanceof Error ? error.message : String(error);
@@ -52,7 +51,6 @@ export function Homepage() {
         );
     };
 
-    // Helper function to handle viewport reload
     const handleViewportReload = async (
         viewport: Viewport,
         originalPath: string,
@@ -62,7 +60,7 @@ export function Homepage() {
             | Sprite
             | undefined;
 
-        // @ts-expect-error custom property should exist
+        // @ts-expect-error custom property
         if (!sprite || sprite.path !== originalPath) {
             return false;
         }
@@ -114,7 +112,6 @@ export function Homepage() {
                   }
                 | string
             >("image-reload-requested", async event => {
-                // Handle both old format (string) and new format (object with originalPath and newPath)
                 const originalPath =
                     typeof event.payload === "string"
                         ? event.payload
@@ -127,7 +124,6 @@ export function Homepage() {
                 const leftCanvas = getCanvas(CANVAS_ID.LEFT, true);
                 const rightCanvas = getCanvas(CANVAS_ID.RIGHT, true);
 
-                // Try left viewport first
                 if (leftCanvas.viewport) {
                     const handled = await handleViewportReload(
                         leftCanvas.viewport,
@@ -137,7 +133,6 @@ export function Homepage() {
                     if (handled) return;
                 }
 
-                // Try right viewport
                 if (rightCanvas.viewport) {
                     await handleViewportReload(
                         rightCanvas.viewport,

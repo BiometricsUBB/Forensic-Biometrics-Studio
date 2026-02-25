@@ -173,24 +173,21 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                     disabled={!viewport.children.find(x => x instanceof Sprite)}
                     onClick={async () => {
                         try {
-                            // Get the sprite (image) from the viewport
                             const sprite = viewport.children.find(
                                 x => x instanceof Sprite
                             ) as Sprite | undefined;
 
-                            // Extract the image path from the sprite
                             let imagePath: string | undefined;
                             if (sprite) {
-                                // @ts-expect-error custom property should exist
+                                // @ts-expect-error custom property
                                 imagePath = sprite.path;
                             }
 
-                            // Open the edit window with the image path (or null if no image)
                             await invoke("open_edit_window", {
                                 imagePath: imagePath || null,
                             });
-                        } catch (error) {
-                            // Silently fail - user can try again
+                        } catch {
+                            /* empty */
                         }
                     }}
                 >

@@ -71,9 +71,9 @@ function getImageData(picture: Sprite | undefined): ImageInfo | null {
 
     return {
         name: picture.name,
-        // @ts-expect-error custom property should exist
+        // @ts-expect-error custom property
         path: picture.path,
-        // @ts-expect-error custom property should exist
+        // @ts-expect-error custom property
         sha256: picture.hash,
         size: {
             width: texture.width,

@@ -55,21 +55,18 @@ async fn open_settings_window(app: tauri::AppHandle) -> Result<(), String> {
 async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> Result<(), String> {
     if let Some(edit_window) = app.get_webview_window("edit") {
         edit_window.set_focus().map_err(|e| e.to_string())?;
-        // Send the image path to the existing window via event
         if let Some(path) = image_path {
             edit_window.emit("image-path-changed", path).map_err(|e| e.to_string())?;
         }
         return Ok(());
     }
 
-    // Build URL with image path if provided (for new windows)
     let mut url = "index.html?window=edit".to_string();
     if let Some(path) = &image_path {
-        // Simple URL encoding - replace backslashes and encode special chars
         let mut encoded = String::new();
         for c in path.chars() {
             match c {
-                '\\' => encoded.push('/'),  // Normalize to forward slashes
+                '\\' => encoded.push('/'),
                 ' ' => encoded.push_str("%20"),
                 '#' => encoded.push_str("%23"),
                 '%' => encoded.push_str("%25"),
@@ -98,8 +95,6 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
     .build()
     .map_err(|e| e.to_string())?;
 
-    // Path is passed via URL, so the frontend will read it from there
-
     Ok(())
 }
 
@@ -109,6 +104,13 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            println!("{}, {argv:?}, {cwd}", app.package_info().name);
+            let _ = app
+                .get_webview_window("main")
+                .expect("no main window")
+                .set_focus();
+        })) 
         .invoke_handler(tauri::generate_handler![
             show_main_window_if_hidden,
             close_splashscreen_if_exists,

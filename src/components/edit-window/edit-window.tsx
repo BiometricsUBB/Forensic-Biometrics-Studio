@@ -35,7 +35,6 @@ export function EditWindow() {
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Helper function to find a unique file path
     const findUniqueFilePath = async (
         directory: string,
         baseName: string,
@@ -43,22 +42,18 @@ export function EditWindow() {
         extension: string,
         initialPath: string
     ): Promise<string> => {
-        // Check initial path
         let fileExists = false;
         try {
             fileExists = await exists(initialPath);
         } catch {
-            // If we can't check, assume it doesn't exist and return the initial path
             return initialPath;
         }
 
-        // If file doesn't exist, return the initial path
         if (!fileExists) {
             return initialPath;
         }
 
-        // Try numbered variants - check multiple paths in parallel
-        const maxAttempts = 100; // Prevent infinite loop
+        const maxAttempts = 100;
         const pathsToCheck: Promise<{ path: string; exists: boolean }>[] = [];
 
         for (let i = 1; i <= maxAttempts; i += 1) {
@@ -80,11 +75,9 @@ export function EditWindow() {
             return firstAvailable.path;
         }
 
-        // Fallback: return the last attempted path
         return results[results.length - 1]?.path ?? initialPath;
     };
 
-    // Helper function to process image with filters
     const processImageWithFilters = async (
         imagePath: string,
         brightnessValue: number,
@@ -137,7 +130,6 @@ export function EditWindow() {
         return new Uint8Array(arrayBuffer);
     };
 
-    // Helper function to generate filename
     const generateFilename = async (
         imagePath: string
     ): Promise<{
@@ -176,7 +168,6 @@ export function EditWindow() {
             const blob = new Blob([imageBytes]);
             const url = URL.createObjectURL(blob);
             setImageUrl(url);
-            // Reset zoom and pan when loading new image
             setZoom(1);
             setPan({ x: 0, y: 0 });
         } catch (err) {
@@ -187,7 +178,6 @@ export function EditWindow() {
         }
     };
 
-    // Handle mouse wheel for zooming
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
         if (!imageUrl || !containerRef.current || !imageRef.current) return;
 
@@ -197,18 +187,14 @@ export function EditWindow() {
 
         const containerRect = containerRef.current.getBoundingClientRect();
 
-        // Get mouse position relative to container center
         const containerCenterX = containerRect.width / 2;
         const containerCenterY = containerRect.height / 2;
         const mouseX = e.clientX - containerRect.left;
         const mouseY = e.clientY - containerRect.top;
 
-        // Calculate the point under the mouse in image coordinates (before zoom)
-        // Account for the current pan and the image's centered position
         const imageX = (mouseX - containerCenterX - pan.x) / zoom;
         const imageY = (mouseY - containerCenterY - pan.y) / zoom;
 
-        // Adjust pan to keep the point under the mouse fixed
         const newPanX = mouseX - containerCenterX - imageX * newZoom;
         const newPanY = mouseY - containerCenterY - imageY * newZoom;
 
@@ -216,14 +202,12 @@ export function EditWindow() {
         setPan({ x: newPanX, y: newPanY });
     };
 
-    // Handle mouse down for panning
     const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (e.button !== 0) return; // Only handle left mouse button
+        if (e.button !== 0) return;
         setIsDragging(true);
         setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
     };
 
-    // Handle mouse move for panning
     const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
         if (!isDragging) return;
         setPan({
@@ -232,38 +216,31 @@ export function EditWindow() {
         });
     };
 
-    // Handle mouse up for panning
     const handleMouseUp = () => {
         setIsDragging(false);
     };
 
-    // Handle double click to reset zoom and pan
     const handleDoubleClick = () => {
         setZoom(1);
         setPan({ x: 0, y: 0 });
     };
 
-    // Reset zoom and pan
     const resetZoom = () => {
         setZoom(1);
         setPan({ x: 0, y: 0 });
     };
 
     useEffect(() => {
-        // Check URL parameters for initial image path
         const urlParams = new URLSearchParams(window.location.search);
         const pathFromUrl = urlParams.get("imagePath");
 
         if (pathFromUrl) {
-            // Decode the path from URL and convert forward slashes back to backslashes on Windows
             const decodedPath = decodeURIComponent(pathFromUrl);
-            // On Windows, convert forward slashes back to backslashes for file paths
             const normalizedPath = decodedPath.replace(/\//g, "\\");
             setImagePath(normalizedPath);
             loadImage(normalizedPath);
         }
 
-        // Listen for image path changes from the main window (when window already exists)
         const setupListener = async () => {
             return listen<string>("image-path-changed", event => {
                 setImagePath(event.payload);
@@ -283,7 +260,6 @@ export function EditWindow() {
         };
     }, []);
 
-    // Cleanup object URL on unmount
     useEffect(() => {
         return () => {
             if (imageUrl) {
@@ -298,23 +274,19 @@ export function EditWindow() {
         }
 
         try {
-            // Process image with filters
             const uint8Array = await processImageWithFilters(
                 imagePath,
                 brightness,
                 contrast
             );
 
-            // Generate filename components
             const { nameWithoutExt, extWithDot, timestamp } =
                 await generateFilename(imagePath);
             const newFilename = `${nameWithoutExt}_edited_${timestamp}${extWithDot}`;
 
-            // Get the directory of the original image
             const imageDir = await dirname(imagePath);
             const newImagePath = await join(imageDir, newFilename);
 
-            // Check if file exists and find a unique name if needed
             const finalPath = await findUniqueFilePath(
                 imageDir,
                 nameWithoutExt,
@@ -323,10 +295,8 @@ export function EditWindow() {
                 newImagePath
             );
 
-            // Save the edited image to Documents folder
             await writeFile(finalPath, uint8Array);
 
-            // Verify the file was written successfully
             const fileWasWritten = await exists(finalPath);
             if (!fileWasWritten) {
                 throw new Error(`File was not created at path: ${finalPath}`);
