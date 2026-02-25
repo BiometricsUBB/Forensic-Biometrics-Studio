@@ -1,92 +1,101 @@
-import React, { RefObject, useEffect, useState } from "react";
+import React, { RefObject, useEffect, useRef, useState } from "react";
 import { Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ICON } from "@/lib/utils/const";
 import { cn } from "@/lib/utils/shadcn";
-import { useImageDpiCalibration } from "./ImageDpiCalibration";
+import { ImageDpiCalibration } from "./imageDpiCalibration";
 
 interface ImageDpiControlsProps {
-  imageRef: RefObject<HTMLImageElement>;
-  canvasRef: RefObject<HTMLCanvasElement>;
+    imageRef: RefObject<HTMLImageElement>;
+    canvasRef: RefObject<HTMLCanvasElement>;
 }
 
 export default function ImageDpiControls({
-  imageRef,
-  canvasRef,
+    imageRef,
+    canvasRef,
 }: ImageDpiControlsProps) {
-  const [active, setActive] = useState(false);
-  const [targetDpi, setTargetDpi] = useState<500 | 1000>(1000);
-  const handlerRef = useImageDpiCalibration(imageRef, canvasRef);
+    const [active, setActive] = useState(false);
+    const [targetDpi, setTargetDpi] = useState<500 | 1000>(1000);
+    const handlerRef = useRef<ImageDpiCalibration | null>(null);
 
-  useEffect(() => {
-    const handler = handlerRef.current;
-    const canvas = canvasRef.current;
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const img = imageRef.current;
 
-    if (!handler || !canvas) return;
+        if (!canvas) return;
 
-    canvas.style.pointerEvents = active ? "auto" : "none";
+        if (active && img) {
+            if (!handlerRef.current) {
+                handlerRef.current = new ImageDpiCalibration(img, canvas);
+            }
+            handlerRef.current.setTargetDpi(targetDpi);
+            canvas.style.pointerEvents = "auto";
+        } else {
+            canvas.style.pointerEvents = "none";
+            handlerRef.current?.clear();
+        }
+    }, [active, targetDpi, canvasRef, imageRef]);
 
-    if (!active) {
-      handler.clear();
-    }
-  }, [active, handlerRef, canvasRef]);
+    useEffect(() => {
+        return () => {
+            handlerRef.current?.destroy();
+            handlerRef.current = null;
+        };
+    }, []);
 
- 
-  useEffect(() => {
-    handlerRef.current?.setTargetDpi(targetDpi);
-  }, [targetDpi, handlerRef]);
-
-  return (
-    <div className="space-y-3 w-full max-w-md">
-      <Button
-        onClick={() => setActive(prev => !prev)}
-        variant={active ? "destructive" : "default"}
-        className="flex items-center justify-center gap-2"
-      >
-        <Ruler size={ICON.SIZE} />
-        DPI
-      </Button>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium">Target DPI</label>
-
-        <div className="flex gap-4">
-          {[500, 1000].map(dpi => (
-            <label
-              key={dpi}
-              className={cn(
-                "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition",
-                targetDpi === dpi
-                  ? "border-primary bg-primary/10"
-                  : "border-border hover:bg-muted"
-              )}
+    return (
+        <div className="space-y-3 w-full max-w-md">
+            <Button
+                onClick={() => setActive(prev => !prev)}
+                variant={active ? "destructive" : "default"}
+                className="flex items-center justify-center gap-2"
             >
-              <span
-                className={cn(
-                  "flex h-4 w-4 items-center justify-center rounded-full border",
-                  targetDpi === dpi
-                    ? "border-primary"
-                    : "border-muted-foreground"
-                )}
-              >
-                {targetDpi === dpi && (
-                  <span className="h-2 w-2 rounded-full bg-primary" />
-                )}
-              </span>
+                <Ruler size={ICON.SIZE} />
+                DPI
+            </Button>
 
-              <input
-                type="radio"
-                name="dpi"
-                className="hidden"
-                checked={targetDpi === dpi}
-                onChange={() => setTargetDpi(dpi as 500 | 1000)}
-              />
+            <div className="space-y-2">
+                <span className="text-sm font-medium">Target DPI</span>
 
-              <span className="text-sm">{dpi} DPI</span>
-            </label>
-          ))}
+                <div className="flex gap-4">
+                    {([500, 1000] as const).map(dpi => (
+                        <label
+                            key={dpi}
+                            htmlFor={`dpi-radio-${dpi}`}
+                            className={cn(
+                                "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition",
+                                targetDpi === dpi
+                                    ? "border-primary bg-primary/10"
+                                    : "border-border hover:bg-muted"
+                            )}
+                        >
+                            <span
+                                className={cn(
+                                    "flex h-4 w-4 items-center justify-center rounded-full border",
+                                    targetDpi === dpi
+                                        ? "border-primary"
+                                        : "border-muted-foreground"
+                                )}
+                            >
+                                {targetDpi === dpi && (
+                                    <span className="h-2 w-2 rounded-full bg-primary" />
+                                )}
+                            </span>
+
+                            <input
+                                id={`dpi-radio-${dpi}`}
+                                type="radio"
+                                name="dpi"
+                                className="hidden"
+                                checked={targetDpi === dpi}
+                                onChange={() => setTargetDpi(dpi)}
+                            />
+
+                            <span className="text-sm">{dpi} DPI</span>
+                        </label>
+                    ))}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
