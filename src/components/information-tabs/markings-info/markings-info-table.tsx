@@ -145,6 +145,14 @@ function SortingIndicator({ isSorted }: { isSorted: SortDirection | false }) {
     );
 }
 
+function FixedFooter() {
+    return (
+        <TableRow className="h-8 border-0">
+            <TableCell className="p-0 border-0" />
+        </TableRow>
+    );
+}
+
 interface MarkingsInfoTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     selectedMarking: MarkingsState["selectedMarkingLabel"];
@@ -218,20 +226,11 @@ export const MarkingsInfoTable = function <TData, TValue>({
                 overflow: "auto",
             }}
             totalCount={rows.length}
-            // Zwiększono margines renderowania, aby uniknąć ucinania rzędów podczas przewijania
-            increaseViewportBy={{ top: 0, bottom: 400 }}
+            increaseViewportBy={{ top: 0, bottom: 200 }}
             components={{
                 Table: TableComponent,
                 TableRow: TableRowComponent(rows, canvasId),
                 TableHead: TableHeadComponent,
-                // Dodano pustą stopkę, która wypycha ostatni wiersz do góry, zapobiegając jego ucinaniu
-                TableFoot: () => (
-                    <tfoot>
-                        <tr className="h-16 bg-transparent">
-                            <td colSpan={columns.length} />
-                        </tr>
-                    </tfoot>
-                )
             }}
             fixedHeaderContent={() =>
                 table.getHeaderGroups().map(headerGroup => (
@@ -281,6 +280,7 @@ export const MarkingsInfoTable = function <TData, TValue>({
                     </TableRow>
                 ))
             }
+            fixedFooterContent={FixedFooter}
         />
     );
 };

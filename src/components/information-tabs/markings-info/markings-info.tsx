@@ -84,11 +84,11 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
     }, [storeMarkings, storeOppositeMarkings]);
 
     return (
-        <div className="flex-1 overflow-hidden">
+        <div className="w-full h-full overflow-hidden">
             <MarkingsInfoTable
                 canvasId={id}
                 selectedMarking={selectedMarking}
-                height={`calc(${tableHeight}px - 70px)`}
+                height={`${tableHeight}px`}
                 columns={columns}
                 data={markings}
             />
