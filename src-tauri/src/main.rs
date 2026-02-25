@@ -11,7 +11,6 @@ use winreg::enums::HKEY_LOCAL_MACHINE;
 use winreg::RegKey;
 use tauri::WebviewUrl;
 use tauri::WebviewWindowBuilder;
-use tauri::Emitter;
 
 #[tauri::command]
 async fn show_main_window_if_hidden(window: tauri::Window) {
@@ -111,6 +110,9 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
     .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[tauri::command]
 async fn get_machine_id(app: tauri::AppHandle) -> Result<String, String> {
     if let Some(id) = read_os_machine_id() {
         return Ok(id);
@@ -201,7 +203,7 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+       .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             println!("{}, {argv:?}, {cwd}", app.package_info().name);
             let _ = app
                 .get_webview_window("main")
