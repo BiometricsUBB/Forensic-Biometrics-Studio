@@ -391,28 +391,6 @@ class StoreClass {
 
                 this.actions.markings.compactLabelsAcrossBoth();
             },
-            unmergePair: (
-                localLabel: number,
-                oldLocalIds: string[],
-                otherCanvasId: CANVAS_ID,
-                oldOtherLabel: number,
-                oldOtherIds: string[]
-            ) => {
-                this.setMarkingsAndUpdateHash(markings => {
-                    const m = markings.find(x => x.label === localLabel);
-                    if (m) m.ids = oldLocalIds;
-                    return markings;
-                });
-                const otherStore = Store(otherCanvasId);
-                otherStore.setMarkingsAndUpdateHash(markings => {
-                    const m = markings.find(x => x.label === localLabel);
-                    if (m) {
-                        m.label = oldOtherLabel;
-                        m.ids = oldOtherIds;
-                    }
-                    return markings;
-                });
-            },
             compactLabelsAcrossBoth: () => {
                 const leftStore = Store(CANVAS_ID.LEFT);
                 const rightStore = Store(CANVAS_ID.RIGHT);

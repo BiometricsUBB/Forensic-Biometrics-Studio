@@ -8,8 +8,6 @@ import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { Point } from "@/lib/markings/Point";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
-import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
-import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
 
 const distance = (p1: Point, p2: Point): number => {
     return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
@@ -91,15 +89,9 @@ export class PolygonMarkingHandler extends MarkingHandler {
                 markingsStore.state.temporaryMarking!.typeId,
                 this.points
             );
-
-            const command = new AddOrUpdateMarkingCommand(
-                markingsStore.actions.markings,
-                updatedMarking
-            );
-            GlobalHistoryManager.executeCommand(command);
-
+            markingsStore.actions.markings.addOne(updatedMarking);
             this.cleanup();
-        } else {  
+        } else {
             this.points.push(pos);
             markingsStore.actions.temporaryMarking.updateTemporaryMarking({
                 points: [...this.points, pos],

@@ -16,6 +16,8 @@ import {
     RotateCw,
     Crosshair,
     Settings,
+    Eye,
+    EyeOff,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { useTranslation } from "react-i18next";
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
+import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
@@ -47,6 +50,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     } = DashboardToolbarStore.use(state => state.settings.viewport);
 
     const availableMarkingTypes = MarkingTypesStore.use(state => state.types);
+    const hiddenTypes = MarkingTypesStore.use(state => state.hiddenTypes);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
 
@@ -158,14 +162,89 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     <h3 className="text-xs font-semibold">
                         {t("Types", { ns: "keywords" })}
                     </h3>
-                    <button
-                        type="button"
-                        onClick={openTypesSettings}
-                        className="p-1.5 rounded-md hover:bg-accent hover:text-accent-foreground"
-                        title={t("Types", { ns: "keywords" })}
-                    >
-                        <Settings size={16} strokeWidth={ICON.STROKE_WIDTH} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button
+                                    type="button"
+                                    className="p-1.5 rounded-md hover:bg-accent hover:text-accent-foreground"
+                                    title={t("Filters", { ns: "keywords" })}
+                                >
+                                    <Eye
+                                        size={16}
+                                        strokeWidth={ICON.STROKE_WIDTH}
+                                    />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                side="right"
+                                align="start"
+                                className="w-64 p-4 z-[9999]"
+                            >
+                                <div className="space-y-4">
+                                    <h4 className="font-medium leading-none text-sm">
+                                        {t("FeatureVisibility", {
+                                            ns: "keywords",
+                                        })}
+                                    </h4>
+                                    <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">
+                                        {availableMarkingTypes.map(type => (
+                                            <div
+                                                key={type.id}
+                                                className="flex items-center justify-between"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div
+                                                        className="w-3 h-3 rounded-sm flex-shrink-0"
+                                                        style={{
+                                                            backgroundColor:
+                                                                type.backgroundColor as string,
+                                                        }}
+                                                    />
+                                                    <span className="text-sm">
+                                                        {type.displayName}
+                                                    </span>
+                                                </div>
+                                                <Toggle
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-7 px-2"
+                                                    pressed={hiddenTypes.includes(
+                                                        type.id
+                                                    )}
+                                                    onClick={e => {
+                                                        e.preventDefault();
+                                                        MarkingTypesStore.actions.visibility.toggle(
+                                                            type.id
+                                                        );
+                                                    }}
+                                                >
+                                                    {hiddenTypes.includes(
+                                                        type.id
+                                                    ) ? (
+                                                        <EyeOff size={14} />
+                                                    ) : (
+                                                        <Eye size={14} />
+                                                    )}
+                                                </Toggle>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <button
+                            type="button"
+                            onClick={openTypesSettings}
+                            className="p-1.5 rounded-md hover:bg-accent hover:text-accent-foreground"
+                            title={t("Types", { ns: "keywords" })}
+                        >
+                            <Settings
+                                size={16}
+                                strokeWidth={ICON.STROKE_WIDTH}
+                            />
+                        </button>
+                    </div>
                 </div>
                 <DropdownMenu>
                     <DropdownMenuTrigger
@@ -281,6 +360,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         </span>
                     </Toggle>
 
+                    <ReportDialog />
                     <Toggle
                         variant="outline"
                         className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"

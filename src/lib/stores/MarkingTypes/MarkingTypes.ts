@@ -79,6 +79,23 @@ class StoreClass {
                 });
             },
         },
+        visibility: {
+            toggle: (typeId: MarkingType["id"]) => {
+                this.state.set(draft => {
+                    const index = draft.hiddenTypes.indexOf(typeId);
+                    if (index === -1) {
+                        draft.hiddenTypes.push(typeId);
+                    } else {
+                        draft.hiddenTypes.splice(index, 1);
+                    }
+                });
+            },
+            reset: () => {
+                this.state.set(draft => {
+                    draft.hiddenTypes = [];
+                });
+            },
+        },
     };
 }
 

@@ -11,11 +11,13 @@ const STORE_FILE = new LazyStore(`${STORE_NAME}.dat`);
 type State = {
     selectedTypeId: MarkingType["id"] | null;
     types: MarkingType[];
+    hiddenTypes: MarkingType["id"][];
 };
 
 const INITIAL_STATE: State = {
     selectedTypeId: null,
     types: [],
+    hiddenTypes: [],
 };
 
 const useStore = create<Immer<State>>()(

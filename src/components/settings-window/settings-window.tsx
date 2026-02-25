@@ -5,24 +5,34 @@ import { WindowControls } from "@/components/menu/window-controls";
 import { Menubar } from "@/components/ui/menubar";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
-import { Languages, Palette, Info, Settings, Tags } from "lucide-react";
+import {
+    Languages,
+    Palette,
+    Info,
+    Settings,
+    Tags,
+    FileText,
+} from "lucide-react";
 import { CustomThemeStore } from "@/lib/stores/CustomTheme";
 import { applyCustomTheme } from "@/lib/hooks/useCustomTheme";
+import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
 import { LanguageSettings } from "./categories/language-settings";
 import { ThemeSettings } from "./categories/theme-settings";
 import { AboutSettings } from "./categories/about-settings";
 import { MarkingTypesSettings } from "./categories/marking-types-settings";
+import { ReportSettings } from "./categories/report-settings";
 
 export enum SETTINGS_CATEGORY {
     LANGUAGE = "language",
     THEME = "theme",
     MARKING_TYPES = "marking-types",
+    REPORT = "report",
     ABOUT = "about",
 }
 
 interface CategoryItem {
     id: SETTINGS_CATEGORY;
-    labelKey: "Language" | "Theme" | "Types" | "About";
+    labelKey: "Language" | "Theme" | "Types" | "Report" | "About";
     icon: React.ReactNode;
 }
 
@@ -41,6 +51,11 @@ const categories: CategoryItem[] = [
         id: SETTINGS_CATEGORY.MARKING_TYPES,
         labelKey: "Types",
         icon: <Tags size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />,
+    },
+    {
+        id: SETTINGS_CATEGORY.REPORT,
+        labelKey: "Report",
+        icon: <FileText size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />,
     },
     {
         id: SETTINGS_CATEGORY.ABOUT,
@@ -68,6 +83,7 @@ export function SettingsWindow() {
     useEffect(() => {
         const init = async () => {
             await CustomThemeStore.rehydrate();
+            await GlobalSettingsStore.use.persist?.rehydrate?.();
             const activeTheme = CustomThemeStore.getActiveTheme();
             if (activeTheme) {
                 applyCustomTheme(activeTheme);
@@ -96,6 +112,8 @@ export function SettingsWindow() {
                 return <ThemeSettings />;
             case SETTINGS_CATEGORY.MARKING_TYPES:
                 return <MarkingTypesSettings />;
+            case SETTINGS_CATEGORY.REPORT:
+                return <ReportSettings />;
             case SETTINGS_CATEGORY.ABOUT:
                 return <AboutSettings />;
             default:
