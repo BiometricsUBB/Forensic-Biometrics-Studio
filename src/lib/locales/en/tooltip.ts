@@ -27,6 +27,9 @@ const d: Dictionary = {
         "Mark a line between two identical points on each image starting from bottom, the lower point will be the rotation anchor and the upper will be used to calculate the rotation angle",
     "Calculate and align": "Calculate and align",
     "Reset rotation panel": "Reset rotation",
+    "Measurement instructions":
+        "Draw a line between two points on the image to measure the distance",
+    "Clear measurement": "Clear measurement",
     Brightness: "Brightness",
     Contrast: "Contrast",
     "Reset Zoom": "Reset Zoom",

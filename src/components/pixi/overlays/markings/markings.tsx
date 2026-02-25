@@ -3,11 +3,26 @@ import { Graphics as PixiGraphics } from "pixi.js";
 import { memo, useCallback } from "react";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
+import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { MarkingType } from "@/lib/markings/MarkingType";
 import { ShallowViewportStore } from "@/lib/stores/ShallowViewport";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { CANVAS_ID } from "../../canvas/hooks/useCanvasContext";
 import { drawMarking } from "./marking.utils";
+
+const MEASUREMENT_TOOL_TYPE_ID = "__measurement__";
+
+const MEASUREMENT_TOOL_MARKING_TYPE: MarkingType = {
+    id: MEASUREMENT_TOOL_TYPE_ID,
+    name: "measurement-tool",
+    displayName: "Measurement",
+    markingClass: MARKING_CLASS.MEASUREMENT,
+    backgroundColor: "#ffff00",
+    textColor: "#ffff00",
+    size: 2,
+    category: "fingerprint" as MarkingType["category"],
+};
 
 export type MarkingsProps = {
     markings: MarkingClass[];
@@ -31,31 +46,29 @@ export const Markings = memo(
             state => state.settings.markings.showLabels
         );
 
-        // oblicz proporcje viewportu do świata tylko na evencie zoomed, dla lepszej wydajności (nie ma sensu liczyć tego na każdym renderze
-        // bo przy samym ruchu nie zmieniają się proporcje viewportu do świata, tylko przy zoomie)
-        const { viewportWidthRatio, viewportHeightRatio } =
-            ShallowViewportStore(canvasId).use(
-                ({
-                    size: {
-                        screenWorldWidth,
-                        screenWorldHeight,
-                        worldWidth,
-                        worldHeight,
-                    },
-                }) => ({
-                    viewportWidthRatio: screenWorldWidth / worldWidth,
-                    viewportHeightRatio: screenWorldHeight / worldHeight,
-                })
-            );
+        const calibration = MarkingsStore(canvasId).use(
+            state => state.calibration
+        );
+
+        
+            ShallowViewportStore(canvasId).use(state => ({
+                viewportWidthRatio:
+                    state.size.screenWorldWidth / state.size.worldWidth,
+                viewportHeightRatio:
+                    state.size.screenWorldHeight / state.size.worldHeight,
+            }));
+
+        const markingTypes = MarkingTypesStore.use(state => state.types);
 
         const selectedMarkingLabel = MarkingsStore(canvasId).use(
             state => state.selectedMarkingLabel
         );
 
-        const markingTypes = MarkingTypesStore.use(state => state.types);
-
         const drawMarkings = useCallback(
             (g: PixiGraphics) => {
+                g.removeChildren();
+                g.clear();
+
                 g.children
                     .find(x => x.name === "markingsContainer")
                     ?.destroy({
@@ -68,18 +81,24 @@ export const Markings = memo(
                 markingsContainer.name = "markingsContainer";
                 g.addChild(markingsContainer);
                 markings.forEach(marking => {
-                    const markingType = markingTypes.find(
-                        t => t.id === marking.typeId
-                    );
+                    let markingType: MarkingType | undefined;
+                    if (marking.typeId === MEASUREMENT_TOOL_TYPE_ID) {
+                        markingType = MEASUREMENT_TOOL_MARKING_TYPE;
+                    } else {
+                        markingType = markingTypes.find(
+                            t => t.id === marking.typeId
+                        );
+                    }
                     if (!markingType) return;
                     drawMarking(
-                        markingsContainer as PixiGraphics,
+                        g,
                         selectedMarkingLabel === marking.label,
                         marking,
                         markingType,
                         viewportWidthRatio,
                         viewportHeightRatio,
                         showMarkingLabels,
+                        calibration,
                         rotation,
                         centerX,
                         centerY
@@ -101,6 +120,7 @@ export const Markings = memo(
                 rotation,
                 centerX,
                 centerY,
+                calibration,
             ]
         );
 

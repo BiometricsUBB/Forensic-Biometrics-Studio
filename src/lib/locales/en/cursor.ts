@@ -5,6 +5,7 @@ const d: Dictionary = {
         Marking: "Marking",
         Selection: "Panning",
         Rotation: "Rotation",
+        Measurement: "Measurement",
     },
 };
 

@@ -5,4 +5,5 @@ export enum MARKING_CLASS {
     BOUNDING_BOX = "bounding_box",
     POLYGON = "polygon",
     RECTANGLE = "rectangle",
+    MEASUREMENT = "measurement",
 }

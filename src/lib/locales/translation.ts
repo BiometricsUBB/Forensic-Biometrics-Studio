@@ -82,7 +82,7 @@ export type i18nDescription = Recordify<
 export type i18nModes = Recordify<WORKING_MODE>;
 
 export type i18nCursor = {
-    Mode: Recordify<"Selection" | "Marking" | "Rotation">;
+    Mode: Recordify<"Selection" | "Marking" | "Rotation" | "Measurement">;
 };
 
 export type i18nObject = {
@@ -119,6 +119,10 @@ export type i18nObject = {
         Name: string;
         Keys: Recordify<THEMES>;
     };
+    Calibration: {
+        Unit: string;
+        Scale: string;
+    };
 };
 
 export type i18nTooltip = Recordify<
@@ -146,6 +150,8 @@ export type i18nTooltip = Recordify<
     | "Rotation instructions"
     | "Calculate and align"
     | "Reset rotation panel"
+    | "Measurement instructions"
+    | "Clear measurement"
     | "Brightness"
     | "Contrast"
     | "Reset Zoom"

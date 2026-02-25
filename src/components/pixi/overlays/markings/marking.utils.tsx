@@ -4,6 +4,7 @@ import {
     TextStyle,
     Text,
 } from "pixi.js";
+import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { RayMarking } from "@/lib/markings/RayMarking";
 import { PointMarking } from "@/lib/markings/PointMarking";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
@@ -14,6 +15,7 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
 import { Point } from "@/lib/markings/Point";
+import { Calibration } from "@/lib/stores/Markings/Markings.store";
 
 const transformPoint = (
     point: Point,
@@ -51,7 +53,8 @@ const drawLabel = (
     text: string,
     position: Point,
     size: number,
-    textColor: ColorSource
+    textColor: ColorSource,
+    centered: boolean = false
 ) => {
     const fontSize = Math.ceil(
         (size * 2) / (text.length === 1 ? 1 : text.length * 0.58)
@@ -65,7 +68,23 @@ const drawLabel = (
     });
     label.x = position.x;
     label.y = position.y;
-    label.anchor.set(0.5, 0.43);
+
+    if (centered) {
+        label.anchor.set(0.5, 0.5);
+        const bg = new PixiGraphics();
+        bg.beginFill(0x000000, 0.7);
+        bg.drawRoundedRect(
+            position.x - label.width / 2 - 2,
+            position.y - label.height / 2 - 2,
+            label.width + 4,
+            label.height + 4,
+            4
+        );
+        bg.endFill();
+        g.addChild(bg);
+    } else {
+        label.anchor.set(0.5, 0.43);
+    }
 
     g.addChild(label);
 };
@@ -73,6 +92,93 @@ const drawLabel = (
 const lineWidth = 2;
 const lineLength = 4;
 const shadowWidth = 0.5;
+
+const drawMeasurementMarking = (
+    g: PixiGraphics,
+    selected: boolean,
+    { origin, endpoint }: LineSegmentMarking,
+    { textColor, size }: MarkingType,
+    relativeOrigin: Point,
+    relativeEndpoint: Point,
+    calibration?: Calibration
+) => {
+    const { x, y } = relativeOrigin;
+    const { x: ex, y: ey } = relativeEndpoint;
+
+    const dxReal = endpoint.x - origin.x;
+    const dyReal = endpoint.y - origin.y;
+    const distPx = Math.sqrt(dxReal * dxReal + dyReal * dyReal);
+
+    if (distPx < 0.1) return;
+
+    let textToDisplay = `${distPx.toFixed(2)} px`;
+    if (
+        calibration &&
+        calibration.unit === "mm" &&
+        calibration.pixelsPerUnit > 0
+    ) {
+        const distMm = distPx / calibration.pixelsPerUnit;
+        textToDisplay = `${distMm.toFixed(2)} mm`;
+    }
+
+    if (selected) {
+        g.lineStyle(size + 4, 0x0000ff, 0.3);
+        g.moveTo(x, y).lineTo(ex, ey);
+    }
+
+    g.lineStyle(2, textColor);
+    g.moveTo(x, y).lineTo(ex, ey);
+
+    const angle = Math.atan2(ey - y, ex - x);
+    const perpAngle = angle - Math.PI / 2;
+    const tickSize = 10;
+
+    const drawTick = (cx: number, cy: number) => {
+        const x1 = cx + Math.cos(perpAngle) * (tickSize / 2);
+        const y1 = cy + Math.sin(perpAngle) * (tickSize / 2);
+        const x2 = cx - Math.cos(perpAngle) * (tickSize / 2);
+        const y2 = cy - Math.sin(perpAngle) * (tickSize / 2);
+        g.moveTo(x1, y1).lineTo(x2, y2);
+    };
+    drawTick(x, y);
+    drawTick(ex, ey);
+
+    const midX = (x + ex) / 2;
+    const midY = (y + ey) / 2;
+
+    const textOffset = 15;
+    const textX = midX + Math.cos(perpAngle) * textOffset;
+    const textY = midY + Math.sin(perpAngle) * textOffset;
+
+    const style = new TextStyle({
+        fontSize: 14,
+        fill: 0xffffff,
+        fontFamily: "Arial",
+        fontWeight: "bold",
+        stroke: 0x000000,
+        strokeThickness: 3,
+    });
+
+    const label = new Text(textToDisplay, style);
+    label.anchor.set(0.5, 0.5);
+    label.x = textX;
+    label.y = textY;
+    label.resolution = 2;
+
+    const bgPadding = 4;
+    g.lineStyle(0);
+    g.beginFill(0x000000, 0.6);
+    g.drawRoundedRect(
+        textX - label.width / 2 - bgPadding,
+        textY - label.height / 2 - bgPadding,
+        label.width + bgPadding * 2,
+        label.height + bgPadding * 2,
+        4
+    );
+    g.endFill();
+
+    g.addChild(label);
+};
 
 const drawPointMarking = (
     g: PixiGraphics,
@@ -174,31 +280,24 @@ const drawLineSegmentMarking = (
     }
 
     const origin = new PixiGraphics();
-    // Origin outline
     origin.lineStyle(shadowWidth, textColor).drawCircle(x, y, size);
-    // Origin
     origin
         .beginFill(backgroundColor)
         .drawCircle(x, y, size - shadowWidth)
         .endFill();
 
     const line = new PixiGraphics();
-    // Line outline
     line.moveTo(x, y)
         .lineStyle(lineWidth + 3 * shadowWidth, textColor)
         .lineTo(ex, ey);
-    // Line
     line.moveTo(x, y).lineStyle(lineWidth, backgroundColor).lineTo(ex, ey);
 
     const endpoint = new PixiGraphics();
-    // Endpoint outline
     endpoint.lineStyle(shadowWidth, textColor).drawCircle(ex, ey, size);
-    // Endpoint
     endpoint
         .beginFill(backgroundColor)
         .drawCircle(ex, ey, size - shadowWidth)
         .endFill();
-    // Endpoint hole
     endpoint
         .beginHole()
         .drawCircle(ex, ey, size - lineWidth - 1 - shadowWidth)
@@ -206,10 +305,8 @@ const drawLineSegmentMarking = (
         .endHole();
 
     if (showMarkingLabels) {
-        // Label at origin position
         drawLabel(origin, String(label), relativeOrigin, size, textColor);
     } else {
-        // Origin hole
         origin.beginHole();
         origin.drawCircle(x, y, size - lineWidth - 1 - shadowWidth);
         origin.endHole();
@@ -249,11 +346,9 @@ const drawBoundingBoxMarking = (
         );
     }
 
-    // Bounding box outline
     g.lineStyle(2, textColor);
     g.drawRect(rectX, rectY, rectWidth, rectHeight);
 
-    // Bounding box fill
     g.beginFill(backgroundColor, 0.3);
     g.drawRect(rectX, rectY, rectWidth, rectHeight);
     g.endFill();
@@ -348,6 +443,23 @@ const drawPolygonMarking = (
     }
 };
 
+type BlinkState = { label: number; until: number; periodMs: number } | null;
+
+let blinking: BlinkState = null;
+
+export const blinkMarking = (label: number, flashes = 3, periodMs = 150) => {
+    const durationMs = flashes * 2 * periodMs;
+    blinking = { label, until: Date.now() + durationMs, periodMs };
+};
+
+export const isBlinkActive = () => !!blinking && Date.now() < blinking.until;
+
+const isBlinkingThis = (label: number) =>
+    !!blinking && blinking.label === label && Date.now() < blinking.until;
+
+const shouldBlinkNow = (periodMs: number) =>
+    Math.floor(Date.now() / periodMs) % 2 === 0;
+
 export const drawMarking = (
     g: PixiGraphics,
     isSelected: boolean,
@@ -356,11 +468,16 @@ export const drawMarking = (
     viewportWidthRatio: number,
     viewportHeightRatio: number,
     showMarkingLabels?: boolean,
+    calibration?: Calibration,
     rotation: number = 0,
     centerX: number = 0,
     centerY: number = 0
 ) => {
     if (!markingType) return;
+
+    const emphasize = isBlinkingThis(marking.label)
+        ? shouldBlinkNow(blinking!.periodMs)
+        : isSelected;
 
     // Calculate the viewport position of the marking, based on zoom level
     const origin = marking.calculateOriginViewportPosition(
@@ -374,6 +491,116 @@ export const drawMarking = (
         centerY
     );
 
+    switch (marking.markingClass) {
+        case MARKING_CLASS.POINT:
+            drawPointMarking(
+                g,
+                emphasize,
+                marking as PointMarking,
+                markingType,
+                markingViewportPosition,
+                showMarkingLabels
+            );
+            break;
+
+        case MARKING_CLASS.RAY:
+            drawRayMarking(
+                g,
+                emphasize,
+                marking as RayMarking,
+                markingType,
+                markingViewportPosition,
+                showMarkingLabels,
+                rotation
+            );
+            break;
+
+        case MARKING_CLASS.MEASUREMENT:
+            drawMeasurementMarking(
+                g,
+                emphasize,
+                marking as LineSegmentMarking,
+                markingType,
+                markingViewportPosition,
+                transformPoint(
+                    (
+                        marking as LineSegmentMarking
+                    ).calculateEndpointViewportPosition(
+                        viewportWidthRatio,
+                        viewportHeightRatio
+                    ),
+                    rotation,
+                    centerX,
+                    centerY
+                ),
+                calibration
+            );
+            break;
+
+        case MARKING_CLASS.LINE_SEGMENT:
+            drawLineSegmentMarking(
+                g,
+                emphasize,
+                marking as LineSegmentMarking,
+                markingType,
+                markingViewportPosition,
+                transformPoint(
+                    (
+                        marking as LineSegmentMarking
+                    ).calculateEndpointViewportPosition(
+                        viewportWidthRatio,
+                        viewportHeightRatio
+                    ),
+                    rotation,
+                    centerX,
+                    centerY
+                ),
+                showMarkingLabels
+            );
+            break;
+
+        case MARKING_CLASS.BOUNDING_BOX:
+            drawBoundingBoxMarking(
+                g,
+                emphasize,
+                marking as BoundingBoxMarking,
+                markingType,
+                markingViewportPosition,
+                transformPoint(
+                    (
+                        marking as BoundingBoxMarking
+                    ).calculateEndpointViewportPosition(
+                        viewportWidthRatio,
+                        viewportHeightRatio
+                    ),
+                    rotation,
+                    centerX,
+                    centerY
+                ),
+                showMarkingLabels
+            );
+            break;
+
+        case MARKING_CLASS.POLYGON:
+        case MARKING_CLASS.RECTANGLE:
+            drawPolygonMarking(
+                g,
+                emphasize,
+                marking as PolygonMarking | RectangleMarking,
+                markingType,
+                markingViewportPosition,
+                (marking as PolygonMarking | RectangleMarking)
+                    .calculatePointsViewportPosition(
+                        viewportWidthRatio,
+                        viewportHeightRatio
+                    )
+                    .map(p => transformPoint(p, rotation, centerX, centerY)),
+                showMarkingLabels
+            );
+            break;
+
+        default:
+            break;
     if (marking instanceof PointMarking) {
         drawPointMarking(
             g,

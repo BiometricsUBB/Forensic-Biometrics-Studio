@@ -140,47 +140,55 @@ export function MarkingTypesSettings() {
                                     Object.keys(
                                         MARKING_CLASS
                                     ) as (keyof typeof MARKING_CLASS)[]
-                                ).map(key => {
-                                    return (
-                                        <DropdownMenuItem
-                                            key={key}
-                                            onClick={() => {
-                                                MarkingTypesStore.actions.types.add(
-                                                    {
-                                                        id: crypto.randomUUID(),
-                                                        name: t(
-                                                            `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                            {
-                                                                ns: "object",
-                                                            }
-                                                        ),
-                                                        displayName: t(
-                                                            `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                            {
-                                                                ns: "object",
-                                                            }
-                                                        ),
-                                                        markingClass:
-                                                            MARKING_CLASS[key],
-                                                        backgroundColor:
-                                                            defaultBackgroundColor,
-                                                        textColor:
-                                                            defaultTextColor,
-                                                        size: defaultSize,
-                                                        category:
-                                                            selectedCategory!,
-                                                    }
-                                                );
-                                                emitMarkingTypesChange();
-                                            }}
-                                        >
-                                            {t(
-                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                { ns: "object" }
-                                            )}
-                                        </DropdownMenuItem>
-                                    );
-                                })}
+                                )
+                                    .filter(
+                                        key =>
+                                            MARKING_CLASS[key] !==
+                                            MARKING_CLASS.MEASUREMENT
+                                    )
+                                    .map(key => {
+                                        return (
+                                            <DropdownMenuItem
+                                                key={key}
+                                                onClick={() => {
+                                                    MarkingTypesStore.actions.types.add(
+                                                        {
+                                                            id: crypto.randomUUID(),
+                                                            name: t(
+                                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
+                                                                {
+                                                                    ns: "object",
+                                                                }
+                                                            ),
+                                                            displayName: t(
+                                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
+                                                                {
+                                                                    ns: "object",
+                                                                }
+                                                            ),
+                                                            markingClass:
+                                                                MARKING_CLASS[
+                                                                    key
+                                                                ],
+                                                            backgroundColor:
+                                                                defaultBackgroundColor,
+                                                            textColor:
+                                                                defaultTextColor,
+                                                            size: defaultSize,
+                                                            category:
+                                                                selectedCategory!,
+                                                        }
+                                                    );
+                                                    emitMarkingTypesChange();
+                                                }}
+                                            >
+                                                {t(
+                                                    `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
+                                                    { ns: "object" }
+                                                )}
+                                            </DropdownMenuItem>
+                                        );
+                                    })}
                             </DropdownMenuContent>
                         </DropdownMenuPortal>
                     </DropdownMenu>
