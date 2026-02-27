@@ -21,6 +21,15 @@ const d: Dictionary = {
         "Mark a line between two identical points on each image starting from bottom, the lower point will be the rotation anchor and the upper will be used to calculate the rotation angle",
     "Calculate and align": "Calculate and align",
     "Reset rotation panel": "Reset rotation",
+    "Toggle tracing mode": "Toggle tracing mode",
+    "Line mode instruction":
+        "Right-click to finish the current line sequence and start a new one",
+    "Save tracing data to a JSON file": "Save tracing data to a JSON file",
+    "Tracing data saved": "Tracing data saved successfully",
+    "Failed to save tracing data": "Failed to save tracing data",
+    "Load tracing data from file": "Load tracing data from file",
+    "Tracing data loaded": "Tracing data loaded successfully",
+    "Failed to load tracing data": "Failed to load tracing data",
 };
 
 export default d;

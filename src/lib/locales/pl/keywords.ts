@@ -33,6 +33,13 @@ const d: Dictionary = {
     "Themes imported successfully": "Motywy zaimportowane pomyślnie",
     "Invalid themes file": "Nieprawidłowy plik motywów",
     "Failed to import themes": "Nie udało się zaimportować motywów",
+    Free: "Odręczne",
+    Line: "Linia",
+    Color: "Kolor",
+    Opacity: "Przezroczystość",
+    Thickness: "Grubość",
+    Undo: "Cofnij",
+    Redo: "Ponów",
 };
 
 export default d;

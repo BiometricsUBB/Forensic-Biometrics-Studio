@@ -38,6 +38,9 @@ const d: Dictionary = {
     "Invalid markings data file": "Nieprawidłowy plik danych adnotacji",
     "Are you sure?": "Czy jesteś pewny?",
     Warning: "Ostrzeżenie",
+    "Invalid tracing data file": "Nieprawidłowy plik danych rysowania",
+    "Are you sure you want to load tracing data?\n\nIt will replace current drawing.":
+        "Czy na pewno chcesz wczytać dane rysowania?\n\nZastąpi one obecny rysunek.",
 };
 
 export default d;

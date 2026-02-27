@@ -22,6 +22,15 @@ const d: Dictionary = {
         "Oznacz linią dwa te same punkty na każdym obrazie rozpoczynając od dołu, dolny punkt będzie kotwicą obrotu a górny posłuży wyliczeniu kąta obrotu",
     "Calculate and align": "Oblicz i dopasuj",
     "Reset rotation panel": "Zresetuj rotację",
+    "Toggle tracing mode": "Włącz/wyłącz tryb rysowania",
+    "Line mode instruction":
+        "Prawy przycisk myszy kończy linię i pozwala zacząć kolejną",
+    "Save tracing data to a JSON file": "Zapisz dane rysowania do pliku JSON",
+    "Tracing data saved": "Dane rysowania zapisano pomyślnie",
+    "Failed to save tracing data": "Nie udało się zapisać danych rysowania",
+    "Load tracing data from file": "Wczytaj dane rysowania z pliku",
+    "Tracing data loaded": "Dane rysowania wczytano pomyślnie",
+    "Failed to load tracing data": "Nie udało się wczytać danych rysowania",
 };
 
 export default d;

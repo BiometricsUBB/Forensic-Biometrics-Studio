@@ -33,6 +33,13 @@ const d: Dictionary = {
     "Themes imported successfully": "Themes imported successfully",
     "Invalid themes file": "Invalid themes file",
     "Failed to import themes": "Failed to import themes",
+    Free: "Free",
+    Line: "Line",
+    Color: "Color",
+    Opacity: "Opacity",
+    Thickness: "Thickness",
+    Undo: "Undo",
+    Redo: "Redo",
 };
 
 export default d;

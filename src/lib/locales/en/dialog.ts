@@ -35,6 +35,9 @@ const d: Dictionary = {
     "Invalid markings data file": "Invalid markings data file",
     "Are you sure?": "Are you sure?",
     Warning: "Warning",
+    "Invalid tracing data file": "Invalid tracing data file",
+    "Are you sure you want to load tracing data?\n\nIt will replace current drawing.":
+        "Are you sure you want to load tracing data?\n\nIt will replace current drawing.",
 };
 
 export default d;
