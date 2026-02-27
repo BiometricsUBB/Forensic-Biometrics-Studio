@@ -5,7 +5,7 @@ import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { Immer, produceCallback } from "../immer.helpers";
 import { tauriStorage } from "../tauri-storage-adapter.helpers";
 
-const STORE_NAME = "toolbar-settings";
+const STORE_NAME = "toolbar-settings-v3";
 const STORE_FILE = new LazyStore(`${STORE_NAME}.dat`);
 
 export const enum CURSOR_MODES {
@@ -25,6 +25,13 @@ type Settings = {
         locked: boolean;
         scaleSync: boolean;
     };
+    tracing: {
+        isEnabled: boolean;
+        color: string;
+        opacity: number;
+        brushSize: number;
+        mode: "free" | "line";
+    };
 };
 
 type State = {
@@ -42,6 +49,13 @@ const INITIAL_STATE: State = {
         viewport: {
             locked: false,
             scaleSync: false,
+        },
+        tracing: {
+            isEnabled: false,
+            color: "#ff0000",
+            opacity: 1,
+            brushSize: 2,
+            mode: "free",
         },
     },
 };
