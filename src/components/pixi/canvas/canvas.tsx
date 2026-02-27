@@ -10,6 +10,7 @@ import { PixiApp } from "../app/app";
 import { DebugOverlay } from "../overlays/debug-overlay";
 import { MarkingOverlay } from "../overlays/marking-overlay";
 import { CrosshairOverlay } from "../overlays/crosshair-overlay";
+import { TracingOverlay } from "../overlays/tracing-overlay";
 
 function range(min: number, max: number): number[] {
     const len = max - min + 1;
@@ -51,6 +52,7 @@ export function Canvas({ options, className, ...props }: CanvasProps) {
         powerPreference: "high-performance",
         resolution: 1,
         ...options,
+        ...props,
     };
 
     if (!isFontLoaded) return null;
@@ -75,6 +77,7 @@ export function Canvas({ options, className, ...props }: CanvasProps) {
                 height={props.height ?? 0}
                 canvasMetadata={canvasMetadata}
             />
+            <TracingOverlay canvasMetadata={canvasMetadata} />
             <MarkingOverlay canvasMetadata={canvasMetadata} />
             <CrosshairOverlay canvasMetadata={canvasMetadata} />
             {isDragging && (
