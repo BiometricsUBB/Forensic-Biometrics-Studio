@@ -11,15 +11,18 @@ import {
     Save,
     FileInput,
     Info,
+    FileJson,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
-import { Button } from "@/components/ui/button";
+
 import { SplitButton } from "@/components/ui/split-button";
 import { useTranslation } from "react-i18next";
 import { loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
 import { saveMarkingsDataWithDialog } from "@/lib/utils/viewport/saveMarkingsDataWithDialog";
 import { loadMarkingsDataWithDialog } from "@/lib/utils/viewport/loadMarkingsData";
+import { saveTracingDataWithDialog } from "@/lib/utils/viewport/saveTracingDataWithDialog";
+import { loadTracingDataWithDialog } from "@/lib/utils/viewport/loadTracingDataWithDialog";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -62,18 +65,54 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
             {...props}
         >
             <div className="flex items-center gap-1.5">
-                <Button
-                    title={t("Save markings data to a JSON file", {
-                        ns: "tooltip",
-                    })}
+                <SplitButton
+                    mainAction={{
+                        label: t("Save markings data to a JSON file", {
+                            ns: "tooltip",
+                        }),
+                        icon: (
+                            <Save
+                                size={ICON.SIZE}
+                                strokeWidth={ICON.STROKE_WIDTH}
+                            />
+                        ),
+                        onClick: () => {
+                            saveMarkingsDataWithDialog(viewport);
+                        },
+                    }}
+                    dropdownActions={[
+                        {
+                            label: t("Save markings data to a JSON file", {
+                                ns: "tooltip",
+                            }),
+                            icon: (
+                                <Save
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                saveMarkingsDataWithDialog(viewport);
+                            },
+                        },
+                        {
+                            label: t("Save tracing data to a JSON file", {
+                                ns: "tooltip",
+                            }),
+                            icon: (
+                                <FileJson
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                saveTracingDataWithDialog(viewport);
+                            },
+                        },
+                    ]}
                     size="icon"
                     variant="outline"
-                    onClick={() => {
-                        saveMarkingsDataWithDialog(viewport);
-                    }}
-                >
-                    <Save size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
-                </Button>
+                />
 
                 <SplitButton
                     mainAction={{
@@ -103,6 +142,20 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                             ),
                             onClick: () => {
                                 loadMarkingsDataWithDialog(viewport);
+                            },
+                        },
+                        {
+                            label: t("Load tracing data from file", {
+                                ns: "tooltip",
+                            }),
+                            icon: (
+                                <FileInput
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                loadTracingDataWithDialog(viewport);
                             },
                         },
                     ]}
