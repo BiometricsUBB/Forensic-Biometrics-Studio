@@ -3,7 +3,6 @@ import { PDFDocument } from "pdf-lib";
 import { save } from "@tauri-apps/plugin-dialog";
 import { readFile, writeFile } from "@tauri-apps/plugin-fs";
 import { getVersion } from "@tauri-apps/api/app";
-import { join } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/core";
 import i18n from "@/lib/locales/i18n";
 import type { TFunction } from "i18next";
@@ -119,9 +118,8 @@ const getSystemId = async () => {
 const getSpritePath = async (sprite: PIXI.Sprite) => {
     // @ts-expect-error custom property
     const path = sprite.path as string | null;
-    const { name } = sprite;
-    if (!path || !name) return null;
-    return join(path, name);
+    if (!path) return null;
+    return path;
 };
 
 const getImageMeta = async (sprite: PIXI.Sprite) => {
@@ -190,6 +188,7 @@ const renderImageWithMarkings = async (
             1,
             1,
             showMarkingLabels,
+            undefined,
             0,
             width / 2,
             height / 2
@@ -345,18 +344,13 @@ const createOverviewCalloutImage = async (
 const ensureImagesLoaded = async (container: HTMLElement) => {
     const images = Array.from(container.querySelectorAll("img"));
     await Promise.all(
-        images.map(img =>
-            img.complete
-                ? Promise.resolve()
-                : new Promise<void>(resolve => {
-                      img.addEventListener("load", () => resolve(), {
-                          once: true,
-                      });
-                      img.addEventListener("error", () => resolve(), {
-                          once: true,
-                      });
-                  })
-        )
+        images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise<void>(resolve => {
+                img.addEventListener("load", () => resolve(), { once: true });
+                img.addEventListener("error", () => resolve(), { once: true });
+            });
+        })
     );
 };
 
@@ -825,9 +819,10 @@ export const generateReportPdfWithDialog = async (
                 "#7a0000"
             );
             // eslint-disable-next-line security/detect-object-injection
-            const leftCrop = detailCrops[idx]?.left;
-            // eslint-disable-next-line security/detect-object-injection
-            const rightCrop = detailCrops[idx]?.right;
+            const detailCrop = detailCrops[idx];
+            if (!detailCrop) return;
+            const leftCrop = detailCrop.left;
+            const rightCrop = detailCrop.right;
 
             const row = document.createElement("tr");
             row.innerHTML = `
@@ -865,26 +860,23 @@ export const generateReportPdfWithDialog = async (
                 )
             );
 
-            const pdfEmbeddings = await Promise.all(
-                renderedPages.map(async canvas => {
+            await renderedPages.reduce(
+                async (chainPromise, canvas) => {
+                    const chain = await chainPromise;
                     const pngBytes = canvas.toDataURL("image/png");
                     const image = await pdf.embedPng(pngBytes);
-                    return {
-                        image,
+                    const page = pdf.addPage([canvas.width, canvas.height]);
+                    page.drawImage(image, {
+                        x: 0,
+                        y: 0,
                         width: canvas.width,
                         height: canvas.height,
-                    };
-                })
+                    });
+                    chain.push(page);
+                    return chain;
+                },
+                Promise.resolve([] as ReturnType<typeof pdf.addPage>[])
             );
-            pdfEmbeddings.forEach(({ image, width, height }) => {
-                const page = pdf.addPage([width, height]);
-                page.drawImage(image, {
-                    x: 0,
-                    y: 0,
-                    width,
-                    height,
-                });
-            });
 
             stage = "save-pdf";
             const pdfBytes = await pdf.save();

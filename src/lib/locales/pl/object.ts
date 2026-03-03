@@ -15,9 +15,10 @@ const d: Dictionary = {
                     point: "Punkt",
                     ray: "Linia skierowana",
                     line_segment: "Odcinek",
-                    bounding_box: "Prostok\u0105t (legacy)",
-                    rectangle: "Prostok\u0105t",
-                    polygon: "Wielok\u0105t",
+                    bounding_box: "Prostokąt (legacy)",
+                    rectangle: "Prostokąt",
+                    polygon: "Wielokąt",
+                    measurement: "Miarka",
                 },
             },
             typeId: "ID typu",
@@ -52,6 +53,10 @@ const d: Dictionary = {
             light_blue: "Jasny niebieski",
             dark_blue: "Ciemny niebieski",
         },
+    },
+    Calibration: {
+        Unit: "Jednostka",
+        Scale: "Pikseli na jednostkę",
     },
 };
 

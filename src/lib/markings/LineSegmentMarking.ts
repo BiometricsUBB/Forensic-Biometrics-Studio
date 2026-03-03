@@ -1,27 +1,37 @@
-import { MarkingClass } from "@/lib/markings/MarkingClass";
-import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
-import { Point } from "@/lib/markings/Point";
+import { MARKING_CLASS } from "./MARKING_CLASS";
+import { MarkingClass } from "./MarkingClass";
+import { Point } from "./Point";
 
 export class LineSegmentMarking extends MarkingClass {
-    readonly markingClass = MARKING_CLASS.LINE_SEGMENT;
+    readonly markingClass: MARKING_CLASS = MARKING_CLASS.LINE_SEGMENT;
 
     constructor(
-        label: MarkingClass["label"],
-        origin: MarkingClass["origin"],
-        typeId: MarkingClass["typeId"],
+        label: number,
+        public override origin: Point, // FIX: Punkt jako DRUGI
+        typeId: string,                // FIX: Tekst jako TRZECI
         public endpoint: Point,
         ids?: string[]
     ) {
         super(label, origin, typeId, ids);
     }
 
-    public calculateEndpointViewportPosition(
-        viewportWidthRatio: number,
-        viewportHeightRatio: number
+    public override calculateOriginViewportPosition(
+        widthRatio: number,
+        heightRatio: number
     ): Point {
         return {
-            x: this.endpoint.x * viewportWidthRatio,
-            y: this.endpoint.y * viewportHeightRatio,
+            x: this.origin.x * widthRatio,
+            y: this.origin.y * heightRatio,
+        };
+    }
+
+    public calculateEndpointViewportPosition(
+        widthRatio: number,
+        heightRatio: number
+    ): Point {
+        return {
+            x: this.endpoint.x * widthRatio,
+            y: this.endpoint.y * heightRatio,
         };
     }
 }

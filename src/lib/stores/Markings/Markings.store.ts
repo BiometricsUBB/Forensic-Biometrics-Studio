@@ -5,11 +5,18 @@ import { createWithEqualityFn } from "zustand/traditional";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { Immer, produceCallback } from "../immer.helpers";
 
+export type Calibration = {
+    pixelsPerUnit: number;
+    unit: string;
+};
+
 type State = {
     markingsHash: string;
     markings: MarkingClass[];
     selectedMarkingLabel: MarkingClass["label"] | null;
     temporaryMarking: MarkingClass | null;
+    calibration: Calibration;
+    set: (callback: (state: State) => void) => void;
 };
 
 const INITIAL_STATE: State = {
@@ -17,6 +24,11 @@ const INITIAL_STATE: State = {
     temporaryMarking: null,
     selectedMarkingLabel: null,
     markings: [],
+    calibration: {
+        pixelsPerUnit: 1,
+        unit: "px",
+    },
+    set: () => {},
 };
 
 const createStore = (id: CanvasMetadata["id"]) =>

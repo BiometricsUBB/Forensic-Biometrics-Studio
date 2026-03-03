@@ -16,6 +16,7 @@ import {
     RotateCw,
     Crosshair,
     Settings,
+    Ruler,
     Eye,
     EyeOff,
 } from "lucide-react";
@@ -30,9 +31,10 @@ import {
     DropdownMenuPortal,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
-import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { MeasurementPanel } from "./measurement-panel";
 
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
@@ -360,7 +362,45 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         </span>
                     </Toggle>
 
+                    <Toggle
+                        variant="outline"
+                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        pressed={cursorMode === CURSOR_MODES.MEASUREMENT}
+                        onClick={() => {
+                            if (cursorMode === CURSOR_MODES.MEASUREMENT) {
+                                DashboardToolbarStore.actions.settings.cursor.setCursorMode(
+                                    CURSOR_MODES.SELECTION
+                                );
+                            } else {
+                                DashboardToolbarStore.actions.settings.cursor.setCursorMode(
+                                    CURSOR_MODES.MEASUREMENT
+                                );
+                            }
+                        }}
+                    >
+                        <Ruler
+                            className="flex-shrink-0"
+                            size={ICON.SIZE}
+                            strokeWidth={ICON.STROKE_WIDTH}
+                        />
+                        <span className="text-sm text-left leading-tight">
+                            {t("Mode.Measurement", { ns: "cursor" })}
+                        </span>
+                    </Toggle>
+
+                    <div
+                        className={cn(
+                            "overflow-hidden transition-all duration-300 ease-in-out",
+                            cursorMode === CURSOR_MODES.MEASUREMENT
+                                ? "max-h-96 opacity-100 mt-2"
+                                : "max-h-0 opacity-0"
+                        )}
+                    >
+                        <MeasurementPanel />
+                    </div>
+
                     <ReportDialog />
+
                     <Toggle
                         variant="outline"
                         className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
