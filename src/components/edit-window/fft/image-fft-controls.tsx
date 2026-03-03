@@ -19,17 +19,22 @@ interface ImageFftControlsProps {
     imageRef: RefObject<HTMLImageElement | null>;
     canvasRef: RefObject<HTMLCanvasElement | null>;
     onApply: (dataUrl: string) => void;
+    onWheel?: (e: WheelEvent) => void;
+    onMiddleDrag?: (dx: number, dy: number) => void;
 }
 
 export default function ImageFftControls({
     imageRef,
     canvasRef,
     onApply,
+    onWheel,
+    onMiddleDrag,
 }: ImageFftControlsProps) {
     const { t } = useTranslation(["keywords", "tooltip"]);
 
     const [active, setActive] = useState(false);
     const [brushSize, setBrushSize] = useState(30);
+    const [spectrumOpacity, setSpectrumOpacity] = useState(75);
     const [viewMode, setViewMode] = useState<FftViewMode>("edit");
     const [status, setStatus] = useState<FftStatus>("idle");
 
@@ -38,12 +43,19 @@ export default function ImageFftControls({
     const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const specCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const isDrawingRef = useRef(false);
+    const isPanningRef = useRef(false);
+    const lastPanPosRef = useRef({ x: 0, y: 0 });
     const brushSizeRef = useRef(brushSize);
+    const spectrumOpacityRef = useRef(spectrumOpacity);
     const originalDimsRef = useRef({ w: 0, h: 0 });
 
     useEffect(() => {
         brushSizeRef.current = brushSize;
     }, [brushSize]);
+
+    useEffect(() => {
+        spectrumOpacityRef.current = spectrumOpacity;
+    }, [spectrumOpacity]);
 
     /** Redraw the overlay canvas: spectrum + mask */
     const redrawOverlay = useCallback(() => {
@@ -55,7 +67,7 @@ export default function ImageFftControls({
         if (!ctx) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.globalAlpha = 0.75;
+        ctx.globalAlpha = spectrumOpacityRef.current / 100;
         ctx.drawImage(specCvs, 0, 0, canvas.width, canvas.height);
         ctx.globalAlpha = 1.0;
 
@@ -206,18 +218,62 @@ export default function ImageFftControls({
             isDrawingRef.current = false;
         };
 
+        /* Forward wheel events (zoom) and middle-button drag (pan) to parent */
+        const onWheelForward = (e: WheelEvent) => {
+            e.preventDefault();
+            onWheel?.(e);
+        };
+
+        const onMiddleDown = (e: MouseEvent) => {
+            if (e.button === 1) {
+                e.preventDefault();
+                isPanningRef.current = true;
+                lastPanPosRef.current = { x: e.clientX, y: e.clientY };
+            }
+        };
+
+        const onMiddleMove = (e: MouseEvent) => {
+            if (!isPanningRef.current) return;
+            const dx = e.clientX - lastPanPosRef.current.x;
+            const dy = e.clientY - lastPanPosRef.current.y;
+            lastPanPosRef.current = { x: e.clientX, y: e.clientY };
+            onMiddleDrag?.(dx, dy);
+        };
+
+        const onMiddleUp = (e: MouseEvent) => {
+            if (e.button === 1) isPanningRef.current = false;
+        };
+
         canvas.addEventListener("mousedown", onDown);
+        canvas.addEventListener("mousedown", onMiddleDown);
         canvas.addEventListener("mousemove", onMove);
+        canvas.addEventListener("mousemove", onMiddleMove);
         canvas.addEventListener("mouseup", onUp);
+        canvas.addEventListener("mouseup", onMiddleUp);
         canvas.addEventListener("mouseleave", onUp);
+        canvas.addEventListener("mouseleave", onMiddleUp);
+        canvas.addEventListener("wheel", onWheelForward, { passive: false });
 
         return () => {
             canvas.removeEventListener("mousedown", onDown);
+            canvas.removeEventListener("mousedown", onMiddleDown);
             canvas.removeEventListener("mousemove", onMove);
+            canvas.removeEventListener("mousemove", onMiddleMove);
             canvas.removeEventListener("mouseup", onUp);
+            canvas.removeEventListener("mouseup", onMiddleUp);
             canvas.removeEventListener("mouseleave", onUp);
+            canvas.removeEventListener("mouseleave", onMiddleUp);
+            canvas.removeEventListener("wheel", onWheelForward);
         };
-    }, [active, status, viewMode, canvasRef, redrawOverlay]);
+    }, [
+        active,
+        status,
+        viewMode,
+        canvasRef,
+        redrawOverlay,
+        onWheel,
+        onMiddleDrag,
+    ]);
 
     /** Toggle between spectrum editor and filtered preview */
     const togglePreview = useCallback(() => {
@@ -365,6 +421,29 @@ export default function ImageFftControls({
                                             parseInt(e.target.value, 10)
                                         )
                                     }
+                                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-secondary accent-primary"
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <Label
+                                    htmlFor="fft-opacity"
+                                    className="text-sm"
+                                >
+                                    {t("Opacity", { ns: "keywords" })}{" "}
+                                    {spectrumOpacity}%
+                                </Label>
+                                <input
+                                    id="fft-opacity"
+                                    type="range"
+                                    min="10"
+                                    max="100"
+                                    value={spectrumOpacity}
+                                    onChange={e => {
+                                        const v = parseInt(e.target.value, 10);
+                                        setSpectrumOpacity(v);
+                                        spectrumOpacityRef.current = v;
+                                        redrawOverlay();
+                                    }}
                                     className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-secondary accent-primary"
                                 />
                             </div>

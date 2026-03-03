@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { WindowControls } from "@/components/menu/window-controls";
 import { Menubar } from "@/components/ui/menubar";
@@ -218,6 +218,34 @@ export function EditWindow() {
     const handleMouseUp = () => {
         setIsDragging(false);
     };
+
+    /** Forward wheel events from the FFT overlay to zoom the image */
+    const fftHandleWheel = useCallback((e: WheelEvent) => {
+        if (!containerRef.current || !imageRef.current) return;
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        setZoom(prev => {
+            const newZoom = Math.max(0.1, Math.min(10, prev * delta));
+            const containerRect = containerRef.current!.getBoundingClientRect();
+            const cx = containerRect.width / 2;
+            const cy = containerRect.height / 2;
+            const mx = e.clientX - containerRect.left;
+            const my = e.clientY - containerRect.top;
+            setPan(p => {
+                const imgX = (mx - cx - p.x) / prev;
+                const imgY = (my - cy - p.y) / prev;
+                return {
+                    x: mx - cx - imgX * newZoom,
+                    y: my - cy - imgY * newZoom,
+                };
+            });
+            return newZoom;
+        });
+    }, []);
+
+    /** Forward middle-button drag from FFT overlay to pan the image */
+    const fftHandleMiddleDrag = useCallback((dx: number, dy: number) => {
+        setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+    }, []);
 
     const handleDoubleClick = () => {
         setZoom(1);
@@ -654,6 +682,8 @@ export function EditWindow() {
                                 }
                                 setImageUrl(dataUrl);
                             }}
+                            onWheel={fftHandleWheel}
+                            onMiddleDrag={fftHandleMiddleDrag}
                         />
                     </div>
                 </div>
