@@ -72,6 +72,8 @@ const d: Dictionary = {
     "Brush size": "Brush size",
     Preview: "Preview",
     Edit: "Edit",
+    Apply: "Apply",
+    Clear: "Clear",
 };
 
 export default d;

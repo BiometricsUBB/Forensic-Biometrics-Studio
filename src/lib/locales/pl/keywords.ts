@@ -72,6 +72,8 @@ const d: Dictionary = {
     "Brush size": "Wielkość pędzla",
     Preview: "Podgląd",
     Edit: "Edycja",
+    Apply: "Zastosuj",
+    Clear: "Wyczyść",
 };
 
 export default d;

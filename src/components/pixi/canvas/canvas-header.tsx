@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils/shadcn";
-import { HTMLAttributes, useState } from "react";
+import { HTMLAttributes } from "react";
 import { CanvasToolbarStore } from "@/lib/stores/CanvasToolbar";
 import {
     Eye,
@@ -17,10 +17,7 @@ import {
     RotateCcw,
     RefreshCw,
     Wand2,
-    Waves,
 } from "lucide-react";
-import { readFile } from "@tauri-apps/plugin-fs";
-import { FftEditor } from "@/components/FftEditor";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
@@ -71,28 +68,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
     const ROTATION_STEP = (5 * Math.PI) / 180;
 
     const viewport = useGlobalViewport(id, { autoUpdate: true });
-
-    const [fftImage, setFftImage] = useState<string | null>(null);
-
-    const openFftEditor = async () => {
-        const sprite = viewport?.children.find(x => x instanceof Sprite) as
-            | (Sprite & { path?: string })
-            | undefined;
-        if (!sprite?.path) return;
-        try {
-            const bytes = await readFile(sprite.path);
-            const blob = new Blob([bytes]);
-            const reader = new FileReader();
-            reader.onload = () => {
-                if (typeof reader.result === "string") {
-                    setFftImage(reader.result);
-                }
-            };
-            reader.readAsDataURL(blob);
-        } catch (e) {
-            console.error("Failed to load image for FFT:", e);
-        }
-    };
 
     if (viewport === null) return null;
 
@@ -323,15 +298,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
             </div>
 
             <div className="flex items-center gap-1.5">
-                <Button
-                    title={t("FFT Filter", { ns: "tooltip" })}
-                    size="icon"
-                    variant="outline"
-                    disabled={!viewport.children.find(x => x instanceof Sprite)}
-                    onClick={openFftEditor}
-                >
-                    <Waves size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
-                </Button>
                 <Toggle
                     variant="outline"
                     title={t("Edit mode", {
@@ -397,14 +363,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                     <Info size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
                 </Toggle>
             </div>
-
-            {fftImage && (
-                <FftEditor
-                    imageSrc={fftImage}
-                    onClose={() => setFftImage(null)}
-                    onSave={() => setFftImage(null)}
-                />
-            )}
         </div>
     );
 }

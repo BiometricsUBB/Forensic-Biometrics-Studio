@@ -81,6 +81,8 @@ export type i18nKeywords = Recordify<
     | "Brush size"
     | "Preview"
     | "Edit"
+    | "Apply"
+    | "Clear"
 >;
 
 export type i18nDescription = Recordify<

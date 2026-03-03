@@ -14,6 +14,7 @@ import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
+import ImageFftControls from "@/components/edit-window/fft/image-fft-controls";
 
 export function EditWindow() {
     const { t } = useTranslation(["tooltip", "keywords"]);
@@ -39,6 +40,9 @@ export function EditWindow() {
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const fftCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+    const TRANSFORM_ORIGIN = "center center";
 
     const findUniqueFilePath = async (
         directory: string,
@@ -314,6 +318,37 @@ export function EditWindow() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageUrl]);
 
+    /* Sync FFT canvas CSS position to the image (without clearing internal dims) */
+    useEffect(() => {
+        const img = imageRef.current;
+        const fftCanvas = fftCanvasRef.current;
+        if (!img || !fftCanvas) return undefined;
+
+        const syncFft = () => {
+            requestAnimationFrame(() => {
+                if (!fftCanvas || !img) return;
+                Object.assign(fftCanvas.style, {
+                    width: `${img.width}px`,
+                    height: `${img.height}px`,
+                    position: "absolute",
+                    zIndex: "11",
+                });
+            });
+        };
+
+        const resizeObserver = new ResizeObserver(syncFft);
+        resizeObserver.observe(img);
+
+        if (img.complete) syncFft();
+        img.addEventListener("load", syncFft);
+
+        return () => {
+            resizeObserver.disconnect();
+            img.removeEventListener("load", syncFft);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageUrl]);
+
     const saveEditedImage = async () => {
         if (!imageUrl || !imagePath) {
             return;
@@ -445,7 +480,7 @@ export function EditWindow() {
                                 style={{
                                     filter: `brightness(${brightness / 100}) contrast(${contrast / 100})`,
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: "center center",
+                                    transformOrigin: TRANSFORM_ORIGIN,
                                     transition: isDragging
                                         ? "none"
                                         : "transform 0.1s ease-out",
@@ -457,7 +492,18 @@ export function EditWindow() {
                                 className="absolute pointer-events-none"
                                 style={{
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: "center center",
+                                    transformOrigin: TRANSFORM_ORIGIN,
+                                }}
+                            />
+                            <canvas
+                                ref={fftCanvasRef}
+                                className="absolute pointer-events-none"
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transformOrigin: TRANSFORM_ORIGIN,
+                                    transition: isDragging
+                                        ? "none"
+                                        : "transform 0.1s ease-out",
                                 }}
                             />
                             {zoom !== 1 && (
@@ -590,6 +636,24 @@ export function EditWindow() {
                         <ImageDpiControls
                             imageRef={imageRef}
                             canvasRef={canvasRef}
+                        />
+                    </div>
+
+                    <div className="border-t border-border/30" />
+
+                    <div className="flex flex-col gap-2">
+                        <h3 className="text-sm font-semibold text-muted-foreground">
+                            FFT
+                        </h3>
+                        <ImageFftControls
+                            imageRef={imageRef}
+                            canvasRef={fftCanvasRef}
+                            onApply={dataUrl => {
+                                if (imageUrl && imageUrl.startsWith("blob:")) {
+                                    URL.revokeObjectURL(imageUrl);
+                                }
+                                setImageUrl(dataUrl);
+                            }}
                         />
                     </div>
                 </div>
