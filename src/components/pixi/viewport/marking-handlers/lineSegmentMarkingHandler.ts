@@ -3,14 +3,13 @@ import { MarkingHandler } from "@/components/pixi/viewport/marking-handlers/mark
 import { FederatedPointerEvent } from "pixi.js";
 import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { getNormalizedMousePosition } from "@/components/pixi/viewport/event-handlers/utils";
-import { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
+import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
 
 export class LineSegmentMarkingHandler extends MarkingHandler {
     private stage: 1 | 2 = 1;
-
     private canvasId: CANVAS_ID;
 
     constructor(
@@ -32,6 +31,8 @@ export class LineSegmentMarkingHandler extends MarkingHandler {
             rotation,
             viewport
         );
+
+        // FIX: Kolejność (label, POS, typeId, POS)
         markingsStore.actions.temporaryMarking.setTemporaryMarking(
             new LineSegmentMarking(label, pos, this.typeId, pos)
         );
@@ -59,14 +60,10 @@ export class LineSegmentMarkingHandler extends MarkingHandler {
 
     handleLMBUp(e: FederatedPointerEvent) {
         const { cachedViewportStore } = this.plugin.handlerParams;
-
         if (this.stage === 1) {
             this.stage = 2;
             cachedViewportStore.actions.viewport.setRayPosition(
-                getNormalizedMousePosition(
-                    e,
-                    this.plugin.handlerParams.viewport
-                )
+                getNormalizedMousePosition(e, this.plugin.handlerParams.viewport)
             );
         }
     }

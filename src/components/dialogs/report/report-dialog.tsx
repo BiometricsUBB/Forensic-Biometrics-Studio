@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
-import { X } from "lucide-react";
+import { FileText, X } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
@@ -140,12 +140,18 @@ export function ReportDialog({ className }: ReportDialogProps) {
                 className={cn(
                     "w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3 border border-input rounded-md",
                     "hover:bg-accent hover:text-accent-foreground transition-colors",
+                    "flex items-center",
                     className
                 )}
                 onClick={() => setIsOpen(true)}
                 disabled={!canGenerate}
                 title={generateReportLabel}
             >
+                <FileText
+                    className="flex-shrink-0"
+                    size={ICON.SIZE}
+                    strokeWidth={ICON.STROKE_WIDTH}
+                />
                 <span className="text-sm text-left leading-tight">
                     {generateReportLabel}
                 </span>

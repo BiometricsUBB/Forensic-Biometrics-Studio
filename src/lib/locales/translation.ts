@@ -21,6 +21,8 @@ export type i18nKeywords = Recordify<
     | "Remove"
     | "Add"
     | "Tools"
+    | "Edit Image"
+    | "Adjustments"
     | "About"
     | "Version"
     | "Description"
@@ -80,7 +82,7 @@ export type i18nDescription = Recordify<
 export type i18nModes = Recordify<WORKING_MODE>;
 
 export type i18nCursor = {
-    Mode: Recordify<"Selection" | "Marking" | "Rotation">;
+    Mode: Recordify<"Selection" | "Marking" | "Rotation" | "Measurement">;
 };
 
 export type i18nObject = {
@@ -117,6 +119,10 @@ export type i18nObject = {
         Name: string;
         Keys: Recordify<THEMES>;
     };
+    Calibration: {
+        Unit: string;
+        Scale: string;
+    };
 };
 
 export type i18nTooltip = Recordify<
@@ -131,14 +137,25 @@ export type i18nTooltip = Recordify<
     | "Toggle scale mode"
     | "Toggle marking labels"
     | "Toggle viewport information"
+    | "Edit mode"
     | "Export marking types"
     | "Import marking types"
     | "Markings data saved"
     | "Failed to save markings data"
+    | "Image saved successfully"
+    | "Failed to save image: {{error}}"
+    | "Image saved successfully, but could not be reloaded due to path restrictions"
+    | "Save"
     | "Auto rotate"
     | "Rotation instructions"
     | "Calculate and align"
     | "Reset rotation panel"
+    | "Measurement instructions"
+    | "Clear measurement"
+    | "Brightness"
+    | "Contrast"
+    | "Reset Zoom"
+    | "ImageLoadPermissionError"
     | "Generate report"
     | "Report generated"
     | "Failed to generate report"

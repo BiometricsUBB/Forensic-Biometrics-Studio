@@ -18,6 +18,7 @@ const d: Dictionary = {
                     bounding_box: "Bounding box (legacy)",
                     rectangle: "Rectangle",
                     polygon: "Polygon",
+                    measurement: "Measurement / Ruler",
                 },
             },
             typeId: "Type ID",
@@ -52,6 +53,10 @@ const d: Dictionary = {
             light_blue: "Light blue",
             dark_blue: "Dark blue",
         },
+    },
+    Calibration: {
+        Unit: "Unit name",
+        Scale: "Pixels per unit",
     },
 };
 

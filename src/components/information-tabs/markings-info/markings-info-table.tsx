@@ -144,6 +144,14 @@ function SortingIndicator({ isSorted }: { isSorted: SortDirection | false }) {
     );
 }
 
+function FixedFooter() {
+    return (
+        <TableRow className="h-8 border-0">
+            <TableCell className="p-0 border-0" />
+        </TableRow>
+    );
+}
+
 interface MarkingsInfoTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     selectedMarking: MarkingsState["selectedMarkingLabel"];
@@ -271,6 +279,7 @@ export const MarkingsInfoTable = function <TData, TValue>({
                     </TableRow>
                 ))
             }
+            fixedFooterContent={FixedFooter}
         />
     );
 };
