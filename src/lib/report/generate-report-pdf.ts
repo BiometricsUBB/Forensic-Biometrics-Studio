@@ -904,3 +904,4 @@ export const generateReportPdfWithDialog = async (
         throw new Error(`Report failed at ${stage}: ${message}`);
     }
 };
+/* eslint-enable sonarjs/cognitive-complexity */
