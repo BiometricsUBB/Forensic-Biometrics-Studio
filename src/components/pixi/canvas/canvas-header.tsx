@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
-
+import { Button } from "@/components/ui/button";
 import { SplitButton } from "@/components/ui/split-button";
 import { useTranslation } from "react-i18next";
 import { loadImageWithDialog } from "@/lib/utils/viewport/loadImage";
@@ -167,15 +167,16 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 ns: "tooltip",
                             }),
                             icon: (
-                                <FileInput                                     size={ICON.SIZE}
+                                <FileInput
+                                    size={ICON.SIZE}
                                     strokeWidth={ICON.STROKE_WIDTH}
                                 />
                             ),
-                             onClick: () => {
+                            onClick: () => {
                                 loadTracingDataWithDialog(viewport);
-                             },
+                            },
                         },
-                  {
+                        {
                             label: "Auto-mark (SourceAFIS)",
                             icon: (
                                 <Wand2
@@ -276,7 +277,7 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                     />
                 </Button>
 
-                <span className="text-xs font-mono min-w-[3rem] text-center tabular-nums">
+                <span className="text-xs font-mono min-w-[2rem] text-center tabular-nums">
                     {rotationDeg}&deg;
                 </span>
 

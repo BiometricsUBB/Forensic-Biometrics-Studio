@@ -3,9 +3,14 @@ import * as PIXI from "pixi.js";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { TracingPath, TracingStore } from "@/lib/stores/Tracing/Tracing.store";
 import { DashboardToolbarStore } from "@/lib/stores/DashboardToolbar";
+import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CanvasMetadata } from "../canvas/hooks/useCanvasContext";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { getViewportPosition } from "./utils/get-viewport-local-position";
+import {
+    getAdjustedPosition,
+    getImageCenter,
+} from "../viewport/utils/transform-point";
 
 // Simple ID generator to avoid crypto issues
 const generateId = () =>
@@ -62,6 +67,8 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
                 }
         );
 
+    const rotation = RotationStore(canvasId).use(state => state.rotation);
+
     const tracingStore = TracingStore(canvasId);
 
     const { paths } = tracingStore(state => ({ paths: state.paths }));
@@ -104,7 +111,13 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
             // Prevent viewport dragging when drawing
             viewport.plugins.pause("drag");
 
-            const point = viewport.toLocal(e.global);
+            const rawPoint = viewport.toLocal(e.global);
+            const { rotation: currentRotation } = RotationStore(canvasId).state;
+            const point = getAdjustedPosition(
+                rawPoint,
+                currentRotation,
+                viewport
+            );
             let startPoint = { x: point.x, y: point.y };
 
             // For Line mode, check if we can continue from the last path
@@ -160,7 +173,13 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
         (e: PIXI.FederatedPointerEvent): void => {
             if (!isEnabled || !currentPathId || !viewport) return;
 
-            const point = viewport.toLocal(e.global);
+            const rawPoint = viewport.toLocal(e.global);
+            const { rotation: currentRotation } = RotationStore(canvasId).state;
+            const point = getAdjustedPosition(
+                rawPoint,
+                currentRotation,
+                viewport
+            );
 
             tracingStore.getState().set(state => {
                 const path = state.paths.find(p => p.id === currentPathId);
@@ -179,7 +198,7 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
                 }
             });
         },
-        [isEnabled, currentPathId, viewport, mode, tracingStore]
+        [isEnabled, currentPathId, viewport, mode, tracingStore, canvasId]
     );
 
     const onPointerUp = useCallback((): void => {
@@ -189,6 +208,8 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
     }, [isEnabled, viewport]);
 
     if (!viewport) return null;
+
+    const imageCenter = getImageCenter(viewport);
 
     return (
         <Container
@@ -211,9 +232,15 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
                 }}
             />
 
-            {paths.map(path => (
-                <PathGraphics key={path.id} path={path} />
-            ))}
+            <Container
+                rotation={rotation}
+                pivot={imageCenter}
+                position={imageCenter}
+            >
+                {paths.map(path => (
+                    <PathGraphics key={path.id} path={path} />
+                ))}
+            </Container>
         </Container>
     );
 }
