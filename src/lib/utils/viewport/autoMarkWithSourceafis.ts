@@ -57,11 +57,10 @@ function getImagePathFromViewport(viewport: Viewport): string {
 
     // @ts-expect-error custom property should exist
     const spritePath: string | null = sprite.path ?? null;
-    const spriteName: string | null = sprite.name ?? null;
 
-    if (!spriteName) throw new Error("Image filename not available");
+    if (!spritePath) throw new Error("Image filename not available");
 
-    return spritePath ? `${spritePath}/${spriteName}` : spriteName;
+    return spritePath;
 }
 
 // eslint-disable-next-line sonarjs/cognitive-complexity
