@@ -1,6 +1,6 @@
 import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils/shadcn";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useEffect, useMemo } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 import {
@@ -42,6 +42,10 @@ export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
 export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const { t } = useTranslation();
+    const collapsiblePanelTransitionClass =
+        "overflow-hidden transition-all duration-300 ease-in-out";
+    const collapsiblePanelExpandedClass = "max-h-96 opacity-100 mt-2";
+    const collapsiblePanelCollapsedClass = "max-h-0 opacity-0";
 
     const { mode: cursorMode } = DashboardToolbarStore.use(
         state => state.settings.cursor
@@ -53,10 +57,19 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
         rotationSync: isRotationSync,
     } = DashboardToolbarStore.use(state => state.settings.viewport);
 
-    const availableMarkingTypes = MarkingTypesStore.use(state => state.types);
+    const allMarkingTypes = MarkingTypesStore.use(state => state.types);
+    const selectedTypeId = MarkingTypesStore.use(state => state.selectedTypeId);
     const hiddenTypes = MarkingTypesStore.use(state => state.hiddenTypes);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
+
+    const availableMarkingTypes = useMemo(
+        () =>
+            workingMode
+                ? allMarkingTypes.filter(type => type.category === workingMode)
+                : [],
+        [allMarkingTypes, workingMode]
+    );
 
     const openTypesSettings = async () => {
         try {
@@ -70,9 +83,24 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
         }
     };
 
-    const selectedMarkingType = MarkingTypesStore.use(state =>
-        state.types.find(t => t.id === state.selectedTypeId)
+    const selectedMarkingType = useMemo(
+        () => availableMarkingTypes.find(type => type.id === selectedTypeId),
+        [availableMarkingTypes, selectedTypeId]
     );
+
+    useEffect(() => {
+        if (!selectedTypeId) {
+            return;
+        }
+
+        const selectedTypeExistsInCurrentMode = availableMarkingTypes.some(
+            type => type.id === selectedTypeId
+        );
+
+        if (!selectedTypeExistsInCurrentMode) {
+            MarkingTypesStore.actions.selectedType.set(null);
+        }
+    }, [availableMarkingTypes, selectedTypeId]);
 
     return (
         <div
@@ -167,10 +195,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                 <div
                     className={cn(
-                        "overflow-hidden transition-all duration-300 ease-in-out",
+                        collapsiblePanelTransitionClass,
                         cursorMode === CURSOR_MODES.AUTOROTATE
-                            ? "max-h-96 opacity-100 mt-2"
-                            : "max-h-0 opacity-0"
+                            ? collapsiblePanelExpandedClass
+                            : collapsiblePanelCollapsedClass
                     )}
                 >
                     <RotationPanel />
@@ -178,10 +206,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                 <div
                     className={cn(
-                        "overflow-hidden transition-all duration-300 ease-in-out",
+                        collapsiblePanelTransitionClass,
                         cursorMode === CURSOR_MODES.TRACING
-                            ? "max-h-96 opacity-100 mt-2"
-                            : "max-h-0 opacity-0"
+                            ? collapsiblePanelExpandedClass
+                            : collapsiblePanelCollapsedClass
                     )}
                 >
                     <TracingPanel />
@@ -312,7 +340,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         />
                     </DropdownMenuTrigger>
                     <DropdownMenuPortal>
-                        <DropdownMenuContent className="max-h-[50vh] overflow-y-auto z-[9999] min-w-[200px]">
+                        <DropdownMenuContent
+                            align="start"
+                            className="max-h-[50vh] overflow-y-auto z-[9999] !min-w-0 w-[var(--radix-dropdown-menu-trigger-width)]"
+                        >
                             {availableMarkingTypes.map(type => (
                                 <DropdownMenuItem
                                     key={type.id}
@@ -421,10 +452,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                     <div
                         className={cn(
-                            "overflow-hidden transition-all duration-300 ease-in-out",
+                            collapsiblePanelTransitionClass,
                             cursorMode === CURSOR_MODES.MEASUREMENT
-                                ? "max-h-96 opacity-100 mt-2"
-                                : "max-h-0 opacity-0"
+                                ? collapsiblePanelExpandedClass
+                                : collapsiblePanelCollapsedClass
                         )}
                     >
                         <MeasurementPanel />
