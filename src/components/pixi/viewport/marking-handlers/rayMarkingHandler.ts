@@ -86,7 +86,7 @@ export class RayMarkingHandler extends MarkingHandler {
     handleLMBDown() {
         if (this.stage === 2) {
             const { markingsStore } = this.plugin.handlerParams;
-            markingsStore.actions.markings.addOne(
+            this.addMarkingWithHistory(
                 markingsStore.state.temporaryMarking as RayMarking
             );
             this.cleanup();

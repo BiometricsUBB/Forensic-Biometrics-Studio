@@ -12,6 +12,11 @@ import { useCallback, useMemo } from "react";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
+import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
+import {
+    MergeMarkingsCommand,
+    RemoveMarkingCommand,
+} from "@/lib/stores/History/MarkingCommands";
 
 /* eslint-disable sonarjs/no-duplicated-branches */
 export type EmptyMarking = {
@@ -51,7 +56,12 @@ export const useColumns = (
 
     const handleRemoveClick = useCallback(
         (marking: MarkingClass) => {
-            MarkingsStore(id).actions.markings.removeOneByLabel(marking.label);
+            GlobalHistoryManager.executeCommand(
+                new RemoveMarkingCommand(
+                    MarkingsStore(id).actions.markings,
+                    marking
+                )
+            );
         },
         [id]
     );
@@ -67,10 +77,13 @@ export const useColumns = (
             if (!pendingSel) {
                 GlobalStateStore.actions.merge.setPending(current);
             } else if (pendingSel.canvasId !== id) {
-                MarkingsStore(pendingSel.canvasId).actions.markings.mergePair(
-                    pendingSel.label,
-                    id,
-                    marking.label
+                GlobalHistoryManager.executeCommand(
+                    new MergeMarkingsCommand(
+                        MarkingsStore(pendingSel.canvasId).actions.markings,
+                        pendingSel.label,
+                        id,
+                        marking.label
+                    )
                 );
                 GlobalStateStore.actions.merge.setPending(null);
             } else {

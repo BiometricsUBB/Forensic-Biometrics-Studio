@@ -10,6 +10,7 @@ import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-
 
 export class MeasurementMarkingHandler extends MarkingHandler {
     private stage: 1 | 2 = 1;
+
     private canvasId: CANVAS_ID;
 
     constructor(
@@ -74,7 +75,7 @@ export class MeasurementMarkingHandler extends MarkingHandler {
     handleLMBDown() {
         if (this.stage === 2) {
             const { markingsStore } = this.plugin.handlerParams;
-            markingsStore.actions.markings.addOne(
+            this.addMarkingWithHistory(
                 markingsStore.state.temporaryMarking as MeasurementMarking
             );
             this.cleanup();

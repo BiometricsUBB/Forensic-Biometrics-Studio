@@ -3,7 +3,7 @@ import { MarkingHandler } from "@/components/pixi/viewport/marking-handlers/mark
 import { FederatedPointerEvent } from "pixi.js";
 import { PointMarking } from "@/lib/markings/PointMarking";
 import { getNormalizedMousePosition } from "@/components/pixi/viewport/event-handlers/utils";
-import  type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
+import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
@@ -52,7 +52,7 @@ export class PointMarkingHandler extends MarkingHandler {
 
     handleLMBUp() {
         const { markingsStore } = this.plugin.handlerParams;
-        markingsStore.actions.markings.addOne(
+        this.addMarkingWithHistory(
             markingsStore.state.temporaryMarking as PointMarking
         );
         this.cleanup();

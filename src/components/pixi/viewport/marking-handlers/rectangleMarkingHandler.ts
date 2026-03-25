@@ -98,7 +98,7 @@ export class RectangleMarkingHandler extends MarkingHandler {
             ),
         ];
 
-        markingsStore.actions.markings.addOne(
+        this.addMarkingWithHistory(
             new RectangleMarking(
                 markingsStore.state.temporaryMarking!.label,
                 adjustedOrigin,

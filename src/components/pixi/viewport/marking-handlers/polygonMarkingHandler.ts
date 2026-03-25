@@ -89,7 +89,7 @@ export class PolygonMarkingHandler extends MarkingHandler {
                 markingsStore.state.temporaryMarking!.typeId,
                 this.points
             );
-            markingsStore.actions.markings.addOne(updatedMarking);
+            this.addMarkingWithHistory(updatedMarking);
             this.cleanup();
         } else {
             this.points.push(pos);

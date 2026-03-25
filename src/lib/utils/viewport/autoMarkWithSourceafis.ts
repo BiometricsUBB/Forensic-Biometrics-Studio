@@ -12,6 +12,8 @@ import {
 import { RayMarking } from "@/lib/markings/RayMarking";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
+import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
 
 const TYPE_ID_RIDGE_ENDING = "e6cbde52-5a18-4236-8287-7a1daf941ba9";
 const TYPE_ID_BIFURCATION = "f47c4b97-2d62-4959-aa21-edebfa7a756a";
@@ -153,7 +155,9 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
             }
             const angleRad = minutia.direction - Math.PI / 2;
             const m = new RayMarking(label, origin, typeId, angleRad);
-            markingsStore.actions.markings.addOne(m);
+            GlobalHistoryManager.executeCommand(
+                new AddOrUpdateMarkingCommand(markingsStore.actions.markings, m)
+            );
         }
         // eslint-disable-next-line no-console
         console.log(`Added ${minutiae.length} markings`);

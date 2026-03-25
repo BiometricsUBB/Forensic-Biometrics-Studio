@@ -7,6 +7,7 @@ import {
 } from "../stores/DashboardToolbar";
 import { CUSTOM_GLOBAL_EVENTS } from "../utils/const";
 import { useKeyDown } from "./useKeyDown";
+import { GlobalHistoryManager } from "../stores/History/HistoryManager";
 
 export const useKeyboardShortcuts = () => {
     const { actions } = DashboardToolbarStore;
@@ -75,4 +76,20 @@ export const useKeyboardShortcuts = () => {
     useKeyDown(() => {
         toggleLockScaleSync();
     }, ["m"]);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.undo();
+    }, ["Control", "z"]);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.undo();
+    }, ["Meta", "z"]);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.redo();
+    }, ["Control", "y"]);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.redo();
+    }, ["Meta", "Shift", "z"]);
 };

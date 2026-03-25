@@ -57,7 +57,7 @@ export class BoundingBoxMarkingHandler extends MarkingHandler {
 
     handleLMBDown() {
         const { markingsStore } = this.plugin.handlerParams;
-        markingsStore.actions.markings.addOne(
+        this.addMarkingWithHistory(
             markingsStore.state.temporaryMarking as BoundingBoxMarking
         );
         this.cleanup();

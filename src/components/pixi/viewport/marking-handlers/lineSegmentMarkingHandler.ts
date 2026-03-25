@@ -10,6 +10,7 @@ import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-
 
 export class LineSegmentMarkingHandler extends MarkingHandler {
     private stage: 1 | 2 = 1;
+
     private canvasId: CANVAS_ID;
 
     constructor(
@@ -63,7 +64,10 @@ export class LineSegmentMarkingHandler extends MarkingHandler {
         if (this.stage === 1) {
             this.stage = 2;
             cachedViewportStore.actions.viewport.setRayPosition(
-                getNormalizedMousePosition(e, this.plugin.handlerParams.viewport)
+                getNormalizedMousePosition(
+                    e,
+                    this.plugin.handlerParams.viewport
+                )
             );
         }
     }
@@ -71,7 +75,7 @@ export class LineSegmentMarkingHandler extends MarkingHandler {
     handleLMBDown() {
         if (this.stage === 2) {
             const { markingsStore } = this.plugin.handlerParams;
-            markingsStore.actions.markings.addOne(
+            this.addMarkingWithHistory(
                 markingsStore.state.temporaryMarking as LineSegmentMarking
             );
             this.cleanup();

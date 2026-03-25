@@ -1,11 +1,18 @@
 /* eslint-disable max-classes-per-file */
-import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
-import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
+import { GlobalStateStore } from "@/lib/stores/GlobalState";
+import { MarkingClass } from "@/lib/markings/MarkingClass";
+import { PointMarking } from "@/lib/markings/PointMarking";
+import { RayMarking } from "@/lib/markings/RayMarking";
+import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
+import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
+import { PolygonMarking } from "@/lib/markings/PolygonMarking";
+import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { MeasurementMarking } from "@/lib/markings/MeasurementMarking";
 import { Command } from "./Command";
-import { MarkingsStore } from "../Markings/Markings"; // ???????????????
+import { MarkingsStore } from "../Markings/Markings";
 
-interface MarkingActions {
+type MarkingActions = {
     addOne: (marking: MarkingClass) => void;
     removeOneByLabel: (label: number) => void;
     mergePair: (
@@ -13,215 +20,202 @@ interface MarkingActions {
         otherCanvasId: CANVAS_ID,
         otherLabel: number
     ) => void;
-    unmergePair: (
-        localLabel: number,
-        localIds: string[],
-        otherCanvasId: CANVAS_ID,
-        otherLabel: number,
-        otherIds: string[]
-    ) => void;
-}
-
-export class AddOrUpdateMarkingCommand implements Command {
-    // eslint-disable-next-line no-useless-constructor, @typescript-eslint/no-empty-function
-    constructor(
-        private actions: MarkingActions,
-        private marking: MarkingClass,
-        private oldMarking?: MarkingClass
-    ) {
-        // empty
-    }
-
-    execute() {
-        this.actions.addOne(this.marking);
-    }
-
-    unExecute() {
-        if (this.oldMarking) {
-            this.actions.addOne(this.oldMarking);
-        } else {
-            this.actions.removeOneByLabel(this.marking.label);
-        }
-    }
-}
-
-type LabelSnapshot = {
-    canvasId: CANVAS_ID;
-    markingId: string;
-    label: number;
 };
 
-export class RemoveMarkingCommand {
-    private readonly marking: MarkingClass;
+type MarkingsSnapshot = {
+    left: MarkingClass[];
+    right: MarkingClass[];
+    leftSelectedMarkingLabel: number | null;
+    rightSelectedMarkingLabel: number | null;
+};
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private readonly storeActions: any;
+const cloneMarking = (marking: MarkingClass): MarkingClass => {
+    const clonedOrigin = { ...marking.origin };
+    const clonedIds = [...marking.ids];
 
-    private labelsBackup: LabelSnapshot[] | null = null;
-
-    constructor(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        storeActions: any,
-        marking: MarkingClass,
-        canvasId: CANVAS_ID
-    ) {
-        this.storeActions = storeActions;
-        this.marking = marking;
-
-        const oppositeId = getOppositeCanvasId(canvasId);
-        const oppositeStore = MarkingsStore(oppositeId);
-
-        const existsOnOpposite = oppositeStore.state.markings.some(
-            m => m.label === marking.label
+    if (marking instanceof PointMarking) {
+        return new PointMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            clonedIds
         );
-
-        if (!existsOnOpposite) {
-            this.labelsBackup = [];
-
-            const leftStore = MarkingsStore(CANVAS_ID.LEFT);
-            const rightStore = MarkingsStore(CANVAS_ID.RIGHT);
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const saveState = (store: any, cId: CANVAS_ID) => {
-                store.state.markings.forEach((m: MarkingClass) => {
-                    if (
-                        m.label !== marking.label &&
-                        m.ids &&
-                        m.ids.length > 0
-                    ) {
-                        this.labelsBackup?.push({
-                            canvasId: cId,
-                            markingId: m.ids[0]!,
-                            label: m.label,
-                        });
-                    }
-                });
-            };
-
-            saveState(leftStore, CANVAS_ID.LEFT);
-            saveState(rightStore, CANVAS_ID.RIGHT);
-        }
     }
 
-    execute() {
-        this.storeActions.removeOneByLabel(this.marking.label);
+    if (marking instanceof RayMarking) {
+        return new RayMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            marking.angleRad,
+            clonedIds
+        );
     }
 
-    unExecute() {
-        if (this.labelsBackup && this.labelsBackup.length > 0) {
-            const leftStore = MarkingsStore(CANVAS_ID.LEFT);
-            const rightStore = MarkingsStore(CANVAS_ID.RIGHT);
+    if (marking instanceof MeasurementMarking) {
+        return new MeasurementMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            { ...marking.endpoint },
+            clonedIds
+        );
+    }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const restore = (store: any, cId: CANVAS_ID) => {
-                store.setMarkingsAndUpdateHash((markings: MarkingClass[]) => {
-                    markings.forEach(m => {
-                        const backup = this.labelsBackup?.find(
-                            b => b.canvasId === cId && b.markingId === m.ids[0]
-                        );
+    if (marking instanceof LineSegmentMarking) {
+        return new LineSegmentMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            { ...marking.endpoint },
+            clonedIds
+        );
+    }
 
-                        if (backup) {
-                            // eslint-disable-next-line no-param-reassign
-                            m.label = backup.label;
-                        }
-                    });
-                    return markings;
-                });
-            };
+    if (marking instanceof BoundingBoxMarking) {
+        return new BoundingBoxMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            { ...marking.endpoint },
+            clonedIds
+        );
+    }
 
-            restore(leftStore, CANVAS_ID.LEFT);
-            restore(rightStore, CANVAS_ID.RIGHT);
+    if (marking instanceof PolygonMarking) {
+        return new PolygonMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            marking.points.map(point => ({ ...point })),
+            clonedIds
+        );
+    }
 
-            leftStore.actions.labelGenerator.reset();
-            rightStore.actions.labelGenerator.reset();
+    if (marking instanceof RectangleMarking) {
+        return new RectangleMarking(
+            marking.label,
+            clonedOrigin,
+            marking.typeId,
+            marking.points.map(point => ({ ...point })),
+            clonedIds
+        );
+    }
+
+    return marking;
+};
+
+const cloneMarkings = (markings: MarkingClass[]): MarkingClass[] =>
+    markings.map(cloneMarking);
+
+const getSnapshot = (): MarkingsSnapshot => {
+    const leftStore = MarkingsStore(CANVAS_ID.LEFT);
+    const rightStore = MarkingsStore(CANVAS_ID.RIGHT);
+
+    return {
+        left: cloneMarkings(leftStore.state.markings),
+        right: cloneMarkings(rightStore.state.markings),
+        leftSelectedMarkingLabel: leftStore.state.selectedMarkingLabel,
+        rightSelectedMarkingLabel: rightStore.state.selectedMarkingLabel,
+    };
+};
+
+const syncUnsavedChanges = () => {
+    const leftHash = MarkingsStore(CANVAS_ID.LEFT).state.markingsHash;
+    const rightHash = MarkingsStore(CANVAS_ID.RIGHT).state.markingsHash;
+    GlobalStateStore.actions.unsavedChanges.checkForUnsavedChanges(
+        leftHash,
+        rightHash
+    );
+};
+
+const restoreSnapshot = (snapshot: MarkingsSnapshot) => {
+    const leftStore = MarkingsStore(CANVAS_ID.LEFT);
+    const rightStore = MarkingsStore(CANVAS_ID.RIGHT);
+
+    leftStore.actions.markings.resetForLoading();
+    leftStore.actions.markings.addManyForLoading(cloneMarkings(snapshot.left));
+    leftStore.actions.selectedMarkingLabel.setSelectedMarkingLabel(
+        snapshot.leftSelectedMarkingLabel
+    );
+
+    rightStore.actions.markings.resetForLoading();
+    rightStore.actions.markings.addManyForLoading(
+        cloneMarkings(snapshot.right)
+    );
+    rightStore.actions.selectedMarkingLabel.setSelectedMarkingLabel(
+        snapshot.rightSelectedMarkingLabel
+    );
+
+    leftStore.actions.labelGenerator.reset();
+    rightStore.actions.labelGenerator.reset();
+
+    syncUnsavedChanges();
+};
+
+abstract class SnapshotCommand implements Command {
+    private readonly beforeState = getSnapshot();
+
+    private afterState: MarkingsSnapshot | null = null;
+
+    protected abstract run(): void;
+
+    execute(): void {
+        if (this.afterState) {
+            restoreSnapshot(this.afterState);
+            return;
         }
 
-        this.storeActions.addOne(this.marking);
+        this.run();
+        this.afterState = getSnapshot();
+    }
+
+    unExecute(): void {
+        restoreSnapshot(this.beforeState);
     }
 }
 
-export class MergeMarkingsCommand implements Command {
-    private labelsBackup: LabelSnapshot[] | null = null;
+export class AddOrUpdateMarkingCommand extends SnapshotCommand {
+    constructor(
+        private actions: MarkingActions,
+        private marking: MarkingClass
+    ) {
+        super();
+    }
 
+    protected run(): void {
+        this.actions.addOne(this.marking);
+    }
+}
+
+export class RemoveMarkingCommand extends SnapshotCommand {
+    constructor(
+        private actions: MarkingActions,
+        private marking: MarkingClass
+    ) {
+        super();
+    }
+
+    protected run(): void {
+        this.actions.removeOneByLabel(this.marking.label);
+    }
+}
+
+export class MergeMarkingsCommand extends SnapshotCommand {
     constructor(
         private actions: MarkingActions,
         private localLabel: number,
-        private localOldIds: string[],
         private otherCanvasId: CANVAS_ID,
-        private otherLabel: number,
-        private otherOldIds: string[]
+        private otherLabel: number
     ) {
-        this.labelsBackup = [];
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const saveState = (store: any, cId: CANVAS_ID) => {
-            store.state.markings.forEach((m: MarkingClass) => {
-                const isSourceItem =
-                    cId === this.otherCanvasId && m.label === this.otherLabel;
-
-                if (m.ids && m.ids.length > 0) {
-                    const labelToSave = isSourceItem
-                        ? this.localLabel
-                        : m.label;
-
-                    this.labelsBackup?.push({
-                        canvasId: cId,
-                        markingId: m.ids[0]!,
-                        label: labelToSave,
-                    });
-                }
-            });
-        };
-
-        saveState(MarkingsStore(CANVAS_ID.LEFT), CANVAS_ID.LEFT);
-        saveState(MarkingsStore(CANVAS_ID.RIGHT), CANVAS_ID.RIGHT);
+        super();
     }
 
-    execute() {
+    protected run(): void {
         this.actions.mergePair(
             this.localLabel,
             this.otherCanvasId,
             this.otherLabel
-        );
-    }
-
-    unExecute() {
-        if (this.labelsBackup && this.labelsBackup.length > 0) {
-            const leftStore = MarkingsStore(CANVAS_ID.LEFT);
-            const rightStore = MarkingsStore(CANVAS_ID.RIGHT);
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const restore = (store: any, cId: CANVAS_ID) => {
-                store.setMarkingsAndUpdateHash((markings: MarkingClass[]) => {
-                    markings.forEach(m => {
-                        const backup = this.labelsBackup?.find(
-                            b =>
-                                b.canvasId === cId &&
-                                m.ids.includes(b.markingId)
-                        );
-
-                        if (backup) {
-                            // eslint-disable-next-line no-param-reassign
-                            m.label = backup.label;
-                        }
-                    });
-                    return markings;
-                });
-            };
-
-            restore(leftStore, CANVAS_ID.LEFT);
-            restore(rightStore, CANVAS_ID.RIGHT);
-
-            leftStore.actions.labelGenerator.reset();
-            rightStore.actions.labelGenerator.reset();
-        }
-
-        this.actions.unmergePair(
-            this.localLabel,
-            this.localOldIds,
-            this.otherCanvasId,
-            this.otherLabel,
-            this.otherOldIds
         );
     }
 }
