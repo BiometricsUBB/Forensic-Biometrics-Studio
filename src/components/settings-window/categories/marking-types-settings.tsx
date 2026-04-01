@@ -85,7 +85,8 @@ export function MarkingTypesSettings() {
                             )}
                         >
                             <span className="text-sm">
-                                {selectedCategory ?? t("Working mode")}
+                                {t(selectedCategory, { ns: "modes" }) ??
+                                    t("Working mode")}
                             </span>
                             <ChevronDown size={14} />
                         </DropdownMenuTrigger>
@@ -98,7 +99,7 @@ export function MarkingTypesSettings() {
                                             setSelectedCategory(mode)
                                         }
                                     >
-                                        {mode}
+                                        {t(mode, { ns: "modes" })}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
