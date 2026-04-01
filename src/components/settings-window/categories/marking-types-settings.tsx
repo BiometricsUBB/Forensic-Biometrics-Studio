@@ -29,30 +29,19 @@ import {
 } from "@/lib/markings/MarkingType";
 import { useState, useEffect } from "react";
 import { emitMarkingTypesChange } from "@/lib/hooks/useSettingsSync";
+import { invoke } from "@tauri-apps/api/core";
 
 export function MarkingTypesSettings() {
     const { t } = useTranslation();
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlWorkingMode = urlParams.get("workingMode") as WORKING_MODE | null;
-
-    const [selectedCategory, setSelectedCategory] =
-        useState<WORKING_MODE | null>(urlWorkingMode);
+    const [selectedCategory, setSelectedCategory] = useState<WORKING_MODE>(
+        WORKING_MODE.FINGERPRINT
+    );
 
     useEffect(() => {
-        const handleLocationChange = () => {
-            const params = new URLSearchParams(window.location.search);
-            const mode = params.get("workingMode") as WORKING_MODE | null;
-            if (mode) {
-                setSelectedCategory(mode);
-            }
-        };
-
-        window.addEventListener("popstate", handleLocationChange);
-
-        return () => {
-            window.removeEventListener("popstate", handleLocationChange);
-        };
+        invoke<WORKING_MODE | null>("get_working_mode").then(mode => {
+            if (mode) setSelectedCategory(mode);
+        });
     }, []);
 
     const types = MarkingTypesStore.use(state =>
