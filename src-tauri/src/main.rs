@@ -4,6 +4,19 @@
 use tauri::Emitter;
 use tauri::Manager;
 use std::fs;
+use std::sync::Mutex;
+
+struct WorkingModeState(Mutex<Option<String>>);
+
+#[tauri::command]
+fn set_working_mode(state: tauri::State<WorkingModeState>, mode: String) {
+    *state.0.lock().unwrap() = Some(mode);
+}
+
+#[tauri::command]
+fn get_working_mode(state: tauri::State<WorkingModeState>) -> Option<String> {
+    state.0.lock().unwrap().clone()
+}
 
 #[cfg(target_os = "windows")]
 use winreg::enums::HKEY_LOCAL_MACHINE;
@@ -199,6 +212,7 @@ fn read_os_machine_id() -> Option<String> {
 
 fn main() {
     let mut builder = tauri::Builder::default()
+        .manage(WorkingModeState(Mutex::new(None)))
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
@@ -217,6 +231,8 @@ fn main() {
             open_settings_window,
             open_edit_window,
             get_machine_id,
+            set_working_mode,
+            get_working_mode,
         ]);
 
     #[cfg(target_os = "windows")]
