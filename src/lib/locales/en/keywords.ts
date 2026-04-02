@@ -74,6 +74,9 @@ const d: Dictionary = {
     Edit: "Edit",
     Apply: "Apply",
     Clear: "Clear",
+    "Select working mode": "Select working mode",
+    "Select a working mode to view marking types":
+        "Select a working mode to view marking types",
 };
 
 export default d;

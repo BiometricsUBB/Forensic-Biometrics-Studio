@@ -74,6 +74,9 @@ const d: Dictionary = {
     Edit: "Edycja",
     Apply: "Zastosuj",
     Clear: "Wyczyść",
+    "Select working mode": "Wybierz tryb pracy",
+    "Select a working mode to view marking types":
+        "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
 };
 
 export default d;
