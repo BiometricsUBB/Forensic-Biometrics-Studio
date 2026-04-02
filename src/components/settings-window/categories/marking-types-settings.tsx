@@ -34,9 +34,9 @@ import { invoke } from "@tauri-apps/api/core";
 export function MarkingTypesSettings() {
     const { t } = useTranslation();
 
-    const [selectedCategory, setSelectedCategory] = useState<WORKING_MODE>(
-        WORKING_MODE.FINGERPRINT
-    );
+    const [selectedCategory, setSelectedCategory] = useState<
+        WORKING_MODE | undefined
+    >(undefined);
 
     useEffect(() => {
         invoke<WORKING_MODE | null>("get_working_mode").then(mode => {
