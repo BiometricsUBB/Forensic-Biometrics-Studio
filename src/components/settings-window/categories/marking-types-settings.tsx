@@ -287,9 +287,9 @@ export function MarkingTypesSettings() {
                                         colSpan={8}
                                         className="text-center py-8 text-muted-foreground"
                                     >
-                                        {selectedCategory
-                                            ? t("Types")
-                                            : t("Working mode")}
+                                        {t(
+                                            "No marking types found for the selected working mode"
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             ) : (

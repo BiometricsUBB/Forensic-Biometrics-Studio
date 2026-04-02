@@ -75,6 +75,8 @@ const d: Dictionary = {
     Apply: "Apply",
     Clear: "Clear",
     "Select working mode": "Select working mode",
+    "No marking types found for the selected working mode":
+        "No marking types found for the selected working mode",
     "Select a working mode to view marking types":
         "Select a working mode to view marking types",
 };

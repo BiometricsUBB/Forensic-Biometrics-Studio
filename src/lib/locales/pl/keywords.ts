@@ -75,6 +75,8 @@ const d: Dictionary = {
     Apply: "Zastosuj",
     Clear: "Wyczyść",
     "Select working mode": "Wybierz tryb pracy",
+    "No marking types found for the selected working mode":
+        "Nie znaleziono typów adnotacji dla wybranego trybu pracy",
     "Select a working mode to view marking types":
         "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
 };
