@@ -83,6 +83,9 @@ export type i18nKeywords = Recordify<
     | "Edit"
     | "Apply"
     | "Clear"
+    | "Select a working mode to view marking types"
+    | "Select working mode"
+    | "No marking types found for the selected working mode"
 >;
 
 export type i18nDescription = Recordify<

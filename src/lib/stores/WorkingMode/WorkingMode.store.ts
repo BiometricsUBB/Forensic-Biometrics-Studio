@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createJSONStorage, devtools } from "zustand/middleware";
 import { WORKING_MODE } from "@/views/selectMode";
 import { tauriStorage } from "@/lib/stores/tauri-storage-adapter.helpers";
+import { invoke } from "@tauri-apps/api/core";
 
 const STORE_NAME = "working-mode";
 const STORE_FILE = new LazyStore(`${STORE_NAME}.dat`);
@@ -21,9 +22,14 @@ const useWorkingModeStore = create<State>()(
     devtools(
         set => ({
             ...INITIAL_STATE,
-            setWorkingMode: mode => set(() => ({ workingMode: mode })),
-            resetWorkingMode: () =>
-                set(() => ({ workingMode: INITIAL_STATE.workingMode })),
+            setWorkingMode: mode => {
+                invoke("set_working_mode", { mode });
+                set(() => ({ workingMode: mode }));
+            },
+            resetWorkingMode: () => {
+                invoke("set_working_mode", { mode: INITIAL_STATE.workingMode });
+                set(() => ({ workingMode: INITIAL_STATE.workingMode }));
+            },
         }),
         {
             name: STORE_NAME,
