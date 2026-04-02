@@ -10,12 +10,12 @@ struct WorkingModeState(Mutex<Option<String>>);
 
 #[tauri::command]
 fn set_working_mode(state: tauri::State<WorkingModeState>, mode: String) {
-    *state.0.lock().unwrap() = Some(mode);
+    *state.0.lock().unwrap_or_else(|e| e.into_inner()) = Some(mode);
 }
 
 #[tauri::command]
 fn get_working_mode(state: tauri::State<WorkingModeState>) -> Option<String> {
-    state.0.lock().unwrap().clone()
+    state.0.lock().unwrap_or_else(|e| e.into_inner()).clone()
 }
 
 #[cfg(target_os = "windows")]
