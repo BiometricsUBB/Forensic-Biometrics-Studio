@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { TriangleMarking } from "@/lib/markings/TriangleMarking";
 
 type ImageInfo = {
     name: string | null;
@@ -55,7 +56,7 @@ export type ExportObject = {
             endpoint?:
                 | LineSegmentMarking["endpoint"]
                 | BoundingBoxMarking["endpoint"];
-            points?: PolygonMarking["points"];
+            points?: PolygonMarking["points"] | TriangleMarking["points"];
         }[];
     };
 };
@@ -134,8 +135,12 @@ async function getData(
                     : {}),
                 ...("points" in m
                     ? {
-                          points: (m as PolygonMarking | RectangleMarking)
-                              .points,
+                          points: (
+                              m as
+                                  | PolygonMarking
+                                  | RectangleMarking
+                                  | TriangleMarking
+                          ).points,
                       }
                     : {}),
             })),
