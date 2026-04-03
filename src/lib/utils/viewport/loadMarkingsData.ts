@@ -29,6 +29,7 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { TriangleMarking } from "@/lib/markings/TriangleMarking";
 import { Point } from "@/lib/markings/Point";
 import { ExportObject } from "./saveMarkingsDataWithDialog";
 
@@ -118,7 +119,10 @@ function createPolygonOrRectangleMarking(
     baseArgs: readonly [number, Point, string],
     marking: ExportObject["data"]["markings"][0],
     ids: string[],
-    MarkingConstructor: typeof PolygonMarking | typeof RectangleMarking
+    MarkingConstructor:
+        | typeof PolygonMarking
+        | typeof RectangleMarking
+        | typeof TriangleMarking
 ): MarkingClass {
     const { points } = marking as { points?: Point[] };
     if (!points) {
@@ -157,6 +161,13 @@ function createMarkingFromData(
                 marking,
                 ids,
                 RectangleMarking
+            );
+        case MARKING_CLASS.TRIANGLE:
+            return createPolygonOrRectangleMarking(
+                baseArgs,
+                marking,
+                ids,
+                TriangleMarking
             );
         default:
             throw new Error(`Unknown marking class: ${marking.markingClass}`);

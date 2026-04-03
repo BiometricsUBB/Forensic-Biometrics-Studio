@@ -15,6 +15,7 @@ import {
     BoundingBoxMarkingHandler,
     PolygonMarkingHandler,
     RectangleMarkingHandler,
+    TriangleMarkingHandler,
 } from "@/components/pixi/viewport/marking-handlers";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { isManualRotateKeyDown } from "./manualRotatePlugin";
@@ -117,6 +118,7 @@ export class MarkingModePlugin extends Plugin {
             [MARKING_CLASS.BOUNDING_BOX]: BoundingBoxMarkingHandler,
             [MARKING_CLASS.POLYGON]: PolygonMarkingHandler,
             [MARKING_CLASS.RECTANGLE]: RectangleMarkingHandler,
+            [MARKING_CLASS.TRIANGLE]: TriangleMarkingHandler,
         };
 
         // eslint-disable-next-line security/detect-object-injection

@@ -14,6 +14,7 @@ import { MarkingType } from "@/lib/markings/MarkingType";
 import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { TriangleMarking } from "@/lib/markings/TriangleMarking";
 import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
 
@@ -383,7 +384,7 @@ const drawBoundingBoxMarking = (
 const drawPolygonMarking = (
     g: PixiGraphics,
     selected: boolean,
-    { label }: PolygonMarking | RectangleMarking,
+    { label }: PolygonMarking | RectangleMarking | TriangleMarking,
     { backgroundColor, textColor, size }: MarkingType,
     relativeOrigin: Point,
     relativePoints: Point[],
@@ -583,13 +584,14 @@ export const drawMarking = (
 
         case MARKING_CLASS.POLYGON:
         case MARKING_CLASS.RECTANGLE:
+        case MARKING_CLASS.TRIANGLE:
             drawPolygonMarking(
                 g,
                 emphasize,
-                marking as PolygonMarking | RectangleMarking,
+                marking as PolygonMarking | RectangleMarking | TriangleMarking,
                 markingType,
                 markingViewportPosition,
-                (marking as PolygonMarking | RectangleMarking)
+                (marking as PolygonMarking | RectangleMarking | TriangleMarking)
                     .calculatePointsViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio

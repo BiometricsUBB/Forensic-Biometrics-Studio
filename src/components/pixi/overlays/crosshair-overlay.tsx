@@ -34,7 +34,8 @@ export function CrosshairOverlay({
         cursorMode === CURSOR_MODES.MARKING &&
         (selectedType?.markingClass === MARKING_CLASS.BOUNDING_BOX ||
             selectedType?.markingClass === MARKING_CLASS.POLYGON ||
-            selectedType?.markingClass === MARKING_CLASS.RECTANGLE) &&
+            selectedType?.markingClass === MARKING_CLASS.RECTANGLE ||
+            selectedType?.markingClass === MARKING_CLASS.TRIANGLE) &&
         isVisible;
 
     useEffect(() => {
