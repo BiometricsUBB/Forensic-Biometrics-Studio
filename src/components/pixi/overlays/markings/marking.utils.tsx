@@ -15,6 +15,7 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
+import { PolylineMarking } from "@/lib/markings/PolylineMarking";
 
 const transformPoint = (
     point: Point,
@@ -379,6 +380,58 @@ const drawBoundingBoxMarking = (
     }
 };
 
+const drawPolylineMarking = (
+    g: PixiGraphics,
+    selected: boolean,
+    { label }: PolylineMarking,
+    { backgroundColor, textColor, size }: MarkingType,
+    relativeOrigin: Point,
+    relativePoints: Point[],
+    showMarkingLabels?: boolean
+) => {
+    if (relativePoints.length === 0) return;
+
+    if (selected) {
+        const minX = Math.min(...relativePoints.map(p => p.x));
+        const maxX = Math.max(...relativePoints.map(p => p.x));
+        const minY = Math.min(...relativePoints.map(p => p.y));
+        const maxY = Math.max(...relativePoints.map(p => p.y));
+        g.lineStyle(1, textColor);
+        g.beginFill(0x0000ff, 0.5);
+        g.drawRect(
+            minX - size - 2,
+            minY - size - 2,
+            maxX - minX + size * 2 + 4,
+            maxY - minY + size * 2 + 4
+        );
+    }
+
+    const [firstPoint, ...restPoints] = relativePoints;
+    if (firstPoint) {
+        g.lineStyle(lineWidth, backgroundColor);
+        g.moveTo(firstPoint.x, firstPoint.y);
+        restPoints.forEach(point => g.lineTo(point.x, point.y));
+    }
+
+    const firstPointForLabel = relativePoints[0];
+    if (firstPointForLabel) {
+        g.lineStyle(shadowWidth, textColor);
+        g.drawCircle(firstPointForLabel.x, firstPointForLabel.y, size);
+        g.beginFill(backgroundColor);
+        g.drawCircle(
+            firstPointForLabel.x,
+            firstPointForLabel.y,
+            size - shadowWidth
+        );
+        g.endFill();
+        drawLabel(g, String(label), firstPointForLabel, size, textColor);
+    }
+
+    if (showMarkingLabels) {
+        drawLabel(g, String(label), relativeOrigin, size, textColor);
+    }
+};
+
 const drawPolygonMarking = (
     g: PixiGraphics,
     selected: boolean,
@@ -576,6 +629,23 @@ export const drawMarking = (
                     centerX,
                     centerY
                 ),
+                showMarkingLabels
+            );
+            break;
+
+        case MARKING_CLASS.POLYLINE:
+            drawPolylineMarking(
+                g,
+                emphasize,
+                marking as PolylineMarking,
+                markingType,
+                markingViewportPosition,
+                (marking as PolylineMarking)
+                    .calculatePointsViewportPosition(
+                        viewportWidthRatio,
+                        viewportHeightRatio
+                    )
+                    .map(p => transformPoint(p, rotation, centerX, centerY)),
                 showMarkingLabels
             );
             break;

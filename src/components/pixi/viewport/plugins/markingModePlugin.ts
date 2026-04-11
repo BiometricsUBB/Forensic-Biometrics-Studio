@@ -16,6 +16,7 @@ import {
     PolygonMarkingHandler,
     RectangleMarkingHandler,
     TriangleMarkingHandler,
+    PolylineMarkingHandler,
 } from "@/components/pixi/viewport/marking-handlers";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { isManualRotateKeyDown } from "./manualRotatePlugin";
@@ -119,6 +120,7 @@ export class MarkingModePlugin extends Plugin {
             [MARKING_CLASS.POLYGON]: PolygonMarkingHandler,
             [MARKING_CLASS.RECTANGLE]: RectangleMarkingHandler,
             [MARKING_CLASS.TRIANGLE]: TriangleMarkingHandler,
+            [MARKING_CLASS.POLYLINE]: PolylineMarkingHandler,
         };
 
         // eslint-disable-next-line security/detect-object-injection
@@ -144,16 +146,21 @@ export class MarkingModePlugin extends Plugin {
         this.viewport.on("mousemove", this.handleMouseMove);
         this.viewport.on("mouseup", this.handleLMBUp);
         this.viewport.on("mousedown", this.handleLMBDown);
+        this.viewport.on("rightup", this.handleRMBUp);
+        this.viewport.on("rightdown", this.handleRMBDown);
     }
 
     private removeEventListeners(): void {
         this.viewport.off("mousemove", this.handleMouseMove);
         this.viewport.off("mouseup", this.handleLMBUp);
         this.viewport.off("mousedown", this.handleLMBDown);
+        this.viewport.off("rightdown", this.handleRMBDown);
+
         document.removeEventListener(
             CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING,
             this.handleInterrupt
         );
+
         this.currentHandler = null;
     }
 
@@ -172,6 +179,20 @@ export class MarkingModePlugin extends Plugin {
             return;
 
         if (e.button === 0) this.currentHandler.handleLMBDown(e);
+    };
+
+    private handleRMBUp = (e: FederatedPointerEvent): void => {
+        if (!this.shouldHandleMarking() || !this.currentHandler?.handleRMBUp)
+            return;
+
+        this.currentHandler.handleRMBUp(e);
+    };
+
+    private handleRMBDown = (e: FederatedPointerEvent): void => {
+        if (!this.shouldHandleMarking() || !this.currentHandler?.handleRMBDown)
+            return;
+
+        this.currentHandler.handleRMBDown(e);
     };
 
     public override down(event: FederatedPointerEvent): boolean {

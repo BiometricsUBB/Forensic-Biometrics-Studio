@@ -19,6 +19,7 @@ const d: Dictionary = {
                     rectangle: "Rectangle",
                     polygon: "Polygon",
                     triangle: "Triangle",
+                    polyline: "Polyline",
                     measurement: "Measurement / Ruler",
                 },
             },

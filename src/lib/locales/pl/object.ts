@@ -19,6 +19,7 @@ const d: Dictionary = {
                     rectangle: "Prostokąt",
                     polygon: "Wielokąt",
                     triangle: "Trójkąt",
+                    polyline: "Linia łamana",
                     measurement: "Miarka",
                 },
             },

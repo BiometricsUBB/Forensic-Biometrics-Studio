@@ -20,6 +20,10 @@ export abstract class MarkingHandler {
 
     abstract handleLMBDown?(e: FederatedPointerEvent): void;
 
+    handleRMBUp?(_e: FederatedPointerEvent): void;
+
+    handleRMBDown?(_e: FederatedPointerEvent): void;
+
     protected cleanup() {
         this.plugin.cleanup();
     }
