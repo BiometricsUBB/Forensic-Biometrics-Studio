@@ -33,6 +33,11 @@ import { TriangleMarking } from "@/lib/markings/TriangleMarking";
 import { Point } from "@/lib/markings/Point";
 import { ExportObject } from "./saveMarkingsDataWithDialog";
 
+type PointsMarkingConstructor =
+    | typeof PolygonMarking
+    | typeof RectangleMarking
+    | typeof TriangleMarking;
+
 const MINIMUM_APP_VERSION = "0.5.0";
 
 function compareVersions(version1: string, version2: string): number {
@@ -119,10 +124,7 @@ function createPolygonOrRectangleMarking(
     baseArgs: readonly [number, Point, string],
     marking: ExportObject["data"]["markings"][0],
     ids: string[],
-    MarkingConstructor:
-        | typeof PolygonMarking
-        | typeof RectangleMarking
-        | typeof TriangleMarking
+    MarkingConstructor: PointsMarkingConstructor
 ): MarkingClass {
     const { points } = marking as { points?: Point[] };
     if (!points) {

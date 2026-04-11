@@ -12,9 +12,7 @@ import { BitmapText } from "@pixi/text-bitmap";
 import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
-import { PolygonMarking } from "@/lib/markings/PolygonMarking";
-import { RectangleMarking } from "@/lib/markings/RectangleMarking";
-import { TriangleMarking } from "@/lib/markings/TriangleMarking";
+import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
 
@@ -384,7 +382,7 @@ const drawBoundingBoxMarking = (
 const drawPolygonMarking = (
     g: PixiGraphics,
     selected: boolean,
-    { label }: PolygonMarking | RectangleMarking | TriangleMarking,
+    { label }: PointsMarkingClass,
     { backgroundColor, textColor, size }: MarkingType,
     relativeOrigin: Point,
     relativePoints: Point[],
@@ -588,10 +586,10 @@ export const drawMarking = (
             drawPolygonMarking(
                 g,
                 emphasize,
-                marking as PolygonMarking | RectangleMarking | TriangleMarking,
+                marking as PointsMarkingClass,
                 markingType,
                 markingViewportPosition,
-                (marking as PolygonMarking | RectangleMarking | TriangleMarking)
+                (marking as PointsMarkingClass)
                     .calculatePointsViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio
