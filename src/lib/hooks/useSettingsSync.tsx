@@ -10,6 +10,8 @@ import { CustomThemeStore, CustomTheme } from "@/lib/stores/CustomTheme";
 import { applyCustomTheme } from "@/lib/hooks/useCustomTheme";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { MarkingType } from "@/lib/markings/MarkingType";
+import { KeybindingsStore } from "@/lib/stores/Keybindings";
+import { TypeKeybinding } from "@/lib/stores/Keybindings/Keybindings.store";
 import i18n from "@/lib/locales/i18n";
 
 type SettingsChangePayload =
@@ -17,6 +19,7 @@ type SettingsChangePayload =
     | { type: "theme"; value: string }
     | { type: "customTheme"; theme: CustomTheme | null }
     | { type: "markingTypes"; types: MarkingType[] }
+    | { type: "keybindings"; typesKeybindings: TypeKeybinding[] }
     | { type: "report"; value: ReportSettings };
 
 const SETTINGS_CHANGE_EVENT = "settings-change";
@@ -28,6 +31,11 @@ export const emitSettingsChange = async (payload: SettingsChangePayload) => {
 export const emitMarkingTypesChange = async () => {
     const { types } = MarkingTypesStore.state;
     await emitSettingsChange({ type: "markingTypes", types });
+};
+
+export const emitKeybindingsChange = async () => {
+    const { typesKeybindings } = KeybindingsStore.state;
+    await emitSettingsChange({ type: "keybindings", typesKeybindings });
 };
 
 export const useSettingsSync = () => {
@@ -52,6 +60,10 @@ export const useSettingsSync = () => {
                     applyCustomTheme(theme);
                 } else if (payload.type === "markingTypes") {
                     MarkingTypesStore.use.setState({ types: payload.types });
+                } else if (payload.type === "keybindings") {
+                    KeybindingsStore.use.setState({
+                        typesKeybindings: payload.typesKeybindings,
+                    });
                 } else if (payload.type === "report") {
                     GlobalSettingsStore.actions.settings.report.setReportSettings(
                         payload.value

@@ -35,7 +35,10 @@ import {
     defaultTextColor,
 } from "@/lib/markings/MarkingType";
 import { useState, useEffect } from "react";
-import { emitMarkingTypesChange } from "@/lib/hooks/useSettingsSync";
+import {
+    emitMarkingTypesChange,
+    emitKeybindingsChange,
+} from "@/lib/hooks/useSettingsSync";
 import { invoke } from "@tauri-apps/api/core";
 
 export function MarkingTypesSettings() {
@@ -70,12 +73,30 @@ export function MarkingTypesSettings() {
             : state.typesKeybindings
     );
 
+    const allKeybindings = KeybindingsStore.use(
+        state => state.typesKeybindings
+    );
+
+    useEffect(() => {
+        emitKeybindingsChange();
+    }, [allKeybindings]);
+
     const workingModes = Object.values(WORKING_MODE);
 
+    const activeKeybindings = types
+        .map(item => keybindings.find(k => k.typeId === item.id))
+        .filter((k): k is NonNullable<typeof k> => !!k?.boundKey);
+
     const conflictingKeys = new Set(
-        keybindings
+        activeKeybindings
+            .filter((k, _, arr) =>
+                arr.some(
+                    other =>
+                        other.boundKey === k.boundKey &&
+                        other.typeId !== k.typeId
+                )
+            )
             .map(k => k.boundKey)
-            .filter((key, _, arr) => arr.filter(k => k === key).length > 1)
     );
 
     return (
