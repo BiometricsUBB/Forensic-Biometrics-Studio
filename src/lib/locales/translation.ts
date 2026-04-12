@@ -231,10 +231,13 @@ export type i18nDialog = Recordify<
 export type i18nKeybindings = Recordify<
     | "Keybinding"
     | "None"
-    | "Press a key"
-    | "Press a numeric key (0-9)"
-    | "Press 'Del' to remove keybinding"
-    | "'{{key}}' is not a  numeric key"
+    | "Keybinding conflicts detected"
+    | "Assign keybinding"
+    | "Press a key or combination"
+    | "Waiting for input..."
+    | "Also assigned to: {{name}}"
+    | "cancel"
+    | "remove"
 >;
 
 export type i18nReport = Recordify<
