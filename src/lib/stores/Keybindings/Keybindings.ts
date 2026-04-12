@@ -33,6 +33,13 @@ class StoreClass {
                     );
                 });
             },
+            cleanupOrphans: (validTypeIds: string[]) => {
+                this.state.set(draft => {
+                    draft.typesKeybindings = draft.typesKeybindings.filter(x =>
+                        validTypeIds.includes(x.typeId)
+                    );
+                });
+            },
         },
     };
 }
