@@ -8,6 +8,8 @@ import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { Point } from "@/lib/markings/Point";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
+import { toast } from "sonner";
+import { t } from "i18next";
 
 const DOUBLE_CLICK_MS = 300;
 
@@ -88,7 +90,7 @@ export class PolylineMarkingHandler extends MarkingHandler {
 
         const pos = this.getAdjustedPos(e);
 
-        if (isDoubleClick && this.points.length >= 1) {
+        if (isDoubleClick && this.points.length >= 2) {
             this.finalize([...this.points, pos]);
             return;
         }
@@ -101,8 +103,12 @@ export class PolylineMarkingHandler extends MarkingHandler {
     }
 
     override handleRMBDown() {
-        if (this.points.length >= 2) {
+        if (this.points.length >= 3) {
             this.finalize(this.points);
+        } else {
+            toast.warning(
+                t("Polyline requires at least 2 segments", { ns: "tooltip" })
+            );
         }
     }
 }

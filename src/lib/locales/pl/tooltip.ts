@@ -58,6 +58,8 @@ const d: Dictionary = {
         "Zamaluj jasne punkty, aby je odfiltrować",
     "Preview ready. Return to edit or save.":
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
+    "Polyline requires at least 2 segments":
+        "Linia łamana wymaga co najmniej 2 segmentów",
 };
 
 export default d;

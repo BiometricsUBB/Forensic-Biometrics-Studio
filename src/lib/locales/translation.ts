@@ -194,6 +194,7 @@ export type i18nTooltip = Recordify<
     | "FFT Filter"
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
+    | "Polyline requires at least 2 segments"
 >;
 
 export type i18nDialog = Recordify<
