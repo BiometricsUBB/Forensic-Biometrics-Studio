@@ -17,6 +17,17 @@ import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
 import { PolylineMarking } from "@/lib/markings/PolylineMarking";
 
+const getBoundingBox = (points: Point[]) =>
+    points.reduce(
+        (acc, p) => ({
+            minX: Math.min(acc.minX, p.x),
+            minY: Math.min(acc.minY, p.y),
+            maxX: Math.max(acc.maxX, p.x),
+            maxY: Math.max(acc.maxY, p.y),
+        }),
+        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+
 const transformPoint = (
     point: Point,
     rotation: number,
@@ -392,10 +403,7 @@ const drawPolylineMarking = (
     if (relativePoints.length === 0) return;
 
     if (selected) {
-        const minX = Math.min(...relativePoints.map(p => p.x));
-        const maxX = Math.max(...relativePoints.map(p => p.x));
-        const minY = Math.min(...relativePoints.map(p => p.y));
-        const maxY = Math.max(...relativePoints.map(p => p.y));
+        const { minX, minY, maxX, maxY } = getBoundingBox(relativePoints);
         g.lineStyle(1, textColor);
         g.beginFill(0x0000ff, 0.5);
         g.drawRect(
@@ -413,18 +421,13 @@ const drawPolylineMarking = (
         restPoints.forEach(point => g.lineTo(point.x, point.y));
     }
 
-    const firstPointForLabel = relativePoints[0];
-    if (firstPointForLabel) {
+    if (firstPoint) {
         g.lineStyle(shadowWidth, textColor);
-        g.drawCircle(firstPointForLabel.x, firstPointForLabel.y, size);
+        g.drawCircle(firstPoint.x, firstPoint.y, size);
         g.beginFill(backgroundColor);
-        g.drawCircle(
-            firstPointForLabel.x,
-            firstPointForLabel.y,
-            size - shadowWidth
-        );
+        g.drawCircle(firstPoint.x, firstPoint.y, size - shadowWidth);
         g.endFill();
-        drawLabel(g, String(label), firstPointForLabel, size, textColor);
+        drawLabel(g, String(label), firstPoint, size, textColor);
     }
 
     if (showMarkingLabels) {
@@ -444,10 +447,7 @@ const drawPolygonMarking = (
     if (relativePoints.length === 0) return;
 
     if (selected) {
-        const minX = Math.min(...relativePoints.map(p => p.x));
-        const maxX = Math.max(...relativePoints.map(p => p.x));
-        const minY = Math.min(...relativePoints.map(p => p.y));
-        const maxY = Math.max(...relativePoints.map(p => p.y));
+        const { minX, minY, maxX, maxY } = getBoundingBox(relativePoints);
         g.lineStyle(1, textColor);
         g.beginFill(0x0000ff, 0.5);
         g.drawRect(
@@ -476,18 +476,13 @@ const drawPolygonMarking = (
         g.endFill();
     }
 
-    const firstPointForLabel = relativePoints[0];
-    if (firstPointForLabel) {
+    if (firstPoint) {
         g.lineStyle(shadowWidth, textColor);
-        g.drawCircle(firstPointForLabel.x, firstPointForLabel.y, size);
+        g.drawCircle(firstPoint.x, firstPoint.y, size);
         g.beginFill(backgroundColor);
-        g.drawCircle(
-            firstPointForLabel.x,
-            firstPointForLabel.y,
-            size - shadowWidth
-        );
+        g.drawCircle(firstPoint.x, firstPoint.y, size - shadowWidth);
         g.endFill();
-        drawLabel(g, String(label), firstPointForLabel, size, textColor);
+        drawLabel(g, String(label), firstPoint, size, textColor);
     }
 
     if (showMarkingLabels) {
