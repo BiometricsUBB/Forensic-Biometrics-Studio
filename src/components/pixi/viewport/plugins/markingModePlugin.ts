@@ -33,6 +33,10 @@ export class MarkingModePlugin extends Plugin {
 
     private currentHandler: MarkingHandler | null = null;
 
+    private pendingMouseEvent: FederatedPointerEvent | null = null;
+
+    private rafId: number | null = null;
+
     constructor(viewport: Viewport, handlerParams: ViewportHandlerParams) {
         super(viewport);
         this.dragPlugin = new Drag(viewport, { wheel: true });
@@ -46,6 +50,7 @@ export class MarkingModePlugin extends Plugin {
 
     public override destroy(): void {
         super.destroy();
+        this.cancelPendingMouseMove();
         this.removeEventListeners();
         window.removeEventListener("keydown", this.handleKeyDown);
         window.removeEventListener("keyup", this.handleKeyUp);
@@ -55,8 +60,17 @@ export class MarkingModePlugin extends Plugin {
         document.dispatchEvent(
             new Event(CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING)
         );
+        this.cancelPendingMouseMove();
         this.removeEventListeners();
         this.currentHandler = null;
+    }
+
+    private cancelPendingMouseMove() {
+        if (this.rafId !== null) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+        this.pendingMouseEvent = null;
     }
 
     private isMarkingModeActive(): boolean {
@@ -167,7 +181,18 @@ export class MarkingModePlugin extends Plugin {
 
     private handleMouseMove = (e: FederatedPointerEvent): void => {
         if (!this.isMarkingModeActive() || !this.currentHandler) return;
-        this.currentHandler.handleMouseMove(e);
+        this.pendingMouseEvent = e;
+        if (this.rafId === null) {
+            this.rafId = requestAnimationFrame(this.flushMouseMove);
+        }
+    };
+
+    private flushMouseMove = () => {
+        this.rafId = null;
+        if (this.pendingMouseEvent && this.currentHandler) {
+            this.currentHandler.handleMouseMove(this.pendingMouseEvent);
+            this.pendingMouseEvent = null;
+        }
     };
 
     private handleLMBUp = (e: FederatedPointerEvent): void => {
