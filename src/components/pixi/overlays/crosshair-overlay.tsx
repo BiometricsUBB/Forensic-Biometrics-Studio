@@ -12,6 +12,14 @@ import { CanvasMetadata } from "../canvas/hooks/useCanvasContext";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useGlobalApp } from "../app/hooks/useGlobalApp";
 
+const CROSSHAIR_MARKING_CLASSES = [
+    MARKING_CLASS.BOUNDING_BOX,
+    MARKING_CLASS.POLYGON,
+    MARKING_CLASS.RECTANGLE,
+    MARKING_CLASS.TRIANGLE,
+    MARKING_CLASS.POLYLINE,
+] as const as readonly MARKING_CLASS[];
+
 export type CrosshairOverlayProps = {
     canvasMetadata: CanvasMetadata;
 };
@@ -32,11 +40,8 @@ export function CrosshairOverlay({
 
     const ShowCrosshair =
         cursorMode === CURSOR_MODES.MARKING &&
-        (selectedType?.markingClass === MARKING_CLASS.BOUNDING_BOX ||
-            selectedType?.markingClass === MARKING_CLASS.POLYGON ||
-            selectedType?.markingClass === MARKING_CLASS.RECTANGLE ||
-            selectedType?.markingClass === MARKING_CLASS.TRIANGLE ||
-            selectedType?.markingClass === MARKING_CLASS.POLYLINE) &&
+        !!selectedType?.markingClass &&
+        CROSSHAIR_MARKING_CLASSES.includes(selectedType.markingClass) &&
         isVisible;
 
     useEffect(() => {
