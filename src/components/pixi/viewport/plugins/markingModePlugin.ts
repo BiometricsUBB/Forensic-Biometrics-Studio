@@ -154,6 +154,7 @@ export class MarkingModePlugin extends Plugin {
         this.viewport.off("mousemove", this.handleMouseMove);
         this.viewport.off("mouseup", this.handleLMBUp);
         this.viewport.off("mousedown", this.handleLMBDown);
+        this.viewport.off("rightup", this.handleRMBUp);
         this.viewport.off("rightdown", this.handleRMBDown);
 
         document.removeEventListener(
