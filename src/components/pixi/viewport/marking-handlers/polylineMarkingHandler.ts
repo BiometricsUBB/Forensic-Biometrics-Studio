@@ -38,7 +38,7 @@ export class PolylineMarkingHandler extends MarkingHandler {
             viewport
         );
         this.points = [pos];
-        this.lastClickTime = Date.now();
+        this.lastClickTime = performance.now();
         markingsStore.actions.temporaryMarking.setTemporaryMarking(
             new PolylineMarking(label, pos, this.typeId, [pos, pos])
         );
@@ -82,7 +82,7 @@ export class PolylineMarkingHandler extends MarkingHandler {
     }
 
     handleLMBDown(e: FederatedPointerEvent) {
-        const now = Date.now();
+        const now = performance.now();
         const isDoubleClick = now - this.lastClickTime < DOUBLE_CLICK_MS;
         this.lastClickTime = now;
 
