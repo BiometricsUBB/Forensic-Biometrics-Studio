@@ -14,7 +14,6 @@ export class RectangleMarking extends PointsMarkingClass {
         ids?: string[]
     ) {
         super(label, origin, typeId, ids);
-        this.points = points;
     }
 
     public clone(ids: string[]): this {
