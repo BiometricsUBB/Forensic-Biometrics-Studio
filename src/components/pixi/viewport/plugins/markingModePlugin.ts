@@ -111,11 +111,6 @@ export class MarkingModePlugin extends Plugin {
         )
             return;
 
-        document.addEventListener(
-            CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING,
-            this.handleInterrupt
-        );
-
         const type = MarkingTypesStore.actions.selectedType.get();
         if (!type) return;
 
@@ -145,6 +140,11 @@ export class MarkingModePlugin extends Plugin {
         if (!MarkingHandlerClass) {
             throw new Error(`Unsupported marking class: ${type.markingClass}`);
         }
+
+        document.addEventListener(
+            CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING,
+            this.handleInterrupt
+        );
 
         this.currentHandler = new MarkingHandlerClass(this, type.id, e);
 
