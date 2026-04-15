@@ -76,12 +76,14 @@ const getMimeTypeFromName = (name: string) => {
     return "application/octet-stream";
 };
 
+const toBlobBytes = (bytes: Uint8Array) => new Uint8Array(bytes);
+
 const toDataUrl = (bytes: Uint8Array, name: string) =>
     new Promise<string>(resolve => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(
-            new Blob([bytes], { type: getMimeTypeFromName(name) })
+            new Blob([toBlobBytes(bytes)], { type: getMimeTypeFromName(name) })
         );
     });
 
@@ -128,7 +130,7 @@ const getImageMeta = async (sprite: PIXI.Sprite) => {
         throw new Error("Missing image path for report generation.");
     }
     const bytes = await readFile(fullPath);
-    const bitmap = await createImageBitmap(new Blob([bytes]));
+    const bitmap = await createImageBitmap(new Blob([toBlobBytes(bytes)]));
     const checksum = md5Bytes(bytes);
 
     return {
@@ -151,7 +153,7 @@ const renderImageWithMarkings = async (
         markingsAlpha?: number;
     }
 ) => {
-    const bitmap = await createImageBitmap(new Blob([imageBytes]));
+    const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
     const showMarkingLabels = options?.showMarkingLabels ?? true;
     const markingsAlpha = options?.markingsAlpha ?? 1;
@@ -223,7 +225,7 @@ const createOverviewCalloutImage = async (
     imageBytes: Uint8Array,
     features: MarkingClass[]
 ) => {
-    const bitmap = await createImageBitmap(new Blob([imageBytes]));
+    const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
     const numberCircleRadius = Math.max(
         12,
@@ -425,6 +427,56 @@ const createStyles = () => {
 };
 
 type ReportT = TFunction<"report">;
+
+const FEATURE_TYPE_REPORT_KEYS = {
+    core: "Feature type Core",
+    delta: "Feature type Delta",
+    ridgebeginning: "Feature type RidgeBeginning",
+    ridgeending: "Feature type RidgeEnding",
+    bifurcation: "Feature type Bifurcation",
+    ridgemerge: "Feature type RidgeMerge",
+    hook: "Feature type Hook",
+    section: "Feature type Section",
+    bridge: "Feature type Bridge",
+    point: "Feature type Point",
+    pore: "Feature type Pore",
+    lake: "Feature type Lake",
+    ridgeprotrusion: "Feature type Ridge protrusion",
+    ridgeindentation: "Feature type Ridge indentation",
+    dot: "Feature type Dot",
+    incipientridge: "Feature type Incipient ridge",
+    scar: "Feature type Scar",
+    crease: "Feature type Crease",
+} as const;
+
+const normalizeFeatureTypeName = (value: string) =>
+    value
+        .trim()
+        .toLowerCase()
+        .replace(/[\s_-]+/g, "");
+
+const resolveFeatureTypeName = (
+    featureTypeDefinition: MarkingType | undefined,
+    tReport: ReportT
+) => {
+    if (!featureTypeDefinition) return "-";
+
+    const lookupKey = normalizeFeatureTypeName(featureTypeDefinition.name);
+    const reportKey =
+        FEATURE_TYPE_REPORT_KEYS[
+            lookupKey as keyof typeof FEATURE_TYPE_REPORT_KEYS
+        ];
+
+    if (reportKey) {
+        return tReport(reportKey);
+    }
+
+    return (
+        featureTypeDefinition.displayName?.trim() ||
+        featureTypeDefinition.name?.trim() ||
+        "-"
+    );
+};
 
 const createFooter = (
     pageNumber: number,
@@ -809,7 +861,10 @@ export const generateReportPdfWithDialog = async (
             const featureTypeDefinition = markingTypes.find(
                 type => type.id === feature.left.typeId
             );
-            const featureType = featureTypeDefinition?.name;
+            const featureType = resolveFeatureTypeName(
+                featureTypeDefinition,
+                tReport
+            );
             const markerRing = toCssColor(
                 featureTypeDefinition?.backgroundColor,
                 "#cc0000"
