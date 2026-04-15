@@ -18,6 +18,7 @@ const CROSSHAIR_MARKING_CLASSES = [
     MARKING_CLASS.RECTANGLE,
     MARKING_CLASS.TRIANGLE,
     MARKING_CLASS.POLYLINE,
+    MARKING_CLASS.FREEHAND,
 ] as const as readonly MARKING_CLASS[];
 
 export type CrosshairOverlayProps = {

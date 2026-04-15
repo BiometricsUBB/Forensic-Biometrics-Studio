@@ -31,6 +31,7 @@ import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
 import { TriangleMarking } from "@/lib/markings/TriangleMarking";
 import { PolylineMarking } from "@/lib/markings/PolylineMarking";
+import { FreehandMarking } from "@/lib/markings/FreehandMarking";
 import { Point } from "@/lib/markings/Point";
 import { ExportObject } from "./saveMarkingsDataWithDialog";
 
@@ -38,7 +39,8 @@ type PointsMarkingConstructor =
     | typeof PolygonMarking
     | typeof RectangleMarking
     | typeof TriangleMarking
-    | typeof PolylineMarking;
+    | typeof PolylineMarking
+    | typeof FreehandMarking;
 
 const MINIMUM_APP_VERSION = "0.5.0";
 
@@ -165,6 +167,8 @@ function createMarkingFromData(
             return createPointsMarking(baseArgs, marking, ids, TriangleMarking);
         case MARKING_CLASS.POLYLINE:
             return createPointsMarking(baseArgs, marking, ids, PolylineMarking);
+        case MARKING_CLASS.FREEHAND:
+            return createPointsMarking(baseArgs, marking, ids, FreehandMarking);
         default:
             throw new Error(`Unknown marking class: ${marking.markingClass}`);
     }

@@ -7,5 +7,6 @@ export enum MARKING_CLASS {
     RECTANGLE = "rectangle",
     TRIANGLE = "triangle",
     POLYLINE = "polyline",
+    FREEHAND = "freehand",
     MEASUREMENT = "measurement",
 }

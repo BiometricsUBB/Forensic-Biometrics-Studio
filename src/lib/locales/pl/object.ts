@@ -20,6 +20,7 @@ const d: Dictionary = {
                     polygon: "Wielokąt",
                     triangle: "Trójkąt",
                     polyline: "Linia łamana",
+                    freehand: "Linia odręczna",
                     measurement: "Miarka",
                 },
             },

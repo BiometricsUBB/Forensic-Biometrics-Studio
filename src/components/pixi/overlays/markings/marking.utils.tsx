@@ -15,7 +15,6 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
-import { PolylineMarking } from "@/lib/markings/PolylineMarking";
 
 const getBoundingBox = (points: Point[]) =>
     points.reduce(
@@ -391,10 +390,10 @@ const drawBoundingBoxMarking = (
     }
 };
 
-const drawPolylineMarking = (
+const drawPath = (
     g: PixiGraphics,
     selected: boolean,
-    { label }: PolylineMarking,
+    { label }: MarkingClass,
     { backgroundColor, textColor, size }: MarkingType,
     relativeOrigin: Point,
     relativePoints: Point[],
@@ -629,13 +628,14 @@ export const drawMarking = (
             break;
 
         case MARKING_CLASS.POLYLINE:
-            drawPolylineMarking(
+        case MARKING_CLASS.FREEHAND:
+            drawPath(
                 g,
                 emphasize,
-                marking as PolylineMarking,
+                marking as PointsMarkingClass,
                 markingType,
                 markingViewportPosition,
-                (marking as PolylineMarking)
+                (marking as PointsMarkingClass)
                     .calculatePointsViewportPosition(
                         viewportWidthRatio,
                         viewportHeightRatio
