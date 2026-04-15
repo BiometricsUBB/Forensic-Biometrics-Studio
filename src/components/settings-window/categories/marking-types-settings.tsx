@@ -259,7 +259,7 @@ export function MarkingTypesSettings() {
                 </div>
             </div>
 
-            {conflictingKeys.size > 0 && (
+            {selectedCategory !== undefined && conflictingKeys.size > 0 && (
                 <p className="text-sm text-destructive">
                     {t("Keybinding conflicts detected", { ns: "keybindings" })}
                 </p>
