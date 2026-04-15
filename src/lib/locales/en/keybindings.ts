@@ -7,7 +7,8 @@ const d: Dictionary = {
     "Assign keybinding": "Assign keybinding",
     "Press a key or combination": "Press a key or combination",
     "Waiting for input...": "Waiting for input...",
-    "Also assigned to: {{name}}": "Also assigned to: {{name}}",
+    "This shortcut is reserved by the application":
+        "This shortcut is reserved by the application",
     cancel: "cancel",
     remove: "remove",
 };

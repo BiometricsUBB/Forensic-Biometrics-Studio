@@ -1,12 +1,22 @@
 const MODIFIER_ORDER = ["Control", "Alt", "Shift", "Meta"] as const;
 
 export const RESERVED_KEYS = new Set([
+    // Single keys
     "Escape",
     "Tab",
+    "F1",
+    "F2",
     "F5",
-    "F12",
     "F11",
-    ...MODIFIER_ORDER,
+    "F12",
+    "L",
+    "M",
+
+    // Combos
+    "Control+Z",
+    "Control+Y",
+    "Meta+Z",
+    "Meta+Shift+Z",
 ]);
 
 const MODIFIER_LABELS: Record<string, string> = {
@@ -19,6 +29,7 @@ const MODIFIER_LABELS: Record<string, string> = {
 function codeToKey(code: string): string {
     if (code.startsWith("Key")) return code.slice(3).toUpperCase();
     if (code.startsWith("Digit")) return code.slice(5);
+
     return code; // F1, Space, ArrowUp, BracketLeft, etc.
 }
 
@@ -41,7 +52,7 @@ export function isModifierOnly(event: KeyboardEvent): boolean {
 }
 
 export function isReserved(event: KeyboardEvent): boolean {
-    return RESERVED_KEYS.has(event.key);
+    return RESERVED_KEYS.has(serializeCombo(event));
 }
 
 export function formatCombo(combo: string): string[] {

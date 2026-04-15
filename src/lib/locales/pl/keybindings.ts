@@ -8,7 +8,8 @@ const d: Dictionary = {
     "Assign keybinding": "Przypisz skrót klawiszowy",
     "Press a key or combination": "Wciśnij klawisz lub kombinację",
     "Waiting for input...": "Oczekiwanie na wejście...",
-    "Also assigned to: {{name}}": "Przypisany też do: {{name}}",
+    "This shortcut is reserved by the application":
+        "Ten skrót klawiszowy jest zarezerwowany przez aplikację",
     cancel: "anuluj",
     remove: "usuń",
 };

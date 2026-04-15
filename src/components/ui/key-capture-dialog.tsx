@@ -19,7 +19,6 @@ interface KeyCaptureDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     boundKey?: string;
-    resolveConflict?: (combo: string) => string | undefined;
     onKeyBind: (combo: string) => void;
     onKeyUnbind?: () => void;
 }
@@ -28,17 +27,18 @@ function KeyCaptureDialog({
     open,
     onOpenChange,
     boundKey,
-    resolveConflict,
     onKeyBind,
     onKeyUnbind,
 }: KeyCaptureDialogProps) {
     const { t } = useTranslation("keybindings");
     const [preview, setPreview] = useState<string | null>(null);
+    const [reservedKey, setReservedKey] = useState<string | null>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (open) {
             setPreview(null);
+            setReservedKey(null);
             setTimeout(() => contentRef.current?.focus(), 0);
         }
     }, [open]);
@@ -58,24 +58,29 @@ function KeyCaptureDialog({
             return;
         }
 
-        if (isModifierOnly(e.nativeEvent) || isReserved(e.nativeEvent)) return;
+        if (isModifierOnly(e.nativeEvent)) return;
 
+        if (isReserved(e.nativeEvent)) {
+            setPreview(null);
+            setReservedKey(serializeCombo(e.nativeEvent));
+            return;
+        }
+
+        setReservedKey(null);
         setPreview(serializeCombo(e.nativeEvent));
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-        if (preview && !isModifierOnly(e.nativeEvent)) {
-            onKeyBind(preview);
-            onOpenChange(false);
-        }
+        if (!preview || isModifierOnly(e.nativeEvent)) return;
+        onKeyBind(preview);
+        onOpenChange(false);
     };
 
-    const displayCombo = preview ?? boundKey ?? null;
+    const displayCombo = reservedKey ?? preview ?? boundKey ?? null;
     const displayParts = displayCombo ? formatCombo(displayCombo) : null;
     const hasKey = !!displayCombo;
     const isPreview = !!preview;
-    const conflictName =
-        preview && resolveConflict ? resolveConflict(preview) : undefined;
+    const isReservedPreview = !!reservedKey;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,7 +106,8 @@ function KeyCaptureDialog({
                             hasKey
                                 ? "border-solid border-border"
                                 : "border-dashed border-border/60",
-                            isPreview && "border-primary/60"
+                            isPreview && "border-primary/60",
+                            isReservedPreview && "border-destructive/60"
                         )}
                     >
                         {displayParts ? (
@@ -111,7 +117,10 @@ function KeyCaptureDialog({
                                         key={`part-${part}`}
                                         className={cn(
                                             "text-base px-2.5 py-1 h-auto",
-                                            !isPreview && "opacity-40"
+                                            !isPreview &&
+                                                !isReservedPreview &&
+                                                "opacity-40",
+                                            isReservedPreview && "opacity-50"
                                         )}
                                     >
                                         {part}
@@ -125,11 +134,9 @@ function KeyCaptureDialog({
                         )}
                     </div>
 
-                    {conflictName && (
+                    {isReservedPreview && (
                         <p className="text-xs text-destructive text-center">
-                            {t("Also assigned to: {{name}}", {
-                                name: conflictName,
-                            })}
+                            {t("This shortcut is reserved by the application")}
                         </p>
                     )}
 

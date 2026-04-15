@@ -235,7 +235,7 @@ export type i18nKeybindings = Recordify<
     | "Assign keybinding"
     | "Press a key or combination"
     | "Waiting for input..."
-    | "Also assigned to: {{name}}"
+    | "This shortcut is reserved by the application"
     | "cancel"
     | "remove"
 >;
