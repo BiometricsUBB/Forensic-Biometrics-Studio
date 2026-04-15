@@ -18,6 +18,7 @@ import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import { WORKING_MODE } from "@/views/selectMode";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
+import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import {
     clamp,
     formatReportDateTime,
@@ -65,6 +66,15 @@ const IMAGE_CELL_SIZE = 200;
 const ROWS_PER_PAGE = 4;
 const FULL_CIRCLE = Math.PI * 2;
 const CLOCKWISE_START_ANGLE = -Math.PI / 4;
+const RAY_LINE_LENGTH_MULTIPLIER = 4;
+const CANVAS_CONTEXT_ERROR = "Failed to create canvas context.";
+
+const normalizeAngleRad = (value: number) => {
+    let angle = value;
+    while (angle <= -Math.PI) angle += FULL_CIRCLE;
+    while (angle > Math.PI) angle -= FULL_CIRCLE;
+    return angle;
+};
 
 const getMimeTypeFromName = (name: string) => {
     const lower = name.toLowerCase();
@@ -202,23 +212,180 @@ const renderImageWithMarkings = async (
     return canvas as HTMLCanvasElement;
 };
 
+const getMarkingDirectionRad = (marking: MarkingClass) => {
+    const withAngle = marking as MarkingClass & { angleRad?: unknown };
+    if (
+        typeof withAngle.angleRad === "number" &&
+        Number.isFinite(withAngle.angleRad)
+    ) {
+        return withAngle.angleRad;
+    }
+
+    const withEndpoint = marking as MarkingClass & {
+        endpoint?: { x: number; y: number };
+    };
+    if (
+        withEndpoint.endpoint &&
+        Number.isFinite(withEndpoint.endpoint.x) &&
+        Number.isFinite(withEndpoint.endpoint.y)
+    ) {
+        const dx = withEndpoint.endpoint.x - marking.origin.x;
+        const dy = withEndpoint.endpoint.y - marking.origin.y;
+        if (dx === 0 && dy === 0) return null;
+        return Math.atan2(dy, dx);
+    }
+
+    return null;
+};
+
+const getAlignmentRotationRad = (left: MarkingClass, right: MarkingClass) => {
+    const leftDirection = getMarkingDirectionRad(left);
+    const rightDirection = getMarkingDirectionRad(right);
+    if (leftDirection === null || rightDirection === null) {
+        return 0;
+    }
+
+    return normalizeAngleRad(leftDirection - rightDirection);
+};
+
+const getFeatureCropCenter = (
+    marking: MarkingClass,
+    markingType: MarkingType | undefined,
+    sizeScale: number
+) => {
+    const withEndpoint = marking as MarkingClass & {
+        endpoint?: { x: number; y: number };
+    };
+
+    if (
+        withEndpoint.endpoint &&
+        Number.isFinite(withEndpoint.endpoint.x) &&
+        Number.isFinite(withEndpoint.endpoint.y)
+    ) {
+        return {
+            x: (marking.origin.x + withEndpoint.endpoint.x) / 2,
+            y: (marking.origin.y + withEndpoint.endpoint.y) / 2,
+        };
+    }
+
+    if (marking.markingClass === MARKING_CLASS.RAY) {
+        const direction = getMarkingDirectionRad(marking);
+        if (direction !== null) {
+            const scaledSize = Math.max(
+                2,
+                (markingType?.size ?? 10) * sizeScale
+            );
+            const rayLength = RAY_LINE_LENGTH_MULTIPLIER * scaledSize;
+            return {
+                x: marking.origin.x + (-Math.sin(direction) * rayLength) / 2,
+                y: marking.origin.y + (Math.cos(direction) * rayLength) / 2,
+            };
+        }
+    }
+
+    return {
+        x: marking.origin.x,
+        y: marking.origin.y,
+    };
+};
+
+const getExpandedCropSizeForRotation = (
+    targetSize: number,
+    rotateRad: number
+) => {
+    const absSin = Math.abs(Math.sin(rotateRad));
+    const absCos = Math.abs(Math.cos(rotateRad));
+    return Math.ceil(targetSize * (absSin + absCos));
+};
+
 const cropCanvas = (
     source: HTMLCanvasElement,
     centerX: number,
     centerY: number,
-    size: number
+    size: number,
+    rotateRad = 0
 ) => {
-    const safeSize = Math.max(1, Math.min(size, source.width, source.height));
+    const targetSize = Math.max(1, Math.min(size, source.width, source.height));
+    const expandedSize =
+        Math.abs(rotateRad) < 1e-4
+            ? targetSize
+            : getExpandedCropSizeForRotation(targetSize, rotateRad);
+    const safeSize = Math.max(
+        1,
+        Math.min(expandedSize, source.width, source.height)
+    );
+
     const half = safeSize / 2;
-    const sx = clamp(centerX - half, 0, source.width - safeSize);
-    const sy = clamp(centerY - half, 0, source.height - safeSize);
+    const sx = Math.round(centerX - half);
+    const sy = Math.round(centerY - half);
     const canvas = document.createElement("canvas");
     canvas.width = safeSize;
     canvas.height = safeSize;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Failed to create canvas context.");
-    ctx.drawImage(source, sx, sy, safeSize, safeSize, 0, 0, safeSize, safeSize);
-    return canvas.toDataURL("image/png");
+    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, safeSize, safeSize);
+
+    const srcX = clamp(sx, 0, source.width);
+    const srcY = clamp(sy, 0, source.height);
+    const dstX = Math.max(0, -sx);
+    const dstY = Math.max(0, -sy);
+    const srcWidth = Math.max(
+        0,
+        Math.min(source.width - srcX, safeSize - dstX)
+    );
+    const srcHeight = Math.max(
+        0,
+        Math.min(source.height - srcY, safeSize - dstY)
+    );
+
+    if (srcWidth > 0 && srcHeight > 0) {
+        ctx.drawImage(
+            source,
+            srcX,
+            srcY,
+            srcWidth,
+            srcHeight,
+            dstX,
+            dstY,
+            srcWidth,
+            srcHeight
+        );
+    }
+
+    if (Math.abs(rotateRad) < 1e-4) {
+        return canvas.toDataURL("image/png");
+    }
+
+    const rotated = document.createElement("canvas");
+    rotated.width = safeSize;
+    rotated.height = safeSize;
+    const rotatedCtx = rotated.getContext("2d");
+    if (!rotatedCtx) throw new Error(CANVAS_CONTEXT_ERROR);
+    rotatedCtx.translate(safeSize / 2, safeSize / 2);
+    rotatedCtx.rotate(rotateRad);
+    rotatedCtx.drawImage(canvas, -safeSize / 2, -safeSize / 2);
+    rotatedCtx.setTransform(1, 0, 0, 1, 0, 0);
+
+    const finalCanvas = document.createElement("canvas");
+    finalCanvas.width = targetSize;
+    finalCanvas.height = targetSize;
+    const finalCtx = finalCanvas.getContext("2d");
+    if (!finalCtx) throw new Error(CANVAS_CONTEXT_ERROR);
+    const cutOffset = Math.max(0, (safeSize - targetSize) / 2);
+    finalCtx.drawImage(
+        rotated,
+        cutOffset,
+        cutOffset,
+        targetSize,
+        targetSize,
+        0,
+        0,
+        targetSize,
+        targetSize
+    );
+
+    return finalCanvas.toDataURL("image/png");
 };
 
 const createOverviewCalloutImage = async (
@@ -236,7 +403,7 @@ const createOverviewCalloutImage = async (
     canvas.width = width + margin * 2;
     canvas.height = height + margin * 2;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error("Failed to create canvas context.");
+    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -624,18 +791,40 @@ export const generateReportPdfWithDialog = async (
                     ]
                 );
 
+                const rightRotationRad = getAlignmentRotationRad(
+                    feature.left,
+                    feature.right
+                );
+                const leftTypeDefinition = markingTypes.find(
+                    type => type.id === feature.left.typeId
+                );
+                const rightTypeDefinition = markingTypes.find(
+                    type => type.id === feature.right.typeId
+                );
+                const leftCenter = getFeatureCropCenter(
+                    feature.left,
+                    leftTypeDefinition,
+                    1.6
+                );
+                const rightCenter = getFeatureCropCenter(
+                    feature.right,
+                    rightTypeDefinition,
+                    1.6
+                );
+
                 return {
                     left: cropCanvas(
                         leftSingleCanvas,
-                        feature.left.origin.x,
-                        feature.left.origin.y,
+                        leftCenter.x,
+                        leftCenter.y,
                         IMAGE_CELL_SIZE
                     ),
                     right: cropCanvas(
                         rightSingleCanvas,
-                        feature.right.origin.x,
-                        feature.right.origin.y,
-                        IMAGE_CELL_SIZE
+                        rightCenter.x,
+                        rightCenter.y,
+                        IMAGE_CELL_SIZE,
+                        rightRotationRad
                     ),
                 };
             })
