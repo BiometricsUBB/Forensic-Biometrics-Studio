@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
-import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { WORKING_MODE } from "@/views/selectMode";
 import KeyCaptureDialog from "@/components/ui/key-capture-dialog";
@@ -26,22 +25,6 @@ function MarkingTypeKeybinding({
     const [open, setOpen] = useState(false);
 
     const { add, remove } = KeybindingsStore.actions.typesKeybindings;
-
-    const allBindings = KeybindingsStore.use(state => state.typesKeybindings);
-
-    const resolveConflict = (combo: string): string | undefined => {
-        const conflict = allBindings.find(
-            x =>
-                x.boundKey === combo &&
-                x.workingMode === workingMode &&
-                x.typeId !== typeId
-        );
-        if (!conflict) return undefined;
-        return (
-            MarkingTypesStore.state.types.find(t => t.id === conflict.typeId)
-                ?.displayName ?? conflict.typeId
-        );
-    };
 
     const handleKeyBind = (combo: string) => {
         add({ workingMode, boundKey: combo, typeId });
@@ -94,7 +77,6 @@ function MarkingTypeKeybinding({
                 open={open}
                 onOpenChange={setOpen}
                 boundKey={boundKey}
-                resolveConflict={resolveConflict}
                 onKeyBind={handleKeyBind}
                 onKeyUnbind={boundKey ? handleKeyUnbind : undefined}
             />
