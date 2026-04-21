@@ -15,18 +15,6 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { Point } from "@/lib/markings/Point";
 import { Calibration } from "@/lib/stores/Markings/Markings.store";
-import { PolylineMarking } from "@/lib/markings/PolylineMarking";
-
-const getBoundingBox = (points: Point[]) =>
-    points.reduce(
-        (acc, p) => ({
-            minX: Math.min(acc.minX, p.x),
-            minY: Math.min(acc.minY, p.y),
-            maxX: Math.max(acc.maxX, p.x),
-            maxY: Math.max(acc.maxY, p.y),
-        }),
-        { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-    );
 
 const getBoundingBox = (points: Point[]) =>
     points.reduce(
