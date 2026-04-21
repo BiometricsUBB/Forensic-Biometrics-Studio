@@ -24,8 +24,7 @@ import { WORKING_MODE } from "@/views/selectMode";
 import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { toast } from "sonner";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
-import { PolygonMarking } from "@/lib/markings/PolygonMarking";
-import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 
 type ImageInfo = {
     name: string | null;
@@ -55,7 +54,7 @@ export type ExportObject = {
             endpoint?:
                 | LineSegmentMarking["endpoint"]
                 | BoundingBoxMarking["endpoint"];
-            points?: PolygonMarking["points"];
+            points?: PointsMarkingClass["points"];
         }[];
     };
 };
@@ -134,8 +133,7 @@ async function getData(
                     : {}),
                 ...("points" in m
                     ? {
-                          points: (m as PolygonMarking | RectangleMarking)
-                              .points,
+                          points: (m as PointsMarkingClass).points,
                       }
                     : {}),
             })),

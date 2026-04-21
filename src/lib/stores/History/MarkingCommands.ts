@@ -6,8 +6,7 @@ import { PointMarking } from "@/lib/markings/PointMarking";
 import { RayMarking } from "@/lib/markings/RayMarking";
 import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
-import { PolygonMarking } from "@/lib/markings/PolygonMarking";
-import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { MeasurementMarking } from "@/lib/markings/MeasurementMarking";
 import { Command } from "./Command";
 import { MarkingsStore } from "../Markings/Markings";
@@ -82,24 +81,8 @@ const cloneMarking = (marking: MarkingClass): MarkingClass => {
         );
     }
 
-    if (marking instanceof PolygonMarking) {
-        return new PolygonMarking(
-            marking.label,
-            clonedOrigin,
-            marking.typeId,
-            marking.points.map(point => ({ ...point })),
-            clonedIds
-        );
-    }
-
-    if (marking instanceof RectangleMarking) {
-        return new RectangleMarking(
-            marking.label,
-            clonedOrigin,
-            marking.typeId,
-            marking.points.map(point => ({ ...point })),
-            clonedIds
-        );
+    if (marking instanceof PointsMarkingClass) {
+        return marking.clone(clonedIds);
     }
 
     return marking;

@@ -5,6 +5,7 @@ import { LineSegmentMarkingHandler } from "./lineSegmentMarkingHandler";
 import { BoundingBoxMarkingHandler } from "./boundingBoxMarkingHandler";
 import { RectangleMarkingHandler } from "./rectangleMarkingHandler";
 import { PolygonMarkingHandler } from "./polygonMarkingHandler";
+import { TriangleMarkingHandler } from "./triangleMarkingHandler";
 
 // eslint-disable-next-line import/no-cycle
 export * from "./markingHandler";
@@ -15,6 +16,7 @@ export * from "./lineSegmentMarkingHandler";
 export * from "./boundingBoxMarkingHandler";
 export * from "./polygonMarkingHandler";
 export * from "./rectangleMarkingHandler";
+export * from "./triangleMarkingHandler";
 
 export const MARKING_HANDLERS = {
     [MARKING_CLASS.POINT]: PointMarkingHandler,
@@ -23,4 +25,5 @@ export const MARKING_HANDLERS = {
     [MARKING_CLASS.BOUNDING_BOX]: BoundingBoxMarkingHandler,
     [MARKING_CLASS.RECTANGLE]: RectangleMarkingHandler,
     [MARKING_CLASS.POLYGON]: PolygonMarkingHandler,
+    [MARKING_CLASS.TRIANGLE]: TriangleMarkingHandler,
 };
