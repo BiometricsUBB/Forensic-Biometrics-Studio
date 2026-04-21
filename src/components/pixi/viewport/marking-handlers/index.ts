@@ -14,7 +14,6 @@ export * from "./markingHandler";
 export * from "./rayMarkingHandler";
 export * from "./pointMarkingHandler";
 export * from "./lineSegmentMarkingHandler";
-// Ta linijka jest kluczowa dla Twojego błędu:
 export * from "./boundingBoxMarkingHandler";
 export * from "./polygonMarkingHandler";
 export * from "./rectangleMarkingHandler";
