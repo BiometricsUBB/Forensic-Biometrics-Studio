@@ -9,6 +9,8 @@ import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { Point } from "@/lib/markings/Point";
 import { getAdjustedPosition } from "@/components/pixi/viewport/utils/transform-point";
 
+const MIN_DISTANCE_SQ = 9; // 3px threshold, squared to avoid sqrt
+
 export class FreehandMarkingHandler extends MarkingHandler {
     private points: Point[] = [];
 
@@ -61,8 +63,14 @@ export class FreehandMarkingHandler extends MarkingHandler {
         const { markingsStore } = this.plugin.handlerParams;
 
         const pos = this.getAdjustedPos(e);
-        this.points.push(pos);
+        const last = this.points[this.points.length - 1];
+        if (last) {
+            const dx = pos.x - last.x;
+            const dy = pos.y - last.y;
+            if (dx * dx + dy * dy < MIN_DISTANCE_SQ) return;
+        }
 
+        this.points.push(pos);
         markingsStore.actions.temporaryMarking.updateTemporaryMarking({
             points: [...this.points],
         });
