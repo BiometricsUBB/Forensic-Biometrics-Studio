@@ -18,6 +18,8 @@ const d: Dictionary = {
                     bounding_box: "Bounding box (legacy)",
                     rectangle: "Rectangle",
                     polygon: "Polygon",
+                    triangle: "Triangle",
+                    polyline: "Polyline",
                     measurement: "Measurement / Ruler",
                 },
             },

@@ -56,6 +56,8 @@ const d: Dictionary = {
         "Paint over bright spots to filter them out",
     "Preview ready. Return to edit or save.":
         "Preview ready. Return to edit or save.",
+    "Polyline requires at least 2 segments":
+        "Polyline requires at least 2 segments",
 };
 
 export default d;

@@ -14,8 +14,7 @@ import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { RayMarking } from "@/lib/markings/RayMarking";
 import { PointMarking } from "@/lib/markings/PointMarking";
 import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
-import { PolygonMarking } from "@/lib/markings/PolygonMarking";
-import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { ActionProduceCallback } from "../immer.helpers";
 import {
@@ -220,22 +219,8 @@ class StoreClass {
                                 (marking as BoundingBoxMarking).endpoint,
                                 idsToUse
                             );
-                        } else if (marking instanceof PolygonMarking) {
-                            mToPush = new PolygonMarking(
-                                marking.label,
-                                marking.origin,
-                                marking.typeId,
-                                (marking as PolygonMarking).points,
-                                idsToUse
-                            );
-                        } else if (marking instanceof RectangleMarking) {
-                            mToPush = new RectangleMarking(
-                                marking.label,
-                                marking.origin,
-                                marking.typeId,
-                                (marking as RectangleMarking).points,
-                                idsToUse
-                            );
+                        } else if (marking instanceof PointsMarkingClass) {
+                            mToPush = marking.clone(idsToUse);
                         }
                         state.push(mToPush);
                     })
@@ -287,23 +272,8 @@ class StoreClass {
                                     idsToUse
                                 );
                             }
-                            if (m instanceof PolygonMarking) {
-                                return new PolygonMarking(
-                                    m.label,
-                                    m.origin,
-                                    m.typeId,
-                                    (m as PolygonMarking).points,
-                                    idsToUse
-                                );
-                            }
-                            if (m instanceof RectangleMarking) {
-                                return new RectangleMarking(
-                                    m.label,
-                                    m.origin,
-                                    m.typeId,
-                                    (m as RectangleMarking).points,
-                                    idsToUse
-                                );
+                            if (m instanceof PointsMarkingClass) {
+                                return m.clone(idsToUse);
                             }
                             return m;
                         });
@@ -445,10 +415,7 @@ class StoreClass {
                             m.endpoint.x *= scaleX;
                             m.endpoint.y *= scaleY;
                         }
-                        if (
-                            m instanceof PolygonMarking ||
-                            m instanceof RectangleMarking
-                        ) {
+                        if (m instanceof PointsMarkingClass) {
                             m.points.forEach(p => {
                                 p.x *= scaleX;
                                 p.y *= scaleY;
@@ -468,8 +435,7 @@ class StoreClass {
                     | RayMarking
                     | LineSegmentMarking
                     | BoundingBoxMarking
-                    | PolygonMarking
-                    | RectangleMarking
+                    | PointsMarkingClass
                 >
             ) =>
                 this.setTemporaryMarking(

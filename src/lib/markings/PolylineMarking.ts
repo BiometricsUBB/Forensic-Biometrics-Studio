@@ -3,8 +3,8 @@ import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { Point } from "@/lib/markings/Point";
 import { PointsMarkingClass } from "@/lib/markings/PointsMarkingClass";
 
-export class RectangleMarking extends PointsMarkingClass {
-    readonly markingClass = MARKING_CLASS.RECTANGLE;
+export class PolylineMarking extends PointsMarkingClass {
+    readonly markingClass = MARKING_CLASS.POLYLINE;
 
     constructor(
         label: MarkingClass["label"],
@@ -17,7 +17,7 @@ export class RectangleMarking extends PointsMarkingClass {
     }
 
     public clone(ids: string[]): this {
-        return new RectangleMarking(
+        return new PolylineMarking(
             this.label,
             { ...this.origin },
             this.typeId,

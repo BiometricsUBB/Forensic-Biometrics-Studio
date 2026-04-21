@@ -29,8 +29,16 @@ import { BoundingBoxMarking } from "@/lib/markings/BoundingBoxMarking";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";
+import { TriangleMarking } from "@/lib/markings/TriangleMarking";
+import { PolylineMarking } from "@/lib/markings/PolylineMarking";
 import { Point } from "@/lib/markings/Point";
 import { ExportObject } from "./saveMarkingsDataWithDialog";
+
+type PointsMarkingConstructor =
+    | typeof PolygonMarking
+    | typeof RectangleMarking
+    | typeof TriangleMarking
+    | typeof PolylineMarking;
 
 const MINIMUM_APP_VERSION = "0.5.0";
 
@@ -114,11 +122,11 @@ function extractMarkingIds(
     return legacyId ? [legacyId] : [];
 }
 
-function createPolygonOrRectangleMarking(
+function createPointsMarking(
     baseArgs: readonly [number, Point, string],
     marking: ExportObject["data"]["markings"][0],
     ids: string[],
-    MarkingConstructor: typeof PolygonMarking | typeof RectangleMarking
+    MarkingConstructor: PointsMarkingConstructor
 ): MarkingClass {
     const { points } = marking as { points?: Point[] };
     if (!points) {
@@ -145,19 +153,18 @@ function createMarkingFromData(
         case MARKING_CLASS.BOUNDING_BOX:
             return new BoundingBoxMarking(...baseArgs, marking.endpoint!, ids);
         case MARKING_CLASS.POLYGON:
-            return createPolygonOrRectangleMarking(
-                baseArgs,
-                marking,
-                ids,
-                PolygonMarking
-            );
+            return createPointsMarking(baseArgs, marking, ids, PolygonMarking);
         case MARKING_CLASS.RECTANGLE:
-            return createPolygonOrRectangleMarking(
+            return createPointsMarking(
                 baseArgs,
                 marking,
                 ids,
                 RectangleMarking
             );
+        case MARKING_CLASS.TRIANGLE:
+            return createPointsMarking(baseArgs, marking, ids, TriangleMarking);
+        case MARKING_CLASS.POLYLINE:
+            return createPointsMarking(baseArgs, marking, ids, PolylineMarking);
         default:
             throw new Error(`Unknown marking class: ${marking.markingClass}`);
     }
