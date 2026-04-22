@@ -77,6 +77,11 @@ export class FreehandMarkingHandler extends MarkingHandler {
     }
 
     handleLMBUp(e: FederatedPointerEvent) {
+        if (this.points.length < 2) {
+            this.cleanup();
+            return;
+        }
+
         const pos = this.getAdjustedPos(e);
         const finalPoints = [...this.points, pos];
         const { markingsStore } = this.plugin.handlerParams;
