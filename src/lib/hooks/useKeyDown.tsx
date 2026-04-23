@@ -1,41 +1,31 @@
-import { useCallback, useEffect } from "react";
-
-const CONTROL_KEY = "Control";
-const SHIFT_KEY = "Shift";
-const ALT_KEY = "Alt";
-const META_KEY = "Meta";
-
-const SPECIAL_KEYS = [CONTROL_KEY, SHIFT_KEY, ALT_KEY, META_KEY];
+import { useEffect, useRef } from "react";
+import { isModifierKey } from "../utils/keybinding";
 
 export const useKeyDown = (
     callback: (event: KeyboardEvent) => void,
-    keys: string[]
+    keys: readonly string[]
 ) => {
-    const onKeyDown = useCallback(
-        (event: KeyboardEvent) => {
-            const inputField = document.querySelector("input:focus");
-            if (inputField) return;
-
-            if (
-                keys
-                    .filter(key => !SPECIAL_KEYS.includes(key))
-                    .every(key => event.key === key)
-            ) {
-                if (keys.includes(CONTROL_KEY) && !event.ctrlKey) return;
-                if (keys.includes(SHIFT_KEY) && !event.shiftKey) return;
-                if (keys.includes(ALT_KEY) && !event.altKey) return;
-                if (keys.includes(META_KEY) && !event.metaKey) return;
-
-                event.preventDefault();
-                callback(event);
-            }
-        },
-        [callback, keys]
-    );
+    const callbackRef = useRef(callback);
     useEffect(() => {
-        document.addEventListener("keydown", onKeyDown);
-        return () => {
-            document.removeEventListener("keydown", onKeyDown);
+        callbackRef.current = callback;
+    });
+
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (document.querySelector("input:focus, textarea:focus")) return;
+
+            const mainKeys = keys.filter(k => !isModifierKey(k));
+            if (!mainKeys.every(k => event.key === k)) return;
+            if (keys.includes("Control") && !event.ctrlKey) return;
+            if (keys.includes("Shift") && !event.shiftKey) return;
+            if (keys.includes("Alt") && !event.altKey) return;
+            if (keys.includes("Meta") && !event.metaKey) return;
+
+            event.preventDefault();
+            callbackRef.current(event);
         };
-    }, [onKeyDown]);
+
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [keys]);
 };

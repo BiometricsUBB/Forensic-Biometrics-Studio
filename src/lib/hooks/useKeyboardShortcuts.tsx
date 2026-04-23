@@ -9,7 +9,7 @@ import {
 import { CUSTOM_GLOBAL_EVENTS } from "../utils/const";
 import { useKeyDown } from "./useKeyDown";
 import { GlobalHistoryManager } from "../stores/History/HistoryManager";
-import { serializeCombo } from "../utils/keybinding";
+import { APP_SHORTCUTS, serializeCombo } from "../utils/keybinding";
 
 export const useKeyboardShortcuts = () => {
     const { actions } = DashboardToolbarStore;
@@ -26,39 +26,39 @@ export const useKeyboardShortcuts = () => {
         document.dispatchEvent(
             new Event(CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING)
         );
-    }, ["Escape"]);
+    }, APP_SHORTCUTS.INTERRUPT_MARKING);
 
     useKeyDown(() => {
         setCursorMode(CURSOR_MODES.SELECTION);
-    }, ["F1"]);
+    }, APP_SHORTCUTS.SELECTION_MODE);
 
     useKeyDown(() => {
         setCursorMode(CURSOR_MODES.MARKING);
-    }, ["F2"]);
+    }, APP_SHORTCUTS.MARKING_MODE);
 
     useKeyDown(() => {
         toggleLockedViewport();
-    }, ["l"]);
+    }, APP_SHORTCUTS.LOCK_VIEWPORT);
 
     useKeyDown(() => {
         toggleLockScaleSync();
-    }, ["m"]);
+    }, APP_SHORTCUTS.LOCK_SCALE_SYNC);
 
     useKeyDown(() => {
         GlobalHistoryManager.undo();
-    }, ["Control", "z"]);
+    }, APP_SHORTCUTS.UNDO_WIN);
 
     useKeyDown(() => {
         GlobalHistoryManager.undo();
-    }, ["Meta", "z"]);
+    }, APP_SHORTCUTS.UNDO_MAC);
 
     useKeyDown(() => {
         GlobalHistoryManager.redo();
-    }, ["Control", "y"]);
+    }, APP_SHORTCUTS.REDO_WIN);
 
     useKeyDown(() => {
         GlobalHistoryManager.redo();
-    }, ["Meta", "Shift", "z"]);
+    }, APP_SHORTCUTS.REDO_MAC);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
