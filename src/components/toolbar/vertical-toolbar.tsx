@@ -35,7 +35,7 @@ import {
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { formatCombo } from "@/lib/utils/keybinding";
+import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
 import { TracingPanel } from "./tracing-panel";
@@ -45,6 +45,7 @@ export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
 export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const { t } = useTranslation();
+    const formatCombo = useFormatCombo();
     const collapsiblePanelTransitionClass =
         "overflow-hidden transition-all duration-300 ease-in-out";
     const collapsiblePanelExpandedClass = "max-h-96 opacity-100 mt-2";

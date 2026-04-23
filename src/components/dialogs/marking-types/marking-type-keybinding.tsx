@@ -4,7 +4,7 @@ import { MarkingType } from "@/lib/markings/MarkingType";
 import { WORKING_MODE } from "@/views/selectMode";
 import KeyCaptureDialog from "@/components/ui/key-capture-dialog";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
-import { formatCombo } from "@/lib/utils/keybinding";
+import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
 import { cn } from "@/lib/utils/shadcn";
 import { Plus } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
@@ -23,6 +23,7 @@ function MarkingTypeKeybinding({
     isConflict = false,
 }: TypesKeyCaptureDialogProps) {
     const [open, setOpen] = useState(false);
+    const formatCombo = useFormatCombo();
 
     const { add, remove } = KeybindingsStore.actions.typesKeybindings;
 

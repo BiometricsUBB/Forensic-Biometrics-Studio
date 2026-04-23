@@ -12,8 +12,8 @@ import {
     serializeCombo,
     isModifierOnly,
     isReserved,
-    formatCombo,
 } from "@/lib/utils/keybinding";
+import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
 
 interface KeyCaptureDialogProps {
     open: boolean;
@@ -34,6 +34,7 @@ function KeyCaptureDialog({
     const [preview, setPreview] = useState<string | null>(null);
     const [reservedKey, setReservedKey] = useState<string | null>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const formatCombo = useFormatCombo();
 
     const handleKeyDown = (e: KeyboardEvent) => {
         e.preventDefault();
