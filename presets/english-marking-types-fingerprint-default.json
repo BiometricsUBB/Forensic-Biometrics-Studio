@@ -1,0 +1,192 @@
+{
+    "metadata": {
+        "software": {
+            "name": "biometrics-studio",
+            "version": "0.6.9"
+        }
+    },
+    "data": {
+        "markingTypes": [
+            {
+                "id": "09722531-e8d8-4b51-8061-8c4e062add5a",
+                "name": "Core",
+                "displayName": "Core",
+                "markingClass": "point",
+                "backgroundColor": "#e17e3d",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "63387b93-d801-40d4-bcc4-2d959fce1531",
+                "name": "Delta",
+                "displayName": "Delta",
+                "markingClass": "point",
+                "backgroundColor": "#60d2b6",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "49173ccd-98a8-4aa9-9eae-f4df32dbf583",
+                "name": "RidgeBeginning",
+                "displayName": "Ridge beginning",
+                "markingClass": "ray",
+                "backgroundColor": "#2871e6",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "e6cbde52-5a18-4236-8287-7a1daf941ba9",
+                "name": "RidgeEnding",
+                "displayName": "Ridge ending",
+                "markingClass": "ray",
+                "backgroundColor": "#d1db3d",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "f47c4b97-2d62-4959-aa21-edebfa7a756a",
+                "name": "Bifurcation",
+                "displayName": "Bifurcation",
+                "markingClass": "ray",
+                "backgroundColor": "#36d938",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "4953e6e4-356a-48c2-bdae-eaeaa5ebff68",
+                "name": "RidgeMerge",
+                "displayName": "Ridge joining",
+                "markingClass": "ray",
+                "backgroundColor": "#f93e98",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "8ad7471b-d25b-4c49-92a7-08b27ac79aab",
+                "name": "Hook",
+                "displayName": "Hook",
+                "markingClass": "line_segment",
+                "backgroundColor": "#9d4edd",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "7c12e813-15c5-4087-8428-3723ad3e4956",
+                "name": "Section",
+                "displayName": "Island",
+                "markingClass": "line_segment",
+                "backgroundColor": "#fff6bd",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "58b97c5b-713a-4452-ba4a-83c5ce639bcf",
+                "name": "Bridge",
+                "displayName": "Bridge",
+                "markingClass": "line_segment",
+                "backgroundColor": "#d25171",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "3bc11b0e-0744-4eb8-9ecc-5f22213633f1",
+                "name": "Point",
+                "displayName": "Point",
+                "markingClass": "point",
+                "backgroundColor": "#f448cf",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "b59bf4ab-3737-4822-b333-beaf95612f04",
+                "name": "Pore",
+                "displayName": "Pore",
+                "markingClass": "point",
+                "backgroundColor": "#ff5733",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "26595e0c-208b-48b3-b65c-63ac0e5f3d15",
+                "name": "Lake",
+                "displayName": "Lake",
+                "markingClass": "line_segment",
+                "backgroundColor": "#d279cf",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "07317d85-93a3-48a4-b96e-3ee5a2708ac0",
+                "name": "Ridge protrusion",
+                "displayName": "Ridge protrusion",
+                "markingClass": "point",
+                "backgroundColor": "#68d651",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "a71d05c4-a735-4191-88bb-9b6ddb5073d7",
+                "name": "Ridge indentation",
+                "displayName": "Ridge indentation",
+                "markingClass": "point",
+                "backgroundColor": "#ff914d",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "a9b5408a-97a4-45f1-85db-be33053a371c",
+                "name": "Dot",
+                "displayName": "Dot",
+                "markingClass": "point",
+                "backgroundColor": "#f78fb3",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "35b5d779-f12b-469f-95de-7bfc678ad0c8",
+                "name": "Incipient ridge",
+                "displayName": "Incipient ridge",
+                "markingClass": "line_segment",
+                "backgroundColor": "#1f7a8c",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "23af05e0-2aaf-46fd-9f0f-16b075a1cfdb",
+                "name": "Scar",
+                "displayName": "Scar",
+                "markingClass": "line_segment",
+                "backgroundColor": "#ffc300",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            },
+            {
+                "id": "dcbe2774-07df-45c2-8318-a0d3b40dcc96",
+                "name": "Crease",
+                "displayName": "Crease",
+                "markingClass": "line_segment",
+                "backgroundColor": "#2d6a4f",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "FINGERPRINT"
+            }
+        ]
+    }
+}
