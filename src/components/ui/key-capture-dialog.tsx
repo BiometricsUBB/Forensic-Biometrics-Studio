@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, KeyboardEvent } from "react";
+import { useState, useRef, KeyboardEvent } from "react";
 import {
     Dialog,
     DialogContent,
@@ -34,14 +34,6 @@ function KeyCaptureDialog({
     const [preview, setPreview] = useState<string | null>(null);
     const [reservedKey, setReservedKey] = useState<string | null>(null);
     const contentRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (open) {
-            setPreview(null);
-            setReservedKey(null);
-            setTimeout(() => contentRef.current?.focus(), 0);
-        }
-    }, [open]);
 
     const handleKeyDown = (e: KeyboardEvent) => {
         e.preventDefault();
@@ -88,6 +80,12 @@ function KeyCaptureDialog({
                 ref={contentRef}
                 tabIndex={-1}
                 className="grid gap-3 max-w-xs w-full outline-none select-none"
+                onOpenAutoFocus={e => {
+                    e.preventDefault();
+                    setPreview(null);
+                    setReservedKey(null);
+                    contentRef.current?.focus();
+                }}
                 onKeyDown={handleKeyDown}
                 onKeyUp={handleKeyUp}
             >
