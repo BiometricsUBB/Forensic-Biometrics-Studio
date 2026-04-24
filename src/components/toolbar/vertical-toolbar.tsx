@@ -33,6 +33,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { KeybindingsStore } from "@/lib/stores/Keybindings";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
 import { TracingPanel } from "./tracing-panel";
@@ -42,6 +45,7 @@ export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
 
 export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const { t } = useTranslation();
+    const formatCombo = useFormatCombo();
     const collapsiblePanelTransitionClass =
         "overflow-hidden transition-all duration-300 ease-in-out";
     const collapsiblePanelExpandedClass = "max-h-96 opacity-100 mt-2";
@@ -62,6 +66,8 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const hiddenTypes = MarkingTypesStore.use(state => state.hiddenTypes);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
+
+    const keybindings = KeybindingsStore.use(state => state.typesKeybindings);
 
     const availableMarkingTypes = useMemo(
         () =>
@@ -344,26 +350,48 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             align="start"
                             className="max-h-[50vh] overflow-y-auto z-[9999] !min-w-0 w-[var(--radix-dropdown-menu-trigger-width)]"
                         >
-                            {availableMarkingTypes.map(type => (
-                                <DropdownMenuItem
-                                    key={type.id}
-                                    onClick={() => {
-                                        MarkingTypesStore.actions.selectedType.set(
-                                            type.id
-                                        );
-                                    }}
-                                    className="cursor-pointer"
-                                >
-                                    <div
-                                        className="w-4 h-4 rounded-sm border border-border/40 flex-shrink-0"
-                                        style={{
-                                            backgroundColor:
-                                                type.backgroundColor as string,
+                            {availableMarkingTypes.map(type => {
+                                const boundKey = keybindings.find(
+                                    k =>
+                                        k.typeId === type.id &&
+                                        k.workingMode === workingMode
+                                )?.boundKey;
+                                return (
+                                    <DropdownMenuItem
+                                        key={type.id}
+                                        onClick={() => {
+                                            MarkingTypesStore.actions.selectedType.set(
+                                                type.id
+                                            );
                                         }}
-                                    />
-                                    <span>{type.displayName}</span>
-                                </DropdownMenuItem>
-                            ))}
+                                        className="cursor-pointer justify-between gap-4"
+                                    >
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <div
+                                                className="w-4 h-4 rounded-sm border border-border/40 flex-shrink-0"
+                                                style={{
+                                                    backgroundColor:
+                                                        type.backgroundColor as string,
+                                                }}
+                                            />
+                                            <span className="truncate">
+                                                {type.displayName}
+                                            </span>
+                                        </div>
+                                        {boundKey && (
+                                            <KbdGroup className="flex-shrink-0">
+                                                {formatCombo(boundKey).map(
+                                                    part => (
+                                                        <Kbd key={part}>
+                                                            {part}
+                                                        </Kbd>
+                                                    )
+                                                )}
+                                            </KbdGroup>
+                                        )}
+                                    </DropdownMenuItem>
+                                );
+                            })}
                         </DropdownMenuContent>
                     </DropdownMenuPortal>
                 </DropdownMenu>

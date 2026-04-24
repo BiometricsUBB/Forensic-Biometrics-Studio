@@ -8,6 +8,7 @@ import {
 import { t } from "i18next";
 import { readTextFile } from "@tauri-apps/plugin-fs";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { validateFileData } from "@/lib/utils/viewport/loadMarkingsData";
 import { WORKING_MODE } from "@/views/selectMode";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
@@ -101,6 +102,9 @@ export async function loadMarkingTypesData(filePath: string) {
     }
 
     MarkingTypesStore.actions.types.addMany(types);
+    KeybindingsStore.actions.typesKeybindings.cleanupOrphans(
+        MarkingTypesStore.state.types.map(t => t.id)
+    );
     toast.success(t("Marking types imported successfully", { ns: "dialog" }));
 }
 

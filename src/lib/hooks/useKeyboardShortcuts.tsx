@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { useWorkingModeStore } from "@/lib/stores/WorkingMode";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
@@ -8,6 +9,7 @@ import {
 import { CUSTOM_GLOBAL_EVENTS } from "../utils/const";
 import { useKeyDown } from "./useKeyDown";
 import { GlobalHistoryManager } from "../stores/History/HistoryManager";
+import { APP_SHORTCUTS, serializeCombo } from "../utils/keybinding";
 
 export const useKeyboardShortcuts = () => {
     const { actions } = DashboardToolbarStore;
@@ -24,72 +26,70 @@ export const useKeyboardShortcuts = () => {
         document.dispatchEvent(
             new Event(CUSTOM_GLOBAL_EVENTS.INTERRUPT_MARKING)
         );
-    }, ["Escape"]);
+    }, APP_SHORTCUTS.INTERRUPT_MARKING);
 
     useKeyDown(() => {
         setCursorMode(CURSOR_MODES.SELECTION);
-    }, ["F1"]);
+    }, APP_SHORTCUTS.SELECTION_MODE);
 
     useKeyDown(() => {
         setCursorMode(CURSOR_MODES.MARKING);
-    }, ["F2"]);
+    }, APP_SHORTCUTS.MARKING_MODE);
 
-    const handleKeyDown = (key: string) => {
-        const typeId = keybindings.find(
-            keybinding =>
-                keybinding.boundKey === key &&
-                keybinding.workingMode === workingMode
-        )?.typeId;
+    useKeyDown(() => {
+        toggleLockedViewport();
+    }, APP_SHORTCUTS.LOCK_VIEWPORT);
 
-        if (typeId && workingMode) {
+    useKeyDown(() => {
+        toggleLockScaleSync();
+    }, APP_SHORTCUTS.LOCK_SCALE_SYNC);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.undo();
+    }, APP_SHORTCUTS.UNDO_WIN);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.undo();
+    }, APP_SHORTCUTS.UNDO_MAC);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.redo();
+    }, APP_SHORTCUTS.REDO_WIN);
+
+    useKeyDown(() => {
+        GlobalHistoryManager.redo();
+    }, APP_SHORTCUTS.REDO_MAC);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (document.querySelector("input:focus, textarea:focus")) return;
+            if (!workingMode) return;
+
+            const combo = serializeCombo(event);
+            const binding = keybindings.find(
+                k => k.boundKey === combo && k.workingMode === workingMode
+            );
+
+            if (!binding) return;
+
             const typeExists = MarkingTypesStore.state.types.some(
-                type => type.id === typeId && type.category === workingMode
+                type =>
+                    type.id === binding.typeId && type.category === workingMode
             );
 
             if (!typeExists) {
                 KeybindingsStore.actions.typesKeybindings.remove(
-                    typeId,
+                    binding.typeId,
                     workingMode
                 );
                 return;
             }
 
-            MarkingTypesStore.actions.selectedType.set(typeId);
-        }
-    };
+            event.preventDefault();
+            MarkingTypesStore.actions.selectedType.set(binding.typeId);
+        };
 
-    useKeyDown(() => handleKeyDown("0"), ["0"]);
-    useKeyDown(() => handleKeyDown("1"), ["1"]);
-    useKeyDown(() => handleKeyDown("2"), ["2"]);
-    useKeyDown(() => handleKeyDown("3"), ["3"]);
-    useKeyDown(() => handleKeyDown("4"), ["4"]);
-    useKeyDown(() => handleKeyDown("5"), ["5"]);
-    useKeyDown(() => handleKeyDown("6"), ["6"]);
-    useKeyDown(() => handleKeyDown("7"), ["7"]);
-    useKeyDown(() => handleKeyDown("8"), ["8"]);
-    useKeyDown(() => handleKeyDown("9"), ["9"]);
-
-    useKeyDown(() => {
-        toggleLockedViewport();
-    }, ["l"]);
-
-    useKeyDown(() => {
-        toggleLockScaleSync();
-    }, ["m"]);
-
-    useKeyDown(() => {
-        GlobalHistoryManager.undo();
-    }, ["Control", "z"]);
-
-    useKeyDown(() => {
-        GlobalHistoryManager.undo();
-    }, ["Meta", "z"]);
-
-    useKeyDown(() => {
-        GlobalHistoryManager.redo();
-    }, ["Control", "y"]);
-
-    useKeyDown(() => {
-        GlobalHistoryManager.redo();
-    }, ["Meta", "Shift", "z"]);
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [keybindings, workingMode]);
 };

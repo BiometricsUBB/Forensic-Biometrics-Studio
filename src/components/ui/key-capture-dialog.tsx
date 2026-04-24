@@ -1,126 +1,158 @@
-import React, { useState } from "react";
+import { useState, useRef, KeyboardEvent } from "react";
 import {
     Dialog,
     DialogContent,
-    DialogOverlay,
-    DialogPortal,
     DialogTitle,
-    DialogTrigger,
+    DialogDescription,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils/shadcn";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils/shadcn";
+import {
+    serializeCombo,
+    isModifierOnly,
+    isReserved,
+} from "@/lib/utils/keybinding";
+import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
 
 interface KeyCaptureDialogProps {
-    // Current bound key to display
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
     boundKey?: string;
-
-    // Custom validation function that returns error message if invalid
-    validateKey?: (key: string) => string | undefined;
-
-    // Handlers for key operations
-    onKeyBind?: (key: string) => void | Promise<void>;
-    onKeyUnbind?: () => void | Promise<void>;
-
-    // Optional custom trigger and title content
-    triggerContent?: React.ReactNode;
-    dialogTitle?: React.ReactNode;
-
-    // Optional className for trigger button
-    triggerClassName?: string;
+    onKeyBind: (combo: string) => void;
+    onKeyUnbind?: () => void;
 }
 
 function KeyCaptureDialog({
+    open,
+    onOpenChange,
     boundKey,
-    validateKey = () => undefined,
     onKeyBind,
     onKeyUnbind,
-    triggerContent,
-    dialogTitle,
-    triggerClassName,
 }: KeyCaptureDialogProps) {
-    const { t } = useTranslation();
-    const [isOpen, setIsOpen] = useState(false);
-    const [error, setError] = useState("");
-    const [isShaking, setIsShaking] = useState(false);
+    const { t } = useTranslation("keybindings");
+    const [preview, setPreview] = useState<string | null>(null);
+    const [reservedKey, setReservedKey] = useState<string | null>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const formatCombo = useFormatCombo();
 
-    const handleKeyPress = async (
-        event: React.KeyboardEvent<HTMLDivElement>
-    ) => {
-        const { key } = event;
+    const handleKeyDown = (e: KeyboardEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
 
-        if (key === "Delete" && onKeyUnbind) {
-            await onKeyUnbind();
-            setIsOpen(false);
-            setError("");
+        if (e.key === "Escape") {
+            onOpenChange(false);
             return;
         }
 
-        const validationError = validateKey(key);
-        if (validationError) {
-            setError(validationError);
-            setIsShaking(true);
-            setTimeout(() => setIsShaking(false), 500);
+        if ((e.key === "Delete" || e.key === "Backspace") && onKeyUnbind) {
+            onKeyUnbind();
+            onOpenChange(false);
             return;
         }
 
-        if (onKeyBind) {
-            await onKeyBind(key);
-            setIsOpen(false);
-            setError("");
+        if (isModifierOnly(e.nativeEvent)) return;
+
+        if (isReserved(e.nativeEvent)) {
+            setPreview(null);
+            setReservedKey(serializeCombo(e.nativeEvent));
+            return;
         }
+
+        setReservedKey(null);
+        setPreview(serializeCombo(e.nativeEvent));
     };
 
-    const defaultTitle = (
-        <>
-            <span>{t("Press a key", { ns: "keybindings" })}</span>
-            {onKeyUnbind && (
-                <>
-                    <br />
-                    <span>
-                        {t("Press 'Del' to remove keybinding", {
-                            ns: "keybindings",
-                        })}
-                    </span>
-                </>
-            )}
-        </>
-    );
+    const handleKeyUp = (e: KeyboardEvent) => {
+        if (!preview || isModifierOnly(e.nativeEvent)) return;
+        onKeyBind(preview);
+        onOpenChange(false);
+    };
+
+    const displayCombo = reservedKey ?? preview ?? boundKey ?? null;
+    const displayParts = displayCombo ? formatCombo(displayCombo) : null;
+    const hasKey = !!displayCombo;
+    const isPreview = !!preview;
+    const isReservedPreview = !!reservedKey;
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger
-                title={t("Keybinding", { ns: "keybindings" })}
-                className={cn("m-auto", triggerClassName)}
-                onClick={() => {
-                    setIsOpen(true);
-                    setError("");
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent
+                ref={contentRef}
+                tabIndex={-1}
+                className="grid gap-3 max-w-xs w-full outline-none select-none"
+                onOpenAutoFocus={e => {
+                    e.preventDefault();
+                    setPreview(null);
+                    setReservedKey(null);
+                    contentRef.current?.focus();
                 }}
+                onKeyDown={handleKeyDown}
+                onKeyUp={handleKeyUp}
             >
-                {triggerContent ?? boundKey ?? "none"}
-            </DialogTrigger>
+                <div className="flex flex-col items-center gap-1.5 text-center">
+                    <DialogTitle>{t("Assign keybinding")}</DialogTitle>
+                    <DialogDescription className="text-xs">
+                        {t("Press a key or combination")}
+                    </DialogDescription>
+                </div>
 
-            <DialogPortal>
-                <DialogOverlay />
-                <DialogContent
-                    className={cn(
-                        "p-6 outline-none",
-                        isShaking && "shake-animation"
-                    )}
-                    onKeyDown={handleKeyPress}
-                    tabIndex={-1}
-                >
-                    <DialogTitle>{dialogTitle ?? defaultTitle}</DialogTitle>
+                <div className="flex flex-col items-center gap-3 py-2">
+                    <div
+                        className={cn(
+                            "w-full flex items-center justify-center rounded-md h-16",
+                            "border-2 transition-colors",
+                            hasKey
+                                ? "border-solid border-border"
+                                : "border-dashed border-border/60",
+                            isPreview && "border-primary/60",
+                            isReservedPreview && "border-destructive/60"
+                        )}
+                    >
+                        {displayParts ? (
+                            <KbdGroup>
+                                {displayParts.map(part => (
+                                    <Kbd
+                                        key={`part-${part}`}
+                                        className={cn(
+                                            "text-base px-2.5 py-1 h-auto",
+                                            !isPreview &&
+                                                !isReservedPreview &&
+                                                "opacity-40",
+                                            isReservedPreview && "opacity-50"
+                                        )}
+                                    >
+                                        {part}
+                                    </Kbd>
+                                ))}
+                            </KbdGroup>
+                        ) : (
+                            <span className="text-muted-foreground/60 text-sm">
+                                {t("Waiting for input...")}
+                            </span>
+                        )}
+                    </div>
 
-                    {error && (
-                        <div
-                            className="text-destructive text-center"
-                            aria-live="polite"
-                        >
-                            {error}
-                        </div>
+                    {isReservedPreview && (
+                        <p className="text-xs text-destructive text-center">
+                            {t("This shortcut is reserved by the application")}
+                        </p>
                     )}
-                </DialogContent>
-            </DialogPortal>
+
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                            <Kbd>Esc</Kbd>
+                            {t("cancel")}
+                        </span>
+                        {onKeyUnbind && (
+                            <span className="flex items-center gap-1">
+                                <Kbd>Del</Kbd>
+                                {t("remove")}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </DialogContent>
         </Dialog>
     );
 }
