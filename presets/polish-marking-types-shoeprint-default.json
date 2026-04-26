@@ -190,7 +190,7 @@
             {
                 "id": "3e3c5cdd-7b11-424c-b17b-db10754708cf",
                 "name": "Prostokąt",
-                "displayName": "Motylek",
+                "displayName": "G: Motylek",
                 "markingClass": "bounding_box",
                 "backgroundColor": "#aac8aa",
                 "textColor": "#0a130a",
@@ -200,7 +200,7 @@
             {
                 "id": "7828e58f-b299-444b-9fda-5520e6032aa1",
                 "name": "Prostokąt",
-                "displayName": "Kapelusz",
+                "displayName": "G: Kapelusz",
                 "markingClass": "bounding_box",
                 "backgroundColor": "#aac8aa",
                 "textColor": "#0a130a",
