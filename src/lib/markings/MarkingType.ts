@@ -4,7 +4,6 @@ import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 
 export interface MarkingType {
     id: string;
-    name: string;
     displayName: string;
     markingClass: MARKING_CLASS;
     backgroundColor: ColorSource;

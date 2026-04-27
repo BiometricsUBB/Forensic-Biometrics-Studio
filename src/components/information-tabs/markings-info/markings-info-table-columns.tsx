@@ -186,7 +186,7 @@ export const useColumns = (
                 },
                 {
                     accessorKey: "type",
-                    header: t("MarkingType.Keys.name", { ns: "object" }),
+                    header: t("MarkingType.Keys.displayName", { ns: "object" }),
                     size: 120,
                     cell: info =>
                         formatCell(info, ({ row }) => {

@@ -15,7 +15,6 @@ const MEASUREMENT_TOOL_TYPE_ID = "__measurement__";
 
 const MEASUREMENT_TOOL_MARKING_TYPE: MarkingType = {
     id: MEASUREMENT_TOOL_TYPE_ID,
-    name: "measurement-tool",
     displayName: "Measurement",
     markingClass: MARKING_CLASS.MEASUREMENT,
     backgroundColor: "#ffff00",

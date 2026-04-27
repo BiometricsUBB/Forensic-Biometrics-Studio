@@ -37,8 +37,7 @@ const d: Dictionary = {
         Name: "Marking type",
         Keys: {
             id: "ID",
-            displayName: "Local name",
-            name: "Type",
+            displayName: "Name",
             markingClass: "Marking class",
             category: "Category",
             backgroundColor: "Background color",

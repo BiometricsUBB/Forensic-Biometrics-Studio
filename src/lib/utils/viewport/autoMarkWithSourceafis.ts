@@ -38,9 +38,7 @@ export function resolveSourceafisTypeId(kind: string) {
     const match =
         existingTypes.find(t => t.id === desiredId) ||
         existingTypes.find(
-            t =>
-                normalizeTypeName(t.name) === desiredName ||
-                normalizeTypeName(t.displayName) === desiredName
+            t => normalizeTypeName(t.displayName) === desiredName
         );
 
     return match?.id ?? null;

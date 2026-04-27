@@ -38,8 +38,7 @@ const d: Dictionary = {
         Name: "Typ adnotacji",
         Keys: {
             id: "ID",
-            displayName: "Nazwa lokalna",
-            name: "Nazwa",
+            displayName: "Nazwa",
             markingClass: "Klasa adnotacji",
             category: "Kategoria",
             backgroundColor: "Kolor t\u0142a",

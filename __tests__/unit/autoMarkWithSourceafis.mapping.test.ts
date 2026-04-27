@@ -1,5 +1,5 @@
 const mockMarkingTypesState = {
-    types: [] as Array<{ id: string; name: string; displayName: string }>,
+    types: [] as Array<{ id: string; displayName: string }>,
 };
 
 const RIDGE_ID = "e6cbde52-5a18-4236-8287-7a1daf941ba9";
@@ -45,12 +45,10 @@ describe("resolveSourceafisTypeId", () => {
         mockMarkingTypesState.types = [
             {
                 id: BIFURCATION_ID,
-                name: BIFURCATION_NAME,
                 displayName: BIFURCATION_NAME,
             },
             {
                 id: RIDGE_ID,
-                name: RIDGE_NAME,
                 displayName: RIDGE_NAME,
             },
         ];
@@ -62,12 +60,10 @@ describe("resolveSourceafisTypeId", () => {
         mockMarkingTypesState.types = [
             {
                 id: RIDGE_ID,
-                name: RIDGE_NAME,
                 displayName: RIDGE_NAME,
             },
             {
                 id: BIFURCATION_ID,
-                name: BIFURCATION_NAME,
                 displayName: BIFURCATION_NAME,
             },
         ];
@@ -79,12 +75,10 @@ describe("resolveSourceafisTypeId", () => {
         mockMarkingTypesState.types = [
             {
                 id: "ridge-id-by-name",
-                name: "ridge ending",
                 displayName: "ridge ending",
             },
             {
                 id: "bif-id-by-name",
-                name: "bifurcation",
                 displayName: "bifurcation",
             },
         ];

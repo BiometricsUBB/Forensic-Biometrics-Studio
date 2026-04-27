@@ -809,7 +809,7 @@ export const generateReportPdfWithDialog = async (
             const featureTypeDefinition = markingTypes.find(
                 type => type.id === feature.left.typeId
             );
-            const featureType = featureTypeDefinition?.name;
+            const featureType = featureTypeDefinition?.displayName;
             const markerRing = toCssColor(
                 featureTypeDefinition?.backgroundColor,
                 "#cc0000"

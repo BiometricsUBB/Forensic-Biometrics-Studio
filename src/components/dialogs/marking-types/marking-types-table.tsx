@@ -39,11 +39,6 @@ function MarkingTypesTable() {
                             })}
                         </TableHead>
                         <TableHead className="text-center text-card-foreground">
-                            {t(`MarkingType.Keys.name`, {
-                                ns: "object",
-                            })}
-                        </TableHead>
-                        <TableHead className="text-center text-card-foreground">
                             {t(`MarkingType.Keys.markingClass`, {
                                 ns: "object",
                             })}
@@ -75,7 +70,7 @@ function MarkingTypesTable() {
                             <TableCell>
                                 <Input
                                     className="h-6 !p-0 text-center"
-                                    title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
+                                    title={`${t("MarkingType.Keys.displayName", { ns: "object" })}`}
                                     type="text"
                                     value={item.displayName}
                                     onChange={e => {
@@ -84,32 +79,6 @@ function MarkingTypesTable() {
                                         });
                                     }}
                                 />
-                            </TableCell>
-                            {/* 
-                            
-                                TODO:
-                                Allowed changing the typeName input in DEV_ENVIRONMENT until the adding method is redesigned; 
-                                the typeName input should be repalced in the future to only display the typeName through the app;
-
-                            */}
-                            <TableCell>
-                                {IS_DEV_ENVIRONMENT ? (
-                                    <Input
-                                        className="h-6 !p-0 text-center"
-                                        title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
-                                        type="text"
-                                        value={item.name}
-                                        onChange={e => {
-                                            setType(item.id, {
-                                                name: e.target.value,
-                                            });
-                                        }}
-                                    />
-                                ) : (
-                                    <span className="p-1 cursor-default">
-                                        {item.name}
-                                    </span>
-                                )}
                             </TableCell>
                             <TableCell
                                 className={cn("p-1 cursor-default text-center")}

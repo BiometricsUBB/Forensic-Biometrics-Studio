@@ -75,12 +75,6 @@ function MarkingTypesDialogPortal() {
                                                     MarkingTypesStore.actions.types.add(
                                                         {
                                                             id: crypto.randomUUID(),
-                                                            name: t(
-                                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                                {
-                                                                    ns: "object",
-                                                                }
-                                                            ),
                                                             displayName: t(
                                                                 `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
                                                                 {

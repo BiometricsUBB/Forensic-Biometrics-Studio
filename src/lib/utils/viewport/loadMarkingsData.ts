@@ -304,7 +304,6 @@ export async function loadMarkingsData(filePath: string, canvasId: CANVAS_ID) {
                 // set names according to metadata if non-existent use slice of id
                 return {
                     id,
-                    name: metadataTypeName ?? id.slice(0, 6),
                     displayName: metadataTypeName ?? id.slice(0, 6),
                     markingClass,
                     backgroundColor: defaultBackgroundColor,

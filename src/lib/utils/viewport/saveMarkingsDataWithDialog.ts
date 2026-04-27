@@ -113,7 +113,7 @@ async function getData(
                             CANVAS_ID.RIGHT
                         )
                 )
-                .map(c => ({ id: c.id, name: c.name })),
+                .map(c => ({ id: c.id, name: c.displayName })),
         },
         data: {
             markings: markings.map(m => ({

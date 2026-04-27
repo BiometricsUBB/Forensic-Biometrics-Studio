@@ -78,7 +78,7 @@ export async function loadMarkingTypesData(filePath: string) {
 
     const conflicts = MarkingTypesStore.actions.types
         .getConflicts(types)
-        .map(conflict => conflict.name)
+        .map(conflict => conflict.displayName)
         .join(", ");
 
     if (conflicts.length > 0) {
