@@ -58,6 +58,11 @@ const d: Dictionary = {
         "Preview ready. Return to edit or save.",
     "Polyline requires at least 2 segments":
         "Polyline requires at least 2 segments",
+    brightness_desc: "Adjust the overall brightness of the image",
+    contrast_desc:
+        "Adjust the difference between light and dark areas of the image",
+    fft_desc:
+        "Apply Fast Fourier Transform to filter out periodic noise and patterns",
 };
 
 export default d;
