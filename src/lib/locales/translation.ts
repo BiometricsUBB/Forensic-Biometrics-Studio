@@ -83,6 +83,12 @@ export type i18nKeywords = Recordify<
     | "Edit"
     | "Apply"
     | "Clear"
+    | "Draw"
+    | "Pan"
+    | "Eraser"
+    | "Shape"
+    | "Round"
+    | "Oval"
 >;
 
 export type i18nDescription = Recordify<

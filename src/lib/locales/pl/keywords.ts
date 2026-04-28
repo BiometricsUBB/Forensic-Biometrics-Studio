@@ -74,6 +74,12 @@ const d: Dictionary = {
     Edit: "Edycja",
     Apply: "Zastosuj",
     Clear: "Wyczyść",
+    Draw: "Rysuj",
+    Pan: "Przesuwaj",
+    Eraser: "Gumka",
+    Shape: "Kształt",
+    Round: "Okrągły",
+    Oval: "Owalny",
 };
 
 export default d;
