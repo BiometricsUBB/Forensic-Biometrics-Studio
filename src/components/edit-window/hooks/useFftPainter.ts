@@ -1,7 +1,7 @@
 import React, { RefObject, useEffect, useRef } from "react";
 import { FFTResult } from "@/lib/fftProcessor";
-import { BrushShape, FftStatus, InteractionMode } from "./fftTypes";
-import { getCanvasCoords } from "./fftCanvasUtils";
+import { BrushShape, FftStatus, InteractionMode } from "../fft/fftTypes";
+import { getCanvasCoords } from "../fft/fftCanvasUtils";
 
 // this file contains mouse event lifecycle
 

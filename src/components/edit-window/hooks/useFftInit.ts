@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import React, { RefObject, useEffect } from "react";
 import { ImageFFT, type FFTResult } from "@/lib/fftProcessor";
-import { FftStatus } from "./fftTypes";
+import { FftStatus } from "../fft/fftTypes";
 
 // this file contains fft lifecycle
 // init processor,build offscreen canvas

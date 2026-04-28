@@ -12,7 +12,7 @@ interface ImagePanesProps {
     isFftActive: boolean;
     fftStatus: FftStatus;
 
-    // left pane — original image
+    // left pane — FFT editor
     containerRef: RefObject<HTMLDivElement>;
     imageRef: RefObject<HTMLImageElement>;
     spectrumCanvasRef: RefObject<HTMLCanvasElement>;
@@ -28,7 +28,7 @@ interface ImagePanesProps {
     onDoubleClick: () => void;
     onResetZoom: () => void;
 
-    // right pane — FFT preview
+    // right pane — FFT output
     fftContainerRef: RefObject<HTMLDivElement>;
     previewCanvasRef: RefObject<HTMLCanvasElement>;
     rightPanZoom: number;
@@ -87,7 +87,7 @@ function ImagePanes({
                 isFftActive ? "gap-4" : "gap-0"
             )}
         >
-            {/* ── Left pane: original image ── */}
+            {/* ── Left pane: fft editor ── */}
             <div
                 ref={containerRef}
                 className={cn(
@@ -125,7 +125,7 @@ function ImagePanes({
                     alt={imagePath || "Loaded image"}
                     className="max-w-full max-h-full object-contain select-none pointer-events-none"
                     style={{
-                        opacity: isFftActive ? (isFftReady ? 0.08 : 0) : 1,
+                        opacity: isFftActive ? 0 : 1,
                         filter: `brightness(${brightness / 100}) contrast(${contrast / 100})`,
                         transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                         transformOrigin: TRANSFORM_ORIGIN,

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils/shadcn";
 import { Edit3, Hand, Waves, Trash2 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
-import { UseFftWorkspaceReturn } from "../fft/useFftWorkspace";
+import { UseFftWorkspaceReturn } from "../hooks/useFftWorkspace";
 
 interface SidebarFFTProps {
     isFftActive: boolean;

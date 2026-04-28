@@ -8,7 +8,7 @@ import { Edit } from "lucide-react";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "./dpi/image-dpi-controls";
 import ImagePanes from "./fft/ImagePanes";
-import { useFftWorkspace } from "./fft/useFftWorkspace";
+import { useFftWorkspace } from "./hooks/useFftWorkspace";
 
 import { useImagePanZoom } from "./hooks/useImagePanZoom";
 import { useImageIO } from "./hooks/useImageIO";
