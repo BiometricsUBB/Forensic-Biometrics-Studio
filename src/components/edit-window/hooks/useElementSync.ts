@@ -61,8 +61,12 @@ export function useSyncedElement(
 
                 // If target is a canvas, sync its internal resolution as well
                 if (target instanceof HTMLCanvasElement) {
-                    target.width = source.naturalWidth;
-                    target.height = source.naturalHeight;
+                    if (target.width !== source.naturalWidth) {
+                        target.width = source.naturalWidth;
+                    }
+                    if (target.height !== source.naturalHeight) {
+                        target.height = source.naturalHeight;
+                    }
                 }
 
                 syncContainedElement(
