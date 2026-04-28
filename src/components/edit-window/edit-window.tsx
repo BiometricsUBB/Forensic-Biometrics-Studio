@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { WindowControls } from "@/components/menu/window-controls";
 import { Menubar } from "@/components/ui/menubar";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
@@ -14,12 +12,80 @@ import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
-import ImageFftControls from "@/components/edit-window/fft/image-fft-controls";
+import { AnyModifier, ModifierType } from "@/lib/imageModifiers/types";
+import {
+    MODIFIER_REGISTRY,
+    buildCssFilter,
+} from "@/lib/imageModifiers/registry";
+import { applyPipelineToImage } from "@/lib/imageModifiers/pipeline";
+import { AddModifierButton } from "@/components/edit-window/modifiers/AddModifierButton";
+import { ModifierList } from "@/components/edit-window/modifiers/ModifierList";
+import { ModifierSettingsDialog } from "@/components/edit-window/modifiers/ModifierSettingsDialog";
+
+// ─── File helpers (unchanged from old implementation) ─────────────────────────
+
+async function findUniqueFilePath(
+    directory: string,
+    baseName: string,
+    timestamp: string,
+    extension: string,
+    initialPath: string
+): Promise<string> {
+    let fileExists = false;
+    try {
+        fileExists = await exists(initialPath);
+    } catch {
+        return initialPath;
+    }
+    if (!fileExists) return initialPath;
+
+    const maxAttempts = 100;
+    const pathsToCheck: Promise<{ path: string; exists: boolean }>[] = [];
+    for (let i = 1; i <= maxAttempts; i += 1) {
+        const numberedFilename = `${baseName}_edited_${timestamp}_${i}${extension}`;
+        const numberedPathPromise = join(directory, numberedFilename);
+        pathsToCheck.push(
+            numberedPathPromise.then(path =>
+                exists(path)
+                    .then(e => ({ path, exists: e }))
+                    .catch(() => ({ path, exists: false }))
+            )
+        );
+    }
+    const results = await Promise.all(pathsToCheck);
+    const firstAvailable = results.find(r => !r.exists);
+    return (
+        firstAvailable?.path ?? results[results.length - 1]?.path ?? initialPath
+    );
+}
+
+async function generateFilename(p: string) {
+    const originalFilename = await basename(p);
+    const extension = await extname(p);
+    const extWithDot = extension
+        ? extension.startsWith(".")
+            ? extension
+            : `.${extension}`
+        : ".png";
+    const lastDotIndex = originalFilename.lastIndexOf(".");
+    const nameWithoutExt =
+        lastDotIndex > 0
+            ? originalFilename.slice(0, lastDotIndex)
+            : originalFilename;
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, -5);
+    return { nameWithoutExt, extWithDot, timestamp };
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export function EditWindow() {
     const { t } = useTranslation(["tooltip", "keywords"]);
     useSettingsSync();
 
+    // ── Image state ──────────────────────────────────────────────────────────
     const [imagePath, setImagePath] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [imageName, setImageName] = useState<string | null>(null);
@@ -27,8 +93,8 @@ export function EditWindow() {
         null
     );
     const [error, setError] = useState<string | null>(null);
-    const [brightness, setBrightness] = useState<number>(100);
-    const [contrast, setContrast] = useState<number>(100);
+
+    // ── View state ───────────────────────────────────────────────────────────
     const [zoom, setZoom] = useState<number>(1);
     const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -37,126 +103,22 @@ export function EditWindow() {
         y: 0,
     });
 
+    // ── Modifier pipeline state ──────────────────────────────────────────────
+    const [modifiers, setModifiers] = useState<AnyModifier[]>([]);
+    const [editingModifierId, setEditingModifierId] = useState<string | null>(
+        null
+    );
+
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const fftCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const TRANSFORM_ORIGIN = "center center";
 
-    const findUniqueFilePath = async (
-        directory: string,
-        baseName: string,
-        timestamp: string,
-        extension: string,
-        initialPath: string
-    ): Promise<string> => {
-        let fileExists = false;
-        try {
-            fileExists = await exists(initialPath);
-        } catch {
-            return initialPath;
-        }
+    // ── CSS filter (live, lightweight) ───────────────────────────────────────
+    const cssFilter = buildCssFilter(modifiers);
 
-        if (!fileExists) {
-            return initialPath;
-        }
-
-        const maxAttempts = 100;
-        const pathsToCheck: Promise<{ path: string; exists: boolean }>[] = [];
-
-        for (let i = 1; i <= maxAttempts; i += 1) {
-            const numberedFilename = `${baseName}_edited_${timestamp}_${i}${extension}`;
-            const numberedPathPromise = join(directory, numberedFilename);
-            pathsToCheck.push(
-                numberedPathPromise.then(path =>
-                    exists(path)
-                        .then(exists => ({ path, exists }))
-                        .catch(() => ({ path, exists: false }))
-                )
-            );
-        }
-
-        const results = await Promise.all(pathsToCheck);
-        const firstAvailable = results.find(result => !result.exists);
-
-        if (firstAvailable) {
-            return firstAvailable.path;
-        }
-
-        return results[results.length - 1]?.path ?? initialPath;
-    };
-
-    const processImageWithFilters = async (
-        imgRef: React.RefObject<HTMLImageElement>,
-        brightnessValue: number,
-        contrastValue: number
-    ): Promise<Uint8Array> => {
-        if (!imgRef.current) throw new Error("Image not loaded");
-        const img = imgRef.current;
-
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-            throw new Error("Failed to get canvas context");
-        }
-
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-
-        if (brightnessValue !== 100 || contrastValue !== 100) {
-            ctx.filter = `brightness(${brightnessValue / 100}) contrast(${contrastValue / 100})`;
-        }
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        ctx.filter = "none";
-
-        const editedBlob = await new Promise<Blob>((resolve, reject) => {
-            canvas.toBlob(
-                blob => {
-                    if (blob) {
-                        resolve(blob);
-                    } else {
-                        reject(new Error("Failed to convert canvas to blob"));
-                    }
-                },
-                "image/png",
-                1.0
-            );
-        });
-
-        const arrayBuffer = await editedBlob.arrayBuffer();
-        return new Uint8Array(arrayBuffer);
-    };
-
-    const generateFilename = async (
-        imagePath: string
-    ): Promise<{
-        nameWithoutExt: string;
-        extWithDot: string;
-        timestamp: string;
-    }> => {
-        const originalFilename = await basename(imagePath);
-        const extension = await extname(imagePath);
-
-        const extWithDot = extension
-            ? extension.startsWith(".")
-                ? extension
-                : `.${extension}`
-            : ".png";
-
-        const lastDotIndex = originalFilename.lastIndexOf(".");
-        const nameWithoutExt =
-            lastDotIndex > 0
-                ? originalFilename.slice(0, lastDotIndex)
-                : originalFilename;
-
-        const timestamp = new Date()
-            .toISOString()
-            .replace(/[:.]/g, "-")
-            .slice(0, -5);
-
-        return { nameWithoutExt, extWithDot, timestamp };
-    };
+    // ── Image loading ────────────────────────────────────────────────────────
 
     const loadImage = async (path: string) => {
         try {
@@ -170,35 +132,32 @@ export function EditWindow() {
             setZoom(1);
             setPan({ x: 0, y: 0 });
         } catch (err) {
-            const errorMessage =
+            const msg =
                 err instanceof Error ? err.message : "Failed to load image";
-            setError(`${errorMessage} (Path: ${path})`);
+            setError(`${msg} (Path: ${path})`);
             setImageUrl(null);
         }
     };
 
+    // ── Wheel / pan handlers ─────────────────────────────────────────────────
+
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
         if (!imageUrl || !containerRef.current || !imageRef.current) return;
-
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newZoom = Math.max(0.1, Math.min(10, zoom * delta));
-
         const containerRect = containerRef.current.getBoundingClientRect();
-
-        const containerCenterX = containerRect.width / 2;
-        const containerCenterY = containerRect.height / 2;
-        const mouseX = e.clientX - containerRect.left;
-        const mouseY = e.clientY - containerRect.top;
-
-        const imageX = (mouseX - containerCenterX - pan.x) / zoom;
-        const imageY = (mouseY - containerCenterY - pan.y) / zoom;
-
-        const newPanX = mouseX - containerCenterX - imageX * newZoom;
-        const newPanY = mouseY - containerCenterY - imageY * newZoom;
-
+        const cx = containerRect.width / 2;
+        const cy = containerRect.height / 2;
+        const mx = e.clientX - containerRect.left;
+        const my = e.clientY - containerRect.top;
+        const imageX = (mx - cx - pan.x) / zoom;
+        const imageY = (my - cy - pan.y) / zoom;
         setZoom(newZoom);
-        setPan({ x: newPanX, y: newPanY });
+        setPan({
+            x: mx - cx - imageX * newZoom,
+            y: my - cy - imageY * newZoom,
+        });
     };
 
     const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -215,47 +174,34 @@ export function EditWindow() {
         });
     };
 
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
-
-    /** Forward wheel events from the FFT overlay to zoom the image */
-    const fftHandleWheel = useCallback((e: WheelEvent) => {
-        if (!containerRef.current || !imageRef.current) return;
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        setZoom(prev => {
-            const newZoom = Math.max(0.1, Math.min(10, prev * delta));
-            const containerRect = containerRef.current!.getBoundingClientRect();
-            const cx = containerRect.width / 2;
-            const cy = containerRect.height / 2;
-            const mx = e.clientX - containerRect.left;
-            const my = e.clientY - containerRect.top;
-            setPan(p => {
-                const imgX = (mx - cx - p.x) / prev;
-                const imgY = (my - cy - p.y) / prev;
-                return {
-                    x: mx - cx - imgX * newZoom,
-                    y: my - cy - imgY * newZoom,
-                };
-            });
-            return newZoom;
-        });
-    }, []);
-
-    /** Forward middle-button drag from FFT overlay to pan the image */
-    const fftHandleMiddleDrag = useCallback((dx: number, dy: number) => {
-        setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
-    }, []);
+    const handleMouseUp = () => setIsDragging(false);
 
     const handleDoubleClick = () => {
         setZoom(1);
         setPan({ x: 0, y: 0 });
     };
-
     const resetZoom = () => {
         setZoom(1);
         setPan({ x: 0, y: 0 });
     };
+
+    // ── Canvas sync (DPI overlay) ────────────────────────────────────────────
+
+    function syncCanvasToImage(img: HTMLImageElement, cvs: HTMLCanvasElement) {
+        const width = img.naturalWidth;
+        const height = img.naturalHeight;
+        Object.assign(cvs, { width, height });
+        Object.assign(cvs.style, {
+            width: `${img.width}px`,
+            height: `${img.height}px`,
+            position: "absolute",
+            zIndex: "10",
+        });
+        const ctx = cvs.getContext("2d")!;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    // ── Effects ──────────────────────────────────────────────────────────────
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -268,16 +214,12 @@ export function EditWindow() {
             loadImage(normalizedPath);
         }
 
-        const setupListener = async () => {
-            return listen<string>("image-path-changed", event => {
-                setImagePath(event.payload);
-                loadImage(event.payload);
-            });
-        };
-
         let unlistenPromise: Promise<() => void> | null = null;
-        setupListener().then(unlisten => {
-            unlistenPromise = Promise.resolve(unlisten);
+        listen<string>("image-path-changed", event => {
+            setImagePath(event.payload);
+            loadImage(event.payload);
+        }).then(u => {
+            unlistenPromise = Promise.resolve(u);
         });
 
         return () => {
@@ -306,24 +248,6 @@ export function EditWindow() {
         return () => img.removeEventListener("load", updateSize);
     }, [imageUrl]);
 
-    function syncCanvasToImage(img: HTMLImageElement, cvs: HTMLCanvasElement) {
-        if (!img || !cvs) return;
-
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
-
-        Object.assign(cvs, { width, height });
-        Object.assign(cvs.style, {
-            width: `${img.width}px`,
-            height: `${img.height}px`,
-            position: "absolute",
-            zIndex: "10",
-        });
-
-        const ctx = cvs.getContext("2d")!;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
-
     useEffect(() => {
         const img = imageRef.current;
         const canvas = canvasRef.current;
@@ -346,56 +270,75 @@ export function EditWindow() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageUrl]);
 
-    /* Sync FFT canvas CSS position to the image (without clearing internal dims) */
-    useEffect(() => {
-        const img = imageRef.current;
-        const fftCanvas = fftCanvasRef.current;
-        if (!img || !fftCanvas) return undefined;
+    // ── Modifier helpers ─────────────────────────────────────────────────────
 
-        const syncFft = () => {
-            requestAnimationFrame(() => {
-                if (!fftCanvas || !img) return;
-                Object.assign(fftCanvas.style, {
-                    width: `${img.width}px`,
-                    height: `${img.height}px`,
-                    position: "absolute",
-                    zIndex: "11",
-                });
+    const handleAddModifier = useCallback((type: ModifierType) => {
+        const def = MODIFIER_REGISTRY.find(d => d.type === type);
+        if (!def) return;
+        const newMod = def.create() as AnyModifier;
+        setModifiers(prev => [...prev, newMod]);
+        // Automatically open edit dialog for the new modifier
+        // Use timeout so Radix DropdownMenu doesn't intercept the click-outside and immediately dismiss the dialog
+        setTimeout(() => setEditingModifierId(newMod.id), 50);
+    }, []);
+
+    const handleUpdateModifier = useCallback(
+        (id: string, params: Partial<AnyModifier["params"]>) => {
+            setModifiers(prev =>
+                prev.map(m =>
+                    m.id === id
+                        ? ({
+                              ...m,
+                              params: { ...m.params, ...params },
+                          } as AnyModifier)
+                        : m
+                )
+            );
+        },
+        []
+    );
+
+    const handleToggleModifier = useCallback((id: string) => {
+        setModifiers(prev =>
+            prev.map(m => (m.id === id ? { ...m, enabled: !m.enabled } : m))
+        );
+    }, []);
+
+    const handleRemoveModifier = useCallback((id: string) => {
+        setModifiers(prev => prev.filter(m => m.id !== id));
+        setEditingModifierId(prev => (prev === id ? null : prev));
+    }, []);
+
+    const handleReorderModifiers = useCallback(
+        (fromIndex: number, toIndex: number) => {
+            setModifiers(prev => {
+                const next = [...prev];
+                const [removed] = next.splice(fromIndex, 1);
+                next.splice(toIndex, 0, removed!);
+                return next;
             });
-        };
+        },
+        []
+    );
 
-        const resizeObserver = new ResizeObserver(syncFft);
-        resizeObserver.observe(img);
+    const editingModifier =
+        modifiers.find(m => m.id === editingModifierId) ?? null;
 
-        if (img.complete) syncFft();
-        img.addEventListener("load", syncFft);
-
-        return () => {
-            resizeObserver.disconnect();
-            img.removeEventListener("load", syncFft);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageUrl]);
+    // ── Save ─────────────────────────────────────────────────────────────────
 
     const saveEditedImage = async () => {
-        if (!imageUrl || !imagePath) {
-            return;
-        }
-
+        if (!imageUrl || !imagePath || !imageRef.current) return;
         try {
-            const uint8Array = await processImageWithFilters(
-                imageRef,
-                brightness,
-                contrast
+            const uint8Array = await applyPipelineToImage(
+                imageRef.current,
+                modifiers
             );
 
             const { nameWithoutExt, extWithDot, timestamp } =
                 await generateFilename(imagePath);
             const newFilename = `${nameWithoutExt}_edited_${timestamp}${extWithDot}`;
-
             const imageDir = await dirname(imagePath);
             const newImagePath = await join(imageDir, newFilename);
-
             const finalPath = await findUniqueFilePath(
                 imageDir,
                 nameWithoutExt,
@@ -405,11 +348,9 @@ export function EditWindow() {
             );
 
             await writeFile(finalPath, uint8Array);
-
             const fileWasWritten = await exists(finalPath);
-            if (!fileWasWritten) {
+            if (!fileWasWritten)
                 throw new Error(`File was not created at path: ${finalPath}`);
-            }
 
             await emit("image-reload-requested", {
                 originalPath: imagePath,
@@ -424,16 +365,17 @@ export function EditWindow() {
 
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
         } catch (err) {
-            const errorMessage =
-                err instanceof Error ? err.message : String(err);
+            const msg = err instanceof Error ? err.message : String(err);
             toast.error(
                 t("Failed to save image: {{error}}", {
                     ns: "tooltip",
-                    error: errorMessage,
+                    error: msg,
                 })
             );
         }
     };
+
+    // ─────────────────────────────────────────────────────────────────────────
 
     return (
         <main
@@ -466,6 +408,7 @@ export function EditWindow() {
             </Menubar>
 
             <div className="flex flex-1 w-full overflow-hidden flex-row">
+                {/* ── Image viewer ─────────────────────────────────────────── */}
                 <div className="flex flex-1 overflow-hidden p-4 flex-col">
                     {error ? (
                         <div className="text-center flex-1 flex items-center justify-center">
@@ -506,7 +449,7 @@ export function EditWindow() {
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
-                                    filter: `brightness(${brightness / 100}) contrast(${contrast / 100})`,
+                                    filter: cssFilter,
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                                     transformOrigin: TRANSFORM_ORIGIN,
                                     transition: isDragging
@@ -521,17 +464,6 @@ export function EditWindow() {
                                 style={{
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                                     transformOrigin: TRANSFORM_ORIGIN,
-                                }}
-                            />
-                            <canvas
-                                ref={fftCanvasRef}
-                                className="absolute pointer-events-none"
-                                style={{
-                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: TRANSFORM_ORIGIN,
-                                    transition: isDragging
-                                        ? "none"
-                                        : "transform 0.1s ease-out",
                                 }}
                             />
                             {zoom !== 1 && (
@@ -560,134 +492,88 @@ export function EditWindow() {
                         </div>
                     )}
                 </div>
-                <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col gap-4 p-4 pb-8 h-[calc(100vh-56px)] overflow-y-auto">
-                    {imageName && (
-                        <div className="flex flex-col gap-1">
-                            <h3 className="text-sm font-semibold text-muted-foreground">
-                                Info
-                            </h3>
-                            <p
-                                className="text-xs text-foreground truncate"
-                                title={imageName}
-                            >
-                                {imageName}
-                            </p>
-                            {imageSize && (
-                                <p className="text-xs text-muted-foreground">
-                                    {imageSize.w} × {imageSize.h} px
+
+                {/* ── Sidebar ───────────────────────────────────────────────── */}
+                <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col h-[calc(100vh-56px)]">
+                    <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                        {/* Image info */}
+                        {imageName && (
+                            <div className="flex flex-col gap-1">
+                                <h3 className="text-sm font-semibold text-muted-foreground">
+                                    Info
+                                </h3>
+                                <p
+                                    className="text-xs text-foreground truncate"
+                                    title={imageName}
+                                >
+                                    {imageName}
                                 </p>
-                            )}
+                                {imageSize && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {imageSize.w} × {imageSize.h} px
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="border-t border-border/30" />
+
+                        {/* Modifier pipeline */}
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                {t("Adjustments", { ns: "keywords" })}
+                            </h3>
+                            <ModifierList
+                                modifiers={modifiers}
+                                onEdit={setEditingModifierId}
+                                onToggle={handleToggleModifier}
+                                onRemove={handleRemoveModifier}
+                                onReorder={handleReorderModifiers}
+                            />
+                            <AddModifierButton
+                                onAdd={handleAddModifier}
+                                disabled={!imageUrl}
+                            />
                         </div>
-                    )}
 
-                    <div className="border-t border-border/30" />
+                        <div className="border-t border-border/30" />
 
-                    <div className="flex flex-col gap-2">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            {t("Tools", { ns: "keywords" })}
-                        </h3>
+                        {/* DPI controls (unchanged) */}
+                        <div className="flex flex-col gap-2">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                DPI
+                            </h3>
+                            <ImageDpiControls
+                                imageRef={imageRef}
+                                canvasRef={canvasRef}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Fixed bottom save button */}
+                    <div className="p-4 border-t border-border/30 bg-background">
                         <Button
                             onClick={saveEditedImage}
                             className="w-full"
-                            variant="default"
+                            size="lg"
                             disabled={!imageUrl || !imagePath}
+                            id="save-edited-image-button"
                         >
                             <Save size={ICON.SIZE} className="mr-2" />
                             {t("Save", { ns: "tooltip" })}
                         </Button>
                     </div>
-
-                    <div className="border-t border-border/30" />
-
-                    <div className="flex flex-col gap-4">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            {t("Adjustments", { ns: "keywords" })}
-                        </h3>
-                        <div className="flex flex-col items-center space-y-2">
-                            <Label
-                                htmlFor="brightness"
-                                className="text-sm font-medium self-start"
-                            >
-                                {t("Brightness", { ns: "tooltip" })}
-                            </Label>
-                            <div className="flex items-center gap-3 w-full">
-                                <Input
-                                    id="brightness"
-                                    type="range"
-                                    min="0"
-                                    max="200"
-                                    value={brightness}
-                                    onChange={e =>
-                                        setBrightness(Number(e.target.value))
-                                    }
-                                    className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                    disabled={!imageUrl}
-                                />
-                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
-                                    {brightness}%
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-center space-y-2">
-                            <Label
-                                htmlFor="contrast"
-                                className="text-sm font-medium self-start"
-                            >
-                                {t("Contrast", { ns: "tooltip" })}
-                            </Label>
-                            <div className="flex items-center gap-3 w-full">
-                                <Input
-                                    id="contrast"
-                                    type="range"
-                                    min="0"
-                                    max="200"
-                                    value={contrast}
-                                    onChange={e =>
-                                        setContrast(Number(e.target.value))
-                                    }
-                                    className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                                    disabled={!imageUrl}
-                                />
-                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
-                                    {contrast}%
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border-t border-border/30" />
-
-                    <div className="flex flex-col gap-2">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            DPI
-                        </h3>
-                        <ImageDpiControls
-                            imageRef={imageRef}
-                            canvasRef={canvasRef}
-                        />
-                    </div>
-
-                    <div className="border-t border-border/30" />
-
-                    <div className="flex flex-col gap-2">
-                        <h3 className="text-sm font-semibold text-muted-foreground">
-                            FFT
-                        </h3>
-                        <ImageFftControls
-                            imageRef={imageRef}
-                            canvasRef={fftCanvasRef}
-                            onApply={dataUrl => {
-                                if (imageUrl && imageUrl.startsWith("blob:")) {
-                                    URL.revokeObjectURL(imageUrl);
-                                }
-                                setImageUrl(dataUrl);
-                            }}
-                            onWheel={fftHandleWheel}
-                            onMiddleDrag={fftHandleMiddleDrag}
-                        />
-                    </div>
                 </div>
             </div>
+
+            {/* Modifier settings dialog (rendered outside the sidebar for correct stacking) */}
+            <ModifierSettingsDialog
+                modifier={editingModifier}
+                imageRef={imageRef}
+                open={editingModifierId !== null}
+                onClose={() => setEditingModifierId(null)}
+                onUpdate={handleUpdateModifier}
+            />
         </main>
     );
 }

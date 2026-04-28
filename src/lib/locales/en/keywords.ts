@@ -79,6 +79,8 @@ const d: Dictionary = {
         "No marking types found for the selected working mode",
     "Select a working mode to view marking types":
         "Select a working mode to view marking types",
+    Modifiers: "Modifiers",
+    "No modifiers yet": "No modifiers yet",
 };
 
 export default d;
