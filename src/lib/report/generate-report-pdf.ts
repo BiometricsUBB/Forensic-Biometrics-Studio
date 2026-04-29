@@ -302,42 +302,26 @@ const cropCanvas = (
     source: HTMLCanvasElement,
     centerX: number,
     centerY: number,
-    size: number,
-    rotateRad = 0
+    size: number
 ) => {
-    const targetSize = Math.max(1, Math.min(size, source.width, source.height));
-    const expandedSize =
-        Math.abs(rotateRad) < 1e-4
-            ? targetSize
-            : getExpandedCropSizeForRotation(targetSize, rotateRad);
-    const safeSize = Math.max(
-        1,
-        Math.min(expandedSize, source.width, source.height)
-    );
-
-    const half = safeSize / 2;
-    const sx = Math.round(centerX - half);
-    const sy = Math.round(centerY - half);
     const canvas = document.createElement("canvas");
-    canvas.width = safeSize;
-    canvas.height = safeSize;
+    canvas.width = size;
+    canvas.height = size;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, safeSize, safeSize);
+    ctx.fillRect(0, 0, size, size);
+
+    const half = size / 2;
+    const sx = Math.round(centerX - half);
+    const sy = Math.round(centerY - half);
 
     const srcX = clamp(sx, 0, source.width);
     const srcY = clamp(sy, 0, source.height);
     const dstX = Math.max(0, -sx);
     const dstY = Math.max(0, -sy);
-    const srcWidth = Math.max(
-        0,
-        Math.min(source.width - srcX, safeSize - dstX)
-    );
-    const srcHeight = Math.max(
-        0,
-        Math.min(source.height - srcY, safeSize - dstY)
-    );
+    const srcWidth = Math.max(0, Math.min(source.width - srcX, size - dstX));
+    const srcHeight = Math.max(0, Math.min(source.height - srcY, size - dstY));
 
     if (srcWidth > 0 && srcHeight > 0) {
         ctx.drawImage(
@@ -353,10 +337,15 @@ const cropCanvas = (
         );
     }
 
-    if (Math.abs(rotateRad) < 1e-4) {
-        return canvas.toDataURL("image/png");
-    }
+    return canvas;
+};
 
+const rotateCanvas = (
+    source: HTMLCanvasElement,
+    rotateRad: number,
+    targetSize: number
+) => {
+    const safeSize = source.width;
     const rotated = document.createElement("canvas");
     rotated.width = safeSize;
     rotated.height = safeSize;
@@ -364,7 +353,7 @@ const cropCanvas = (
     if (!rotatedCtx) throw new Error(CANVAS_CONTEXT_ERROR);
     rotatedCtx.translate(safeSize / 2, safeSize / 2);
     rotatedCtx.rotate(rotateRad);
-    rotatedCtx.drawImage(canvas, -safeSize / 2, -safeSize / 2);
+    rotatedCtx.drawImage(source, -safeSize / 2, -safeSize / 2);
     rotatedCtx.setTransform(1, 0, 0, 1, 0, 0);
 
     const finalCanvas = document.createElement("canvas");
@@ -385,7 +374,7 @@ const cropCanvas = (
         targetSize
     );
 
-    return finalCanvas.toDataURL("image/png");
+    return finalCanvas;
 };
 
 const createOverviewCalloutImage = async (
@@ -595,54 +584,18 @@ const createStyles = () => {
 
 type ReportT = TFunction<"report">;
 
-const FEATURE_TYPE_REPORT_KEYS = {
-    core: "Core",
-    delta: "Delta",
-    ridgebeginning: "RidgeBeginning",
-    ridgeending: "RidgeEnding",
-    bifurcation: "Bifurcation",
-    ridgemerge: "RidgeMerge",
-    hook: "Hook",
-    section: "Section",
-    bridge: "Bridge",
-    point: "Point",
-    pore: "Pore",
-    lake: "Lake",
-    ridgeprotrusion: "Ridge protrusion",
-    ridgeindentation: "Ridge indentation",
-    dot: "Dot",
-    incipientridge: "Incipient ridge",
-    scar: "Scar",
-    crease: "Crease",
-} as const;
-
-const normalizeFeatureTypeName = (value: string) =>
-    value
-        .trim()
-        .toLowerCase()
-        .replace(/[\s_-]+/g, "");
-
 const resolveFeatureTypeName = (
     featureTypeDefinition: MarkingType | undefined,
     tReport: ReportT
 ) => {
     if (!featureTypeDefinition) return "-";
 
-    const lookupKey = normalizeFeatureTypeName(featureTypeDefinition.name);
-    const reportKey =
-        FEATURE_TYPE_REPORT_KEYS[
-            lookupKey as keyof typeof FEATURE_TYPE_REPORT_KEYS
-        ];
-
-    if (reportKey) {
-        return tReport(reportKey);
-    }
-
-    return (
+    const baseName =
         featureTypeDefinition.displayName?.trim() ||
         featureTypeDefinition.name?.trim() ||
-        "-"
-    );
+        "-";
+
+    return tReport(baseName as never, { defaultValue: baseName });
 };
 
 const createFooter = (
@@ -812,20 +765,67 @@ export const generateReportPdfWithDialog = async (
                     1.6
                 );
 
-                return {
-                    left: cropCanvas(
-                        leftSingleCanvas,
-                        leftCenter.x,
-                        leftCenter.y,
-                        IMAGE_CELL_SIZE
-                    ),
-                    right: cropCanvas(
+                const leftTargetSize = Math.max(
+                    1,
+                    Math.min(
+                        IMAGE_CELL_SIZE,
+                        leftSingleCanvas.width,
+                        leftSingleCanvas.height
+                    )
+                );
+                const leftCropped = cropCanvas(
+                    leftSingleCanvas,
+                    leftCenter.x,
+                    leftCenter.y,
+                    leftTargetSize
+                );
+
+                const rightTargetSize = Math.max(
+                    1,
+                    Math.min(
+                        IMAGE_CELL_SIZE,
+                        rightSingleCanvas.width,
+                        rightSingleCanvas.height
+                    )
+                );
+                let rightCropped: HTMLCanvasElement;
+
+                if (Math.abs(rightRotationRad) < 1e-4) {
+                    rightCropped = cropCanvas(
                         rightSingleCanvas,
                         rightCenter.x,
                         rightCenter.y,
-                        IMAGE_CELL_SIZE,
+                        rightTargetSize
+                    );
+                } else {
+                    const expandedSize = getExpandedCropSizeForRotation(
+                        rightTargetSize,
                         rightRotationRad
-                    ),
+                    );
+                    const safeSize = Math.max(
+                        1,
+                        Math.min(
+                            expandedSize,
+                            rightSingleCanvas.width,
+                            rightSingleCanvas.height
+                        )
+                    );
+                    const expandedCropped = cropCanvas(
+                        rightSingleCanvas,
+                        rightCenter.x,
+                        rightCenter.y,
+                        safeSize
+                    );
+                    rightCropped = rotateCanvas(
+                        expandedCropped,
+                        rightRotationRad,
+                        rightTargetSize
+                    );
+                }
+
+                return {
+                    left: leftCropped.toDataURL("image/png"),
+                    right: rightCropped.toDataURL("image/png"),
                 };
             })
         );
@@ -1078,7 +1078,7 @@ export const generateReportPdfWithDialog = async (
                         >
                             <span class="feature-index-value">${feature.left.label}</span>
                         </div>
-                    <div class="feature-type">${tReport("Feature type")} ${featureType ?? "-"}</div>
+                    <div class="feature-type">${tReport("Feature type")} ${featureType}</div>
                 </div>
             </td>
             <td><img class="feature-image" src="${leftCrop}" /></td>
