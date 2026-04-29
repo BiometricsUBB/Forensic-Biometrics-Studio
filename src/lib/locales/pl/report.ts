@@ -2,20 +2,20 @@ import { i18nReport as Dictionary } from "@/lib/locales/translation";
 
 const d: Dictionary = {
     "Technical report title":
-        "Raport techniczny por\u00f3wnania obraz\u00f3w \u015blad\u00f3w kryminalistycznych",
+        "Raport techniczny porównania obrazów śladów kryminalistycznych",
     "Report ID label": "Identyfikator raportu:",
     "Report date and time label": "Data i czas wykonania raportu:",
     "Performed by label": "Wykonany przez:",
     "Software information": "Informacje o oprogramowaniu",
     "Application name": "Nazwa aplikacji:",
     "Application version": "Wersja aplikacji:",
-    "Input material": "Materia\u0142 wej\u015bciowy",
+    "Input material": "Materiał wejściowy",
     "Image 1": "Obraz 1",
     "Image 2": "Obraz 2",
     "File name": "Nazwa pliku:",
     "Image dimensions": "Wymiary obrazu:",
     Dimensions: "wymiary:",
-    Size: "wielko\u015b\u0107:",
+    Size: "wielkość:",
     Checksum: "suma kontrolna:",
     "Matched features count":
         "Liczba wyznaczonych cech zgodnych na obu obrazach:",
@@ -29,17 +29,17 @@ const d: Dictionary = {
     "Image 1 label": "Obraz 1:",
     "Image 2 label": "Obraz 2:",
     "Comparative table overview":
-        "Tablica komparacyjna wybranych cech \u2013 ilustracja pogl\u0105dowa",
+        "Tablica komparacyjna wybranych cech – ilustracja poglądowa",
     "Comparative table zoom":
-        "Tablica komparacyjna wybranych cech \u2013 powi\u0119kszenie",
+        "Tablica komparacyjna wybranych cech – powiększenie",
     "Comparative table details":
-        "Tablica komparacyjna wybranych cech \u2013 szczeg\u00f3\u0142y",
+        "Tablica komparacyjna wybranych cech – szczegóły",
     Feature: "Cecha",
     "Feature type": "Typ cechy:",
     Page: "Strona",
     "Note title": "Uwaga",
     "Note body":
-        "Identyfikator raportu uwiarygadnia autentyczno\u015b\u0107 raportu i jest wyliczany na podstawie danych wej\u015bciowych oraz identyfikatora systemu.",
+        "Identyfikator raportu uwiarygadnia autentyczność raportu i jest wyliczany na podstawie danych wejściowych oraz identyfikatora systemu.",
 };
 
 export default d;
