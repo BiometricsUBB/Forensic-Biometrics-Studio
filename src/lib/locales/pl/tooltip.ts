@@ -60,6 +60,12 @@ const d: Dictionary = {
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
     "Polyline requires at least 2 segments":
         "Linia łamana wymaga co najmniej 2 segmentów",
+    "Save ANSI/NIST (XML)": "Zapisz ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) from file": "Wczytaj ANSI/NIST (XML) z pliku",
+    "Save ANSI/NIST (XML) data": "Zapisz dane ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) data": "Wczytaj dane ANSI/NIST (XML)",
+    "Load Traditional ANSI/NIST (.an2, .eft)":
+        "Wczytaj binarny ANSI/NIST (.an2, .eft)",
 };
 
 export default d;

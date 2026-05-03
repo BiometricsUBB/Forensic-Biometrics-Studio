@@ -26,7 +26,11 @@ import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { loadSprite } from "./loadSprite";
 
-export async function loadImage(filePath: string, viewport: Viewport) {
+export async function loadImage(
+    filePathOrData: string | Uint8Array,
+    viewport: Viewport,
+    name?: string
+) {
     DashboardToolbarStore.actions.settings.viewport.setLockScaleSync(false);
     DashboardToolbarStore.actions.settings.viewport.setLockedViewport(false);
 
@@ -68,7 +72,7 @@ export async function loadImage(filePath: string, viewport: Viewport) {
             baseTexture: true,
         });
 
-    const sprite = await loadSprite(filePath);
+    const sprite = await loadSprite(filePathOrData, name);
     sprite.anchor.set(0, 0);
     sprite.pivot.set(sprite.width / 2, sprite.height / 2);
     sprite.position.set(sprite.width / 2, sprite.height / 2);
@@ -81,9 +85,17 @@ export async function loadImage(filePath: string, viewport: Viewport) {
     fitWorld(viewport);
     emitFitEvents(viewport, "fit-world");
 
-    const defaultMarkingsFilePath = `${filePath}.json`;
-    if (await exists(defaultMarkingsFilePath)) {
-        await loadMarkingsData(defaultMarkingsFilePath, canvasId);
+    if (typeof filePathOrData === "string") {
+        const defaultMarkingsFilePath = `${filePathOrData}.json`;
+        if (await exists(defaultMarkingsFilePath)) {
+            await loadMarkingsData(defaultMarkingsFilePath, canvasId);
+        } else {
+            MarkingsStore(canvasId).actions.markings.reset();
+            MarkingsStore(canvasId).actions.labelGenerator.reset();
+            MarkingsStore(
+                getOppositeCanvasId(canvasId)
+            ).actions.labelGenerator.reset();
+        }
     } else {
         MarkingsStore(canvasId).actions.markings.reset();
         MarkingsStore(canvasId).actions.labelGenerator.reset();

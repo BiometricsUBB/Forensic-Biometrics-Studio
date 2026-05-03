@@ -13,6 +13,9 @@ dependencies:
   '@atlaskit/pragmatic-drag-and-drop-flourish':
     specifier: 1.1.0
     version: 1.1.0(@types/react@18.2.69)(react@18.2.0)
+  '@li0ard/wsq':
+    specifier: ^0.1.1
+    version: 0.1.1(typescript@5.6.3)
   '@pixi/core':
     specifier: 7.4.3
     version: 7.4.3
@@ -1894,6 +1897,15 @@ packages:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
+
+  /@li0ard/wsq@0.1.1(typescript@5.6.3):
+    resolution: {integrity: sha512-01AuT7/ECVdiYOuwZkcQjPvqNTzQzmojfqPg+Wc7gFmPqH29gIhsg9YJXAAuCIswbMlZO6OyZoOwQ/8GbLCfTw==}
+    peerDependencies:
+      typescript: ^5.0.0
+    dependencies:
+      '@pdf-lib/upng': 1.0.1
+      typescript: 5.6.3
+    dev: false
 
   /@napi-rs/wasm-runtime@0.2.11:
     resolution: {integrity: sha512-9DPkXtvHydrcOsopiYpUgPHpmj0HWZKMUnL2dZqpvC42lsratuBG06V5ipyno0fUek5VlFsNQ+AcFATSrJXgMA==}

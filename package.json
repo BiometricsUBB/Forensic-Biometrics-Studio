@@ -45,6 +45,7 @@
     },
     "dependencies": {
         "@atlaskit/pragmatic-drag-and-drop-flourish": "1.1.0",
+        "@li0ard/wsq": "^0.1.1",
         "@pixi/core": "7.4.3",
         "@pixi/react": "7.1.0",
         "@pixi/text-bitmap": "7.4.3",
