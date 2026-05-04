@@ -34,6 +34,7 @@ type ReportGenerationOptions = {
     performedBy: string;
     department: string;
     addressLines: string[];
+    selectedLabels: number[];
 };
 
 type ImageMeta = {
@@ -679,9 +680,12 @@ export const generateReportPdfWithDialog = async (
             throw new Error("Load both images before generating the report.");
         }
 
-        stage = "collect-markings";
-        const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
+        stage = "collect-markings-and-tracings";
+        const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).state.markings
+            .filter(m => options.selectedLabels.includes(m.label));
+        const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).state.markings
+            .filter(m => options.selectedLabels.includes(m.label));
+            
         const markingTypes = MarkingTypesStore.state.types;
 
         const matched = options.includeMatchedOnly

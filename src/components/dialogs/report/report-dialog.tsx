@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
-import { FileText, X } from "lucide-react";
+import { FileText, X, Check } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
@@ -55,6 +55,16 @@ export function ReportDialog({ className }: ReportDialogProps) {
     const [addressLine4, setAddressLine4] = useState("");
     const [reportLanguage, setReportLanguage] = useState(i18n.language);
 
+    const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).use(state => state.markings);
+    const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).use(state => state.markings);
+
+    const allFeatures = useMemo(() => {
+        const labels = new Set([...markingsLeft.map(m => m.label), ...markingsRight.map(m => m.label)]);
+        return Array.from(labels).sort((a, b) => a - b);
+    },[markingsLeft, markingsRight]);
+
+    const[selectedLabels, setSelectedLabels] = useState<number[]>([]);
+
     useEffect(() => {
         if (!isOpen) return;
         setReportDateTime(formatReportDateTime(new Date()));
@@ -65,38 +75,24 @@ export function ReportDialog({ className }: ReportDialogProps) {
         setAddressLine3(reportDefaults?.addressLine3 ?? "");
         setAddressLine4(reportDefaults?.addressLine4 ?? "");
         setReportLanguage(i18n.language);
-    }, [isOpen, reportDefaults]);
+        setSelectedLabels(allFeatures);
+    }, [isOpen, reportDefaults, allFeatures]);
 
-    const workingMode = WorkingModeStore.use(state => state.workingMode);
-    const leftCount = MarkingsStore(CANVAS_ID.LEFT).use(
-        state => state.markings.length
-    );
-    const rightCount = MarkingsStore(CANVAS_ID.RIGHT).use(
-        state => state.markings.length
-    );
+    const toggleFeature = (label: number) => {
+        setSelectedLabels(prev => 
+            prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
+        );
+    };
 
-    const matchedFeatures = useMemo(() => {
-        const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
-        return getMatchedFeatures(left, right);
-    }, [leftCount, rightCount]);
+    const matchedFeaturesCount = useMemo(() => 
+        getMatchedFeatures(markingsLeft, markingsRight).length,[markingsLeft, markingsRight]);
 
-    const pairedFeatures = useMemo(() => {
-        const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
-        return getPairedByLabel(left, right);
-    }, [leftCount, rightCount]);
-
-    const availableCount = includeMatchedOnly
-        ? matchedFeatures.length
-        : pairedFeatures.length;
-    const selectedCount = availableCount;
     const generateReportLabel = t("Generate report", { ns: "keywords" });
-
+    const workingMode = WorkingModeStore.use(state => state.workingMode);
     const canGenerate =
         workingMode === WORKING_MODE.FINGERPRINT &&
-        leftCount > 0 &&
-        rightCount > 0;
+        markingsLeft.length > 0 &&
+        markingsRight.length > 0;
 
     const onGenerate = async () => {
         if (!canGenerate) return;
@@ -104,7 +100,6 @@ export function ReportDialog({ className }: ReportDialogProps) {
             setIsGenerating(true);
             const now = new Date();
             const timestamp = formatReportDateTime(now);
-            setReportDateTime(timestamp);
             await generateReportPdfWithDialog({
                 includeMatchedOnly,
                 reportDateTime: timestamp,
@@ -117,6 +112,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                     addressLine3.trim(),
                     addressLine4.trim(),
                 ],
+                selectedLabels,
             });
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
@@ -158,209 +154,207 @@ export function ReportDialog({ className }: ReportDialogProps) {
             </DialogTrigger>
 
             <DialogPortal>
-                <DialogOverlay />
-                <DialogContent className="w-[640px] max-w-[92vw] max-h-[90vh] flex flex-col">
-                    <DialogTitle className="text-lg font-semibold">
-                        {t("Report generation", { ns: "keywords" })}
-                    </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">
-                        {t("Generate PDF report", { ns: "description" })}
-                    </DialogDescription>
+                <DialogOverlay className="bg-black/40 backdrop-blur-sm" />
+                <DialogContent className="w-[880px] max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background border-border shadow-2xl">
+                    
+                    <div className="flex flex-col gap-1.5 p-6 sm:px-8 pb-4 border-b border-border bg-muted/10 shrink-0">
+                        <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+                            {t("Report generation", { ns: "keywords" })}
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">
+                            {t("Generate PDF report", { ns: "description" })}
+                        </DialogDescription>
+                    </div>
 
-                    <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-                        <div className="grid gap-3">
-                            <div className="grid gap-1 text-sm">
-                                <div>
-                                    {t("Matched features", { ns: "keywords" })}:{" "}
-                                    <strong>{matchedFeatures.length}</strong>
-                                </div>
-                                <div>
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : <strong>{selectedCount}</strong>
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : {selectedCount}
-                                </div>
+                    <div className="flex-1 min-h-0 overflow-hidden p-6 sm:px-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-8 bg-background">
+                        
+                        <div className="flex flex-col space-y-5 pb-2">
+                            <div className="grid grid-cols-2 gap-4">
+    <div className="flex flex-col justify-end space-y-1.5">
+        <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            {t("Language", { ns: "keywords" })}
+        </label>
+        <select
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:border-primary/50 focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer"
+            value={reportLanguage}
+            onChange={e => setReportLanguage(e.target.value)}
+        >
+            <option value="pl">Polski</option>
+            <option value="en">English</option>
+        </select>
+    </div>
+
+    <div className="flex flex-col justify-end space-y-1.5">
+        <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            {t("Report date and time", { ns: "keywords" })}
+        </label>
+        <Input 
+            value={reportDateTime} 
+            readOnly 
+            className="flex h-10 w-full rounded-md border border-input/60 bg-muted/40 cursor-not-allowed text-sm shadow-sm text-muted-foreground" 
+        />
+    </div>
+</div>
+
+                            <div className="flex flex-col space-y-1.5">
+                                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    {t("Performed by", { ns: "keywords" })}
+                                </label>
+                                <Input 
+                                    value={performedBy} 
+                                    onChange={e => setPerformedBy(e.target.value)} 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
+                                />
                             </div>
 
-                            <label
-                                htmlFor="include-matched-only"
-                                className="flex items-center gap-2 text-sm"
-                            >
-                                <input
-                                    id="include-matched-only"
-                                    type="checkbox"
-                                    checked={includeMatchedOnly}
-                                    onChange={e =>
-                                        setIncludeMatchedOnly(e.target.checked)
-                                    }
+                            <div className="flex flex-col space-y-1.5">
+                                <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    {t("Department", { ns: "keywords" })}
+                                </label>
+                                <Input 
+                                    value={department} 
+                                    onChange={e => setDepartment(e.target.value)} 
+                                    className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
                                 />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 pt-1">
+                                <div className="flex flex-col space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Address line 1", { ns: "keywords" })}
+                                    </label>
+                                    <Input 
+                                        value={addressLine1} 
+                                        onChange={e => setAddressLine1(e.target.value)} 
+                                        className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Address line 2", { ns: "keywords" })}
+                                    </label>
+                                    <Input 
+                                        value={addressLine2} 
+                                        onChange={e => setAddressLine2(e.target.value)} 
+                                        className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Address line 3", { ns: "keywords" })}
+                                    </label>
+                                    <Input 
+                                        value={addressLine3} 
+                                        onChange={e => setAddressLine3(e.target.value)} 
+                                        className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Address line 4", { ns: "keywords" })}
+                                    </label>
+                                    <Input 
+                                        value={addressLine4} 
+                                        onChange={e => setAddressLine4(e.target.value)} 
+                                        className="flex h-10 w-full rounded-md border border-input bg-background shadow-sm hover:border-primary/50 transition-colors" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col space-y-4 min-h-0">
+                            <div className="bg-card p-4 rounded-lg border border-border flex justify-between items-center shadow-sm shrink-0">
+                                <div className="flex flex-col">
+                                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Matched features", { ns: "keywords" })}
+                                    </span>
+                                    <span className="text-2xl font-bold text-foreground">
+                                        {matchedFeaturesCount}
+                                    </span>
+                                </div>
+                                <div className="w-px h-10 bg-border"></div>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Selected features", { ns: "keywords" })}
+                                    </span>
+                                    <span className="text-2xl font-bold text-primary">
+                                        {selectedLabels.length} <span className="text-muted-foreground text-lg">/ {allFeatures.length}</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <label className="flex items-center gap-2.5 cursor-pointer text-sm font-medium w-max hover:text-primary transition-colors shrink-0">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        className="peer appearance-none w-4 h-4 border border-input rounded-sm bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer shadow-sm"
+                                        checked={includeMatchedOnly}
+                                        onChange={e => setIncludeMatchedOnly(e.target.checked)}
+                                    />
+                                    <Check className="absolute w-3 h-3 text-primary-foreground opacity-0 peer-checked:opacity-100 pointer-events-none" strokeWidth={3} />
+                                </div>
                                 {t("Include matched only", { ns: "keywords" })}
                             </label>
 
-                            <div className="grid grid-cols-1 gap-3">
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-language"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Language", { ns: "keywords" })}
-                                    </label>
-                                    <select
-                                        id="report-language"
-                                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                                        value={reportLanguage}
-                                        onChange={e =>
-                                            setReportLanguage(e.target.value)
-                                        }
-                                    >
-                                        <option value="pl">Polski</option>
-                                        <option value="en">English</option>
-                                    </select>
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-datetime"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Report date and time", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="report-datetime"
-                                            value={reportDateTime}
-                                            readOnly
-                                            placeholder="30.12.2025 - 15:28:31"
-                                        />
-                                    </div>
-                                </div>
+                            <div className="flex-1 min-h-0 rounded-lg border border-border bg-muted/5 p-2 overflow-y-auto custom-scrollbar shadow-inner">
+                                <div className="grid grid-cols-2 gap-2">
+                                    {allFeatures.map((label) => {
+                                        const left = markingsLeft.find(m => m.label === label);
+                                        const right = markingsRight.find(m => m.label === label);
+                                        const isSelected = selectedLabels.includes(label);
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-performed-by"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Performed by", { ns: "keywords" })}
-                                    </label>
-                                    <Input
-                                        id="report-performed-by"
-                                        value={performedBy}
-                                        onChange={e =>
-                                            setPerformedBy(e.target.value)
-                                        }
-                                        placeholder="Jan Kowalski"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-department"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Department", { ns: "keywords" })}
-                                    </label>
-                                    <Input
-                                        id="report-department"
-                                        value={department}
-                                        onChange={e =>
-                                            setDepartment(e.target.value)
-                                        }
-                                        placeholder="Wydzia\u0142 Bada\u0144 Daktyloskopijnych i Traseologicznych"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-1"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 1", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-1"
-                                        value={addressLine1}
-                                        onChange={e =>
-                                            setAddressLine1(e.target.value)
-                                        }
-                                        placeholder="ul. Mi\u0142a 1"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-2"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 2", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-2"
-                                        value={addressLine2}
-                                        onChange={e =>
-                                            setAddressLine2(e.target.value)
-                                        }
-                                        placeholder="02-520 Warszawa"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-3"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 3", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-3"
-                                        value={addressLine3}
-                                        onChange={e =>
-                                            setAddressLine3(e.target.value)
-                                        }
-                                        placeholder=""
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-4"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 4", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-4"
-                                        value={addressLine4}
-                                        onChange={e =>
-                                            setAddressLine4(e.target.value)
-                                        }
-                                        placeholder=""
-                                    />
+                                        return (
+                                            <div 
+                                                key={label}
+                                                onClick={() => toggleFeature(label)}
+                                                className={cn(
+                                                    "flex flex-col gap-2 p-3 rounded-md border cursor-pointer transition-all duration-200 select-none bg-background",
+                                                    isSelected 
+                                                        ? "border-primary ring-1 ring-primary/20 shadow-sm" 
+                                                        : "border-border hover:border-primary/50 hover:bg-muted/30 opacity-80"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className={cn(
+                                                        "w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 transition-colors shadow-sm", 
+                                                        isSelected ? "bg-primary border-primary text-primary-foreground" : "bg-card border-input"
+                                                    )}>
+                                                        {isSelected && <Check size={12} strokeWidth={3} />}
+                                                    </div>
+                                                    <span className={cn(
+                                                        "text-sm font-semibold truncate",
+                                                        isSelected ? "text-foreground" : "text-muted-foreground"
+                                                    )}>
+                                                        {t("Feature", { ns: "keywords" })} #{label}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between pl-6.5 text-xs font-medium">
+                                                    <span className={cn("px-1.5 py-0.5 rounded-sm border", left ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-muted/50 border-border/50 text-muted-foreground")}>
+                                                        L: {left ? "OK" : "—"}
+                                                    </span>
+                                                    <span className={cn("px-1.5 py-0.5 rounded-sm border", right ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-muted/50 border-border/50 text-muted-foreground")}>
+                                                        R: {right ? "OK" : "—"}
+                                                    </span>
+                                                </div>
+                                            </div>  
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-6 flex justify-between shrink-0">
+                    <div className="p-4 sm:px-8 border-t border-border bg-muted/10 flex justify-end gap-3 shrink-0">
                         <DialogClose asChild>
-                            <Button type="button" variant="outline">
+                            <Button type="button" variant="outline" className="w-28 shadow-sm">
                                 {t("Cancel", { ns: "keywords" })}
                             </Button>
                         </DialogClose>
                         <Button
                             type="button"
                             onClick={onGenerate}
-                            disabled={!canGenerate || isGenerating}
+                            className="w-44 shadow-sm"
+                            disabled={!canGenerate || isGenerating || selectedLabels.length === 0}
                         >
                             {isGenerating
                                 ? t("Generating...", { ns: "keywords" })
@@ -368,8 +362,8 @@ export function ReportDialog({ className }: ReportDialogProps) {
                         </Button>
                     </div>
 
-                    <DialogClose className="absolute top-3 right-3">
-                        <X size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
+                    <DialogClose className="absolute top-6 right-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-muted-foreground hover:bg-muted p-1">
+                        <X size={20} strokeWidth={ICON.STROKE_WIDTH} />
                     </DialogClose>
                 </DialogContent>
             </DialogPortal>
