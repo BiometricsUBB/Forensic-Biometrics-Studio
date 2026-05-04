@@ -19,6 +19,8 @@ import { WORKING_MODE } from "@/views/selectMode";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { TracingStore, TracingPath } from "@/lib/stores/Tracing/Tracing.store";
+import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import {
     clamp,
     formatReportDateTime,
@@ -159,6 +161,8 @@ const renderImageWithMarkings = async (
     markings: MarkingClass[],
     markingTypes: MarkingType[],
     sizeScale: number,
+    tracingPaths?: TracingPath[], 
+    rotation: number = 0,         
     options?: {
         showMarkingLabels?: boolean;
         markingsAlpha?: number;
@@ -180,6 +184,28 @@ const renderImageWithMarkings = async (
     const sprite = new PIXI.Sprite(PIXI.Texture.from(bitmap));
     sprite.position.set(0, 0);
     app.stage.addChild(sprite);
+
+    if (tracingPaths && tracingPaths.length > 0) {
+        const tracingContainer = new PIXI.Container();
+
+        tracingPaths.forEach(path => {
+            const g = new PIXI.Graphics();
+            g.lineStyle({
+                width: path.brushSize,
+                color: Number(path.color.replace("#", "0x")),
+                alpha: path.opacity ?? 1,
+                join: PIXI.LINE_JOIN.ROUND,
+                cap: PIXI.LINE_CAP.ROUND,
+            });
+            if (path.points && path.points.length > 0) {
+                const [p0, ...rest] = path.points;
+                g.moveTo(p0.x, p0.y);
+                rest.forEach(p => g.lineTo(p.x, p.y));
+            }
+            tracingContainer.addChild(g);
+        });
+        app.stage.addChild(tracingContainer);
+    }
 
     const g = new PIXI.Graphics();
     g.alpha = markingsAlpha;
@@ -380,7 +406,9 @@ const rotateCanvas = (
 
 const createOverviewCalloutImage = async (
     imageBytes: Uint8Array,
-    features: MarkingClass[]
+    features: MarkingClass[],
+    tracingPaths?: TracingPath[], 
+    rotation: number = 0          
 ) => {
     const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
@@ -398,6 +426,27 @@ const createOverviewCalloutImage = async (
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, margin, margin);
+
+    if (tracingPaths && tracingPaths.length > 0) {
+        ctx.save();
+
+        tracingPaths.forEach(path => {
+            if (!path.points || path.points.length === 0) return;
+            ctx.beginPath();
+            ctx.lineWidth = path.brushSize;
+            ctx.strokeStyle = path.color;
+            ctx.globalAlpha = path.opacity ?? 1;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+
+            ctx.moveTo(path.points[0].x, path.points[0].y);
+            for (let i = 1; i < path.points.length; i++) {
+                ctx.lineTo(path.points[i].x, path.points[i].y);
+            }
+            ctx.stroke();
+        });
+        ctx.restore();
+    }
 
     const centerX = margin + width / 2;
     const centerY = margin + height / 2;
@@ -702,6 +751,12 @@ export const generateReportPdfWithDialog = async (
             
         const markingTypes = MarkingTypesStore.state.types;
 
+        const leftTracingPaths = TracingStore(CANVAS_ID.LEFT).getState().paths;
+        const rightTracingPaths = TracingStore(CANVAS_ID.RIGHT).getState().paths;
+        
+        const leftRotation = RotationStore(CANVAS_ID.LEFT).state.rotation;
+        const rightRotation = RotationStore(CANVAS_ID.RIGHT).state.rotation;
+
         const matched = options.includeMatchedOnly
             ? getMatchedFeatures(markingsLeft, markingsRight)
             : getPairedByLabel(markingsLeft, markingsRight);
@@ -720,13 +775,17 @@ export const generateReportPdfWithDialog = async (
             leftMeta.bytes,
             markingsLeft,
             markingTypes,
-            1.6
+            1.6,
+            leftTracingPaths,
+            leftRotation
         );
         const rightAllCanvas = await renderImageWithMarkings(
             rightMeta.bytes,
             markingsRight,
             markingTypes,
-            1.6
+            1.6,
+            rightTracingPaths,
+            rightRotation
         );
 
         const leftSelectedCanvas = await renderImageWithMarkings(
@@ -750,6 +809,8 @@ export const generateReportPdfWithDialog = async (
                             [feature.left],
                             markingTypes,
                             1.6,
+                            undefined,
+                            0,
                             { showMarkingLabels: false, markingsAlpha: 0.45 }
                         ),
                         renderImageWithMarkings(
@@ -757,6 +818,8 @@ export const generateReportPdfWithDialog = async (
                             [feature.right],
                             markingTypes,
                             1.6,
+                            undefined,
+                            0,
                             { showMarkingLabels: false, markingsAlpha: 0.45 }
                         ),
                     ]
@@ -1178,4 +1241,3 @@ export const generateReportPdfWithDialog = async (
         throw new Error(`Report failed at ${stage}: ${message}`);
     }
 };
-/* eslint-enable sonarjs/cognitive-complexity */
