@@ -53,7 +53,8 @@
         "src/**/*.ts",
         "src/**/*.tsx",
         "__tests__/**/*.ts",
-        "__tests__/**/*.tsx"
+        "__tests__/**/*.tsx",
+        "vite.config.ts"
     ],
     "exclude": ["node_modules", "dist", "src-tauri"]
 }
