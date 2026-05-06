@@ -32,7 +32,7 @@ export class LineSegmentMarkingHandler extends MarkingHandler {
             viewport
         );
 
-        // FIX: Kolejność (label, POS, typeId, POS)
+        // FIX: argument order (label, POS, typeId, POS)
         markingsStore.actions.temporaryMarking.setTemporaryMarking(
             new LineSegmentMarking(label, pos, this.typeId, pos)
         );

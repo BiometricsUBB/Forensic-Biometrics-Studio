@@ -6,7 +6,7 @@ export const useThemeController = (app: Application<ICanvas>) => {
     const colors = useColors();
 
     useEffect(() => {
-        // Zmień kolor tła canvasu gdy użytkownik zmieni motyw
+        // Update the canvas background when the user changes the theme
         app.renderer.background.color = colors.background;
     }, [app.renderer.background, colors.background]);
 

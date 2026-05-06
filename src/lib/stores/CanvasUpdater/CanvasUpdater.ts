@@ -5,13 +5,13 @@ import {
 } from "./CanvasUpdater.store";
 
 class CanvasUpdaterClass {
-    /** Defaultowy updater który re-renderuje gdy zmienia stan */
+    /** Default updater that re-renders when state changes */
     readonly use = useCanvasUpdater;
 
-    /** Updater ktȯry nie powoduje re-renderów ale zmienia stan */
+    /** Updater that mutates state without triggering re-renders */
     readonly useDry = useDryCanvasUpdater;
 
-    /** Updater który re-renderuje się określoną razy na sekundę (np. 60). Używany np. do informacji debug */
+    /** Updater that re-renders at a fixed rate (e.g. 60Hz). Used for things like debug info */
     readonly useThrottled = useThrottledCanvasUpdater;
 }
 

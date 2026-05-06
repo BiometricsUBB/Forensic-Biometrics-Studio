@@ -42,19 +42,19 @@ class StoreClass {
     readonly actions = {
         settings: {
             language: {
-                /** Ta funkcja zmienia stan języka TYLKO w store
+                /** Updates the language state in the store ONLY.
                  *
-                 * Żeby zmienić język aplikacji użyj useTranslation().i18n.changeLanguage
-                 * */
+                 * To change the application's language, use useTranslation().i18n.changeLanguage.
+                 */
                 setLanguage: (newLanguage: State["settings"]["language"]) => {
                     this.setLanguageSettings(() => newLanguage);
                 },
             },
             interface: {
-                /** Ta funkcja zmienia theme TYLKO w store
+                /** Updates the theme state in the store ONLY.
                  *
-                 * Żeby zmienić theme aplikacji użyj useTheme().setTheme
-                 * */
+                 * To change the application's theme, use useTheme().setTheme.
+                 */
                 setTheme: (
                     newTheme: State["settings"]["interface"]["theme"]
                 ) => {

@@ -11,12 +11,13 @@ export type GlobalCanvasRefs = {
     rightCanvas: CanvasRef;
 };
 
-// Globalny obiekt przechowujący referencje do canvasów, żeby były dostępny w całym projekcie
-// W komponentach reactowych zalecane jest używanie hooków useGlobalApp() oraz useGlobalViewport(),
-// które zwrócą odpowiednie referencje oraz obsłużą re-rendery przy zmianie
+// Global object holding canvas references so they're accessible across the project.
+// In React components, prefer the useGlobalApp() and useGlobalViewport() hooks —
+// they return the same references and trigger re-renders on change.
 //
-// app - instancja pixi.js, tu obsługiwana jest cała grafika 2D związane z canvasem
-// viewport - instancja pixi-viewport, obszar w do którego ładowane są obrazy śladów kryminalistycznych, jest childem app
+// app — the pixi.js instance that handles all 2D graphics for the canvas.
+// viewport — the pixi-viewport instance, the area that loads forensic-trace
+//   images, mounted as a child of app.
 export const CANVAS_REFS: GlobalCanvasRefs = {
     leftCanvas: {
         app: null as Application<ICanvas> | null,

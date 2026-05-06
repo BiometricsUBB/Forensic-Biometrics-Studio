@@ -7,7 +7,7 @@ export const useViewportResizer = (
     height: number
 ) => {
     useEffect(() => {
-        // Zmień rozdzielczość canvasa gdy użytkownik zmieni rozmiar okna
+        // Resize the canvas when the user resizes the window
         if (viewport === null) return;
         viewport.resize(width, height);
     }, [width, height, viewport]);

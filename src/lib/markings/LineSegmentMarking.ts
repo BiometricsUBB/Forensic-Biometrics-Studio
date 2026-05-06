@@ -7,8 +7,8 @@ export class LineSegmentMarking extends MarkingClass {
 
     constructor(
         label: number,
-        public override origin: Point, // FIX: Punkt jako DRUGI
-        typeId: string,                // FIX: Tekst jako TRZECI
+        public override origin: Point, // FIX: Point as the SECOND arg
+        typeId: string, // FIX: string as the THIRD arg
         public endpoint: Point,
         ids?: string[]
     ) {

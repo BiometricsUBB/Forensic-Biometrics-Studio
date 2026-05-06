@@ -64,7 +64,7 @@ export const handleMove = (e: MovedEvent, params: ViewportHandlerParams) => {
         return;
     }
 
-    // Jeśli Viewport jest zalockowany (L): wyślij eventy do drugiego viewportu
+    // If the viewport is locked (L): forward events to the opposite viewport
 
     // oxlint-disable-next-line react-hooks/rules-of-hooks
     const oppositeViewport = useGlobalViewport(getOppositeCanvasId(id));

@@ -225,7 +225,7 @@ export function DebugInfo({ ...props }: DebugInfoProps) {
         },
     ];
 
-    // lista eventów, które nasłuchuje viewport
+    // List of events the viewport listens to
     const viewportListeners: EventName[] = [
         // from DisplayObjectEvents type
         "added",

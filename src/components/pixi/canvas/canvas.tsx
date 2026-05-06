@@ -27,7 +27,7 @@ export function Canvas({ options, className, ...props }: CanvasProps) {
 
     useEffect(() => {
         PIXI.BaseTexture.defaultOptions.scaleMode = 1;
-        // załaduj bitmapowe czcionki, rozmiary 6-32 i 64
+        // Load bitmap fonts at sizes 6–32 and 64
         const fontSizes = [...range(6, 32), 64];
         Promise.all(
             fontSizes.map(fontSize =>

@@ -14,9 +14,9 @@ export function DebugOverlay({ canvasMetadata: { id } }: DebugOverlayProps) {
     const viewport = useGlobalViewport(id, { autoUpdate: true });
     const app = useGlobalApp(id);
 
-    // potrzebne do update'owania overlaya w niektórych przypadkach (np. gdy jest zablokowany),
-    // bo poniższy hook robi update przy zmianie rozmiaru viewportu, bez tego hooka
-    // overlay nie zareaguje na zmianę rozmiaru viewportu w pewnych przypadkach
+    // Needed to update the overlay in some cases (e.g. when locked) — the hook
+    // below re-renders on viewport size changes; without it the overlay would
+    // miss certain viewport-resize events.
     ShallowViewportStore(id).use(({ size }) => ({
         size,
     }));

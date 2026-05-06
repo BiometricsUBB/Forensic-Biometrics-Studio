@@ -7,8 +7,8 @@ export class MeasurementMarking extends LineSegmentMarking {
 
     constructor(
         label: number,
-        origin: Point,  // FIX: Punkt drugi (zgodnie z rodzicem)
-        typeId: string, // FIX: Tekst trzeci (zgodnie z rodzicem)
+        origin: Point, // FIX: second arg (matches parent class)
+        typeId: string, // FIX: third arg (matches parent class)
         endpoint: Point,
         ids?: string[]
     ) {
