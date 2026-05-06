@@ -119,7 +119,7 @@
 }
 
 @utility logo {
-  [class*='dark'] &img {
+  [class*='dark'] & {
     filter: invert(1);
   }
 }
