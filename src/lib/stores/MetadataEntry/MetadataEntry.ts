@@ -21,6 +21,11 @@ class StoreClass {
                 };
             });
         },
+        clear: () => {
+            this.state.set(draft => {
+                draft.activeEntry = null;
+            });
+        },
         setValue: (attributeId: string, optionId: string) => {
             this.state.set(draft => {
                 if (draft.activeEntry) {

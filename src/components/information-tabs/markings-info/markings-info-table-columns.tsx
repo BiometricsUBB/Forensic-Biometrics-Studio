@@ -12,6 +12,7 @@ import { useCallback, useMemo } from "react";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
+import { MetadataEntryStore } from "@/lib/stores/MetadataEntry";
 import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
 import {
     MergeMarkingsCommand,
@@ -58,6 +59,9 @@ export const useColumns = (
     { onEditMetadata, editingLabel }: UseColumnsArgs
 ): ColumnDef<EmptyableMarking, Element>[] => {
     const { t } = useTranslation();
+    const isMetadataEntryActive = MetadataEntryStore.use(
+        state => state.activeEntry !== null
+    );
 
     const handleRemoveClick = useCallback(
         (marking: MarkingClass) => {
@@ -138,7 +142,7 @@ export const useColumns = (
 
                         return (
                             <div
-                                className="flex gap-1 items-center"
+                                className="flex items-center"
                                 onClick={e => {
                                     e.stopPropagation();
                                 }}
@@ -194,6 +198,7 @@ export const useColumns = (
                                                 variant="outline"
                                                 className="ml-2 py-0"
                                                 pressed={isEditing}
+                                                disabled={isMetadataEntryActive}
                                                 onClickCapture={() =>
                                                     onEditMetadata(
                                                         marking as MarkingClass
@@ -292,6 +297,7 @@ export const useColumns = (
             handleMergeClick,
             onEditMetadata,
             editingLabel,
+            isMetadataEntryActive,
         ]
     );
 };

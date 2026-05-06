@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
@@ -26,16 +27,27 @@ export function MarkingMetadataCoverPanel({ panelCanvasId }: Props) {
         state => state.markings
     );
 
-    if (!activeEntry || activeEntry.canvasId === panelCanvasId) return null;
-
-    const sourceMarkings =
-        activeEntry.canvasId === CANVAS_ID.LEFT ? leftMarkings : rightMarkings;
-    const marking = sourceMarkings.find(m => m.label === activeEntry.label);
+    const sourceMarkings = !activeEntry
+        ? []
+        : activeEntry.canvasId === CANVAS_ID.LEFT
+          ? leftMarkings
+          : rightMarkings;
+    const marking = activeEntry
+        ? sourceMarkings.find(m => m.label === activeEntry.label)
+        : undefined;
     const markingType = marking
         ? types.find(type => type.id === marking.typeId)
         : undefined;
+    const hasAttributes = !!markingType?.attributes?.length;
 
-    if (!marking || !markingType?.attributes?.length) return null;
+    useEffect(() => {
+        if (activeEntry && !marking) {
+            MetadataEntryStore.actions.clear();
+        }
+    }, [activeEntry, marking]);
+
+    if (!activeEntry || activeEntry.canvasId === panelCanvasId) return null;
+    if (!marking || !hasAttributes) return null;
 
     return (
         <div className="absolute inset-0 z-30 bg-background flex flex-col">
