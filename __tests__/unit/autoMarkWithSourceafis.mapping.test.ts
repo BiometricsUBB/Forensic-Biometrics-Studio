@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, mock } from "bun:test";
+
 const mockMarkingTypesState = {
     types: [] as Array<{ id: string; name: string; displayName: string }>,
 };
@@ -7,37 +9,31 @@ const BIFURCATION_ID = "f47c4b97-2d62-4959-aa21-edebfa7a756a";
 const RIDGE_NAME = "ridgeending";
 const BIFURCATION_NAME = "bifurcation";
 
-let resolveSourceafisTypeId: (kind: string) => string | null;
+mock.module("@tauri-apps/api/path", () => ({
+    join: mock(),
+    tempDir: mock(),
+}));
+
+mock.module(
+    "@/lib/external-tools/sourceafis/createSourceAfisExternalTool",
+    () => ({
+        createSourceAfisExternalTool: mock(),
+        SOURCE_AFIS_TIMEOUT_MS: 30_000,
+    })
+);
+
+mock.module("@/lib/stores/MarkingTypes/MarkingTypes", () => ({
+    MarkingTypesStore: {
+        state: mockMarkingTypesState,
+    },
+}));
+
+const { resolveSourceafisTypeId } = await import(
+    "@/lib/utils/viewport/autoMarkWithSourceafis"
+);
 
 beforeEach(() => {
-    jest.resetModules();
     mockMarkingTypesState.types = [];
-
-    jest.doMock("@tauri-apps/api/path", () => ({
-        join: jest.fn(),
-        tempDir: jest.fn(),
-    }));
-
-    jest.doMock(
-        "@/lib/external-tools/sourceafis/createSourceAfisExternalTool",
-        () => ({
-            createSourceAfisExternalTool: jest.fn(),
-            SOURCE_AFIS_TIMEOUT_MS: 30_000,
-        })
-    );
-
-    jest.doMock("@/lib/stores/MarkingTypes/MarkingTypes", () => ({
-        MarkingTypesStore: {
-            state: mockMarkingTypesState,
-        },
-    }));
-
-    const sourceAfisModule =
-        // eslint-disable-next-line @typescript-eslint/no-var-requires, global-require
-        require("@/lib/utils/viewport/autoMarkWithSourceafis") as {
-            resolveSourceafisTypeId: (kind: string) => string | null;
-        };
-    ({ resolveSourceafisTypeId } = sourceAfisModule);
 });
 
 describe("resolveSourceafisTypeId", () => {

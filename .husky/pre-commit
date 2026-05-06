@@ -6,6 +6,5 @@ elif [ -f "$(dirname "$0")/_/husky.sh" ]; then
 fi
 
 bun run tsc:check || exit 1
-# TODO: re-enable once jest is migrated to a bun-compatible runner
-# bun run test:unit || exit 1
+bun run test:unit || exit 1
 bunx lint-staged || exit 1

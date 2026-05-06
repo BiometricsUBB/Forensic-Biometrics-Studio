@@ -3,11 +3,8 @@
  * https://jestjs.io/docs/configuration
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { Config } from "jest";
-
-// Jest configuration for Vite
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
     silent: false,
     verbose: true,
     testEnvironment: "jest-environment-jsdom",
@@ -20,7 +17,7 @@ const config: Config = {
     testRegex: ".*.(test|spec).(j|t)s[x]?$",
     transform: {
         "^.+\\.(js|jsx|ts|tsx)$": [
-            "esbuild-jest", // Use esbuild for transforming JS/TS files (for Vite)
+            "esbuild-jest",
             {
                 sourcemap: true,
             },
@@ -28,5 +25,4 @@ const config: Config = {
     },
 };
 
-// Export Jest config
-export default config;
+module.exports = config;

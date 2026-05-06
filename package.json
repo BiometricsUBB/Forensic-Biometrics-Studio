@@ -39,9 +39,9 @@
         "eslint:check": "eslint .",
         "prettier:write": "prettier --write .",
         "prepare": "husky",
-        "test": "jest",
-        "test:unit": "jest ./__tests__/unit --passWithNoTests",
-        "test:e2e": "jest ./__tests__/e2e --passWithNoTests"
+        "test": "bun test",
+        "test:unit": "bun test __tests__/unit",
+        "test:e2e": "bun test __tests__/e2e"
     },
     "dependencies": {
         "@atlaskit/pragmatic-drag-and-drop-flourish": "1.1.0",
