@@ -15,7 +15,162 @@
                 "backgroundColor": "#e17e3d",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "fa797ba1-ab89-596d-a665-f1782a1b6fa3",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "a75411fb-137b-576d-976a-8314d1f23db5",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "417e0235-97dd-5ef3-8810-535bc3bdd559",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "bc50ec3a-744b-5df0-b1e2-f77fb3699866",
+                        "kind": "size",
+                        "label": "Szerokość nasady",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "b2d3916e-42df-58bf-ba52-47c74cf3c7ae",
+                                "label": "do 5 mm, mała",
+                                "max": 5
+                            },
+                            {
+                                "id": "a8f4013d-e00e-513c-8b46-448f7b1a514e",
+                                "label": "od 5 do 10 mm, średnia",
+                                "min": 5,
+                                "max": 10
+                            },
+                            {
+                                "id": "0092f758-a7d4-5271-b91c-6ab1697e5a98",
+                                "label": "powyżej 10 mm, duża",
+                                "min": 10
+                            }
+                        ]
+                    },
+                    {
+                        "id": "26a5c876-193c-550b-9e9a-bb4d26d83990",
+                        "kind": "choice",
+                        "label": "Kształt początku",
+                        "options": [
+                            {
+                                "id": "c53b5b22-942d-55a5-bb88-8752131c0d06",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "b38e30d8-a899-5f8f-97b7-2f12528527be",
+                                "label": "ścięty"
+                            },
+                            {
+                                "id": "8ab259fd-1820-5a2b-b29f-862baa7a5148",
+                                "label": "z odnogą"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "86cb115f-aae0-557b-95cb-2cb3241fb36d",
+                        "kind": "choice",
+                        "label": "Brzeg wewnętrzny",
+                        "options": [
+                            {
+                                "id": "9645c98e-0366-5464-aedd-0b0d8ad49ce3",
+                                "label": "wypukły"
+                            },
+                            {
+                                "id": "14ccb035-9858-58a9-9501-bbbe8eb02f83",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "ab6dc42a-4807-5c22-87d3-f98760a9940b",
+                                "label": "wklęsły"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "bb38d127-2b96-53f6-9ab8-c377aaa7a44c",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "0cb7e09a-3973-5ee5-866d-5f22738a2a6e",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "1be957c9-3d02-5dfb-9a02-7622619da339",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "23b314f1-6750-54ff-8f59-cfe872b07822",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "b3d862be-56b5-5ae6-999d-c5aedb527ba7",
+                        "kind": "choice",
+                        "label": "Wcięcie początku obrąbka",
+                        "options": [
+                            {
+                                "id": "338cd032-719d-5fa4-9fbb-cd9ce8ec03fe",
+                                "label": "owalne"
+                            },
+                            {
+                                "id": "31e6495d-9389-5008-8f4d-2e099ba2f3eb",
+                                "label": "ostre"
+                            },
+                            {
+                                "id": "27e5fc25-1a23-57e3-bc74-7b4506830a63",
+                                "label": "słabo zarysowane"
+                            },
+                            {
+                                "id": "3da70747-3202-5aad-a1cf-3b1318c23372",
+                                "label": "brak"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "12e71089-dbfd-591e-afe0-224a402fd3f5",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "76ec1459-63a7-5362-b15a-8ae868bcb8a5",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "2e221f20-da7a-5bce-8fc2-406815e0c4e3",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "7c4ff7c7-6820-5c44-8b1a-de8dbd3d038d",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c7f66835-284c-5c62-be5b-2a5861d853e5",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "88ff2d42-9a95-580a-8338-8791a680f3f1",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "9ffcdd7b-cf05-5acb-b56b-446683ab1d0a",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "0db0e075-6b17-4f32-bb54-bb67ef6ba2cf",
@@ -25,7 +180,155 @@
                 "backgroundColor": "#60d2b6",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "a8c6f69d-75ba-59d2-be80-890be1713e7b",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "9a26f4f8-60d1-5f78-9c2d-a37084728413",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "4039462c-754c-538c-aa75-f654b3820b15",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "6a0f654f-0930-5789-a6d2-d8cb4b3262f3",
+                        "kind": "size",
+                        "label": "Szerokość śladu",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "ffd2b92c-c5ba-5190-ade6-5a4e6748833d",
+                                "label": "do 5 mm, mała",
+                                "max": 5
+                            },
+                            {
+                                "id": "515ecd9c-6ac4-563e-8223-83dbd5e38e17",
+                                "label": "od 5 do 10 mm, średnia",
+                                "min": 5,
+                                "max": 10
+                            },
+                            {
+                                "id": "4c935365-931e-5ccb-af6a-ed3e303b9961",
+                                "label": "powyżej 10 mm, duża",
+                                "min": 10
+                            }
+                        ]
+                    },
+                    {
+                        "id": "744e2181-0478-592c-84ff-96ebd26f6a4e",
+                        "kind": "choice",
+                        "label": "Wewnętrzny kształt brzegu",
+                        "options": [
+                            {
+                                "id": "3ae5e955-7988-585d-b65c-6b01fbbb6096",
+                                "label": "owalny regularny"
+                            },
+                            {
+                                "id": "a2206461-1d10-5f0e-b6b3-e47cefd794cd",
+                                "label": "wysklepiony ostro w części środkowej"
+                            },
+                            {
+                                "id": "87a15db1-f097-5732-a539-df2b5380104f",
+                                "label": "wysklepiony ostro w części początkowej"
+                            },
+                            {
+                                "id": "1d303aea-9d9c-5b0a-b0e7-913ae9326eb5",
+                                "label": "wysklepiony ostro w części końcowej"
+                            },
+                            {
+                                "id": "66a4f52c-7696-5db7-8224-cc1c8059ee89",
+                                "label": "kanciasty regularny"
+                            },
+                            {
+                                "id": "4dcde3f1-7511-506c-b949-4b244775591a",
+                                "label": "nietypowy – nieregularny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "bde63a87-c622-56bd-a267-380a88d688f8",
+                        "kind": "choice",
+                        "label": "Zewnętrzny kształt brzegu",
+                        "options": [
+                            {
+                                "id": "dafc369d-08de-5aff-a09f-9ecb8e49b1dd",
+                                "label": "owalny regularny"
+                            },
+                            {
+                                "id": "8ee55ea4-d70d-5345-98b4-46420111f517",
+                                "label": "ostro wysklepiony"
+                            },
+                            {
+                                "id": "26de744b-2a61-523c-99cf-d05a9df11350",
+                                "label": "kanciasty regularny"
+                            },
+                            {
+                                "id": "60baa454-d18a-5a51-84ce-9ab8b1397b8c",
+                                "label": "nieregularny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "983317b6-e894-5c16-bc45-503fa504326c",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "011a2b2c-359f-571e-9296-fcb1e8f74e87",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "5754bd90-eba0-54c6-b8b2-e05bc746047b",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "42f7dcc9-b08e-5407-a61e-5f2e1b97afdc",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "23b7076e-d848-51c9-8c1f-79a4e0af92fd",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "a9405383-dd28-5b26-b047-31ab8998dfeb",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "d599f6d9-9ee0-5196-be4d-8547339b5f5b",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "11523704-ee9c-52f6-9b62-e2465552e63e",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e3115dfd-a43a-5696-aea7-481741e3e3b0",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "9cd972b4-5ba3-5fcd-b63d-117028ebdb0e",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "9e31f20e-a31d-533b-b22d-cad5dad3d124",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "fa84fdc0-a756-47c1-af39-1825ef70a639",
@@ -35,7 +338,209 @@
                 "backgroundColor": "#2871e6",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "b10188c5-1e6a-5749-be04-2f95b1e6fef8",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "d378189e-0ed9-55ea-abd4-d275bc12739e",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "191feeca-80b0-5f08-9c5c-3c626057f79a",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "9aa4a442-53e6-5c2d-addd-8ba90a7125db",
+                        "kind": "size",
+                        "label": "Szerokość guzka",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "278f19ce-085b-5567-87fb-d95c7972c036",
+                                "label": "do 4 mm, mała",
+                                "max": 4
+                            },
+                            {
+                                "id": "363ce8e8-7879-5b7b-b16f-69daedf4f87f",
+                                "label": "od 4 do 6 mm, średnia",
+                                "min": 4,
+                                "max": 6
+                            },
+                            {
+                                "id": "6fcb99a0-1e98-594f-9a67-26c774ac170f",
+                                "label": "powyżej 6 mm, duża",
+                                "min": 6
+                            }
+                        ]
+                    },
+                    {
+                        "id": "80d4197a-23fe-5cd7-8827-29676580e33b",
+                        "kind": "choice",
+                        "label": "Przejście w guzek z wysklepienia górnego",
+                        "options": [
+                            {
+                                "id": "22ca6ad6-e022-5d6e-aa27-682b18127900",
+                                "label": "przerwa w śladzie"
+                            },
+                            {
+                                "id": "13698279-5d6c-510c-a0c5-4dabc1f460b2",
+                                "label": "przejście wąskie"
+                            },
+                            {
+                                "id": "262478fe-c66a-5dce-9492-a11d9d1a7435",
+                                "label": "przejście szerokie"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "b5c275c1-9a01-5ecf-be6c-eb29c53dc053",
+                        "kind": "choice",
+                        "label": "Brzegi przejścia",
+                        "options": [
+                            {
+                                "id": "4ee17ee5-c62a-53c1-bbfb-98954cc9a87c",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "6826ec9e-4c14-5621-9581-8cf63b347c10",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "a0dcd01d-5bd7-500e-ae84-9dc0b8ba6260",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c02b6641-1d59-5fc1-af91-0b6b364945a6",
+                        "kind": "choice",
+                        "label": "Kształt guzka",
+                        "options": [
+                            {
+                                "id": "d1fe0672-9203-5f5e-9098-e757a7587425",
+                                "label": "wąski, bez wysklepienia"
+                            },
+                            {
+                                "id": "aff3e990-61d6-58d0-aca1-16a576531a06",
+                                "label": "po stronie wewnętrznej wysklepiony ostro"
+                            },
+                            {
+                                "id": "d48a345c-f821-5bc0-83c2-f3f1864248c3",
+                                "label": "po stronie zewnętrznej wysklepiony ostro"
+                            },
+                            {
+                                "id": "8a1f8fd7-8d44-5315-acb0-3d8f17a2dc34",
+                                "label": "ostro wysklepiony po obydwu stronach"
+                            },
+                            {
+                                "id": "6670af35-2045-5477-ab1c-a43644e9b370",
+                                "label": "wysklepienie wypukłe po stronie wewnętrznej"
+                            },
+                            {
+                                "id": "a668afc3-33ea-5174-957a-b535de6ddf46",
+                                "label": "wysklepienie wypukłe po stronie zewnętrznej"
+                            },
+                            {
+                                "id": "31a82817-8c35-5ebb-b325-581359cf48dc",
+                                "label": "wysklepienie wypukłe po obydwu stronach"
+                            },
+                            {
+                                "id": "2feb691c-4ed0-5bf8-be50-b8f2439b61e9",
+                                "label": "guzek połączony z wcięciem wysklepienia górnego"
+                            },
+                            {
+                                "id": "f4022091-c6e0-5a3a-b02e-993ea6fa351e",
+                                "label": "guzek podwójny wewnętrzny"
+                            },
+                            {
+                                "id": "05fb86a5-ba13-5a10-b3a2-64ac5dfabed7",
+                                "label": "guzek podwójny zewnętrzny"
+                            },
+                            {
+                                "id": "ebc90a3e-0c7a-5fd2-97f4-7825d08e62cb",
+                                "label": "nietypowy kształt guzka"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ceca9da1-8cb4-5475-8cb7-ed9983f1826f",
+                        "kind": "choice",
+                        "label": "Wewnętrzny brzeg guzka",
+                        "options": [
+                            {
+                                "id": "7ecd6817-a2e2-592a-bbde-fdcabd65dd05",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "720eef43-f127-53d5-b25e-e3f37680e5f4",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "990879a2-eeea-57f6-80a3-7a0056a21478",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "8c1cb66e-a8c8-5bf9-ba59-f537363ab838",
+                        "kind": "choice",
+                        "label": "Wcięcie za guzkiem",
+                        "options": [
+                            {
+                                "id": "23d75376-db0c-56f7-926b-f56f4e60c03c",
+                                "label": "przerwa w śladzie"
+                            },
+                            {
+                                "id": "4fb07044-95c5-5505-bc32-92f444b153ae",
+                                "label": "przejście wąskie"
+                            },
+                            {
+                                "id": "219cd0bd-3119-5000-a99f-d1708489499f",
+                                "label": "przejście szerokie"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "d28d4588-1576-5ca0-b1e6-e27e5ca1db04",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "688f5345-9f52-56a7-8d85-917c2912a45e",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "aabed299-ffb0-57b1-8e6b-075cf17e0f53",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "ceef6a0a-aa04-5deb-a193-2833335926be",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "9ce4ba83-213b-5824-b8b3-ef3f93434df6",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "44952ed2-eea3-5cd7-96c5-c834b7f6436e",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "db1432aa-6c0c-502e-b1dc-0b535886e22e",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "0a792b2d-3e03-4701-941f-853a874627de",
@@ -45,7 +550,143 @@
                 "backgroundColor": "#d1db3d",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "641c6f10-f462-5600-84a9-d52c31ada335",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "e2cacbbc-d644-566e-a69f-a9cc99e33214",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "bc5732e5-25e0-5345-8fdc-89ca95716883",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "cb1ce655-a35f-5234-8d4e-30b7a9d67cdb",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "a6183f7f-8f0d-5eda-a289-f67611dbe10a",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "d644c021-028c-57e1-a506-d80501618485",
+                                "label": "rozszerzający się ku dołowi"
+                            },
+                            {
+                                "id": "e329da3c-7caf-5bfe-9daa-1ff51a1b06c2",
+                                "label": "zwężający się ku dołowi"
+                            },
+                            {
+                                "id": "dae9ea5b-f5ab-55fc-8555-391c3a6dba8c",
+                                "label": "zwężający się w części środkowej"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "9e3ea60f-1d33-517d-be7a-2f8ece21e8cb",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "2246814f-c46e-50f4-a878-fdbb56752e87",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "da5d3bf4-96ae-5d9b-90fa-a39e990f3206",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "ca0b67ab-b604-5238-a681-c24075e7b174",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f07ae26a-cb53-5bc9-a21a-673e385ff429",
+                        "kind": "size",
+                        "label": "Wysklepienie odcinka – szerokość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "214c7c68-177f-563d-a209-be7e9c2fbfe7",
+                                "label": "do 5 mm, słabe",
+                                "max": 5
+                            },
+                            {
+                                "id": "2dfc3171-bee3-5697-a4f3-8e45da6e10d3",
+                                "label": "od 5 do 8 mm, średnie",
+                                "min": 5,
+                                "max": 8
+                            },
+                            {
+                                "id": "0e9fb996-b92e-5a85-8fc6-9cf0705c9367",
+                                "label": "powyżej 8 mm, silne",
+                                "min": 8
+                            }
+                        ]
+                    },
+                    {
+                        "id": "10c2abfb-bf43-50c3-b60c-cfb06f32f0dd",
+                        "kind": "choice",
+                        "label": "Bruzdy poprzeczne",
+                        "options": [
+                            {
+                                "id": "17dba0e7-4a5f-5c29-b290-70632f864680",
+                                "label": "nie występują"
+                            },
+                            {
+                                "id": "5f718e45-383b-593e-a9ac-ea3f34fe9f61",
+                                "label": "występują miernie (1–2)"
+                            },
+                            {
+                                "id": "6da2da1f-79e7-5748-b203-a079c44260ba",
+                                "label": "występują silnie (3 i powyżej)"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f097c6b1-3bb8-5e93-9696-8eed8ad2176b",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "02668e79-e0d3-550f-8be6-b75ef59a9168",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "3a4f3c53-4850-548d-9d3b-f27b69ef8c9a",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "d660aa51-5b73-5dfc-b4f8-a74f4f34db3b",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "d4c9526e-fb77-500e-ab5d-7984ad4ac5ce",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "8f7ee4da-2237-5ba4-bc8f-369fb0a7c228",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "5486149b-9b49-5be4-815f-67a21cefc830",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "3cbb2e5d-a6f9-4cb1-91bc-a95e9c9f1dea",
@@ -55,7 +696,168 @@
                 "backgroundColor": "#36d938",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "1ccb8c91-fa11-5bd1-a9bc-cef0d8e386bd",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "b675f066-02cb-5d71-b9d5-6acdd7164b46",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "80fe794e-920f-55f6-aa4c-cc4312d1cffb",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "76cfced9-fcf6-5216-81e9-fc634685f345",
+                        "kind": "choice",
+                        "label": "Wysklepienie",
+                        "options": [
+                            {
+                                "id": "24e2ce54-8fda-5d68-95b1-4f7282a2ac51",
+                                "label": "słabe"
+                            },
+                            {
+                                "id": "1b5ee39b-0556-5279-b2ac-a5afbb7478b4",
+                                "label": "średnie"
+                            },
+                            {
+                                "id": "a1e54a1d-20c8-5af2-bf17-05384f7fef68",
+                                "label": "silne, masywne"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "1e219196-b7d6-5003-8fa3-9acdba793e10",
+                        "kind": "choice",
+                        "label": "Kształt wejścia w płatek",
+                        "options": [
+                            {
+                                "id": "c9abb3f6-d39d-561c-abe6-6d77dad5d9cb",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "9b89b987-9728-50e1-9a86-25968ebd612d",
+                                "label": "owalny"
+                            },
+                            {
+                                "id": "e4646d8c-114e-5e74-9682-6fb3d97d421e",
+                                "label": "załamany"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "22b690b0-a33a-53f5-91c5-1bf262200d32",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "01107d40-d1a7-5aff-918c-97b685c1965a",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "c83c6bac-97b1-5f14-ad5b-e78148bcc163",
+                                "label": "rozszerzający się ku dołowi"
+                            },
+                            {
+                                "id": "6316819e-f500-5d90-81eb-fa5f1d14f29e",
+                                "label": "zwężający się ku dołowi"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "6b177eb4-48ff-5846-806e-f319b8db194e",
+                        "kind": "choice",
+                        "label": "Wywinięcie odcinka",
+                        "options": [
+                            {
+                                "id": "e19f460a-a403-5ffe-82c6-ba62f7a50489",
+                                "label": "płaskie"
+                            },
+                            {
+                                "id": "1a90df93-295e-5085-9efd-837e2d5dad12",
+                                "label": "wywinięte"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "b79cc511-f131-5fa5-b8d2-8be02e03a406",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "dce5fd6b-90b9-55ad-a36a-68825deda678",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "effd95c5-f6ca-510d-ae84-3aa05ec1f48f",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "361608d8-8d37-5e87-a289-db0c33ec1d01",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "a5df91a1-4540-5768-b151-5199cb33b1a2",
+                        "kind": "choice",
+                        "label": "Styk z nasadą grobelki",
+                        "options": [
+                            {
+                                "id": "c425f68e-c145-5033-a557-808469d60d80",
+                                "label": "oddzielenie całkowite"
+                            },
+                            {
+                                "id": "ff72715e-9b2e-5153-ab45-85bf04dbe88f",
+                                "label": "oddzielenie częściowe"
+                            },
+                            {
+                                "id": "98908850-8c7f-5519-9290-6c8856054c1c",
+                                "label": "pełny styk"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "8d2995d8-7189-5673-b48a-4234b8188f8d",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "86bfee6f-182a-56b4-8272-19d4f2bdd296",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "703b2717-bdc3-5e55-afe5-d40af77b3f99",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "4412e7f2-4f89-5683-a986-7ba79d954857",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "87664ae8-e898-5cb1-bb08-a31e7aa13742",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "6f3e3c13-489d-54ae-a000-d8afc1f2a83e",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "70b2239b-da24-5d11-be6c-be7a9cad0d22",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "ed5541d2-c4e3-4c41-8d49-e878a975de08",
@@ -65,7 +867,185 @@
                 "backgroundColor": "#f93e98",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "24bdc0f5-1a15-5a97-8e69-4ce721d95440",
+                        "kind": "choice",
+                        "label": "Rodzaj grobelki",
+                        "options": [
+                            {
+                                "id": "13e3b026-ee4b-5f09-8ebc-5d3081c9ee0c",
+                                "label": "typ I"
+                            },
+                            {
+                                "id": "fadd7cc9-72e0-5f51-9c6e-a4b4149aaed6",
+                                "label": "typ II"
+                            },
+                            {
+                                "id": "ecba631a-5c88-5ad3-847d-e7ee71076751",
+                                "label": "typ III"
+                            },
+                            {
+                                "id": "e74c5fc6-49f4-5328-8b5e-6c501c627b66",
+                                "label": "typ IV"
+                            },
+                            {
+                                "id": "a6bc549c-777a-53e4-ac99-40a5499c2d89",
+                                "label": "typ V"
+                            },
+                            {
+                                "id": "3fe6ae7e-476b-557a-aa70-46bab67a9d3c",
+                                "label": "typ VI"
+                            },
+                            {
+                                "id": "5b080b2d-ce2d-5717-aef6-1ce11ce93c2d",
+                                "label": "typ VII"
+                            },
+                            {
+                                "id": "77c1fe7d-194b-5600-a7c0-07e4e337cfc1",
+                                "label": "typ VIII"
+                            },
+                            {
+                                "id": "3161436b-0380-5030-bd7f-607db635f34d",
+                                "label": "typ IX"
+                            },
+                            {
+                                "id": "8c691673-4a2e-57fb-ae8d-2e5a322bc8bd",
+                                "label": "typ X"
+                            },
+                            {
+                                "id": "286f6d42-85fe-5aec-975f-3af7bd143d6f",
+                                "label": "typ XI, inne"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "776ad20d-2d5b-5576-b196-33bf9c80f2e4",
+                        "kind": "choice",
+                        "label": "Występowanie początku na śladzie",
+                        "options": [
+                            {
+                                "id": "563b5f39-5eb1-535f-9a4a-c9458a7b22b9",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "a62f8bae-4a07-52e0-bd39-b558b3a0b673",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ecdaba32-01eb-5127-a507-3f75982eebda",
+                        "kind": "choice",
+                        "label": "Początek",
+                        "options": [
+                            {
+                                "id": "22ab0d87-7389-5b47-9d0f-6ba243e50d59",
+                                "label": "od fosy"
+                            },
+                            {
+                                "id": "bd006191-b2fa-51eb-a2b9-f27c03dca230",
+                                "label": "bez fosy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "6914501a-9a22-5d3d-a48f-60df691ce86f",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "e4e1c2a5-372f-5b03-afab-f1e98a21ae06",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "5220a978-1632-58b1-9fdd-d3465b412ba7",
+                                "label": "rozszerzający się ku dołowi"
+                            },
+                            {
+                                "id": "29981bea-877e-556f-a525-ed77c3c02c25",
+                                "label": "zwężający się ku dołowi"
+                            },
+                            {
+                                "id": "65b7e95c-57c6-5ac3-97ab-e38add321b0b",
+                                "label": "złożony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "33fc2b6b-0d79-58c7-9acc-eb9d44337c69",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu zewnętrznego",
+                        "options": [
+                            {
+                                "id": "c481e2b6-eea9-5992-9c8e-628f7554b89d",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "b7832439-8c70-5a8d-bb8c-3fcb4c52fa68",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "c7244d72-b030-56a2-8deb-7a97233e96b4",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "1c0a112f-ca1c-5e10-ad87-54ca85c03419",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "b4eb4505-167b-507a-bf40-d634c540d948",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "35e05c88-3e1e-5056-b359-7bd512a057aa",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "bb61b240-edb5-5297-beed-05d7582e64c7",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "69390bbc-342d-52e3-878f-1046242a3608",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "def0f358-439e-5c07-8fb1-0cf3a20e86ac",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "3d93dc03-caeb-5ea7-98c0-47a2833da4d3",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "e80303cd-7d55-5ab1-ac2f-d3bb1a3fec51",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "440a1f03-8bae-5483-9388-b191d3212f27",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "b166b148-6c4f-5f03-b4a5-9bb074991a5b",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "f92aec81-3a53-52df-b031-1c1a2a2dce71",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "6c4852e0-06ac-4f9b-9955-7080b52534dc",
@@ -75,7 +1055,151 @@
                 "backgroundColor": "#9d4edd",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "600dd984-738f-5852-ac02-bb7d28c33c83",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "6b17a849-b9d4-5f88-84f7-0c6f30aee941",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "ae9e36d3-cd68-5976-9f46-af87f80991de",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "7cf13704-d713-52c8-96f1-be11835b547e",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "cae66d54-1b1b-5eac-9372-4c595e96a09d",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "df845b47-20ae-5356-ba9c-101a2fb0e209",
+                                "label": "rozszerzający się ku górze"
+                            },
+                            {
+                                "id": "31ded83e-32d8-5a28-bd82-cf4ca05ad818",
+                                "label": "rozszerzający się ku dołowi"
+                            },
+                            {
+                                "id": "d82d9e12-9a12-5910-835d-7b15e03ec048",
+                                "label": "wypukły w części wewnętrznej"
+                            },
+                            {
+                                "id": "4d93847e-cc80-54f6-840d-d640b25de28f",
+                                "label": "wypukły w części zewnętrznej"
+                            },
+                            {
+                                "id": "9e8f5258-2adc-54ac-a357-2b2805b2514c",
+                                "label": "obustronnie wypukły"
+                            },
+                            {
+                                "id": "07911f5c-c097-5085-922f-8a19d5129fcf",
+                                "label": "wklęsły w części wewnętrznej"
+                            },
+                            {
+                                "id": "b4eddc75-7a5f-51a1-b239-bf6ccda4a363",
+                                "label": "wklęsły w części zewnętrznej"
+                            },
+                            {
+                                "id": "51c1a314-0a0c-56b2-b294-2d80c30fdddd",
+                                "label": "obustronnie wklęsły"
+                            },
+                            {
+                                "id": "29e50cbe-2417-5d86-aea9-d282e59404c8",
+                                "label": "wklęsły w części wewnętrznej, wypukły w części zewnętrznej"
+                            },
+                            {
+                                "id": "8e7425c3-7326-5029-abc4-1755df86d7dd",
+                                "label": "wklęsły w części zewnętrznej, wypukły w części wewnętrznej"
+                            },
+                            {
+                                "id": "047f4ece-e190-5678-8e8b-1f0ad22a06c9",
+                                "label": "inny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "41895ffd-92bf-5908-b44d-cd5aa49fc2d4",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu wewnętrznego",
+                        "options": [
+                            {
+                                "id": "6f13eff9-9884-52f5-9e95-cbab84d41ad1",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "48affc03-f896-5d58-985b-af7965f449f7",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "38789bb6-b94c-5829-88a7-7c83c0caa8b8",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c4b16b26-85a6-5b4a-9a40-9925f44a5bfa",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu zewnętrznego",
+                        "options": [
+                            {
+                                "id": "e39499c6-6524-5681-9ebd-b37db00fb8f6",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "a0940abb-395e-5feb-a61e-fdafec748d1c",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "461ddee9-8813-50b6-aa49-2694284c886c",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "5ef12279-43c9-53e2-bc0b-6cdbc4dc1e39",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "8dd9512e-6cda-5562-b414-c1191a256be1",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "39874005-b237-5732-b03f-31b463a9891b",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "f765e82c-af85-56bb-b359-f2d05618da68",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "b75a2f97-9fc1-5c00-b864-c8c4f00fced4",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "b4c2c524-84dd-5987-9d2c-bd47474403f6",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "fdc4673d-5063-541b-a546-7d553de06c15",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "119d63d6-72cd-44a8-bd07-9a23cc00358d",
@@ -85,7 +1209,77 @@
                 "backgroundColor": "#fff6bd",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "280e7e11-ccb5-53fa-91ce-a4a7c57bba93",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "27b010dc-711f-50de-8e08-60bc6e3c4cf0",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "80ff4f87-cf85-5630-9d70-f909a85f872a",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "20de4cfb-018f-50ed-a8da-63a547a28251",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "0eaf4285-1dbd-5793-baf9-1029360150d9",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "424aeffa-66e4-538a-b7e4-6376bfa3ea84",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "dedfbc57-ff29-5663-9304-e91722224bff",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c3f15489-9532-54b5-8639-51fd517c930e",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "52467bbd-7fb8-5215-8851-09d1afe6f106",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "eebe5b4b-9c7b-55b1-9a06-96a696da37fa",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "c96c6b6b-8c88-59f8-9134-b04a35c02c37",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "23e12cb7-3404-5b92-91cf-9c02f704cb51",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "124511f1-ccca-5828-8677-5e06e8c7c65c",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "2dc87668-e086-5c17-bf68-f120943fbd3d",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "a5c97fe4-61f4-426b-956e-9986a2b3ae58",
@@ -95,7 +1289,156 @@
                 "backgroundColor": "#d25171",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "f055f2cd-a876-5275-b5c9-03d86802fea7",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "3b08d68a-b261-517a-a829-08e6b29f9090",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "ee95f89a-2c5a-5a2f-892b-b32e06513a1c",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ad975fa1-a093-5b57-a10c-a4265c6daddd",
+                        "kind": "size",
+                        "label": "Długość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "2a83e5ed-7e3b-5b6e-afca-ece22feb88c5",
+                                "label": "do 2 mm, ledwie zaznaczona",
+                                "max": 2
+                            },
+                            {
+                                "id": "473a7ee9-5cad-5bf7-a9c3-8999eeea18f1",
+                                "label": "od 2 do 6 mm, średnia",
+                                "min": 2,
+                                "max": 6
+                            },
+                            {
+                                "id": "cd3ae283-c7a6-5207-89e8-1cf8fcc15b7c",
+                                "label": "powyżej 6 mm, duża",
+                                "min": 6
+                            }
+                        ]
+                    },
+                    {
+                        "id": "1124e90a-c99e-55b3-966b-780a0794c0d5",
+                        "kind": "size",
+                        "label": "Szerokość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "740069ad-a9f0-5930-810b-7367039c3e8f",
+                                "label": "do 3 mm, wąska",
+                                "max": 3
+                            },
+                            {
+                                "id": "332f24f9-9c9e-5387-90e2-cf8b7e68cb4c",
+                                "label": "od 3 do 5 mm, średnia",
+                                "min": 3,
+                                "max": 5
+                            },
+                            {
+                                "id": "62eccf8b-1ffc-59dd-b377-ca441a4e5677",
+                                "label": "powyżej 5 mm, duża",
+                                "min": 5
+                            }
+                        ]
+                    },
+                    {
+                        "id": "1b1c5c3b-28cb-5d47-81ea-3d692d1802ff",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "74564512-84c3-51e0-a357-0d374ab34672",
+                                "label": "punktowy – guzkowaty"
+                            },
+                            {
+                                "id": "8afb56f9-ffd7-559f-a500-f9c40ac7dca4",
+                                "label": "wypukły"
+                            },
+                            {
+                                "id": "6b50bdb0-5a5c-5e71-8cd6-704ad5f42b1f",
+                                "label": "wydłużony"
+                            },
+                            {
+                                "id": "51f133b4-268d-5906-a7e4-586f6dda006f",
+                                "label": "„konik morski”"
+                            },
+                            {
+                                "id": "fd5ff0d8-09eb-532b-ad86-822eb9818197",
+                                "label": "ostry"
+                            },
+                            {
+                                "id": "6b62f1c8-842e-5d0e-a62e-f7788b2358c2",
+                                "label": "inny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "dff5ad59-ca5a-55ac-9aeb-a013156178a5",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "e08cc95c-d3b5-57f0-923e-1cf27a302d7c",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "f542d64e-8aa2-5739-be84-c79cefd9f3ab",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "f8dbe05e-edb9-5262-9359-dd9e58617969",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "0e82711f-bfbe-5c25-a1b0-985d7d9caf40",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "0d898e5b-9ae6-5071-8e65-7d4f3201bba7",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "6dbe21a2-a1cb-5890-8a8e-410775451994",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "fcb8f129-922e-548a-8045-28e21eed9dfa",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "d3d13146-3718-5543-ab32-610a2a60f20d",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "eb7e54d2-4568-5fd6-ae19-77e69cdabdf5",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "6b1265b2-1848-549a-9557-20362de13b3a",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "db52fc5e-0357-4acb-b5af-042d9e6c565b",
@@ -105,7 +1448,74 @@
                 "backgroundColor": "#f448cf",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "cf4f0651-60ef-5861-b178-4b51f439b1ee",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "bbb8fdb0-5670-578a-b736-f979ed378826",
+                                "label": "połączenie z fosą wielką (typ I)"
+                            },
+                            {
+                                "id": "1c345852-d7fe-5cd5-89a4-17803fa1a256",
+                                "label": "połączenie z muszlą (typ II)"
+                            },
+                            {
+                                "id": "c50d4007-8725-593e-9003-dd82c35b8f5f",
+                                "label": "połączenie z fosą wielką i muszlą (typ III)"
+                            },
+                            {
+                                "id": "56e20f64-b489-5c0f-94f7-9a356c22b9fb",
+                                "label": "wyraźne występowanie i połączenie z fosą wielką oraz muszlą przesmykami (typ IV)"
+                            },
+                            {
+                                "id": "15e738d9-3aaf-53cf-9b99-33914d6fb07c",
+                                "label": "odcięcie od fosy wielkiej (typ V)"
+                            },
+                            {
+                                "id": "90258fc4-6682-5b4c-b272-44827ab4432d",
+                                "label": "odcięcie od muszli (typ VI)"
+                            },
+                            {
+                                "id": "77dee311-5cdd-50cf-8f4d-0f1ee5a134d1",
+                                "label": "odcięcie od fosy wielkiej i od muszli (typ VII)"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ad2abe25-9086-5174-938e-488adff37cb7",
+                        "kind": "choice",
+                        "label": "Głębokość",
+                        "options": [
+                            {
+                                "id": "574f0ddf-3a8d-5964-a2dd-af6aaaede11d",
+                                "label": "duża"
+                            },
+                            {
+                                "id": "78b4a319-b45d-5097-95c5-0d81f6742a54",
+                                "label": "mała"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2b10bf17-6322-590a-996c-a7c0aba5fc54",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "665bc082-1241-5e99-b5b0-1a403b63b904",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "1053f2a9-92fe-55be-a15e-71d439cbf497",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "9d369ca9-1f77-447f-abde-5c5c1fe145b5",
@@ -115,7 +1525,142 @@
                 "backgroundColor": "#ff5733",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "0f3a1b4f-fc98-548a-998e-b10cedbdcc2b",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "b3342724-6c65-5ca1-a239-db9dcea5854d",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "a106ae02-387f-5e9c-93b1-d0544c5c9a57",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "00d8c5a6-3e0e-55af-b381-a2bfe25aaa88",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "18cd39f4-5080-5720-a546-736b0cbff843",
+                                "label": "długa wąska"
+                            },
+                            {
+                                "id": "4f356931-ea7d-5b31-b86b-bf2820f3198b",
+                                "label": "krótka wąska"
+                            },
+                            {
+                                "id": "4c3e11e3-787a-5ecc-8b19-c727804510e6",
+                                "label": "długa szeroka"
+                            },
+                            {
+                                "id": "355615f6-5888-5525-8ec8-6204f9d54002",
+                                "label": "krótka szeroka"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e3dd4468-97e8-5a06-88b5-d88879d067e5",
+                        "kind": "choice",
+                        "label": "Kształt II",
+                        "options": [
+                            {
+                                "id": "b8775aaa-1a75-5be1-b00e-76eb28c72588",
+                                "label": "rozszerzona ku górze"
+                            },
+                            {
+                                "id": "ca24ece9-fa5e-55c7-ad86-2e17cd76ab89",
+                                "label": "równa"
+                            },
+                            {
+                                "id": "ca4dbb23-4ecf-51cd-a140-9483f13ec663",
+                                "label": "rozszerzona ku dołowi"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2246bce4-e0a3-561b-8046-f2392b9f4e79",
+                        "kind": "choice",
+                        "label": "Początek",
+                        "options": [
+                            {
+                                "id": "5ad5fa4b-d624-5f14-90d2-d0d0be561946",
+                                "label": "wychodząca z mocnej nasady płatka"
+                            },
+                            {
+                                "id": "2307fb4c-f5b2-5859-9216-6a8a90944202",
+                                "label": "wychodząca głęboko z płatka"
+                            },
+                            {
+                                "id": "f33ea995-8e87-52a2-bb47-cce692165425",
+                                "label": "na śladzie – nieograniczona płatkiem (wychodzi fosa ślad)"
+                            },
+                            {
+                                "id": "046fda6e-bf68-53c9-8f52-e66b2e945115",
+                                "label": "inny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "44eadf2f-7ce6-5af4-8ca3-5c3e491df2aa",
+                        "kind": "choice",
+                        "label": "Kształt początku fosy",
+                        "options": [
+                            {
+                                "id": "250d327b-a9bb-5e82-a4c3-80161963a3d3",
+                                "label": "punktowy"
+                            },
+                            {
+                                "id": "9a031091-640f-530e-9326-e7e6414733a5",
+                                "label": "lejkowaty"
+                            },
+                            {
+                                "id": "a160dfac-3328-52e8-854a-84617f3a25ae",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "e070283b-517a-562c-aaee-a2c2adbda5fe",
+                                "label": "otwarty"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "5d610404-817e-536f-bedd-c92991f58a14",
+                        "kind": "choice",
+                        "label": "Głębokość",
+                        "options": [
+                            {
+                                "id": "d021385f-6b91-54da-b590-034184c7ef31",
+                                "label": "głęboka"
+                            },
+                            {
+                                "id": "6c9f9945-fb95-5016-8bbe-9f17d1f32938",
+                                "label": "płytka"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "8ab8b2f1-15ab-5186-a295-23d0b23b597d",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "c1816b1b-7581-558e-bf58-aef246ce35da",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "4c866731-3532-5acc-8248-6e031006ec8e",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "3f4230e0-f9af-4ccf-bed8-59d122497bec",
@@ -125,7 +1670,54 @@
                 "backgroundColor": "#d279cf",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "b2e71ed5-248b-5f5e-aa4f-517fdabe99de",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "73467c44-ac8a-539c-afe6-bab484f283b3",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "0521b8eb-7750-5f4a-bbbf-5c9dbab47d96",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e0d504e0-9c56-542d-a663-f0b3dbcdcfdb",
+                        "kind": "choice",
+                        "label": "Głębokość",
+                        "options": [
+                            {
+                                "id": "259e9822-7b4c-5c6c-a689-00c8edbe3e28",
+                                "label": "głęboka"
+                            },
+                            {
+                                "id": "82b31415-ae2e-5079-8dbf-93434ce8e280",
+                                "label": "płytka"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2c8b5742-5a8d-5892-b164-077008660217",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "ffabbec3-a524-5f55-99b4-4ef4510b876f",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "2ddb3f89-041d-5855-8ad5-359ac36882fc",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "770bca6d-b509-46bc-a3e1-40aa82dfdbf3",
@@ -135,7 +1727,54 @@
                 "backgroundColor": "#68d651",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "11e492a2-e897-54c2-8d76-f75a7aa16f27",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "6bcbd27d-621b-5480-b3e6-a722f5bda02d",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "3167a587-574d-5efa-bf2e-3c0015a61490",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "06c082d7-2e16-5544-8a14-a49943d19ab8",
+                        "kind": "choice",
+                        "label": "Głębokość",
+                        "options": [
+                            {
+                                "id": "04326fe3-8584-56a1-900a-cac307079778",
+                                "label": "głęboka"
+                            },
+                            {
+                                "id": "6228807e-d62a-5829-944c-407749959804",
+                                "label": "płytka"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e9cedf89-8bdd-52b2-8c47-13d50849c8d2",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "aa6d1033-3878-5f66-8f88-8a7b711d52b6",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "705c76b1-58bf-5282-ab26-ccb8787a2375",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "4ee53436-304f-4850-ad69-50ad7a0e237a",
@@ -145,7 +1784,109 @@
                 "backgroundColor": "#ff914d",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "4f321422-badc-5d7e-a3c0-d0253c41b822",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "4f7f8a2b-a797-5229-a800-f8e9a30ea697",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "2106297d-3fc8-57a6-9e38-cf91781ccfd0",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "50e7e386-a5c4-5bad-a43f-274cd0815927",
+                        "kind": "size",
+                        "label": "Szerokość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "5cf9ff3e-8536-51f1-ac8d-e34230d6da18",
+                                "label": "do 4 mm, wąskie",
+                                "max": 4
+                            },
+                            {
+                                "id": "dbf2f57b-1930-5915-83e6-f0a1648a2704",
+                                "label": "od 4 do 8 mm, średnie",
+                                "min": 4,
+                                "max": 8
+                            },
+                            {
+                                "id": "00bbf0e2-5770-5224-b4e9-32f261ceb1b4",
+                                "label": "powyżej 8 mm, szerokie",
+                                "min": 8
+                            }
+                        ]
+                    },
+                    {
+                        "id": "8dd1892a-ce75-5f18-98b4-675f2bc10a63",
+                        "kind": "choice",
+                        "label": "Odsłonięcie",
+                        "options": [
+                            {
+                                "id": "c3e6ccf8-aa8b-52f3-b519-76ae76229a79",
+                                "label": "odsłonięte całkowicie"
+                            },
+                            {
+                                "id": "0b43712c-8bd8-502d-8521-607c9c12dde8",
+                                "label": "odsłonięte częściowo"
+                            },
+                            {
+                                "id": "f3589674-e091-56f0-a7fd-e253be254747",
+                                "label": "zasłonięte"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "2c974e21-62b6-5cbc-a5a5-3a0d4ac63417",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "7c4645a8-5e48-5e38-a834-084eaabcfa69",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "4b0029f6-020e-56b7-b308-b607642317b0",
+                                "label": "trójkątny"
+                            },
+                            {
+                                "id": "a21bb7d1-86e0-553a-8fcc-ab82d97e6cb6",
+                                "label": "w górę"
+                            },
+                            {
+                                "id": "50ae0ba9-a1c9-5159-80c1-b27d44861b54",
+                                "label": "w dół"
+                            },
+                            {
+                                "id": "cf846639-d1dc-5492-89a3-b32e9a12300e",
+                                "label": "złożony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "fa2b2f29-71ab-5020-991c-a0026a46f155",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "cd8d0e29-91bd-5ccb-bb76-7816df5d07a7",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "d901890f-1438-5488-9c4a-98c1cd4c090c",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "d161f7e5-84e1-4fca-9850-4ffae79b534e",
@@ -155,7 +1896,77 @@
                 "backgroundColor": "#f78fb3",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "bab6836d-fc95-5f2d-bb56-e03898565ed3",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "60b5cf68-8041-501b-b6ea-fe5c01b33c9d",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "60caa38b-171c-5de7-9f1a-a674231d8773",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "b2b2d81d-3b3c-5ec1-a150-dff1e607c207",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "eefd7e35-ef5b-5a2b-bd02-67f5496d3fec",
+                                "label": "punktowy"
+                            },
+                            {
+                                "id": "7a4860c6-e38e-5bde-8bfe-889901706858",
+                                "label": "wypukły"
+                            },
+                            {
+                                "id": "de576c80-991b-5e8c-911c-7903582c5ebc",
+                                "label": "wklęsły"
+                            },
+                            {
+                                "id": "0a6e8b83-1ad4-531f-8507-eedf7f0e4018",
+                                "label": "inne – nieregularne"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "08fb42ca-091f-51fc-98b2-f2d14d2849e6",
+                        "kind": "choice",
+                        "label": "Kształt brzegu",
+                        "options": [
+                            {
+                                "id": "33a9cb42-505d-5d8a-ab41-a0045cbdd67e",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "f1a16859-0c4d-5dcd-b5b2-6de0d804f705",
+                                "label": "nierówny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "00665ca5-6f8b-5318-b12c-9b6c4e03a5fb",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "1488056e-561f-5abd-8129-e672c525df9b",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "91ef78e4-b82f-53f9-99c5-20f8155168e2",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "1ba26ac5-eeca-4ebb-9e7e-3d7d350b4fd0",
@@ -165,7 +1976,58 @@
                 "backgroundColor": "#1f7a8c",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "09cb7fd5-6dd4-58eb-b4e2-9b69bed2af74",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "45bf8a89-7bbc-5738-9c4c-46b5282f13e4",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "5c40f647-8a3e-5838-a3b3-0e8e9d9ebb2d",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "5560cc4b-5dda-5068-83ad-9414b62b1a94",
+                        "kind": "choice",
+                        "label": "Odwzorowanie",
+                        "options": [
+                            {
+                                "id": "18059b74-62fa-51cb-8381-59384bd95060",
+                                "label": "silne"
+                            },
+                            {
+                                "id": "c69c03ac-355e-5244-9a35-d289befda41a",
+                                "label": "średnie"
+                            },
+                            {
+                                "id": "f6acf536-04cf-5d6c-82ae-bd8d889919e6",
+                                "label": "słabe"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "816c580e-8a80-5f9d-9440-c622b94da2e3",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "e4a98de4-24db-527b-8492-aa07c1631bd3",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "48358989-1ac1-59f9-af8a-0209e9cc4ad7",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "10a118af-8ca0-43bf-87b9-a0b3d0e89427",
@@ -175,7 +2037,112 @@
                 "backgroundColor": "#ffc300",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "4a149cf1-78b9-53a5-b818-0e892bb50c50",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "bcf3e259-1644-5b9c-b08a-7197a1bcd900",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "2d657e64-9c0b-5d0c-b69c-65296df3bf26",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "27772edf-2c7c-5aad-b670-2594eb79d985",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "9e218ca1-f4ba-579a-a30f-6c89178c2910",
+                                "label": "punktowy ostry"
+                            },
+                            {
+                                "id": "fbc188bc-c858-5c83-8007-4cce6bb01989",
+                                "label": "punktowy owalny"
+                            },
+                            {
+                                "id": "b245c9de-cf10-5355-be29-13886e0c5aa3",
+                                "label": "owalny"
+                            },
+                            {
+                                "id": "e97edba0-418b-5117-b582-42e42ef5c594",
+                                "label": "prosty"
+                            },
+                            {
+                                "id": "83c261af-eab7-57d3-8e36-1eb3a81a5c35",
+                                "label": "dwuguzkowy"
+                            },
+                            {
+                                "id": "77797566-bff4-5b71-9204-80792de84d77",
+                                "label": "wklęsły"
+                            },
+                            {
+                                "id": "9b8901cf-93f3-51bb-ae6d-6c9cc578f144",
+                                "label": "inny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "ebed0a6e-81a4-5c47-8bf8-ca03e3670e2e",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "cfc99539-77f1-5f0f-bbf6-23ebb03e212e",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "138d176f-c4f6-572b-962a-7009ecefa6c7",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "a8df57b8-7337-5c0f-bc1d-e0147332e6c5",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "d276aec3-87e1-573d-ac3c-636dc22ff0c2",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "b14b07d2-bc73-5c05-9837-73b7b39e1a8d",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "16eba645-6aae-5d6c-91c1-d6ba9c71074c",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "db62c0bf-ffbc-55f2-9acc-af5b03bb53c3",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "aa3e0076-0a91-5475-b09f-0e5dde28b747",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "9908b4ed-257f-5f0d-b2ab-12a747ac7e5d",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "1e1af6db-002e-551c-88a4-cb59eb573098",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "932161a2-5561-4537-9c4e-406366a1c71d",
@@ -185,7 +2152,202 @@
                 "backgroundColor": "#2d6a4f",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "b663c852-b99f-5d8c-a17e-48d493647d85",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "d913b044-0231-5fa7-a03a-62b8a85f25e8",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "bdf9e5b6-d577-55d3-8d43-88926b137954",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "211b11bf-e496-5a8b-b9d7-d6e2ec8c039a",
+                        "kind": "size",
+                        "label": "Szerokość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "9e7418ab-b554-5604-b507-9d26a13ef34b",
+                                "label": "do 2 mm, wąskie",
+                                "max": 2
+                            },
+                            {
+                                "id": "a4acf24f-8917-569f-9b9d-a35845149250",
+                                "label": "od 2 do 5 mm, średnie",
+                                "min": 2,
+                                "max": 5
+                            },
+                            {
+                                "id": "25b9f23a-7cd1-5038-add7-684137eb8477",
+                                "label": "ponad 5 mm, szerokie",
+                                "min": 5
+                            }
+                        ]
+                    },
+                    {
+                        "id": "bdca9ac6-346a-5836-be7a-de819898407c",
+                        "kind": "size",
+                        "label": "Głębokość",
+                        "unit": "mm",
+                        "ranges": [
+                            {
+                                "id": "b839fe36-b135-54fa-8ff3-12c2812699a4",
+                                "label": "do 2 mm, mała",
+                                "max": 2
+                            },
+                            {
+                                "id": "bd91ff28-9292-59dc-8ccd-6a4c726191bb",
+                                "label": "od 2 do 5 mm, średnia",
+                                "min": 2,
+                                "max": 5
+                            },
+                            {
+                                "id": "d4866859-c5e2-5527-9d78-afcd91620e1e",
+                                "label": "powyżej 5 mm, duża",
+                                "min": 5
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f5a02349-708a-5983-8554-3378708fa815",
+                        "kind": "choice",
+                        "label": "Połączenie z bruzdą (wcięciem) płatka",
+                        "options": [
+                            {
+                                "id": "4ec76970-b9c9-59b3-9ee0-4499557d9278",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "b0845cb5-524c-5560-9a67-5980aeb32463",
+                                "label": "wąskie"
+                            },
+                            {
+                                "id": "51b98f65-59bd-534f-9c17-31e482222248",
+                                "label": "szerokie"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "7a3094c6-f67e-5073-bd91-7993778d0847",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "79202082-3da4-5538-8799-cf1a7e01c833",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "06387a6a-bc54-5f42-8533-0ef9d0662c2d",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "b2f2d875-8ee8-5f28-b2a0-9326caec663b",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "be9a8c14-81ea-5561-a5ad-9044b46a1c7a",
+                        "kind": "choice",
+                        "label": "Wysokość brzegu",
+                        "options": [
+                            {
+                                "id": "5a841b09-100b-531c-b118-88d043f837a2",
+                                "label": "brzeg niski (typ I)"
+                            },
+                            {
+                                "id": "3d7972cf-ab2d-5b0a-9fca-49396410fad5",
+                                "label": "brzeg wąski wał (typ II)"
+                            },
+                            {
+                                "id": "0cddbe69-2264-5914-a28f-ac1b946d5673",
+                                "label": "brzeg wysoki po stronie skrawka, niski po stronie przeciwskrawka (typ III)"
+                            },
+                            {
+                                "id": "12f1a53a-ddbd-5b6f-822f-a79172cc5fa5",
+                                "label": "brzeg wysoki po stronie przeciwskrawka, niski po stronie skrawka (typ IV)"
+                            },
+                            {
+                                "id": "30f6ac68-05b4-5f29-a1f0-349a9c63bd1e",
+                                "label": "brzeg wysoki guzkowaty po stronie skrawka i przeciwskrawka, niżej płaski (typ V)"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "da4e1f66-64aa-564f-84a9-d7e8a0a9d96c",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "af534875-a699-5a3c-b6a8-1982c5a2f6e3",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "10017899-b899-5eb2-ab55-cc1842a83ee4",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "052e2b87-10d3-5dad-ae7f-5cebe2a53c9a",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "03fee336-bf65-5d2c-8ea3-d9a5b179acb4",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "9a71184e-ff7c-56b3-a2f3-a6f657c1585c",
+                                "label": "owalny"
+                            },
+                            {
+                                "id": "e84cceb0-d7f4-595e-a5fa-c621f5f51a4d",
+                                "label": "trójkątny"
+                            },
+                            {
+                                "id": "4241e887-0319-5739-8901-3595d46ef0ea",
+                                "label": "lejkowaty"
+                            },
+                            {
+                                "id": "d2e0e8b3-aa77-513b-adf0-507f09ed026f",
+                                "label": "prostokątny"
+                            },
+                            {
+                                "id": "e32c2166-c8df-512b-bd34-49ed151bd91a",
+                                "label": "otwarty"
+                            },
+                            {
+                                "id": "30d1fd93-aaaf-52f4-8ea4-18240d6aae38",
+                                "label": "inny"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "d9f19535-8ebd-531a-8a5c-8b92e276935f",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "78850634-f974-50f1-830e-0aea156d386e",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "223bab47-a038-5f89-b824-9b189acd5225",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "39c49390-9441-442a-9a50-6e62f149e061",
@@ -195,7 +2357,115 @@
                 "backgroundColor": "#57e561",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "82b08d81-637e-5e0b-8dd9-c013908f5085",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "a2bab002-22ed-56e3-86e8-4dac20cdef9c",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "f1dd699a-a8ca-5e28-b875-17f50d1575f0",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c80a03d7-f2b3-5731-bdb8-fb18940c6b8c",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "6866b607-be74-5cdd-95ad-33300ce5ac67",
+                                "label": "podłużny"
+                            },
+                            {
+                                "id": "f602b785-735f-5611-8ac3-98dd3e934c80",
+                                "label": "owalny"
+                            },
+                            {
+                                "id": "6948d62c-fd67-5558-8bbe-3e65dd968dd2",
+                                "label": "guzkowaty, punktowy"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "89c52a71-1a45-5724-93e6-b791ed0ec092",
+                        "kind": "choice",
+                        "label": "Wysklepienie",
+                        "options": [
+                            {
+                                "id": "b8ac8c9e-bb31-5a41-96c3-aaee57609531",
+                                "label": "guzowate"
+                            },
+                            {
+                                "id": "8707d385-9544-5843-8cf5-c3fb41db0d18",
+                                "label": "wałowe"
+                            },
+                            {
+                                "id": "e5f25365-6305-556d-8655-149482af01ae",
+                                "label": "płaskie"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f2cd913d-d406-5135-81ca-bab8d90ce0cc",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "f272d122-7596-5108-b146-f9237bebb62b",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "2c8e45d5-0bca-5a1c-b674-3594a39e95f4",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "9ce95e68-9f04-5b92-b65e-4a8bf13557cf",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "7db78915-c43c-5a02-b612-4465216f058a",
+                        "kind": "choice",
+                        "label": "Budowa poletkowa skóry",
+                        "options": [
+                            {
+                                "id": "0b37ec80-5254-5fca-8adc-0ec8a8e5d76c",
+                                "label": "nieczytelna"
+                            },
+                            {
+                                "id": "5c7f020b-0624-50cb-8796-aec7aeb38fe8",
+                                "label": "widoczna – nie nadająca się do identyfikacji"
+                            },
+                            {
+                                "id": "9d93056c-8c54-5000-9ad4-88af8967a38c",
+                                "label": "czytelna – nadająca się do identyfikacji"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "793efe3f-e65c-5836-b125-443529df2fb6",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "ccadc667-0d8b-59ec-8f78-60a8e6a8423c",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "ae60cec7-50f9-569f-84af-20509d3931d6",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "917f7d1e-ff0c-4394-b68a-944a2fb261c2",
@@ -205,7 +2475,77 @@
                 "backgroundColor": "#ea5757",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "7b180950-9fd4-5556-ae90-edfa4e198ba7",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "d1a713b4-181e-5f08-8d2b-a6aac64c4ea8",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "72389e1a-47eb-548b-8e8c-70ee5b0ddfe2",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e61095e8-fa8d-5e31-8481-d6d4d05e3fc5",
+                        "kind": "choice",
+                        "label": "Kształt",
+                        "options": [
+                            {
+                                "id": "507611a0-e3c7-5ac5-8a07-0e016978d497",
+                                "label": "oddzielająca całkowicie"
+                            },
+                            {
+                                "id": "c13e3931-ca00-5b43-8ef3-f9294822c880",
+                                "label": "oddzielająca w części"
+                            },
+                            {
+                                "id": "5de23834-5815-5138-bac7-d307468790fd",
+                                "label": "zwężająca"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "3e5659e9-2394-5a5d-83d6-0cee1bfe5a6b",
+                        "kind": "choice",
+                        "label": "Nierówność brzegu",
+                        "options": [
+                            {
+                                "id": "07ec9f1d-e73b-5494-b5ff-c3671b112563",
+                                "label": "równy"
+                            },
+                            {
+                                "id": "26db52b7-14ce-5d79-92ba-e3f8ac7f9615",
+                                "label": "nierówny"
+                            },
+                            {
+                                "id": "3da96c92-5451-5a92-ba29-0b553a4804fe",
+                                "label": "postrzępiony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f2779c75-78f1-5e81-8f32-8adc899b5413",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "d50584b6-0ff6-561b-a6f3-08552e884935",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "031d21a6-fe74-5105-adf9-351434b261d1",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "0243f3cf-18ed-4d7c-9a3d-d323ffa179ed",
@@ -215,7 +2555,66 @@
                 "backgroundColor": "#7c5cff",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "d8f9bb83-5f7e-57a1-89ff-c63842871df9",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "3485e627-f84a-588f-8ef8-02d47f11302a",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "f9040eb7-d233-5984-bbe4-c4c8c5afe6d6",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c255ce95-2185-55fc-ba7d-10d38e954c74",
+                        "kind": "choice",
+                        "label": "Kształt płatka",
+                        "options": [
+                            {
+                                "id": "f5465278-e8a1-5370-a1b0-1805cd986a66",
+                                "label": "okrągły"
+                            },
+                            {
+                                "id": "edc1578c-2b5f-5e46-b815-bd3880bbe516",
+                                "label": "trójkątny"
+                            },
+                            {
+                                "id": "f5603fce-e457-5b6c-a3bc-57d72283ba7e",
+                                "label": "kwadratowy"
+                            },
+                            {
+                                "id": "c145fa95-3628-5ab1-a7f1-fef7ce76a986",
+                                "label": "owalny"
+                            },
+                            {
+                                "id": "a5d56204-738e-54da-8da2-702162fb0f90",
+                                "label": "nieokreślony"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "f465620a-25d9-5045-8c54-fd166d505c82",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "6085f4d7-91fe-576a-979b-ae0c7366d0bc",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "b2ae427e-1d9a-55f9-b08b-b9f74328dd23",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "d3efb7e4-c628-4142-8f4a-321e7bbee216",
@@ -225,7 +2624,39 @@
                 "backgroundColor": "#3ec1d3",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "238de013-d518-5a98-a8bd-0155e5ca9f32",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "40a6f80b-0888-53f1-bcc5-3d1286b068f0",
+                                "label": "płatek płaski"
+                            },
+                            {
+                                "id": "4e1a60fd-71d7-56d7-8bd4-61d1342bf8a0",
+                                "label": "płatek wysklepiony guzkowato"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "e9cd568f-9a73-5d79-9883-f34744ea6a2a",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "a1df8939-d21b-575d-bf75-e39be16fc88a",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "474741f9-8a1a-52fa-8495-b96858a89a6b",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "a530742c-e92f-4756-a9ee-f5b2eb2a54af",
@@ -235,7 +2666,39 @@
                 "backgroundColor": "#ffb4a2",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "16856b59-f174-5497-afbb-1446c1f7fe16",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "9a1d8e1e-997c-5fa8-a08d-31ec93ee4c07",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "9588927d-c327-5ee6-9c1b-3f9a2e780d25",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "65efaead-a8e6-5f94-ad31-b17603e5b762",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "2010601d-c429-5d12-9f3f-08eb202ae85b",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "b4266895-9d06-5f98-8059-3afc0aad4f8a",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             },
             {
                 "id": "89cadbf1-651c-46ce-94eb-0ecf4c6aa233",
@@ -245,7 +2708,39 @@
                 "backgroundColor": "#b08968",
                 "textColor": "#0a130a",
                 "size": 10,
-                "category": "EAR"
+                "category": "EAR",
+                "attributes": [
+                    {
+                        "id": "81869e0d-ae68-55ca-a759-d0628bcb00a8",
+                        "kind": "choice",
+                        "label": "Występowanie",
+                        "options": [
+                            {
+                                "id": "e584549a-f280-5b72-975c-468bcb125a3e",
+                                "label": "występuje w części"
+                            },
+                            {
+                                "id": "5a957de3-c574-5176-9688-397f23e2dc7e",
+                                "label": "występuje w całości"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "c05fda37-cadc-5490-8efb-f577e193cf82",
+                        "kind": "choice",
+                        "label": "Inne cechy charakterystyczne",
+                        "options": [
+                            {
+                                "id": "ac4b88e1-7bbd-574a-b3f2-37530be9e900",
+                                "label": "brak"
+                            },
+                            {
+                                "id": "92d8271f-1100-51dd-92e4-8549fb3d2e70",
+                                "label": "występują"
+                            }
+                        ]
+                    }
+                ]
             }
         ]
     }
