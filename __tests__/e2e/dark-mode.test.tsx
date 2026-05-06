@@ -5,28 +5,39 @@ import { Builder, By, Capabilities, WebDriver } from "selenium-webdriver";
 import { Writable } from "stream";
 import find from "find-process";
 
-// NOTE:
-// do uruchomienia testów potrzebne są zainstalowane poniższe programy:
-// tauri-driver [https://beta.tauri.app/guides/test/webdriver/]
-// msedgedriver (na moment pisania tego komentarza wersja 119.0.2151.58, trzeba sprawdzić jaka jest wersja webview tauri)
-// https://msedgewebdriverstorage.z22.web.core.windows.net/?prefix=119.0.2151.58/
-// msedgedriver.exe musi być w %PATH%
+// Tauri-driver supports Linux (webkit2gtk-driver) and Windows (msedgedriver).
+// macOS has no WebDriver for WKWebView — skip there.
+const PLATFORM = process.platform;
+const SUPPORTED = PLATFORM === "win32" || PLATFORM === "linux";
 
-const application = path.resolve(
-    __dirname,
-    "..",
-    "..",
-    "src-tauri",
-    "target",
-    "release",
-    "biometrics-studio.exe"
-);
+const isWindows = PLATFORM === "win32";
+const exe = isWindows ? ".exe" : "";
+
+const application = isWindows
+    ? path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "src-tauri",
+          "target",
+          "release",
+          "biometrics-studio.exe"
+      )
+    : path.resolve(
+          __dirname,
+          "..",
+          "..",
+          "src-tauri",
+          "target",
+          "release",
+          "biometrics-studio"
+      );
 
 const tauriDriverPath = path.resolve(
     os.homedir(),
     ".cargo",
     "bin",
-    "tauri-driver.exe"
+    `tauri-driver${exe}`
 );
 
 let driver: WebDriver | undefined;
@@ -38,7 +49,11 @@ async function clickThroughElements(testIdList: string[]) {
     }
 }
 
+const describeIfSupported = SUPPORTED ? describe : describe.skip;
+
 beforeAll(async () => {
+    if (!SUPPORTED) return;
+
     spawnSync("cargo", ["build", "--release"]);
 
     tauriDriver = spawn(tauriDriverPath, [], {
@@ -54,27 +69,30 @@ beforeAll(async () => {
         .withCapabilities(capabilities)
         .usingServer("http://127.0.0.1:4444/")
         .build();
-    // czekaj przez maks. 120 sekund na uruchomienie aplikacji
 }, 120000);
 
 afterAll(async () => {
+    if (!SUPPORTED) return;
+
     tauriDriver?.kill();
-    const biometricsStudioProcesses = await find(
-        "name",
-        "biometrics-studio.exe",
-        true
-    );
-    biometricsStudioProcesses.forEach(({ pid }) => {
+    const appProcesses = await find("name", `biometrics-studio${exe}`, true);
+    appProcesses.forEach(({ pid }) => {
         process?.kill(pid);
     });
-    const msedgedriverProcesses = await find("name", "msedgedriver.exe", true);
-    msedgedriverProcesses.forEach(({ pid }) => {
-        process?.kill(pid);
-    });
+    if (isWindows) {
+        const msedgedriverProcesses = await find(
+            "name",
+            "msedgedriver.exe",
+            true
+        );
+        msedgedriverProcesses.forEach(({ pid }) => {
+            process?.kill(pid);
+        });
+    }
 });
 
-describe("Dark mode", () => {
-    it("should swtich to light color mode", async () => {
+describeIfSupported("Dark mode", () => {
+    it("should switch to light color mode", async () => {
         const dashboard = await driver
             ?.findElement(By.css("[data-testid='page-container']"))
             .isDisplayed();
@@ -91,7 +109,7 @@ describe("Dark mode", () => {
         expect(htmlClass).toBe("light");
     });
 
-    it("should swtich to dark color mode", async () => {
+    it("should switch to dark color mode", async () => {
         await clickThroughElements(["dark-mode-toggle-item-dark"]);
 
         const htmlElement = await driver?.findElement(By.css("html"));
