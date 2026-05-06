@@ -1,0 +1,30 @@
+{
+    "$schema": "./node_modules/oxlint/configuration_schema.json",
+    "plugins": ["typescript", "react", "unicorn", "oxc", "import"],
+    "categories": {
+        "correctness": "error",
+        "suspicious": "warn",
+        "perf": "warn"
+    },
+    "env": {
+        "browser": true,
+        "node": true,
+        "es2022": true
+    },
+    "rules": {
+        "no-console": "warn",
+        "no-debugger": "error",
+        "react/react-in-jsx-scope": "off",
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn",
+        "@typescript-eslint/no-explicit-any": "error",
+        "@typescript-eslint/no-unused-vars": "error"
+    },
+    "ignorePatterns": [
+        "node_modules",
+        "dist",
+        "src-tauri/target",
+        "src-tauri/gen",
+        ".husky"
+    ]
+}
