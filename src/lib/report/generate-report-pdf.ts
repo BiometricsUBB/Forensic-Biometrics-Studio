@@ -20,7 +20,6 @@ import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
 import { TracingStore, TracingPath } from "@/lib/stores/Tracing/Tracing.store";
-import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import {
     clamp,
     formatReportDateTime,
@@ -51,18 +50,15 @@ type ImageMeta = {
 type RenderedImages = {
     originalDataUrl: string;
     allMarkingsCanvas: HTMLCanvasElement;
-    selectedMarkingsCanvas: HTMLCanvasElement;
 };
 
 const PAGE = {
     width: 794,
     height: 1123,
-    margin: 95,
 };
 const LANDSCAPE = {
     width: PAGE.height,
     height: PAGE.width,
-    margin: 70,
 };
 
 const IMAGE_CELL_SIZE = 200;
@@ -162,7 +158,6 @@ const renderImageWithMarkings = async (
     markingTypes: MarkingType[],
     sizeScale: number,
     tracingPaths?: TracingPath[], 
-    rotation: number = 0,         
     options?: {
         showMarkingLabels?: boolean;
         markingsAlpha?: number;
@@ -186,26 +181,33 @@ const renderImageWithMarkings = async (
     app.stage.addChild(sprite);
 
     if (tracingPaths && tracingPaths.length > 0) {
-        const tracingContainer = new PIXI.Container();
+    const tracingContainer = new PIXI.Container();
 
-        tracingPaths.forEach(path => {
-            const g = new PIXI.Graphics();
-            g.lineStyle({
-                width: path.brushSize,
-                color: Number(path.color.replace("#", "0x")),
-                alpha: path.opacity ?? 1,
-                join: PIXI.LINE_JOIN.ROUND,
-                cap: PIXI.LINE_CAP.ROUND,
-            });
-            if (path.points && path.points.length > 0) {
-                const [p0, ...rest] = path.points;
-                g.moveTo(p0.x, p0.y);
-                rest.forEach(p => g.lineTo(p.x, p.y));
-            }
-            tracingContainer.addChild(g);
+    tracingPaths.forEach(path => {
+        const g = new PIXI.Graphics();
+        g.lineStyle({
+            width: path.brushSize,
+            color: Number(path.color.replace("#", "0x")),
+            alpha: path.opacity ?? 1,
+            join: PIXI.LINE_JOIN.ROUND,
+            cap: PIXI.LINE_CAP.ROUND,
         });
-        app.stage.addChild(tracingContainer);
-    }
+        
+        if (path.points && path.points.length > 0) {
+            const p0 = path.points[0];
+            if (p0) {
+                g.moveTo(p0.x, p0.y);
+                path.points.slice(1).forEach(p => {
+                    if (p) g.lineTo(p.x, p.y);
+                });
+            }
+        }
+        
+        tracingContainer.addChild(g);
+    });
+    
+    app.stage.addChild(tracingContainer);
+}
 
     const g = new PIXI.Graphics();
     g.alpha = markingsAlpha;
@@ -406,9 +408,7 @@ const rotateCanvas = (
 
 const createOverviewCalloutImage = async (
     imageBytes: Uint8Array,
-    features: MarkingClass[],
-    tracingPaths?: TracingPath[], 
-    rotation: number = 0          
+    features: MarkingClass[]
 ) => {
     const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
@@ -426,27 +426,6 @@ const createOverviewCalloutImage = async (
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, margin, margin);
-
-    if (tracingPaths && tracingPaths.length > 0) {
-        ctx.save();
-
-        tracingPaths.forEach(path => {
-            if (!path.points || path.points.length === 0) return;
-            ctx.beginPath();
-            ctx.lineWidth = path.brushSize;
-            ctx.strokeStyle = path.color;
-            ctx.globalAlpha = path.opacity ?? 1;
-            ctx.lineJoin = "round";
-            ctx.lineCap = "round";
-
-            ctx.moveTo(path.points[0].x, path.points[0].y);
-            for (let i = 1; i < path.points.length; i++) {
-                ctx.lineTo(path.points[i].x, path.points[i].y);
-            }
-            ctx.stroke();
-        });
-        ctx.restore();
-    }
 
     const centerX = margin + width / 2;
     const centerY = margin + height / 2;
@@ -596,15 +575,15 @@ const createStyles = () => {
         .software-title { font-size: 16px; font-weight: bold; margin-top: 40px; margin-bottom: 15px; }
         .section-title-large { font-size: 20px; font-weight: bold; margin-top: 40px; margin-bottom: 20px; }
 
-        h2, h3, h4, .section-title { margin-top: 0; margin-bottom: 20px !important; display: block; font-weight: bold; }
+        .section-title { margin-top: 0; margin-bottom: 20px !important; display: block; font-weight: bold; }
         
-        .fig-grid, .overview-grid, .zoom { margin-top: 20px !important; }
+        .overview-grid { margin-top: 20px !important; }
         
         .fig { display: grid; gap: 6px; font-size: 14px; }
         .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .overview-grid.landscape { grid-template-columns: 1fr 1fr; align-items: center; }
         
-        .fig img, .overview-grid img, .zoom img { 
+        .fig img, .overview-grid img { 
             width: 100%; 
             height: auto; 
             border: 1px solid #ccc; 
@@ -753,9 +732,6 @@ export const generateReportPdfWithDialog = async (
 
         const leftTracingPaths = TracingStore(CANVAS_ID.LEFT).getState().paths;
         const rightTracingPaths = TracingStore(CANVAS_ID.RIGHT).getState().paths;
-        
-        const leftRotation = RotationStore(CANVAS_ID.LEFT).state.rotation;
-        const rightRotation = RotationStore(CANVAS_ID.RIGHT).state.rotation;
 
         const matched = options.includeMatchedOnly
             ? getMatchedFeatures(markingsLeft, markingsRight)
@@ -776,30 +752,16 @@ export const generateReportPdfWithDialog = async (
             markingsLeft,
             markingTypes,
             1.6,
-            leftTracingPaths,
-            leftRotation
+            leftTracingPaths
         );
         const rightAllCanvas = await renderImageWithMarkings(
             rightMeta.bytes,
             markingsRight,
             markingTypes,
             1.6,
-            rightTracingPaths,
-            rightRotation
+            rightTracingPaths
         );
 
-        const leftSelectedCanvas = await renderImageWithMarkings(
-            leftMeta.bytes,
-            selectedFeatures.map(x => x.left),
-            markingTypes,
-            1.6
-        );
-        const rightSelectedCanvas = await renderImageWithMarkings(
-            rightMeta.bytes,
-            selectedFeatures.map(x => x.right),
-            markingTypes,
-            1.6
-        );
         const detailCrops = await Promise.all(
             selectedFeatures.map(async feature => {
                 const [leftSingleCanvas, rightSingleCanvas] = await Promise.all(
@@ -810,7 +772,6 @@ export const generateReportPdfWithDialog = async (
                             markingTypes,
                             1.6,
                             undefined,
-                            0,
                             { showMarkingLabels: false, markingsAlpha: 0.45 }
                         ),
                         renderImageWithMarkings(
@@ -819,7 +780,6 @@ export const generateReportPdfWithDialog = async (
                             markingTypes,
                             1.6,
                             undefined,
-                            0,
                             { showMarkingLabels: false, markingsAlpha: 0.45 }
                         ),
                     ]
@@ -914,12 +874,10 @@ export const generateReportPdfWithDialog = async (
         const leftImages: RenderedImages = {
             originalDataUrl: leftOriginal,
             allMarkingsCanvas: leftAllCanvas,
-            selectedMarkingsCanvas: leftSelectedCanvas,
         };
         const rightImages: RenderedImages = {
             originalDataUrl: rightOriginal,
             allMarkingsCanvas: rightAllCanvas,
-            selectedMarkingsCanvas: rightSelectedCanvas,
         };
 
         stage = "report-metadata";
@@ -955,31 +913,16 @@ export const generateReportPdfWithDialog = async (
                 options.department?.trim() || reportSettings?.department || "-"
             )
         );
-        const addressFallback = [
-            reportSettings?.addressLine1,
-            reportSettings?.addressLine2,
-            reportSettings?.addressLine3,
-            reportSettings?.addressLine4,
-        ]
-            .map(line => line?.trim())
-            .filter(Boolean) as string[];
+
         const addressLines =
             options.addressLines?.map(line => line.trim()).filter(Boolean) ??
             [];
-        const address = (
-            addressLines.length > 0 ? addressLines : addressFallback
-        ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
 
         const appVersion = await getVersion();
 
         stage = "build-dom";
         const root = createReportRoot();
         root.appendChild(createStyles());
-
-        const addressHtml =
-            address.length > 0
-                ? address.map(line => `<div>${line}</div>`).join("")
-                : "<div>-</div>";
 
         const page1 = createPage();
         page1.innerHTML = `
@@ -1106,8 +1049,6 @@ export const generateReportPdfWithDialog = async (
         ${createFooter(pages.length + 1, reportId, tReport)}
     `;
         pages.push(overviewPage);
-
-        // Zoom page removed per requirement.
 
         const detailsStartIndex = pages.length;
         selectedFeatures.forEach((feature, idx) => {

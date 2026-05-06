@@ -154,11 +154,11 @@ export function ReportDialog({ className }: ReportDialogProps) {
             </DialogTrigger>
 
             <DialogPortal>
-                <DialogOverlay className="bg-black/40 backdrop-blur-sm" />
-                <DialogContent className="w-[880px] max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background border-border shadow-2xl">
-                    
-                    <div className="flex flex-col gap-1.5 p-6 sm:px-8 pb-4 border-b border-border bg-muted/10 shrink-0">
-                        <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+                <DialogOverlay className="bg-black/40 backdrop-blur-sm z-50" />
+                <DialogContent className="z-50 w-full sm:w-[880px] max-w-[100vw] sm:max-w-[95vw] max-h-[100dvh] sm:max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background sm:border-border sm:shadow-2xl rounded-none sm:rounded-xl">
+
+                    <div className="flex flex-col gap-1.5 p-4 sm:p-6 pb-4 border-b border-border bg-muted/10 shrink-0">
+                        <DialogTitle className="text-xl font-semibold tracking-tight text-foreground pr-8">
                             {t("Report generation", { ns: "keywords" })}
                         </DialogTitle>
                         <DialogDescription className="text-sm text-muted-foreground">
@@ -166,35 +166,34 @@ export function ReportDialog({ className }: ReportDialogProps) {
                         </DialogDescription>
                     </div>
 
-                    <div className="flex-1 min-h-0 overflow-hidden p-6 sm:px-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-8 bg-background">
-                        
+                    <div className="flex-1 overflow-y-auto md:overflow-hidden p-4 sm:p-6 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6 md:gap-8 bg-background">
                         <div className="flex flex-col space-y-5 pb-2">
-                            <div className="grid grid-cols-2 gap-4">
-    <div className="flex flex-col justify-end space-y-1.5">
-        <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            {t("Language", { ns: "keywords" })}
-        </label>
-        <select
-            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:border-primary/50 focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer"
-            value={reportLanguage}
-            onChange={e => setReportLanguage(e.target.value)}
-        >
-            <option value="pl">Polski</option>
-            <option value="en">English</option>
-        </select>
-    </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex flex-col justify-end space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Language", { ns: "keywords" })}
+                                    </label>
+                                    <select
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:border-primary/50 focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer"
+                                        value={reportLanguage}
+                                        onChange={e => setReportLanguage(e.target.value)}
+                                    >
+                                        <option value="pl">Polski</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
 
-    <div className="flex flex-col justify-end space-y-1.5">
-        <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-            {t("Report date and time", { ns: "keywords" })}
-        </label>
-        <Input 
-            value={reportDateTime} 
-            readOnly 
-            className="flex h-10 w-full rounded-md border border-input/60 bg-muted/40 cursor-not-allowed text-sm shadow-sm text-muted-foreground" 
-        />
-    </div>
-</div>
+                                <div className="flex flex-col justify-end space-y-1.5">
+                                    <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        {t("Report date and time", { ns: "keywords" })}
+                                    </label>
+                                    <Input
+                                        value={reportDateTime}
+                                        readOnly
+                                        className="flex h-10 w-full rounded-md border border-input/60 bg-muted/40 cursor-not-allowed text-sm shadow-sm text-muted-foreground"
+                                    />
+                                </div>
+                            </div>
 
                             <div className="flex flex-col space-y-1.5">
                                 <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -218,7 +217,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 pt-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                                 <div className="flex flex-col space-y-1.5">
                                     <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                                         {t("Address line 1", { ns: "keywords" })}
@@ -262,7 +261,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                             </div>
                         </div>
 
-                        <div className="flex flex-col space-y-4 min-h-0">
+                        <div className="flex flex-col space-y-4 md:min-h-0 md:h-full">
                             <div className="bg-card p-4 rounded-lg border border-border flex justify-between items-center shadow-sm shrink-0">
                                 <div className="flex flex-col">
                                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
@@ -272,7 +271,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         {matchedFeaturesCount}
                                     </span>
                                 </div>
-                                <div className="w-px h-10 bg-border"></div>
+                                <div className="w-px h-10 bg-border hidden xs:block"></div>
                                 <div className="flex flex-col items-end">
                                     <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                                         {t("Selected features", { ns: "keywords" })}
@@ -296,8 +295,8 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                 {t("Include matched only", { ns: "keywords" })}
                             </label>
 
-                            <div className="flex-1 min-h-0 rounded-lg border border-border bg-muted/5 p-2 overflow-y-auto custom-scrollbar shadow-inner">
-                                <div className="grid grid-cols-2 gap-2">
+                            <div className="md:flex-1 md:min-h-0 rounded-lg border border-border bg-muted/5 p-2 md:overflow-y-auto custom-scrollbar shadow-inner">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {allFeatures.map((label) => {
                                         const left = markingsLeft.find(m => m.label === label);
                                         const right = markingsRight.find(m => m.label === label);
@@ -344,16 +343,16 @@ export function ReportDialog({ className }: ReportDialogProps) {
                         </div>
                     </div>
 
-                    <div className="p-4 sm:px-8 border-t border-border bg-muted/10 flex justify-end gap-3 shrink-0">
+                    <div className="p-4 sm:px-6 border-t border-border bg-muted/10 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
                         <DialogClose asChild>
-                            <Button type="button" variant="outline" className="w-28 shadow-sm">
+                            <Button type="button" variant="outline" className="w-full sm:w-28 shadow-sm">
                                 {t("Cancel", { ns: "keywords" })}
                             </Button>
                         </DialogClose>
                         <Button
                             type="button"
                             onClick={onGenerate}
-                            className="w-44 shadow-sm"
+                            className="w-full sm:w-44 shadow-sm"
                             disabled={!canGenerate || isGenerating || selectedLabels.length === 0}
                         >
                             {isGenerating
@@ -362,7 +361,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                         </Button>
                     </div>
 
-                    <DialogClose className="absolute top-6 right-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-muted-foreground hover:bg-muted p-1">
+                    <DialogClose className="absolute top-4 right-4 sm:top-6 sm:right-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-muted-foreground hover:bg-muted p-1">
                         <X size={20} strokeWidth={ICON.STROKE_WIDTH} />
                     </DialogClose>
                 </DialogContent>
