@@ -1,57 +1,59 @@
 {
-  "compilerOptions": {
-      "allowJs": true,
-      "declaration": true,
-      "esModuleInterop": true,
-      "isolatedModules": true,
-      "jsx": "preserve",
-      "lib": ["dom", "dom.iterable", "esnext"],
-      "module": "esnext",
-      "moduleResolution": "node",
-      "noEmit": true,
-      "pretty": true,
-      "resolveJsonModule": true,
-      "skipLibCheck": true,
-      "sourceMap": true,
-      "target": "ES2022",
-      // Strict mode (9)
-      "strict": true,
-      "alwaysStrict": true,
-      "noImplicitAny": true,
-      "noImplicitThis": true,
-      "strictNullChecks": true,
-      "strictBindCallApply": true,
-      "strictFunctionTypes": true,
-      "strictPropertyInitialization": true,
-      "useUnknownInCatchVariables": true,
-      // No unused code (4)
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "allowUnusedLabels": false,
-      "allowUnreachableCode": false,
-      // No implicit code (2)
-      "noImplicitOverride": true,
-      "noImplicitReturns": true,
-      // Others (5)
-      "noUncheckedIndexedAccess": true,
-      "noPropertyAccessFromIndexSignature": true,
-      "noFallthroughCasesInSwitch": true,
-      "exactOptionalPropertyTypes": false,
-      "forceConsistentCasingInFileNames": true,
-      "incremental": true,
-      "plugins": [
-          {
-              "name": "next"
-          }
-      ],
-      "baseUrl": ".",
-      "paths": {
-          "@/*": ["./src/*"]
-      }
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
+    "compilerOptions": {
+        "allowJs": true,
+        "declaration": true,
+        "esModuleInterop": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "pretty": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "target": "ES2022",
+        // Strict mode (9)
+        "strict": true,
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "strictNullChecks": true,
+        "strictBindCallApply": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "useUnknownInCatchVariables": true,
+        // No unused code (4)
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "allowUnusedLabels": false,
+        "allowUnreachableCode": false,
+        // No implicit code (2)
+        "noImplicitOverride": true,
+        "noImplicitReturns": true,
+        // Others (5)
+        "noUncheckedIndexedAccess": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noFallthroughCasesInSwitch": true,
+        "exactOptionalPropertyTypes": false,
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ],
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "__tests__/**/*.ts",
+        "__tests__/**/*.tsx"
+    ],
     "exclude": ["node_modules", "dist", "src-tauri"]
 }
