@@ -1,6 +1,6 @@
-= Biometrics Studio
+= Forensic Biometrics Studio
 
-https://github.com/BiometricsUBB/Biometrics-Studio?tab=readme-ov-file#biometrics-studio[ENGLISH] / https://github.com/BiometricsUBB/Biometrics-Studio/blob/master/README_PL.adoc#biometrics-studio[POLSKI]
+https://github.com/BiometricsUBB/Forensic-Biometrics-Studio?tab=readme-ov-file#forensic-biometrics-studio[ENGLISH] / https://github.com/BiometricsUBB/Forensic-Biometrics-Studio/blob/master/README_PL.adoc#forensic-biometrics-studio[POLSKI]
 
 Application for forensic trace comparison
 
@@ -20,11 +20,11 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 ....
 NOTE: The above command would install dependencies onto your system. Then you can run the application by opening the `.\start.bat` file.
 
-## Instalation on macOS
+== Installation on macOS
 
 Since the application is not signed, you need to remove the quarantine attribute before running it. This step is required after installation, specifically after moving the application to the Applications folder. To do this, execute the following command in the terminal:
 .....
-xattr -d com.apple.quarantine /Application/biometrics-studio.app
+xattr -d com.apple.quarantine "/Applications/Forensic Biometrics Studio.app"
 .....
 Make sure to use the correct path to the application.
 
