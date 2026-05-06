@@ -13,7 +13,7 @@
 edition = "2021"
 rust-version = "1.78"
 name = "tauri-plugin-single-instance"
-version = "2.0.0"
+version = "2.2.0"
 authors = ["Tauri Programme within The Commons Conservancy"]
 build = false
 exclude = ["/examples"]
