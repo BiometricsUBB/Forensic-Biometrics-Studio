@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -38,5 +36,9 @@ next-env.d.ts
 
 # local dev files
 /public/images/*.json
+
 # vite cache
 .vite/
+
+#tauri auto-generated capability schemas
+/src-tauri/gen/schemas/
