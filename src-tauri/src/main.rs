@@ -35,6 +35,18 @@ async fn show_current_window(window: tauri::Window) -> Result<(), String> {
     window.show().map_err(|e| e.to_string())
 }
 
+/// Force-shows `window` after `delay_ms` if React never called `show_current_window`
+/// (e.g. rehydrate failed, JS bundle threw before mount). Avoids permanently
+/// invisible windows.
+fn schedule_force_show(window: tauri::WebviewWindow, delay_ms: u64) {
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(delay_ms));
+        if let Ok(false) = window.is_visible() {
+            let _ = window.show();
+        }
+    });
+}
+
 #[tauri::command]
 async fn show_main_window_if_hidden(window: tauri::Window) {
     let main_window = window
@@ -91,7 +103,8 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
     #[cfg(not(target_os = "macos"))]
     let settings_builder = settings_builder.decorations(false).transparent(true);
 
-    settings_builder.build().map_err(|e| e.to_string())?;
+    let window = settings_builder.build().map_err(|e| e.to_string())?;
+    schedule_force_show(window, 3000);
 
     Ok(())
 }
@@ -146,7 +159,8 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
     #[cfg(not(target_os = "macos"))]
     let edit_builder = edit_builder.decorations(false).transparent(true);
 
-    let _window = edit_builder.build().map_err(|e| e.to_string())?;
+    let window = edit_builder.build().map_err(|e| e.to_string())?;
+    schedule_force_show(window, 3000);
 
     Ok(())
 }
