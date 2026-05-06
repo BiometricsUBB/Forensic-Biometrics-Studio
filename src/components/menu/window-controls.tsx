@@ -3,13 +3,14 @@ import { useCallback, useEffect, useState } from "react";
 import { Toggle } from "@/components/ui/toggle";
 import { Minus, Maximize, Minimize, X } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
-import { platform } from "@tauri-apps/plugin-os";
+import { IS_MACOS, IS_WINDOWS } from "@/lib/utils/platform";
 
 export function WindowControls() {
     const [isMaximized, setIsMaximized] = useState(false);
-    const currentPlatform = platform();
 
     useEffect(() => {
+        if (IS_MACOS) return undefined;
+
         const updateMaximized = async () => {
             setIsMaximized(await getCurrentWindow().isMaximized());
         };
@@ -36,6 +37,8 @@ export function WindowControls() {
         await getCurrentWindow().close();
     }, []);
 
+    if (IS_MACOS) return null;
+
     return (
         <div id="windowControls" className="flex">
             <Toggle
@@ -46,7 +49,7 @@ export function WindowControls() {
             >
                 <Minus size={ICON.SIZE / 1.5} strokeWidth={ICON.STROKE_WIDTH} />
             </Toggle>
-            {currentPlatform === "windows" && (
+            {IS_WINDOWS && (
                 <Toggle
                     pressed={false}
                     onMouseDown={e => e.stopPropagation()}

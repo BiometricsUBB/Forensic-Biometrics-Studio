@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
 import { ModeMenu } from "@/components/menu/mode-menu";
 import { WindowControls } from "@/components/menu/window-controls";
+import { MacOSTitleBarSpacer } from "@/components/menu/macos-titlebar-spacer";
+import { IS_MACOS } from "@/lib/utils/platform";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 
 export function Menu() {
@@ -12,11 +14,15 @@ export function Menu() {
     return (
         <Menubar
             className={cn(
-                "flex justify-between w-screen items-center min-h-[40px]"
+                "flex justify-between w-screen items-center",
+                IS_MACOS
+                    ? "h-[32px] pt-3 [&_button]:h-7 [&_button]:px-2"
+                    : "min-h-[40px]"
             )}
             data-tauri-drag-region
         >
             <div className="flex grow-1 items-center">
+                <MacOSTitleBarSpacer />
                 <div className="flex items-center px-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img

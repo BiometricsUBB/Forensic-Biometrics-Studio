@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { WindowControls } from "@/components/menu/window-controls";
+import { MacOSTitleBarSpacer } from "@/components/menu/macos-titlebar-spacer";
+import { IS_MACOS } from "@/lib/utils/platform";
 import { Menubar } from "@/components/ui/menubar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -446,11 +448,15 @@ export function EditWindow() {
 
             <Menubar
                 className={cn(
-                    "flex justify-between w-screen items-center min-h-[56px]"
+                    "flex justify-between w-screen items-center",
+                    IS_MACOS
+                        ? "h-[36px] pt-3 [&_button]:h-7 [&_button]:px-2"
+                        : "min-h-[56px]"
                 )}
                 data-tauri-drag-region
             >
                 <div className="flex grow-1 items-center">
+                    <MacOSTitleBarSpacer />
                     <div className="flex items-center px-2">
                         <Edit
                             size={ICON.SIZE}

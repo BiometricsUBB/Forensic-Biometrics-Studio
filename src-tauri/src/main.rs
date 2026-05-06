@@ -60,7 +60,7 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
         None => "index.html?window=settings".to_string(),
     };
 
-    WebviewWindowBuilder::new(
+    let settings_builder = WebviewWindowBuilder::new(
         &app,
         "settings",
         WebviewUrl::App(url.into()),
@@ -69,11 +69,17 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
     .inner_size(600.0, 450.0)
     .min_inner_size(400.0, 300.0)
     .resizable(true)
-    .decorations(false)
-    .transparent(true)
-    .center()
-    .build()
-    .map_err(|e| e.to_string())?;
+    .center();
+
+    #[cfg(target_os = "macos")]
+    let settings_builder = settings_builder
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true);
+
+    #[cfg(not(target_os = "macos"))]
+    let settings_builder = settings_builder.decorations(false).transparent(true);
+
+    settings_builder.build().map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -107,7 +113,7 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
         url = format!("{}&imagePath={}", url, encoded);
     }
 
-    let _window = WebviewWindowBuilder::new(
+    let edit_builder = WebviewWindowBuilder::new(
         &app,
         "edit",
         WebviewUrl::App(url.into()),
@@ -116,11 +122,17 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
     .inner_size(800.0, 600.0)
     .min_inner_size(400.0, 300.0)
     .resizable(true)
-    .decorations(false)
-    .transparent(true)
-    .center()
-    .build()
-    .map_err(|e| e.to_string())?;
+    .center();
+
+    #[cfg(target_os = "macos")]
+    let edit_builder = edit_builder
+        .title_bar_style(tauri::TitleBarStyle::Overlay)
+        .hidden_title(true);
+
+    #[cfg(not(target_os = "macos"))]
+    let edit_builder = edit_builder.decorations(false).transparent(true);
+
+    let _window = edit_builder.build().map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -211,7 +223,7 @@ fn read_os_machine_id() -> Option<String> {
 }
 
 fn main() {
-    let mut builder = tauri::Builder::default()
+    let builder = tauri::Builder::default()
         .manage(WorkingModeState(Mutex::new(None)))
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
@@ -224,7 +236,7 @@ fn main() {
                 .get_webview_window("main")
                 .expect("no main window")
                 .set_focus();
-        })) 
+        }))
         .invoke_handler(tauri::generate_handler![
             show_main_window_if_hidden,
             close_splashscreen_if_exists,
@@ -236,17 +248,16 @@ fn main() {
         ]);
 
     #[cfg(target_os = "windows")]
-    {
+    let builder = {
         use tauri_plugin_window_state::{Builder as WindowStateBuilder, StateFlags};
-
-        builder = builder.plugin(
+        builder.plugin(
             WindowStateBuilder::default()
                 .with_state_flags(
                     StateFlags::all() & !StateFlags::VISIBLE & !StateFlags::DECORATIONS,
                 )
                 .build(),
-        );
-    }
+        )
+    };
 
     builder
         .run(tauri::generate_context!())

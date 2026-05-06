@@ -43,7 +43,7 @@ const MenubarTrigger = React.forwardRef<
     <MenubarPrimitive.Trigger
         ref={ref}
         className={cn(
-            "px-3 py-1.5 rounded-md transition-colors duration-150",
+            "px-3 py-1.5 rounded-md transition-colors duration-150 leading-none",
             "hover:bg-accent/80 hover:text-accent-foreground",
             "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             "data-[state=open]:bg-accent/80"
