@@ -7,7 +7,7 @@
         "jsx": "preserve",
         "lib": ["dom", "dom.iterable", "esnext"],
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "noEmit": true,
         "pretty": true,
         "resolveJsonModule": true,
@@ -39,12 +39,12 @@
         "exactOptionalPropertyTypes": false,
         "forceConsistentCasingInFileNames": true,
         "incremental": true,
+        "types": ["bun"],
         "plugins": [
             {
                 "name": "next"
             }
         ],
-        "baseUrl": ".",
         "paths": {
             "@/*": ["./src/*"]
         }

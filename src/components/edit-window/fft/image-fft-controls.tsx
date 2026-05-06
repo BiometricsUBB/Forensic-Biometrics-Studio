@@ -137,7 +137,9 @@ export default function ImageFftControls({
                 const specCtx = specCvs.getContext("2d");
                 if (specCtx) {
                     const specImg = new ImageData(
-                        new Uint8ClampedArray(result.spectrum.buffer),
+                        new Uint8ClampedArray(
+                            result.spectrum.buffer as ArrayBuffer
+                        ),
                         result.width,
                         result.height
                     );

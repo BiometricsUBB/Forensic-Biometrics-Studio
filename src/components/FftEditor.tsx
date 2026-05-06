@@ -79,7 +79,9 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
                                 result.height
                             );
                             const spectrumImg = new ImageData(
-                                new Uint8ClampedArray(result.spectrum.buffer),
+                                new Uint8ClampedArray(
+                                    result.spectrum.buffer as ArrayBuffer
+                                ),
                                 result.width,
                                 result.height
                             );
@@ -230,7 +232,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
             }, 50);
         } else {
             const spectrumImg = new ImageData(
-                new Uint8ClampedArray(fftData.spectrum.buffer),
+                new Uint8ClampedArray(fftData.spectrum.buffer as ArrayBuffer),
                 fftData.width,
                 fftData.height
             );

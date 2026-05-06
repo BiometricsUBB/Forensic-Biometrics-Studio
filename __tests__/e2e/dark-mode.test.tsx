@@ -4,6 +4,7 @@ import { ChildProcessByStdio, spawn, spawnSync } from "child_process";
 import { Builder, By, Capabilities, WebDriver } from "selenium-webdriver";
 import { Writable } from "stream";
 import find from "find-process";
+import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 
 // Tauri-driver supports Linux (webkit2gtk-driver) and Windows (msedgedriver).
 // macOS has no WebDriver for WKWebView — skip there.

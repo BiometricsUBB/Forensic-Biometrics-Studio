@@ -18,13 +18,16 @@ export async function loadSprite(data: string | Uint8Array, name?: string) {
     if (!imageBytes)
         throw new Error("Failed to receive a byte representation of a file");
 
-    const hashBuffer = await window.crypto.subtle.digest("SHA-256", imageBytes);
+    const hashBuffer = await window.crypto.subtle.digest(
+        "SHA-256",
+        imageBytes as BufferSource
+    );
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hash = hashArray
         .map(item => item.toString(16).padStart(2, "0"))
         .join("");
 
-    const bitmap = await createImageBitmap(new Blob([imageBytes]));
+    const bitmap = await createImageBitmap(new Blob([imageBytes as BlobPart]));
     const sprite = new PIXI.Sprite(PIXI.Texture.from(bitmap));
 
     const path = typeof data === "string" ? data.split(/[\\/]/) : null;

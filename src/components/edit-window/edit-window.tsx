@@ -165,7 +165,7 @@ export function EditWindow() {
             setError(null);
             setImageUrl(null);
             const imageBytes = await readFile(path);
-            const blob = new Blob([imageBytes]);
+            const blob = new Blob([imageBytes as BlobPart]);
             const url = URL.createObjectURL(blob);
             setImageUrl(url);
             setImageName(await basename(path));
@@ -418,7 +418,9 @@ export function EditWindow() {
 
             setImagePath(finalPath);
             setImageName(await basename(finalPath));
-            const blob = new Blob([uint8Array], { type: "image/png" });
+            const blob = new Blob([uint8Array as BlobPart], {
+                type: "image/png",
+            });
             const url = URL.createObjectURL(blob);
             setImageUrl(url);
 
