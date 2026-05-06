@@ -37,8 +37,8 @@ First, you need to have https://tauri.app/start/prerequisites/[Tauri] installed 
 Then just run the following commands to start the app:
 
 ....
-pnpm i
-pnpm tauri dev
+bun i
+bun run tauri dev
 ....
 
 === Adding New Marking Classes (Current as of: 2025-01-30)

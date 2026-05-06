@@ -6,9 +6,9 @@ elif [ -f "$(dirname "$0")/_/husky.sh" ]; then
 fi
 
 if [ "$OS" = "Windows_NT" ] || [ "$MSYSTEM" ] || [ "$TERM_PROGRAM" = "vscode" ]; then
-  pnpm dlx git-cz --hook || true
+  bunx git-cz --hook || true
 elif [ -t 0 ] && [ -r /dev/tty ]; then
-  exec < /dev/tty && pnpm dlx git-cz --hook || true
+  exec < /dev/tty && bunx git-cz --hook || true
 else
-  pnpm dlx git-cz --hook || true
+  bunx git-cz --hook || true
 fi

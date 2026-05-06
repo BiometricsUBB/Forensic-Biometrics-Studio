@@ -74,7 +74,7 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
 
 winget install -e --id OpenJS.NodeJS --accept-source-agreements --accept-package-agreements
 winget install -e --id Rustlang.Rust.MSVC --accept-source-agreements --accept-package-agreements
-Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+powershell -c "irm bun.com/install.ps1 | iex"
 winget install Microsoft.VisualStudio.2022.Community --accept-source-agreements --accept-package-agreements --override "--wait --quiet --add ProductLang Pl-pl --add Microsoft.VisualStudio.Workload.NativeDesktop --includeRecommended"
 winget install -e --id Microsoft.VCRedist.2015+.x64 --accept-source-agreements --accept-package-agreements
 

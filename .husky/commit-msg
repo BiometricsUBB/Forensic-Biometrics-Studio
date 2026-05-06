@@ -5,7 +5,7 @@ elif [ -f "$(dirname "$0")/_/husky.sh" ]; then
   . "$(dirname "$0")/_/husky.sh"
 fi
 
-pnpm dlx commitlint --edit "$1" || {
+bunx commitlint --edit "$1" || {
   echo "❌ Commit message does not follow conventional commit format"
   exit 1
 }

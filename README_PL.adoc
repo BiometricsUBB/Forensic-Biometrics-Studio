@@ -37,8 +37,8 @@ Najpierw musisz mieć zainstalowanego https://tauri.app/start/prerequisites/[Tau
 Następnie uruchom poniższe polecenia, aby uruchomić aplikację:
 
 ```
-pnpm i
-pnpm tauri dev
+bun i
+bun run tauri dev
 ```
 
 ### Dodawanie Nowąch Klasęów adnotacji (Aktualne na: 2025-01-30)

@@ -13,17 +13,17 @@ if %ERRORLEVEL% neq 0 (
     )
 )
 
-:: Install dependencies using pnpm
+:: Install dependencies using bun
 echo Installing dependencies...
-pnpm install
+bun install
 if %ERRORLEVEL% neq 0 (
-    echo Dependency installation failed. Please check your pnpm setup.
+    echo Dependency installation failed. Please check your bun setup.
     exit /b 1
 )
 
 :: Run Tauri development server
 echo Starting Tauri development server...
-pnpm tauri dev
+bun run tauri dev
 if %ERRORLEVEL% neq 0 (
     echo Failed to start Tauri development server. Please check your setup.
     exit /b 1

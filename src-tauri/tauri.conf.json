@@ -4,8 +4,8 @@
     "version": "0.6.10",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "pnpm build",
-        "beforeDevCommand": "pnpm dev",
+        "beforeBuildCommand": "bun run build",
+        "beforeDevCommand": "bun run dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
     },
@@ -76,4 +76,3 @@
         }
     }
 }
-
