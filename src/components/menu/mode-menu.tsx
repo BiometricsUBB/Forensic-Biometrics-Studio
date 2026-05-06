@@ -12,6 +12,8 @@ import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import { useTranslation } from "react-i18next";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { Sprite } from "pixi.js";
+import { useCallback, useEffect } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { useGlobalViewport } from "@/components/pixi/viewport/hooks/useGlobalViewport";
 
 export function ModeMenu() {
@@ -24,54 +26,69 @@ export function ModeMenu() {
         autoUpdate: true,
     });
 
-    const onCheckedChange = async (mode: WORKING_MODE) => {
-        if (workingMode === mode) return;
+    const onCheckedChange = useCallback(
+        async (mode: WORKING_MODE) => {
+            if (workingMode === mode) return;
 
-        const isCanvasDirty =
-            viewportLeft?.children.length || viewportRight?.children.length;
+            const isCanvasDirty =
+                viewportLeft?.children.length || viewportRight?.children.length;
 
-        if (isCanvasDirty) {
-            const confirmed = await confirm(
-                t(
-                    "This action will clear the current canvas. Are you sure you want to proceed?",
-                    { ns: "dialog" }
-                ),
-                {
-                    kind: "warning",
-                    title: t("Warning", { ns: "dialog" }),
-                }
-            );
+            if (isCanvasDirty) {
+                const confirmed = await confirm(
+                    t(
+                        "This action will clear the current canvas. Are you sure you want to proceed?",
+                        { ns: "dialog" }
+                    ),
+                    {
+                        kind: "warning",
+                        title: t("Warning", { ns: "dialog" }),
+                    }
+                );
 
-            if (!confirmed) return;
-        }
+                if (!confirmed) return;
+            }
 
-        // Destroy current image sprites
-        (
-            viewportLeft?.children.find(x => x instanceof Sprite) as
-                | Sprite
-                | undefined
-        )?.destroy({
-            children: true,
-            texture: true,
-            baseTexture: true,
+            // Destroy current image sprites
+            (
+                viewportLeft?.children.find(x => x instanceof Sprite) as
+                    | Sprite
+                    | undefined
+            )?.destroy({
+                children: true,
+                texture: true,
+                baseTexture: true,
+            });
+            (
+                viewportRight?.children.find(x => x instanceof Sprite) as
+                    | Sprite
+                    | undefined
+            )?.destroy({
+                children: true,
+                texture: true,
+                baseTexture: true,
+            });
+
+            MarkingsStore(CANVAS_ID.LEFT).actions.markings.reset();
+            MarkingsStore(CANVAS_ID.RIGHT).actions.markings.reset();
+            MarkingsStore(CANVAS_ID.LEFT).actions.labelGenerator.reset();
+            MarkingsStore(CANVAS_ID.RIGHT).actions.labelGenerator.reset();
+
+            setWorkingMode(mode);
+        },
+        [workingMode, viewportLeft, viewportRight, t, setWorkingMode]
+    );
+
+    useEffect(() => {
+        const unlisten = listen<string>("native-menu-mode-change", event => {
+            const candidate = event.payload as WORKING_MODE;
+            if (Object.values(WORKING_MODE).includes(candidate)) {
+                onCheckedChange(candidate);
+            }
         });
-        (
-            viewportRight?.children.find(x => x instanceof Sprite) as
-                | Sprite
-                | undefined
-        )?.destroy({
-            children: true,
-            texture: true,
-            baseTexture: true,
-        });
-
-        MarkingsStore(CANVAS_ID.LEFT).actions.markings.reset();
-        MarkingsStore(CANVAS_ID.RIGHT).actions.markings.reset();
-        MarkingsStore(CANVAS_ID.LEFT).actions.labelGenerator.reset();
-        MarkingsStore(CANVAS_ID.RIGHT).actions.labelGenerator.reset();
-
-        setWorkingMode(mode);
-    };
+        return () => {
+            unlisten.then(fn => fn());
+        };
+    }, [onCheckedChange]);
 
     return (
         <MenubarMenu>

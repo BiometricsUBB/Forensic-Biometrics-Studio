@@ -6,6 +6,11 @@ use tauri::Manager;
 use std::fs;
 use std::sync::Mutex;
 
+#[cfg(target_os = "macos")]
+use tauri::menu::{
+    AboutMetadataBuilder, MenuBuilder, MenuItemBuilder, PredefinedMenuItem, SubmenuBuilder,
+};
+
 struct WorkingModeState(Mutex<Option<String>>);
 
 #[tauri::command]
@@ -222,6 +227,65 @@ fn read_os_machine_id() -> Option<String> {
     None
 }
 
+#[cfg(target_os = "macos")]
+fn install_macos_menu(app: &tauri::AppHandle) -> tauri::Result<()> {
+    let app_name = "Forensic Biometrics Studio";
+    let about_metadata = AboutMetadataBuilder::new()
+        .name(Some(app_name.to_string()))
+        .version(Some(env!("CARGO_PKG_VERSION").to_string()))
+        .build();
+
+    let app_submenu = SubmenuBuilder::new(app, app_name)
+        .item(&PredefinedMenuItem::about(
+            app,
+            Some(&format!("About {}", app_name)),
+            Some(about_metadata),
+        )?)
+        .separator()
+        .item(
+            &MenuItemBuilder::with_id("settings", "Settings…")
+                .accelerator("CmdOrCtrl+,")
+                .build(app)?,
+        )
+        .separator()
+        .item(&PredefinedMenuItem::services(app, None)?)
+        .separator()
+        .item(&PredefinedMenuItem::hide(app, None)?)
+        .item(&PredefinedMenuItem::hide_others(app, None)?)
+        .item(&PredefinedMenuItem::show_all(app, None)?)
+        .separator()
+        .item(&PredefinedMenuItem::quit(app, None)?)
+        .build()?;
+
+    let mode_submenu = SubmenuBuilder::new(app, "Mode")
+        .item(&MenuItemBuilder::with_id("mode-FINGERPRINT", "Fingerprints").build(app)?)
+        .item(&MenuItemBuilder::with_id("mode-EAR", "Ears").build(app)?)
+        .item(&MenuItemBuilder::with_id("mode-SHOEPRINT", "Shoeprints").build(app)?)
+        .build()?;
+
+    let edit_submenu = SubmenuBuilder::new(app, "Edit")
+        .item(&PredefinedMenuItem::undo(app, None)?)
+        .item(&PredefinedMenuItem::redo(app, None)?)
+        .separator()
+        .item(&PredefinedMenuItem::cut(app, None)?)
+        .item(&PredefinedMenuItem::copy(app, None)?)
+        .item(&PredefinedMenuItem::paste(app, None)?)
+        .item(&PredefinedMenuItem::select_all(app, None)?)
+        .build()?;
+
+    let window_submenu = SubmenuBuilder::new(app, "Window")
+        .item(&PredefinedMenuItem::minimize(app, None)?)
+        .item(&PredefinedMenuItem::close_window(app, None)?)
+        .build()?;
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&app_submenu, &edit_submenu, &mode_submenu, &window_submenu])
+        .build()?;
+
+    app.set_menu(menu)?;
+    Ok(())
+}
+
 fn main() {
     let builder = tauri::Builder::default()
         .manage(WorkingModeState(Mutex::new(None)))
@@ -237,6 +301,26 @@ fn main() {
                 .expect("no main window")
                 .set_focus();
         }))
+        .setup(|app| {
+            #[cfg(target_os = "macos")]
+            install_macos_menu(app.handle())?;
+            Ok(())
+        })
+        .on_menu_event(|app, event| match event.id().as_ref() {
+            "settings" => {
+                let app_handle = app.clone();
+                tauri::async_runtime::spawn(async move {
+                    let _ = open_settings_window(app_handle, None).await;
+                });
+            }
+            id if id.starts_with("mode-") => {
+                let mode = id.trim_start_matches("mode-").to_string();
+                if let Some(main) = app.get_webview_window("main") {
+                    let _ = main.emit("native-menu-mode-change", mode);
+                }
+            }
+            _ => {}
+        })
         .invoke_handler(tauri::generate_handler![
             show_main_window_if_hidden,
             close_splashscreen_if_exists,
