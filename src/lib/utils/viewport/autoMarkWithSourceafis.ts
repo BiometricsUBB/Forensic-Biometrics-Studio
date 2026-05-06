@@ -85,34 +85,8 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
                 logger: console,
             }
         );
-        console.log("exit code:", processResult.code);
-        const root: unknown = sourceAfisJson;
-        const imageSprite = (() => {
-            try {
-                return viewport.getChildAt(0) as Sprite;
-            } catch {
-                return undefined;
-            }
-        })();
-        if (imageSprite) {
-            const wStudio = imageSprite.width;
-            const hStudio = imageSprite.height;
-            const wAfis = sourceAfisJson.width;
-            const hAfis = sourceAfisJson.height;
-            console.log({
-                wStudio,
-                hStudio,
-                wAfis,
-                hAfis,
-                scaleX:
-                    typeof wAfis === "number" && wAfis !== 0
-                        ? wStudio / wAfis
-                        : null,
-                scaleY:
-                    typeof hAfis === "number" && hAfis !== 0
-                        ? hStudio / hAfis
-                        : null,
-            });
+        if (processResult.code !== 0) {
+            console.error("SourceAFIS exited with code:", processResult.code);
         }
         const canvasId = viewport.name as CanvasMetadata["id"] | null;
         if (canvasId === null) {
@@ -122,9 +96,6 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
 
         const markingsStore = MarkingsStore(canvasId as CANVAS_ID);
         const minutiae = sourceAfisJson.minutiae ?? [];
-        const imgW = imageSprite?.texture?.width ?? null;
-        const imgH = imageSprite?.texture?.height ?? null;
-        let didLogSample = false;
         for (const minutia of minutiae) {
             const label = markingsStore.actions.labelGenerator.getLabel();
             const typeId = resolveSourceafisTypeId(minutia.type);
@@ -136,44 +107,12 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
                 continue;
             }
             const origin = { x: minutia.x, y: minutia.y };
-            if (!didLogSample) {
-                console.log({
-                    imgW,
-                    imgH,
-                    samplePx: [minutia.x, minutia.y],
-                    sampleOrigin: origin,
-                });
-                didLogSample = true;
-            }
             const angleRad = minutia.direction - Math.PI / 2;
             const m = new RayMarking(label, origin, typeId, angleRad);
             GlobalHistoryManager.executeCommand(
                 new AddOrUpdateMarkingCommand(markingsStore.actions.markings, m)
             );
         }
-        console.log(`Added ${minutiae.length} markings`);
-
-        console.log("root keys:", Object.keys(root as object));
-
-        const candidate = root as {
-            minutiae?: unknown;
-            Minutiae?: unknown;
-            features?: unknown;
-        };
-        const minutiaeArray =
-            (Array.isArray(candidate.minutiae) && candidate.minutiae) ||
-            (Array.isArray(candidate.Minutiae) && candidate.Minutiae) ||
-            (Array.isArray(candidate.features) && candidate.features) ||
-            null;
-
-        if (!minutiaeArray) {
-            console.error("No minutiae array found");
-            console.log("root:", root);
-            return;
-        }
-
-        console.log("minutiae.length:", minutiaeArray.length);
-        console.log("minutiae[0]:", minutiaeArray[0]);
     } catch (error) {
         console.error("Failed to run SourceAFIS external tool:", error);
     }

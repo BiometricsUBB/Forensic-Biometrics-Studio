@@ -48,9 +48,9 @@ export async function loadMarkingTypesData(filePath: string) {
     const workingModesFromData =
         Array.from(
             new Set(
-                fileContentJson.data.markingTypes
-                    ?.map(item => item.category)
-                    .flat()
+                fileContentJson.data.markingTypes?.flatMap(
+                    item => item.category
+                )
             )
         ) || [];
     const supportedWorkingModes = Object.keys(WORKING_MODE);

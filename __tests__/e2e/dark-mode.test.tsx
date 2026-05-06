@@ -45,6 +45,7 @@ let tauriDriver: ChildProcessByStdio<Writable, null, null> | undefined;
 
 async function clickThroughElements(testIdList: string[]) {
     for (const testId of testIdList) {
+        // oxlint-disable-next-line no-await-in-loop -- clicks must happen sequentially
         await driver?.findElement(By.css(`[data-testid='${testId}']`)).click();
     }
 }

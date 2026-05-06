@@ -67,8 +67,8 @@ export const DebugInfoTables = (
             <TableCaption className={cn("text-md font-bold", className)}>
                 <div className="[&>div]:leading-none">
                     <div>{name}</div>
-                    {keys.map((key, i) => (
-                        <div key={key + i}>.{key}</div>
+                    {keys.map(key => (
+                        <div key={key}>.{key}</div>
                     ))}
                 </div>
             </TableCaption>

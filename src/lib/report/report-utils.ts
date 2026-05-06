@@ -27,7 +27,7 @@ export const getMatchedFeatures = (
         });
     });
 
-    return Array.from(pairs.values()).sort(
+    return Array.from(pairs.values()).toSorted(
         (a, b) => a.left.label - b.left.label
     );
 };
@@ -51,7 +51,7 @@ export const getPairedByLabel = (
             });
         }
     });
-    return pairs.sort((a, b) => a.left.label - b.left.label);
+    return pairs.toSorted((a, b) => a.left.label - b.left.label);
 };
 
 export const clamp = (value: number, min: number, max: number) =>

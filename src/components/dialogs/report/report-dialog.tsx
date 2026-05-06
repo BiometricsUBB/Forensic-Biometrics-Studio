@@ -79,18 +79,19 @@ export function ReportDialog({ className }: ReportDialogProps) {
         const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
         const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
         return getMatchedFeatures(left, right);
+        // oxlint-disable-next-line react-hooks/exhaustive-deps -- counts gate re-memo, body reads via store.state
     }, [leftCount, rightCount]);
 
     const pairedFeatures = useMemo(() => {
         const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
         const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
         return getPairedByLabel(left, right);
+        // oxlint-disable-next-line react-hooks/exhaustive-deps -- counts gate re-memo, body reads via store.state
     }, [leftCount, rightCount]);
 
-    const availableCount = includeMatchedOnly
+    const selectedCount = includeMatchedOnly
         ? matchedFeatures.length
         : pairedFeatures.length;
-    const selectedCount = availableCount;
     const generateReportLabel = t("Generate report", { ns: "keywords" });
 
     const canGenerate =

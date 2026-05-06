@@ -157,6 +157,7 @@ export function Homepage() {
                 unlisten();
             }
         };
+        // oxlint-disable-next-line react-hooks/exhaustive-deps -- listener set up once on mount
     }, []);
 
     return (

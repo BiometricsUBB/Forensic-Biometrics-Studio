@@ -7,10 +7,9 @@ function getColor(property: string) {
 
 function getColors() {
     const keys = ["background", "foreground"] as const;
-    return keys.reduce((a, key) => {
-        const property = `--${key}`;
-        return { ...a, [key]: `hsl(${getColor(property)})` };
-    }, {}) as Record<(typeof keys)[number], string>;
+    return Object.fromEntries(
+        keys.map(key => [key, `hsl(${getColor(`--${key}`)})`])
+    ) as Record<(typeof keys)[number], string>;
 }
 
 export const useColors = () => {

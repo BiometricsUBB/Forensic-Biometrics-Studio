@@ -91,7 +91,7 @@ const toBlobBytes = (bytes: Uint8Array) => new Uint8Array(bytes);
 const toDataUrl = (bytes: Uint8Array, name: string) =>
     new Promise<string>(resolve => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
+        reader.addEventListener("load", () => resolve(reader.result as string));
         reader.readAsDataURL(
             new Blob([toBlobBytes(bytes)], { type: getMimeTypeFromName(name) })
         );
@@ -431,10 +431,9 @@ const createOverviewCalloutImage = async (
         let lx = centerX + baseCos * baseLabelRadiusX;
         let ly = centerY + baseSin * baseLabelRadiusY;
 
-        let placed = false;
-        for (let ring = 0; ring < 12 && !placed; ring += 1) {
+        for (let ring = 0; ring < 12; ring += 1) {
             const radialBoost = ring * (numberCircleRadius + 6);
-            angularOffsets.some(angleOffset => {
+            const placed = angularOffsets.some(angleOffset => {
                 const angle = baseAngle + angleOffset;
                 const cos = Math.cos(angle);
                 const sin = Math.sin(angle);
@@ -465,11 +464,11 @@ const createOverviewCalloutImage = async (
                 if (isOutsideImage && !overlapsExisting) {
                     lx = safeX;
                     ly = safeY;
-                    placed = true;
                     return true;
                 }
                 return false;
             });
+            if (placed) break;
         }
         placedLabels.push({ x: lx, y: ly });
 

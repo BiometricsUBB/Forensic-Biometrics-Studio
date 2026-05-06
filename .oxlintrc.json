@@ -12,11 +12,16 @@
         "es2022": true
     },
     "rules": {
-        "no-console": "warn",
+        "no-console": ["warn", { "allow": ["error", "warn", "info"] }],
         "no-debugger": "error",
+        "no-underscore-dangle": "off",
+        "no-shadow": "off",
         "react/react-in-jsx-scope": "off",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
+        "import/no-unassigned-import": "off",
+        "import/no-named-as-default-member": "off",
+        "unicorn/consistent-function-scoping": "off",
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-unused-vars": "error"
     },

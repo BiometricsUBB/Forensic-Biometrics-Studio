@@ -164,6 +164,7 @@ export function TracingOverlay({ canvasMetadata }: TracingOverlayProps) {
             brushSize,
             snapshot,
             addPath,
+            canvasId,
         ]
     );
 

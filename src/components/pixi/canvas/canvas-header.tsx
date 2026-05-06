@@ -186,9 +186,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                             ),
                             onClick: async () => {
                                 try {
-                                    console.log(
-                                        "Auto-mark clicked - starting sidecar"
-                                    );
                                     await autoMarkWithSourceafis(viewport);
                                 } catch (error) {
                                     console.error("Auto-mark failed:", error);

@@ -471,7 +471,7 @@ const drawPolygonMarking = (
 
     if (relativePoints.length > 2) {
         g.beginFill(backgroundColor, 0.3);
-        g.drawPolygon(relativePoints.map(p => [p.x, p.y]).flat());
+        g.drawPolygon(relativePoints.flatMap(p => [p.x, p.y]));
         g.endFill();
     }
 

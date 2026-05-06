@@ -40,7 +40,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
         const img = new Image();
         img.crossOrigin = "Anonymous";
         img.src = imageSrc;
-        img.onload = () => {
+        img.addEventListener("load", () => {
             setOriginalDims({ w: img.width, h: img.height });
             setTimeout(() => {
                 try {
@@ -100,7 +100,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
                     setStatus("error");
                 }
             }, 100);
-        };
+        });
     }, [imageSrc, t]);
 
     // --- Coordinate helpers ---
