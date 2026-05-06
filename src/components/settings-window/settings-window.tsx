@@ -163,7 +163,7 @@ export function SettingsWindow() {
                                 "hover:bg-secondary",
                                 "focus:outline-none",
                                 activeCategory === category.id
-                                    ? "bg-primary/20 text-primary-foreground border border-primary/30"
+                                    ? "bg-primary/20 text-foreground border border-primary/30"
                                     : "text-foreground/80"
                             )}
                         >
