@@ -286,6 +286,10 @@
         margin: 0;
         display: block;
     }
+    button:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]) {
+        cursor: pointer;
+    }
     #root {
         display: flex;
         flex-direction: column;
