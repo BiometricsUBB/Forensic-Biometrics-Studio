@@ -11,8 +11,18 @@ import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
 import { Edit, Save } from "lucide-react";
 import { listen, emit } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import { readFile, writeFile, exists } from "@tauri-apps/plugin-fs";
-import { basename, extname, join, dirname } from "@tauri-apps/api/path";
+import { CustomThemeStore } from "@/lib/stores/CustomTheme";
+import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
+import { applyCustomTheme } from "@/lib/hooks/useCustomTheme";
+import {
+    basename,
+    extname,
+    join,
+    dirname,
+    normalize,
+} from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
@@ -260,15 +270,29 @@ export function EditWindow() {
     };
 
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const pathFromUrl = urlParams.get("imagePath");
+        const init = async () => {
+            await CustomThemeStore.rehydrate();
+            await GlobalSettingsStore.use.persist?.rehydrate?.();
+            const activeTheme = CustomThemeStore.getActiveTheme();
+            if (activeTheme) {
+                applyCustomTheme(activeTheme);
+            }
 
-        if (pathFromUrl) {
-            const decodedPath = decodeURIComponent(pathFromUrl);
-            const normalizedPath = decodedPath.replace(/\//g, "\\");
-            setImagePath(normalizedPath);
-            loadImage(normalizedPath);
-        }
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathFromUrl = urlParams.get("imagePath");
+
+            if (pathFromUrl) {
+                const normalizedPath = await normalize(
+                    decodeURIComponent(pathFromUrl)
+                );
+                setImagePath(normalizedPath);
+                await loadImage(normalizedPath);
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await invoke("show_current_window");
+        };
+        init();
 
         const setupListener = async () => {
             return listen<string>("image-path-changed", event => {

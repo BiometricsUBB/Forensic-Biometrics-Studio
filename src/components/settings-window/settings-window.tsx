@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api/core";
 import { WindowControls } from "@/components/menu/window-controls";
 import { MacOSTitleBarSpacer } from "@/components/menu/macos-titlebar-spacer";
 import { IS_MACOS } from "@/lib/utils/platform";
@@ -90,6 +91,8 @@ export function SettingsWindow() {
             if (activeTheme) {
                 applyCustomTheme(activeTheme);
             }
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await invoke("show_current_window");
         };
         init();
     }, []);

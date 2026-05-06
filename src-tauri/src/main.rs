@@ -31,6 +31,11 @@ use tauri::WebviewUrl;
 use tauri::WebviewWindowBuilder;
 
 #[tauri::command]
+async fn show_current_window(window: tauri::Window) -> Result<(), String> {
+    window.show().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn show_main_window_if_hidden(window: tauri::Window) {
     let main_window = window
         .get_webview_window("main")
@@ -56,6 +61,7 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
         if let Some(cat) = &category {
             settings_window.emit("settings-category-change", cat).map_err(|e| e.to_string())?;
         }
+        settings_window.show().map_err(|e| e.to_string())?;
         settings_window.set_focus().map_err(|e| e.to_string())?;
         return Ok(());
     }
@@ -74,6 +80,7 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
     .inner_size(600.0, 450.0)
     .min_inner_size(400.0, 300.0)
     .resizable(true)
+    .visible(false)
     .center();
 
     #[cfg(target_os = "macos")]
@@ -92,6 +99,7 @@ async fn open_settings_window(app: tauri::AppHandle, category: Option<String>) -
 #[tauri::command]
 async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> Result<(), String> {
     if let Some(edit_window) = app.get_webview_window("edit") {
+        edit_window.show().map_err(|e| e.to_string())?;
         edit_window.set_focus().map_err(|e| e.to_string())?;
         if let Some(path) = image_path {
             edit_window.emit("image-path-changed", path).map_err(|e| e.to_string())?;
@@ -127,6 +135,7 @@ async fn open_edit_window(app: tauri::AppHandle, image_path: Option<String>) -> 
     .inner_size(800.0, 600.0)
     .min_inner_size(400.0, 300.0)
     .resizable(true)
+    .visible(false)
     .center();
 
     #[cfg(target_os = "macos")]
@@ -323,6 +332,7 @@ fn main() {
         })
         .invoke_handler(tauri::generate_handler![
             show_main_window_if_hidden,
+            show_current_window,
             close_splashscreen_if_exists,
             open_settings_window,
             open_edit_window,
