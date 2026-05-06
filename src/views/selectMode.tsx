@@ -99,7 +99,7 @@ export default function SelectMode({
                                 key={mode}
                                 type="button"
                                 onClick={() => setCurrentWorkingMode(mode)}
-                                className="group relative flex items-stretch overflow-hidden h-20 rounded-md border border-border bg-card/40 backdrop-blur-xs transition-[transform,border-color,background-color] duration-300 ease-out hover:border-primary hover:bg-card/70 active:scale-[0.995] focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                                className="group relative flex items-stretch overflow-hidden h-20 rounded-md border border-border bg-card/40 backdrop-blur-xs transition-[border-color,background-color] duration-300 ease-out hover:border-primary hover:bg-card/70 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                             >
                                 <div
                                     aria-hidden="true"
