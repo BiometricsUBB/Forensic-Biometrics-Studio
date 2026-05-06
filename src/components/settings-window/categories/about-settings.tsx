@@ -5,7 +5,7 @@ export function AboutSettings() {
     const { t } = useTranslation();
 
     const appVersion = "0.6.10";
-    const appName = "Biometrics Studio";
+    const appName = "Forensic Biometrics Studio";
 
     return (
         <div className="flex flex-col gap-6 ml-1">

@@ -12,7 +12,7 @@
     "app": {
         "windows": [
             {
-                "title": "Biometrics Studio",
+                "title": "Forensic Biometrics Studio",
                 "label": "main",
                 "width": 1280,
                 "height": 720,
@@ -29,7 +29,7 @@
                 "visible": false
             },
             {
-                "title": "Biometrics Studio",
+                "title": "Forensic Biometrics Studio",
                 "label": "splashscreen",
                 "url": "splashscreen.html",
                 "shadow": false,
