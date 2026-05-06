@@ -105,7 +105,6 @@ export const Markings = memo(
                 });
 
                 // Set the alpha to provided value or based on showMarkingLabels config
-                // eslint-disable-next-line no-param-reassign
                 g.alpha = alpha ?? (showMarkingLabels ? 1 : 0.5);
             },
             [

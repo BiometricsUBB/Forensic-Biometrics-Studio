@@ -1,6 +1,3 @@
-/* eslint-disable security/detect-object-injection */
-/* eslint-disable no-plusplus */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-nocheck
 
 export function arrayMin(arr: number[]) {

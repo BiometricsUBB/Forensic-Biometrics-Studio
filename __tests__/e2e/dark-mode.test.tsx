@@ -33,9 +33,7 @@ let driver: WebDriver | undefined;
 let tauriDriver: ChildProcessByStdio<Writable, null, null> | undefined;
 
 async function clickThroughElements(testIdList: string[]) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const testId of testIdList) {
-        // eslint-disable-next-line no-await-in-loop
         await driver?.findElement(By.css(`[data-testid='${testId}']`)).click();
     }
 }

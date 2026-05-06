@@ -65,7 +65,6 @@ function getImagePathFromViewport(viewport: Viewport): string {
     return spritePath;
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function autoMarkWithSourceafis(viewport: Viewport) {
     try {
         const imagePath = getImagePathFromViewport(viewport);
@@ -86,7 +85,6 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
                 logger: console,
             }
         );
-        // eslint-disable-next-line no-console
         console.log("exit code:", processResult.code);
         const root: unknown = sourceAfisJson;
         const imageSprite = (() => {
@@ -101,7 +99,6 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
             const hStudio = imageSprite.height;
             const wAfis = sourceAfisJson.width;
             const hAfis = sourceAfisJson.height;
-            // eslint-disable-next-line no-console
             console.log({
                 wStudio,
                 hStudio,
@@ -119,7 +116,6 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
         }
         const canvasId = viewport.name as CanvasMetadata["id"] | null;
         if (canvasId === null) {
-            // eslint-disable-next-line no-console
             console.error("Canvas ID not found");
             return;
         }
@@ -129,22 +125,18 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
         const imgW = imageSprite?.texture?.width ?? null;
         const imgH = imageSprite?.texture?.height ?? null;
         let didLogSample = false;
-        // eslint-disable-next-line no-restricted-syntax
         for (const minutia of minutiae) {
             const label = markingsStore.actions.labelGenerator.getLabel();
             const typeId = resolveSourceafisTypeId(minutia.type);
             if (!typeId) {
-                // eslint-disable-next-line no-console
                 console.warn(
                     "Missing marking type for SourceAFIS minutia:",
                     minutia.type
                 );
-                // eslint-disable-next-line no-continue
                 continue;
             }
             const origin = { x: minutia.x, y: minutia.y };
             if (!didLogSample) {
-                // eslint-disable-next-line no-console
                 console.log({
                     imgW,
                     imgH,
@@ -159,10 +151,8 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
                 new AddOrUpdateMarkingCommand(markingsStore.actions.markings, m)
             );
         }
-        // eslint-disable-next-line no-console
         console.log(`Added ${minutiae.length} markings`);
 
-        // eslint-disable-next-line no-console
         console.log("root keys:", Object.keys(root as object));
 
         const candidate = root as {
@@ -177,19 +167,14 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
             null;
 
         if (!minutiaeArray) {
-            // eslint-disable-next-line no-console
             console.error("No minutiae array found");
-            // eslint-disable-next-line no-console
             console.log("root:", root);
             return;
         }
 
-        // eslint-disable-next-line no-console
         console.log("minutiae.length:", minutiaeArray.length);
-        // eslint-disable-next-line no-console
         console.log("minutiae[0]:", minutiaeArray[0]);
     } catch (error) {
-        // eslint-disable-next-line no-console
         console.error("Failed to run SourceAFIS external tool:", error);
     }
 }

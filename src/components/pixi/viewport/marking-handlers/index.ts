@@ -9,7 +9,6 @@ import { TriangleMarkingHandler } from "./triangleMarkingHandler";
 import { PolylineMarkingHandler } from "./polylineMarkingHandler";
 import { FreehandMarkingHandler } from "./freehandMarkingHandler";
 
-// eslint-disable-next-line import/no-cycle
 export * from "./markingHandler";
 export * from "./rayMarkingHandler";
 export * from "./pointMarkingHandler";

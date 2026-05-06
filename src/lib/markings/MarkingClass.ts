@@ -22,9 +22,6 @@ export abstract class MarkingClass {
             ids && ids.length > 0
                 ? Array.from(new Set(ids))
                 : [crypto.randomUUID()];
-        this.label = label;
-        this.origin = origin;
-        this.typeId = typeId;
     }
 
     public calculateOriginViewportPosition(

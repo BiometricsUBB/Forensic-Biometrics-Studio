@@ -186,13 +186,11 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                             ),
                             onClick: async () => {
                                 try {
-                                    // eslint-disable-next-line no-console
                                     console.log(
                                         "Auto-mark clicked - starting sidecar"
                                     );
                                     await autoMarkWithSourceafis(viewport);
                                 } catch (error) {
-                                    // eslint-disable-next-line no-console
                                     console.error("Auto-mark failed:", error);
                                 }
                             },

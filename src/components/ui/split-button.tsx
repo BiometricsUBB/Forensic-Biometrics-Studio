@@ -63,9 +63,7 @@ export function SplitButton({
                 title={mainAction.label}
                 className={cn(
                     buttonBaseClasses,
-                    // eslint-disable-next-line security/detect-object-injection
                     variantClasses[variant],
-                    // eslint-disable-next-line security/detect-object-injection
                     sizeClasses[size],
                     "rounded-r-none border-r-0"
                 )}
@@ -82,7 +80,6 @@ export function SplitButton({
                     disabled={disabled || !dropdownActions.length}
                     className={cn(
                         buttonBaseClasses,
-                        // eslint-disable-next-line security/detect-object-injection
                         variantClasses[variant],
                         "h-8 px-1.5 rounded-l-none border-l border-input"
                     )}
@@ -91,7 +88,6 @@ export function SplitButton({
                 </DropdownMenuTrigger>
                 <DropdownMenuPortal>
                     <DropdownMenuContent align="end" className="min-w-[160px]">
-                        {/* eslint-disable-next-line security/detect-object-injection */}
                         {dropdownActions.map(action => (
                             <DropdownMenuItem
                                 key={action.label}

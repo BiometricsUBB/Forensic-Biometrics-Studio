@@ -25,7 +25,6 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
     useEffect(() => {
         if (!calibrationData && typeof setStore === "function") {
             setStore(draft => {
-                // eslint-disable-next-line no-param-reassign
                 draft.calibration = { unit: "px", pixelsPerUnit: 1 };
             });
         }
@@ -86,13 +85,13 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
         ).filter(m => m.markingClass !== MARKING_CLASS.MEASUREMENT);
 
         const thisIds = new Set(filteredMarkings.flatMap(m => m.ids));
-        const thisLabels = filteredMarkings.map(m => m.label);
+        const thisLabels = new Set(filteredMarkings.map(m => m.label));
 
         const combinedMarkings = [
             ...filteredMarkings,
-            ...filteredOpposite.filter(m => !thisLabels.includes(m.label)),
+            ...filteredOpposite.filter(m => !thisLabels.has(m.label)),
         ]
-            .sort((a, b) => a.label - b.label)
+            .toSorted((a, b) => a.label - b.label)
             .map(m =>
                 m.ids.some(markingId => thisIds.has(markingId))
                     ? m

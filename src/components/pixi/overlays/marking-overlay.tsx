@@ -42,22 +42,18 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
     );
 
     const tempAutoRotateLine = AutoRotateStore.use(
-        // eslint-disable-next-line security/detect-object-injection
         state => state.tempLines[canvasId]
     );
 
     const finishedAutoRotateLine = AutoRotateStore.use(
-        // eslint-disable-next-line security/detect-object-injection
         state => state.finishedLines[canvasId]
     );
 
     const tempMeasurementLine = MeasurementStore.use(
-        // eslint-disable-next-line security/detect-object-injection
         state => state.tempLines[canvasId]
     );
 
     const finishedMeasurementLine = MeasurementStore.use(
-        // eslint-disable-next-line security/detect-object-injection
         state => state.finishedLines[canvasId]
     );
 

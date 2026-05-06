@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext";
-// eslint-disable-next-line import/no-cycle
 import { Immer, produceCallback } from "../immer.helpers";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { MovedEvent } from "pixi-viewport/dist/types";
 import { Viewport as PixiViewport } from "pixi-viewport";
 import { DashboardToolbarStore } from "@/lib/stores/DashboardToolbar";
@@ -67,7 +66,7 @@ export const handleMove = (e: MovedEvent, params: ViewportHandlerParams) => {
 
     // Jeśli Viewport jest zalockowany (L): wyślij eventy do drugiego viewportu
 
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+    // oxlint-disable-next-line react-hooks/rules-of-hooks
     const oppositeViewport = useGlobalViewport(getOppositeCanvasId(id));
     if (oppositeViewport === null) return;
 

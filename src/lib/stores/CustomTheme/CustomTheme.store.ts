@@ -35,7 +35,6 @@ const useStore = create<Immer<State>>()(
             onRehydrateStorage: () => state => {
                 if (state) {
                     state.set(draft => {
-                        // eslint-disable-next-line no-param-reassign
                         draft.hydrated = true;
                     });
                 }

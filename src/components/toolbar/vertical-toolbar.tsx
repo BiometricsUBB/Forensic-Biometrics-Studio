@@ -84,7 +84,6 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                 workingMode,
             });
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error("Failed to open settings window:", error);
         }
     };

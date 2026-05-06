@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 import { useApp } from "@pixi/react";
 import { forwardRef, ReactNode } from "react";
 import { Viewport as PixiViewport } from "pixi-viewport";
@@ -117,7 +116,6 @@ export const Viewport = forwardRef<PixiViewport, ViewportProps>(
                         handleZoom(e, handlerParams);
                     });
 
-                    // eslint-disable-next-line no-param-reassign
                     viewport.name = id;
 
                     return viewport;

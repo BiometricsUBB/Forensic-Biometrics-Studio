@@ -91,7 +91,6 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
                         overlayRef.current.height = result.height;
                     }
                 } catch (e) {
-                    // eslint-disable-next-line no-console
                     console.error(e);
                     setErrorMsg(
                         t("Memory error processing high-res image", {
@@ -299,7 +298,6 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
             onSave(dataUrl);
             onClose();
         } catch (e) {
-            // eslint-disable-next-line no-console
             console.error(e);
             setStatus("ready");
         }

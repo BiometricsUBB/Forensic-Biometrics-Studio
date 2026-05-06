@@ -1,5 +1,3 @@
-/* eslint-disable no-throw-literal */
-
 import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { save } from "@tauri-apps/plugin-dialog";
 import { getVersion } from "@tauri-apps/api/app";

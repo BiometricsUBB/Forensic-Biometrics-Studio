@@ -7,7 +7,6 @@ export const useThemeController = (app: Application<ICanvas>) => {
 
     useEffect(() => {
         // Zmień kolor tła canvasu gdy użytkownik zmieni motyw
-        // eslint-disable-next-line no-param-reassign
         app.renderer.background.color = colors.background;
     }, [app.renderer.background, colors.background]);
 

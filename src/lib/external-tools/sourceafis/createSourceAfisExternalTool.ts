@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-
 import { platform } from "@tauri-apps/plugin-os";
 import { exists, readTextFile } from "@tauri-apps/plugin-fs";
 import { Command } from "@tauri-apps/plugin-shell";
@@ -183,7 +181,6 @@ class NotImplementedSourceAfisStrategy
     public buildExecutionPlan(
         _request: SourceAfisRunRequest
     ): ExternalExecutionPlan {
-        // eslint-disable-next-line no-void
         void _request;
         throw new ExternalToolNotImplementedError(
             `SourceAFIS external tool for "${this.currentOs}" not implemented yet`

@@ -12,6 +12,5 @@ export class RayMarking extends MarkingClass {
         ids?: string[]
     ) {
         super(label, origin, typeId, ids);
-        this.angleRad = angleRad;
     }
 }

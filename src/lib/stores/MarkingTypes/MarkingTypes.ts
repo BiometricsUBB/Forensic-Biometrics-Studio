@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";

@@ -1,7 +1,3 @@
-/* eslint-disable func-names */
-/* eslint-disable security/detect-object-injection */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-
 import {
     ColumnDef,
     Row,
@@ -161,7 +157,6 @@ interface MarkingsInfoTableProps<TData, TValue> {
 }
 
 let prevDataLength = 0;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const MarkingsInfoTable = function <TData, TValue>({
     columns,
     selectedMarking,

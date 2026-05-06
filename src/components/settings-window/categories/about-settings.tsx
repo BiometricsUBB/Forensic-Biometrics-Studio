@@ -21,7 +21,6 @@ export function AboutSettings() {
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1 p-4 rounded-lg border border-border/30 bg-background/50">
                     <div className="flex items-center gap-2">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src="/logo.svg"
                             alt="Logo"

@@ -1,6 +1,3 @@
-/* eslint-disable security/detect-object-injection */
-/* eslint-disable no-param-reassign */
-
 import { produce } from "immer";
 import { ActionProduceCallback } from "../immer.helpers";
 import {

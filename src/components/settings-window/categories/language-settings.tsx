@@ -32,7 +32,6 @@ export function LanguageSettings() {
             <div className="flex flex-col gap-2">
                 {(Object.keys(LANGUAGES) as (keyof typeof LANGUAGES)[]).map(
                     key => {
-                        // eslint-disable-next-line security/detect-object-injection
                         const value = LANGUAGES[key];
                         const isSelected = i18n.language === value;
 

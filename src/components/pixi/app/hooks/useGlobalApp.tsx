@@ -9,9 +9,10 @@ export const useGlobalApp = (
 ) => {
     if (options?.autoUpdate === true) {
         if (options.throttledUpdate === true) {
-            // eslint-disable-next-line react-hooks/rules-of-hooks
+            // oxlint-disable-next-line react-hooks/rules-of-hooks
             CanvasUpdater.useThrottled(30);
         } else {
+            // oxlint-disable-next-line react-hooks/rules-of-hooks
             CanvasUpdater.use(id, "app");
         }
     }

@@ -5,7 +5,6 @@ import { MarkingType } from "@/lib/markings/MarkingType";
 export class PointMarking extends MarkingClass {
     readonly markingClass = MARKING_CLASS.POINT;
 
-    // eslint-disable-next-line no-useless-constructor
     constructor(
         label: MarkingClass["label"],
         origin: MarkingClass["origin"],

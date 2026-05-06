@@ -146,13 +146,11 @@ export default function ImageFftControls({
                 specCanvasRef.current = specCvs;
 
                 // Set overlay canvas internal size to image dimensions
-                /* eslint-disable no-param-reassign */
                 canvas.width = w;
                 canvas.height = h;
                 /* eslint-enable no-param-reassign */
 
                 redrawOverlay();
-                // eslint-disable-next-line no-param-reassign
                 canvas.style.pointerEvents = "auto";
                 setStatus("ready");
             } catch {
@@ -309,14 +307,12 @@ export default function ImageFftControls({
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.putImageData(resultImage, 0, 0);
                 }
-                // eslint-disable-next-line no-param-reassign
                 canvas.style.pointerEvents = "none";
                 setViewMode("preview");
                 setStatus("ready");
             }, 50);
         } else {
             redrawOverlay();
-            // eslint-disable-next-line no-param-reassign
             canvas.style.pointerEvents = "auto";
             setViewMode("edit");
         }

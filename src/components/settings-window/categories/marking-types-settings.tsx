@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-object-injection */
 import { cn } from "@/lib/utils/shadcn";
 import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";

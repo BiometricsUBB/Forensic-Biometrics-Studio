@@ -18,7 +18,6 @@ import {
     RemoveMarkingCommand,
 } from "@/lib/stores/History/MarkingCommands";
 
-/* eslint-disable sonarjs/no-duplicated-branches */
 export type EmptyMarking = {
     label: MarkingClass["label"];
 };
@@ -138,7 +137,6 @@ export const useColumns = (
                             editingLabel === (marking as MarkingClass).label;
 
                         return (
-                            /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                             <div
                                 className="flex gap-1 items-center"
                                 onClick={e => {
@@ -234,7 +232,7 @@ export const useColumns = (
                     cell: info =>
                         formatCell(info, ({ row }) => {
                             const marking = row.original.typeId;
-                            return `${MarkingTypesStore.use().types.find(e => e.id === marking)?.displayName}`;
+                            return `${MarkingTypesStore.state.types.find(e => e.id === marking)?.displayName}`;
                         }),
                 },
                 {

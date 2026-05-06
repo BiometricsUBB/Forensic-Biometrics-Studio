@@ -121,7 +121,6 @@ export function ReportDialog({ className }: ReportDialogProps) {
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error(error);
             const message =
                 error instanceof Error ? error.message : String(error);

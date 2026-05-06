@@ -5,7 +5,6 @@ import { _createAutoRotateStore as createStore } from "./AutoRotate.store";
 
 const useStore = createStore();
 
-// eslint-disable-next-line no-use-before-define
 const autoRotate = (store: StoreClass) => {
     const { getFinishedLines, resetTempLines, resetFinishedLines } =
         store.actions;
@@ -46,7 +45,6 @@ class StoreClass {
     readonly actions = {
         setTempLine: (canvasId: CANVAS_ID, line: LineSegmentMarking | null) => {
             this.state.set(draft => {
-                // eslint-disable-next-line security/detect-object-injection, no-param-reassign
                 draft.tempLines[canvasId] = line;
             });
         },
@@ -55,15 +53,12 @@ class StoreClass {
             line: LineSegmentMarking | null
         ) => {
             this.state.set(draft => {
-                // eslint-disable-next-line security/detect-object-injection, no-param-reassign
                 draft.finishedLines[canvasId] = line;
-                // eslint-disable-next-line no-param-reassign
                 draft.lastDrawnCanvas = canvasId;
             });
         },
         resetTempLines: () => {
             this.state.set(draft => {
-                // eslint-disable-next-line no-param-reassign
                 draft.tempLines = {
                     [CANVAS_ID.LEFT]: null,
                     [CANVAS_ID.RIGHT]: null,
@@ -72,12 +67,10 @@ class StoreClass {
         },
         resetFinishedLines: () => {
             this.state.set(draft => {
-                // eslint-disable-next-line no-param-reassign
                 draft.finishedLines = {
                     [CANVAS_ID.LEFT]: null,
                     [CANVAS_ID.RIGHT]: null,
                 };
-                // eslint-disable-next-line no-param-reassign
                 draft.lastDrawnCanvas = null;
             });
         },

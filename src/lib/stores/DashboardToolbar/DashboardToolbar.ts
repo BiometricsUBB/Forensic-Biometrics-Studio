@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import { produce } from "immer";
 import { CUSTOM_GLOBAL_EVENTS } from "@/lib/utils/const";
 import { ActionProduceCallback } from "../immer.helpers";

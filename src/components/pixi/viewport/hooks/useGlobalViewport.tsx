@@ -8,6 +8,7 @@ export const useGlobalViewport = (
     options?: Omit<CanvasUpdaterOptions, "throttledUpdate">
 ) => {
     if (options?.autoUpdate === true) {
+        // oxlint-disable-next-line react-hooks/rules-of-hooks
         CanvasUpdater.use(id, "viewport");
     }
     const { viewport } = getCanvas(id, true);

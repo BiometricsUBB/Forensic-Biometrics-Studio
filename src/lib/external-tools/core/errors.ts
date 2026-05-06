@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-
 export class ExternalToolError extends Error {
     public override readonly cause: unknown;
 

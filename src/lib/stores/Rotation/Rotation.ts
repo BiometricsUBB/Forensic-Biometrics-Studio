@@ -24,13 +24,11 @@ class StoreClass {
     readonly actions = {
         setRotation: (rotation: number) => {
             this.state.set(draft => {
-                // eslint-disable-next-line no-param-reassign
                 draft.rotation = rotation;
             });
         },
         resetRotation: () => {
             this.state.set(draft => {
-                // eslint-disable-next-line no-param-reassign
                 draft.rotation = 0;
             });
         },

@@ -1,4 +1,3 @@
-/* eslint-disable no-plusplus, no-param-reassign, security/detect-object-injection, @typescript-eslint/no-non-null-assertion */
 import FFT from "fft.js";
 
 export interface FFTResult {
@@ -172,7 +171,6 @@ export class ImageFFT {
             this.rowFFT = new FFT(this.width);
             this.colFFT = new FFT(this.height);
         } catch (e) {
-            // eslint-disable-next-line no-console
             console.error("FFT Init Error:", e);
             this.width = 1024;
             this.height = 1024;

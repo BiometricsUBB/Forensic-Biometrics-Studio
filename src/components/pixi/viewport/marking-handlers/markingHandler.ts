@@ -1,5 +1,4 @@
 import { FederatedPointerEvent } from "pixi.js";
-// eslint-disable-next-line import/no-cycle
 import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/markingModePlugin";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
@@ -8,12 +7,10 @@ import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { MetadataEntryStore } from "@/lib/stores/MetadataEntry";
 
 export abstract class MarkingHandler {
-    // eslint-disable-next-line no-useless-constructor
     constructor(
         protected plugin: MarkingModePlugin,
         protected typeId: string,
         protected startEvent: FederatedPointerEvent
-        // eslint-disable-next-line no-empty-function
     ) {}
 
     abstract handleMouseMove(e: FederatedPointerEvent): void;

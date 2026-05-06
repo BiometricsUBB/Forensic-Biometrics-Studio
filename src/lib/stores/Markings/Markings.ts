@@ -1,6 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-param-reassign */
-
 import { produce } from "immer";
 import {
     CANVAS_ID,
@@ -8,7 +5,6 @@ import {
 } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { arrayMax } from "@/lib/utils/array/minmax";
-// eslint-disable-next-line import/no-cycle
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { RayMarking } from "@/lib/markings/RayMarking";
@@ -377,7 +373,7 @@ class StoreClass {
                 ];
                 const uniqueSorted = Array.from(
                     new Set(all.map(m => m.label))
-                ).sort((a, b) => a - b);
+                ).toSorted((a, b) => a - b);
                 const mapping = new Map<number, number>();
                 uniqueSorted.forEach((lbl, idx) => mapping.set(lbl, idx + 1));
 

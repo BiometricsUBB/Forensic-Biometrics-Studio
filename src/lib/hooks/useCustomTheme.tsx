@@ -37,7 +37,6 @@ export function applyCustomTheme(theme: CustomTheme | null) {
 
     Object.entries(CSS_VAR_MAP).forEach(([key, cssVar]) => {
         const colorKey = key as keyof ThemeColors;
-        // eslint-disable-next-line security/detect-object-injection
         const value = theme.colors[colorKey];
         if (value) {
             root.style.setProperty(cssVar, value);

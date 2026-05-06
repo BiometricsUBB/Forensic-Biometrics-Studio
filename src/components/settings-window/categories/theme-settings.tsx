@@ -191,9 +191,7 @@ function ThemeEditor({ theme, onClose }: ThemeEditorProps) {
                 {colorKeys.map(key => (
                     <ColorPicker
                         key={key}
-                        // eslint-disable-next-line security/detect-object-injection
                         label={THEME_COLOR_LABELS[key]}
-                        // eslint-disable-next-line security/detect-object-injection
                         value={theme.colors[key]}
                         onChange={value => handleColorChange(key, value)}
                     />
@@ -311,7 +309,6 @@ export function ThemeSettings() {
 
             <div className="flex flex-col gap-2">
                 {(Object.keys(THEMES) as (keyof typeof THEMES)[]).map(key => {
-                    // eslint-disable-next-line security/detect-object-injection
                     const value = THEMES[key];
                     const isSelected =
                         resolvedTheme === value && activeThemeId === null;

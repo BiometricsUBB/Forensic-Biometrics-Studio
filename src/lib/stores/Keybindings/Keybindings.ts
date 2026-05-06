@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { _useKeybindingsStore, TypeKeybinding } from "./Keybindings.store";
 
 class StoreClass {

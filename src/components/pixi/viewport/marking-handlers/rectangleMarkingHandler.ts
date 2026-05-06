@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-cycle
 import { MarkingHandler } from "@/components/pixi/viewport/marking-handlers/markingHandler";
 import { FederatedPointerEvent } from "pixi.js";
 import { RectangleMarking } from "@/lib/markings/RectangleMarking";

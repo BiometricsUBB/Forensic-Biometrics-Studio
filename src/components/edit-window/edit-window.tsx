@@ -345,7 +345,6 @@ export function EditWindow() {
             resizeObserver.disconnect();
             img.removeEventListener("load", sync);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageUrl]);
 
     /* Sync FFT canvas CSS position to the image (without clearing internal dims) */
@@ -376,7 +375,6 @@ export function EditWindow() {
             resizeObserver.disconnect();
             img.removeEventListener("load", syncFft);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [imageUrl]);
 
     const saveEditedImage = async () => {
@@ -505,7 +503,6 @@ export function EditWindow() {
                                     }
                                 }}
                             />
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
                                 src={imageUrl}

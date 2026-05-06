@@ -1,5 +1,3 @@
-/* eslint-disable no-throw-literal */
-
 import {
     CANVAS_ID,
     CanvasMetadata,
@@ -63,7 +61,6 @@ export type ExportObject = {
 function getImageData(picture: Sprite | undefined): ImageInfo | null {
     if (picture === undefined) return null;
 
-    // eslint-disable-next-line no-underscore-dangle
     const texture: BaseTexture | undefined = picture?._texture.baseTexture;
 
     if (texture === undefined)
@@ -117,30 +114,32 @@ async function getData(
                 .map(c => ({ id: c.id, name: c.name })),
         },
         data: {
-            markings: markings.map(m => ({
-                ids: m.ids,
-                markingClass: m.markingClass,
-                origin: m.origin,
-                typeId: m.typeId,
-                ...("angleRad" in m
-                    ? { angleRad: (m as RayMarking).angleRad }
-                    : {}),
-                ...("endpoint" in m
-                    ? {
-                          endpoint: (
-                              m as LineSegmentMarking | BoundingBoxMarking
-                          ).endpoint,
-                      }
-                    : {}),
-                ...("points" in m
-                    ? {
-                          points: (m as PointsMarkingClass).points,
-                      }
-                    : {}),
-                ...(m.attributeValues
-                    ? { attributeValues: m.attributeValues }
-                    : {}),
-            })),
+            markings: markings.map(m =>
+                Object.assign(
+                    {
+                        ids: m.ids,
+                        markingClass: m.markingClass,
+                        origin: m.origin,
+                        typeId: m.typeId,
+                    },
+                    "angleRad" in m
+                        ? { angleRad: (m as RayMarking).angleRad }
+                        : {},
+                    "endpoint" in m
+                        ? {
+                              endpoint: (
+                                  m as LineSegmentMarking | BoundingBoxMarking
+                              ).endpoint,
+                          }
+                        : {},
+                    "points" in m
+                        ? { points: (m as PointsMarkingClass).points }
+                        : {},
+                    m.attributeValues
+                        ? { attributeValues: m.attributeValues }
+                        : {}
+                )
+            ),
         },
     };
 

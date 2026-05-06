@@ -24,7 +24,6 @@ export function Menu() {
             <div className="flex grow-1 items-center">
                 <MacOSTitleBarSpacer />
                 <div className="flex items-center px-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                         src="/logo.svg"
                         alt="Logo"

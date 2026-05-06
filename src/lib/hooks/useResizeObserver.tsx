@@ -21,7 +21,6 @@ function useResizeObserver<T extends HTMLElement>(
 
         observer.observe(element);
 
-        // eslint-disable-next-line consistent-return
         return () => {
             observer.disconnect();
         };

@@ -27,7 +27,6 @@ const ReactPixiViewportComponent = PixiComponent("Viewport", {
         return viewport;
     },
     willUnmount: (viewport: Viewport) => {
-        // eslint-disable-next-line no-param-reassign
         viewport.options.noTicker = true;
         viewport.destroy({ children: true });
     },

@@ -134,7 +134,6 @@ export class MarkingModePlugin extends Plugin {
             [MARKING_CLASS.FREEHAND]: FreehandMarkingHandler,
         };
 
-        // eslint-disable-next-line security/detect-object-injection
         const MarkingHandlerClass = MARKING_HANDLERS[type.markingClass];
 
         if (!MarkingHandlerClass) {

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+// `any` is unavoidable here: variadic tuple/generic inference requires it.
+/* oxlint-disable typescript/no-explicit-any */
 type Last<T extends readonly any[]> = T extends readonly [...infer _, infer L]
     ? L
     : never;
@@ -9,7 +9,6 @@ export function computeCombined<
 >(fns: T): ReturnType<Last<T>> {
     let args: any[] | undefined = [];
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const func of fns) {
         if (args === undefined) {
             // @ts-expect-error it's fine

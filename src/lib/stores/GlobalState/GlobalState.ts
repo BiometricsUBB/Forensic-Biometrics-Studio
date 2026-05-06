@@ -1,6 +1,3 @@
-/* eslint-disable security/detect-object-injection */
-/* eslint-disable no-param-reassign */
-
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { ActionProduceCallback } from "../immer.helpers";
 import {
@@ -20,7 +17,6 @@ class StoreClass {
     ) {
         this.state.set(draft => {
             const updatedValue = callback(draft.pendingMerge, draft);
-            // eslint-disable-next-line no-param-reassign
             draft.pendingMerge = updatedValue;
         });
     }

@@ -14,7 +14,6 @@ export function sampleLine(imgData: ImageData, a: Point, b: Point): number[] {
         const y = Math.round(a.y + (dy * i) / steps);
         const idx = (y * imgData.width + x) * 4;
 
-        // eslint-disable-next-line security/detect-object-injection
         const r = imgData.data[idx] ?? 0;
         const g = imgData.data[idx + 1] ?? 0;
         const b = imgData.data[idx + 2] ?? 0;
@@ -25,7 +24,6 @@ export function sampleLine(imgData: ImageData, a: Point, b: Point): number[] {
     return values;
 }
 
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function findPeaks(values: number[], minDistance = 5): number[] {
     const peaks: number[] = [];
     if (values.length < 3) return peaks;
@@ -45,7 +43,6 @@ export function findPeaks(values: number[], minDistance = 5): number[] {
         peaks.length === 0 ||
         peakMinIdx - peaks[peaks.length - 1]! >= minDistance;
 
-    // eslint-disable-next-line security/detect-object-injection
     for (let i = 0; i < values.length; i += 1) {
         const v = values[i]!;
 

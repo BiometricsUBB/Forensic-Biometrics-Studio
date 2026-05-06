@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { MarkingClass } from "@/lib/markings/MarkingClass";

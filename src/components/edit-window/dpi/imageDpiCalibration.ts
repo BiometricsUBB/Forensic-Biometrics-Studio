@@ -162,7 +162,6 @@ export class ImageDpiCalibration {
         if (peaksIdx.length < 2) return;
         const diffs: number[] = [];
         for (let i = 0; i < peaksIdx.length - 1; i += 1) {
-            // eslint-disable-next-line security/detect-object-injection
             diffs.push(peaksIdx[i + 1]! - peaksIdx[i]!);
         }
         const pxPerMmOriginal = diffs.reduce((a, b) => a + b, 0) / diffs.length;

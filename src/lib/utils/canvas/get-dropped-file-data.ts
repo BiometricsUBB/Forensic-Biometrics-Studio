@@ -7,7 +7,6 @@ export const getDroppedFileData = async (event: DragEvent<HTMLDivElement>) => {
     if (items) {
         const fileDataArray = [];
 
-        // eslint-disable-next-line no-restricted-syntax
         for (const item of items) {
             if (item.kind !== "file")
                 throw new Error(
@@ -33,7 +32,6 @@ export const getDroppedFileData = async (event: DragEvent<HTMLDivElement>) => {
 
     const fileDataArray = [];
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const file of files) {
         const dataArrayPromise = file
             .arrayBuffer()

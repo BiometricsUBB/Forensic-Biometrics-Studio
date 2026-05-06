@@ -22,9 +22,7 @@ export type EventName = Exclude<keyof DisplayObjectEvents, symbol>;
 
 function getNestedValue(obj: unknown, keys: string[]): string | number {
     const value = keys.reduce(
-        // eslint-disable-next-line security/detect-object-injection
         // @ts-expect-error keys are always strings
-        // eslint-disable-next-line security/detect-object-injection
         (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
         obj
     ) as string | number;
@@ -42,7 +40,6 @@ function getPrimitiveValues(obj: unknown | undefined): string[] {
     if (!obj) return [];
     return Object.keys(obj).filter(e =>
         ["string", "number", "boolean"].includes(
-            // eslint-disable-next-line security/detect-object-injection
             typeof (obj as Record<string, unknown>)[e]
         )
     );
@@ -71,7 +68,6 @@ export const DebugInfoTables = (
                 <div className="[&>div]:leading-none">
                     <div>{name}</div>
                     {keys.map((key, i) => (
-                        // eslint-disable-next-line react/no-array-index-key
                         <div key={key + i}>.{key}</div>
                     ))}
                 </div>
@@ -125,11 +121,7 @@ export function viewportListenersTable(
                     const count = viewport.listenerCount(event);
                     if (count === 0) return null;
                     return (
-                        <TableRow
-                            // eslint-disable-next-line react/no-array-index-key
-                            key={`${event}`}
-                            className="flex gap-1"
-                        >
+                        <TableRow key={`${event}`} className="flex gap-1">
                             <TableCell className=" grow font-semibold text-right p-0">
                                 {event}
                             </TableCell>
@@ -167,7 +159,6 @@ export function DebugInfo({ ...props }: DebugInfoProps) {
         },
         {
             keys: ["stage", "_bounds"],
-            // eslint-disable-next-line no-underscore-dangle
             values: getTableValues(app?.stage._bounds),
         },
         {
@@ -219,7 +210,6 @@ export function DebugInfo({ ...props }: DebugInfoProps) {
         },
         {
             keys: ["_bounds"],
-            // eslint-disable-next-line no-underscore-dangle
             values: getTableValues(viewport?._bounds),
         },
     ];

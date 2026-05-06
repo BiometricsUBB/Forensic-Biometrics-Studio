@@ -109,7 +109,6 @@ const md5String = (value: string) => SparkMD5.hash(value);
 
 const toCssColor = (value: unknown, fallback: string) => {
     if (typeof value === "number" && Number.isFinite(value)) {
-        // eslint-disable-next-line no-bitwise
         return `#${(value >>> 0).toString(16).padStart(6, "0").slice(-6)}`;
     }
     if (typeof value === "string" && value.trim().length > 0) {
@@ -406,7 +405,7 @@ const createOverviewCalloutImage = async (
     const fontSize = Math.max(12, Math.round(numberCircleRadius * 1.1));
     const placedLabels: Array<{ x: number; y: number }> = [];
     const placementOrder = [...features]
-        .sort((a, b) => a.label - b.label)
+        .toSorted((a, b) => a.label - b.label)
         .map((feature, index, arr) => {
             const angle =
                 CLOCKWISE_START_ANGLE +
@@ -435,7 +434,6 @@ const createOverviewCalloutImage = async (
         let placed = false;
         for (let ring = 0; ring < 12 && !placed; ring += 1) {
             const radialBoost = ring * (numberCircleRadius + 6);
-            // eslint-disable-next-line no-loop-func
             angularOffsets.some(angleOffset => {
                 const angle = baseAngle + angleOffset;
                 const cos = Math.cos(angle);
@@ -629,7 +627,6 @@ const createFigurePage = (
     return page;
 };
 
-/* eslint-disable sonarjs/cognitive-complexity */
 export const generateReportPdfWithDialog = async (
     options: ReportGenerationOptions
 ) => {
@@ -1020,7 +1017,6 @@ export const generateReportPdfWithDialog = async (
         selectedFeatures.forEach((feature, idx) => {
             const pageIndex = Math.floor(idx / ROWS_PER_PAGE);
             const targetIndex = detailsStartIndex + pageIndex;
-            // eslint-disable-next-line security/detect-object-injection
             if (!pages[targetIndex]) {
                 const page = createPage();
                 page.innerHTML = `
@@ -1037,11 +1033,9 @@ export const generateReportPdfWithDialog = async (
                 </table>
                 ${createFooter(targetIndex + 1, reportId, tReport)}
             `;
-                // eslint-disable-next-line security/detect-object-injection
                 pages[targetIndex] = page;
             }
 
-            // eslint-disable-next-line security/detect-object-injection
             const tableBody = pages[targetIndex].querySelector(
                 "tbody"
             ) as HTMLTableSectionElement | null;
@@ -1062,7 +1056,6 @@ export const generateReportPdfWithDialog = async (
                 featureTypeDefinition?.textColor,
                 "#7a0000"
             );
-            // eslint-disable-next-line security/detect-object-injection
             const detailCrop = detailCrops[idx];
             if (!detailCrop) return;
             const leftCrop = detailCrop.left;
@@ -1143,9 +1136,10 @@ export const generateReportPdfWithDialog = async (
         }
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        // eslint-disable-next-line no-console
         console.error(`[report] failed at ${stage}: ${message}`, error);
-        throw new Error(`Report failed at ${stage}: ${message}`);
+        throw new Error(`Report failed at ${stage}: ${message}`, {
+            cause: error,
+        });
     }
 };
 /* eslint-enable sonarjs/cognitive-complexity */

@@ -13,13 +13,7 @@ import { CrosshairOverlay } from "../overlays/crosshair-overlay";
 import { TracingOverlay } from "../overlays/tracing-overlay";
 
 function range(min: number, max: number): number[] {
-    const len = max - min + 1;
-    const arr = new Array(len);
-    for (let i = 0; i < len; i += 1) {
-        // eslint-disable-next-line security/detect-object-injection
-        arr[i] = min + i;
-    }
-    return arr;
+    return Array.from({ length: max - min + 1 }, (_, i) => min + i);
 }
 
 export type CanvasProps = Omit<Stage["props"], "children">;
