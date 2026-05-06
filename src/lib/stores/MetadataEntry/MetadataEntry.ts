@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable security/detect-object-injection */
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
@@ -26,7 +24,10 @@ class StoreClass {
         setValue: (attributeId: string, optionId: string) => {
             this.state.set(draft => {
                 if (draft.activeEntry) {
-                    draft.activeEntry.draftValues[attributeId] = optionId;
+                    draft.activeEntry.draftValues = {
+                        ...draft.activeEntry.draftValues,
+                        [attributeId]: optionId,
+                    };
                 }
             });
         },

@@ -44,6 +44,13 @@ module.exports = {
     rules: {
         "dot-notation": "off",
         "default-case": "error",
+        "no-param-reassign": [
+            "error",
+            {
+                props: true,
+                ignorePropertyModificationsFor: ["draft", "state"],
+            },
+        ],
         "@typescript-eslint/prefer-enum-initializers": "error",
         "@typescript-eslint/no-duplicate-enum-values": "error",
         "@typescript-eslint/no-unused-vars": "error",
