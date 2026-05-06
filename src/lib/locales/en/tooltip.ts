@@ -58,6 +58,7 @@ const d: Dictionary = {
         "Preview ready. Return to edit or save.",
     "Polyline requires at least 2 segments":
         "Polyline requires at least 2 segments",
+    "Edit metadata": "Edit metadata",
 };
 
 export default d;

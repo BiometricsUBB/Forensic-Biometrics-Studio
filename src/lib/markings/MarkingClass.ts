@@ -10,6 +10,8 @@ export abstract class MarkingClass {
 
     public ids: string[];
 
+    public attributeValues?: Record<string, string>;
+
     public constructor(
         public label: number,
         public origin: Point,

@@ -60,6 +60,7 @@ const d: Dictionary = {
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
     "Polyline requires at least 2 segments":
         "Linia łamana wymaga co najmniej 2 segmentów",
+    "Edit metadata": "Edytuj metadane",
 };
 
 export default d;

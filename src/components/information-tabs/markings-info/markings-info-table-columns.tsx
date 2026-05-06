@@ -1,6 +1,6 @@
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 import { ICON } from "@/lib/utils/const";
-import { Trash2, Link2 } from "lucide-react";
+import { Trash2, Link2, Pencil } from "lucide-react";
 import { Toggle } from "@/components/ui/toggle";
 import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
@@ -49,8 +49,14 @@ const formatCell = <T,>(
     return isLastRow ? lastRowEmptyValue : "";
 };
 
+export type UseColumnsArgs = {
+    onEditMetadata: (marking: MarkingClass) => void;
+    editingLabel: number | null;
+};
+
 export const useColumns = (
-    id: CanvasMetadata["id"]
+    id: CanvasMetadata["id"],
+    { onEditMetadata, editingLabel }: UseColumnsArgs
 ): ColumnDef<EmptyableMarking, Element>[] => {
     const { t } = useTranslation();
 
@@ -98,7 +104,7 @@ export const useColumns = (
             [
                 {
                     id: "actions",
-                    size: 60,
+                    size: 90,
                     cell: ({ row }) => {
                         const marking = row.original;
                         const oppositeId = getOppositeCanvasId(id);
@@ -117,6 +123,20 @@ export const useColumns = (
                             pending &&
                             pending.canvasId === id &&
                             pending.label === marking.label;
+
+                        const markingType = isMarkingBase(marking)
+                            ? MarkingTypesStore.state.types.find(
+                                  type =>
+                                      type.id ===
+                                      (marking as MarkingClass).typeId
+                              )
+                            : undefined;
+                        const hasAttributes =
+                            (markingType?.attributes?.length ?? 0) > 0;
+                        const isEditing =
+                            isMarkingBase(marking) &&
+                            editingLabel === (marking as MarkingClass).label;
+
                         return (
                             /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
                             <div
@@ -167,6 +187,29 @@ export const useColumns = (
                                                 strokeWidth={ICON.STROKE_WIDTH}
                                             />
                                         </Toggle>
+                                        {hasAttributes && (
+                                            <Toggle
+                                                title={t("Edit metadata", {
+                                                    ns: "tooltip",
+                                                })}
+                                                size="sm-icon"
+                                                variant="outline"
+                                                className="ml-2 py-0"
+                                                pressed={isEditing}
+                                                onClickCapture={() =>
+                                                    onEditMetadata(
+                                                        marking as MarkingClass
+                                                    )
+                                                }
+                                            >
+                                                <Pencil
+                                                    size={ICON.SIZE}
+                                                    strokeWidth={
+                                                        ICON.STROKE_WIDTH
+                                                    }
+                                                />
+                                            </Toggle>
+                                        )}
                                     </>
                                 )}
                             </div>
@@ -244,6 +287,13 @@ export const useColumns = (
                         }),
                 },
             ] as ColumnDef<EmptyableMarking, Element>[],
-        [t, id, handleRemoveClick, handleMergeClick]
+        [
+            t,
+            id,
+            handleRemoveClick,
+            handleMergeClick,
+            onEditMetadata,
+            editingLabel,
+        ]
     );
 };

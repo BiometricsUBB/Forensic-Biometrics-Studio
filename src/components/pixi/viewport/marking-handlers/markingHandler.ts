@@ -4,6 +4,8 @@ import type { MarkingModePlugin } from "@/components/pixi/viewport/plugins/marki
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
 import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { MetadataEntryStore } from "@/lib/stores/MetadataEntry";
 
 export abstract class MarkingHandler {
     // eslint-disable-next-line no-useless-constructor
@@ -35,5 +37,15 @@ export abstract class MarkingHandler {
                 marking
             )
         );
+
+        const type = MarkingTypesStore.state.types.find(
+            t => t.id === marking.typeId
+        );
+        if (type?.attributes && type.attributes.length > 0) {
+            MetadataEntryStore.actions.start(
+                this.plugin.handlerParams.id,
+                marking.label
+            );
+        }
     }
 }

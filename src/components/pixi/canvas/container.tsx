@@ -16,6 +16,8 @@ import {
     emitFitEvents,
     fitWorld,
 } from "@/components/pixi/canvas/utils/fit-viewport";
+import { MarkingMetadataCoverPanel } from "@/components/marking-metadata/MarkingMetadataCoverPanel";
+import { MarkingMetadataInputBlocker } from "@/components/marking-metadata/MarkingMetadataInputBlocker";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import { Canvas } from "./canvas";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
@@ -216,6 +218,8 @@ export function CanvasContainer({ ...props }: CanvasContainerProps) {
                     height={divSize.height}
                 />
             </div>
+            <MarkingMetadataInputBlocker panelCanvasId={id} />
+            <MarkingMetadataCoverPanel panelCanvasId={id} />
         </div>
     );
 }

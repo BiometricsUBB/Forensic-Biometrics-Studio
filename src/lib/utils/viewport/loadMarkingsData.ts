@@ -139,7 +139,7 @@ function createPointsMarking(
     return new MarkingConstructor(...baseArgs, points, ids);
 }
 
-function createMarkingFromData(
+function buildMarking(
     marking: ExportObject["data"]["markings"][0]
 ): MarkingClass {
     const baseArgs = [0, marking.origin, marking.typeId] as const;
@@ -172,6 +172,16 @@ function createMarkingFromData(
         default:
             throw new Error(`Unknown marking class: ${marking.markingClass}`);
     }
+}
+
+function createMarkingFromData(
+    marking: ExportObject["data"]["markings"][0]
+): MarkingClass {
+    const result = buildMarking(marking);
+    if (marking.attributeValues) {
+        result.attributeValues = { ...marking.attributeValues };
+    }
+    return result;
 }
 
 export async function loadMarkingsData(filePath: string, canvasId: CANVAS_ID) {

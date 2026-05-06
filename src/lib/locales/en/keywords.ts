@@ -62,6 +62,7 @@ const d: Dictionary = {
     "Matched features": "Matched features",
     "Selected features": "Selected features",
     Cancel: "Cancel",
+    Submit: "Submit",
     "Generating...": "Generating...",
     "FFT Spectrum Editor": "FFT Spectrum Editor",
     "FFT Result Preview": "FFT Result Preview",

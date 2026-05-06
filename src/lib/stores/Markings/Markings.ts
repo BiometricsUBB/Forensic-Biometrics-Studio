@@ -222,6 +222,11 @@ class StoreClass {
                         } else if (marking instanceof PointsMarkingClass) {
                             mToPush = marking.clone(idsToUse);
                         }
+                        if (marking.attributeValues) {
+                            mToPush.attributeValues = {
+                                ...marking.attributeValues,
+                            };
+                        }
                         state.push(mToPush);
                     })
                 );
@@ -237,45 +242,47 @@ class StoreClass {
                                 existingIds && existingIds.length > 0
                                     ? Array.from(new Set(existingIds))
                                     : m.ids;
+                            let result: MarkingClass = m;
                             if (m instanceof PointMarking) {
-                                return new PointMarking(
+                                result = new PointMarking(
                                     m.label,
                                     m.origin,
                                     m.typeId,
                                     idsToUse
                                 );
-                            }
-                            if (m instanceof RayMarking) {
-                                return new RayMarking(
+                            } else if (m instanceof RayMarking) {
+                                result = new RayMarking(
                                     m.label,
                                     m.origin,
                                     m.typeId,
                                     (m as RayMarking).angleRad,
                                     idsToUse
                                 );
-                            }
-                            if (m instanceof LineSegmentMarking) {
-                                return new LineSegmentMarking(
+                            } else if (m instanceof LineSegmentMarking) {
+                                result = new LineSegmentMarking(
                                     m.label,
                                     m.origin,
                                     m.typeId,
                                     (m as LineSegmentMarking).endpoint,
                                     idsToUse
                                 );
-                            }
-                            if (m instanceof BoundingBoxMarking) {
-                                return new BoundingBoxMarking(
+                            } else if (m instanceof BoundingBoxMarking) {
+                                result = new BoundingBoxMarking(
                                     m.label,
                                     m.origin,
                                     m.typeId,
                                     (m as BoundingBoxMarking).endpoint,
                                     idsToUse
                                 );
+                            } else if (m instanceof PointsMarkingClass) {
+                                result = m.clone(idsToUse);
                             }
-                            if (m instanceof PointsMarkingClass) {
-                                return m.clone(idsToUse);
+                            if (m.attributeValues) {
+                                result.attributeValues = {
+                                    ...m.attributeValues,
+                                };
                             }
-                            return m;
+                            return result;
                         });
                         state.push(...prepared);
                     })
@@ -403,6 +410,18 @@ class StoreClass {
                         state.push(...markings);
                     })
                 ),
+            updateAttributeValues: (
+                label: MarkingClass["label"],
+                values: Record<string, string>
+            ) => {
+                this.setMarkingsAndUpdateHash(markings => {
+                    const m = markings.find(x => x.label === label);
+                    if (m) {
+                        m.attributeValues = { ...values };
+                    }
+                    return markings;
+                });
+            },
             scaleAll: (scaleX: number, scaleY: number) => {
                 this.setMarkingsAndUpdateHash(markings => {
                     markings.forEach(m => {

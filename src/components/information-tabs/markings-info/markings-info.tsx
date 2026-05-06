@@ -1,8 +1,11 @@
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { useCanvasContext } from "@/components/pixi/canvas/hooks/useCanvasContext";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { getOppositeCanvasId } from "@/components/pixi/canvas/utils/get-opposite-canvas-id";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { MarkingClass } from "@/lib/markings/MarkingClass";
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { MarkingMetadataEditDialog } from "@/components/marking-metadata/MarkingMetadataEditDialog";
 
 import { EmptyableMarking, useColumns } from "./markings-info-table-columns";
 import { MarkingsInfoTable } from "./markings-info-table";
@@ -54,7 +57,23 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
         }
     );
 
-    const columns = useColumns(id);
+    const [editingLabel, setEditingLabel] = useState<number | null>(null);
+    const handleEditMetadata = useCallback((m: MarkingClass) => {
+        setEditingLabel(m.label);
+    }, []);
+    const columns = useColumns(id, {
+        onEditMetadata: handleEditMetadata,
+        editingLabel,
+    });
+
+    const types = MarkingTypesStore.use(state => state.types);
+    const editingMarking = useMemo(() => {
+        if (editingLabel === null) return undefined;
+        return storeMarkings.find(m => m.label === editingLabel);
+    }, [editingLabel, storeMarkings]);
+    const editingType = editingMarking
+        ? types.find(type => type.id === editingMarking.typeId)
+        : undefined;
 
     const markings = useMemo(() => {
         if (!storeMarkings || !Array.isArray(storeMarkings)) return [];
@@ -92,6 +111,18 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
                 columns={columns}
                 data={markings}
             />
+            {editingMarking && editingType && (
+                <MarkingMetadataEditDialog
+                    key={editingMarking.label}
+                    open
+                    onOpenChange={open => {
+                        if (!open) setEditingLabel(null);
+                    }}
+                    canvasId={id}
+                    marking={editingMarking}
+                    markingType={editingType}
+                />
+            )}
         </div>
     );
 }

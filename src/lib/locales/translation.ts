@@ -71,6 +71,7 @@ export type i18nKeywords = Recordify<
     | "Matched features"
     | "Selected features"
     | "Cancel"
+    | "Submit"
     | "Generating..."
     | "FFT Spectrum Editor"
     | "FFT Result Preview"
@@ -121,6 +122,7 @@ export type i18nObject = {
             | "markingClass"
             | "calculateOriginViewportPosition"
             | "calculateEndpointViewportPosition"
+            | "attributeValues"
         > & {
             markingClass: {
                 Name: string;
@@ -136,7 +138,7 @@ export type i18nObject = {
     };
     MarkingType: {
         Name: string;
-        Keys: Recordify<keyof MarkingType>;
+        Keys: Omit<Recordify<keyof MarkingType>, "attributes">;
     };
     Theme: {
         Name: string;
@@ -198,6 +200,7 @@ export type i18nTooltip = Recordify<
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
     | "Polyline requires at least 2 segments"
+    | "Edit metadata"
 >;
 
 export type i18nDialog = Recordify<

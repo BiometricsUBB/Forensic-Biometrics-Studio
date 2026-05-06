@@ -55,6 +55,7 @@ export type ExportObject = {
                 | LineSegmentMarking["endpoint"]
                 | BoundingBoxMarking["endpoint"];
             points?: PointsMarkingClass["points"];
+            attributeValues?: MarkingClass["attributeValues"];
         }[];
     };
 };
@@ -135,6 +136,9 @@ async function getData(
                     ? {
                           points: (m as PointsMarkingClass).points,
                       }
+                    : {}),
+                ...(m.attributeValues
+                    ? { attributeValues: m.attributeValues }
                     : {}),
             })),
         },

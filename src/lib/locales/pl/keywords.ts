@@ -62,6 +62,7 @@ const d: Dictionary = {
     "Matched features": "Cechy dopasowane",
     "Selected features": "Cechy wybrane",
     Cancel: "Anuluj",
+    Submit: "Zatwierdź",
     "Generating...": "Generowanie...",
     "FFT Spectrum Editor": "Edytor widma (FFT)",
     "FFT Result Preview": "Podgląd wyniku FFT",
