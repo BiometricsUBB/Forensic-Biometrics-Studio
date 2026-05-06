@@ -21,9 +21,9 @@ export function Menu() {
             )}
             data-tauri-drag-region
         >
-            <div className="flex grow items-center">
+            <div className="flex grow items-center" data-tauri-drag-region>
                 <MacOSTitleBarSpacer />
-                <div className="flex items-center px-2">
+                <div className="flex items-center px-2" data-tauri-drag-region>
                     <img
                         src="/logo.svg"
                         alt="Logo"

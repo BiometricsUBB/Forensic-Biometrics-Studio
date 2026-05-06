@@ -455,16 +455,22 @@ export function EditWindow() {
                 )}
                 data-tauri-drag-region
             >
-                <div className="flex grow items-center">
+                <div className="flex grow items-center" data-tauri-drag-region>
                     <MacOSTitleBarSpacer />
-                    <div className="flex items-center px-2">
+                    <div
+                        className="flex items-center px-2"
+                        data-tauri-drag-region
+                    >
                         <Edit
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                             className="text-foreground"
                         />
                     </div>
-                    <span className="text-sm font-medium text-foreground">
+                    <span
+                        className="text-sm font-medium text-foreground"
+                        data-tauri-drag-region
+                    >
                         {t("Edit Image", { ns: "keywords" })}
                     </span>
                 </div>
