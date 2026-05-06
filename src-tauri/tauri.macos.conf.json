@@ -58,11 +58,11 @@
         "targets": "all",
         "externalBin": [],
         "icon": [
-            "../public/logo_32.png",
-            "../public/logo_128.png",
-            "../public/logo_256.png",
-            "../public/logo_512.png",
-            "../public/logo.ico"
+            "../public/macos/logo_32.png",
+            "../public/macos/logo_128.png",
+            "../public/macos/logo_256.png",
+            "../public/macos/logo_512.png",
+            "../public/macos/logo_1024.png"
         ],
         "windows": {
             "certificateThumbprint": null,
