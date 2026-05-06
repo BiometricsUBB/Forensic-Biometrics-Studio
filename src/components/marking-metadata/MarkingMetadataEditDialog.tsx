@@ -49,7 +49,7 @@ export function MarkingMetadataEditDialog({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogPortal>
                 <DialogOverlay />
-                <DialogContent className="w-[480px] max-w-[90vw] max-h-[80vh] flex flex-col gap-3">
+                <DialogContent className="w-120 max-w-[90vw] max-h-[80vh] flex flex-col gap-3">
                     <div className="flex flex-col gap-1 border-b pb-2">
                         <DialogTitle className="text-xs font-normal text-muted-foreground">
                             {heading}

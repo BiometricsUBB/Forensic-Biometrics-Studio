@@ -11,7 +11,7 @@ const DialogTrigger = React.forwardRef<
     <DialogPrimitive.Trigger
         ref={ref}
         className={cn(
-            "flex items-center px-2 hover:bg-accent hover:text-accent-foreground focus:outline-none",
+            "flex items-center px-2 hover:bg-accent hover:text-accent-foreground focus:outline-hidden",
             className
         )}
         {...props}

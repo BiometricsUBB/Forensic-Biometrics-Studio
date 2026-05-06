@@ -6,13 +6,13 @@ export interface InputProps
     extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const inputVariants = cva(
-    "box-border flex h-9 w-full border border-transparent bg-transparent px-3 py-1 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+    "box-border flex h-9 w-full border border-transparent bg-transparent px-3 py-1 text-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
     {
         variants: {
             variant: {
                 default:
-                    "box-border hover:rounded-md hover:border hover:border-input hover:shadow-sm",
-                outline: "rounded-md border border-input shadow-sm",
+                    "box-border hover:rounded-md hover:border hover:border-input hover:shadow-xs",
+                outline: "rounded-md border border-input shadow-xs",
             },
         },
         defaultVariants: {

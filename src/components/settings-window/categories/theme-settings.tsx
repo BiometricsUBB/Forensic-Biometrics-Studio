@@ -124,7 +124,7 @@ function ColorPicker({ label, value, onChange }: ColorPickerProps) {
                     type="color"
                     value={hexValue}
                     onChange={e => onChange(hexToHsl(e.target.value))}
-                    className="w-8 h-8 rounded-lg cursor-pointer border border-border appearance-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-none [&::-moz-color-swatch]:rounded-md [&::-moz-color-swatch]:border-none"
+                    className="size-8 rounded-lg cursor-pointer border border-border appearance-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-none [&::-moz-color-swatch]:rounded-md [&::-moz-color-swatch]:border-none"
                 />
                 <span className="text-xs text-muted-foreground w-20 font-mono">
                     {hexValue}
@@ -186,7 +186,7 @@ function ThemeEditor({ theme, onClose }: ThemeEditorProps) {
                 />
             </div>
 
-            <div className="flex flex-col gap-1 max-h-[300px] overflow-y-auto pr-2">
+            <div className="flex flex-col gap-1 max-h-75 overflow-y-auto pr-2">
                 <h4 className="text-sm font-medium mb-2">{t("Colors")}</h4>
                 {colorKeys.map(key => (
                     <ColorPicker
@@ -321,7 +321,7 @@ export function ThemeSettings() {
                             className={cn(
                                 "flex items-center justify-between px-4 py-3 rounded-lg transition-all",
                                 "hover:bg-secondary",
-                                "focus:outline-none",
+                                "focus:outline-hidden",
                                 isSelected
                                     ? "bg-secondary text-primary-foreground border border-primary/30"
                                     : "text-foreground/80 border border-border/30"
@@ -395,7 +395,7 @@ export function ThemeSettings() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8"
+                                        className="size-8"
                                         onClick={() => setEditingTheme(theme)}
                                     >
                                         <Edit2 size={14} />
@@ -403,7 +403,7 @@ export function ThemeSettings() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
+                                        className="size-8 hover:bg-destructive hover:text-destructive-foreground"
                                         onClick={() => removeTheme(theme.id)}
                                     >
                                         <Trash2 size={14} />

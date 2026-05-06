@@ -134,7 +134,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }}
                     >
                         <Hand
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -152,7 +152,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }}
                     >
                         <Crosshair
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -170,7 +170,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }}
                     >
                         <RotateCw
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -188,7 +188,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }}
                     >
                         <Brush
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -245,7 +245,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             <DropdownMenuContent
                                 side="right"
                                 align="start"
-                                className="w-64 p-4 z-[9999]"
+                                className="w-64 p-4 z-9999"
                             >
                                 <div className="space-y-4">
                                     <h4 className="font-medium leading-none text-sm">
@@ -253,7 +253,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                             ns: "keywords",
                                         })}
                                     </h4>
-                                    <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto pr-2">
+                                    <div className="flex flex-col gap-2 max-h-100 overflow-y-auto pr-2">
                                         {availableMarkingTypes.map(type => (
                                             <div
                                                 key={type.id}
@@ -261,7 +261,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <div
-                                                        className="w-3 h-3 rounded-sm flex-shrink-0"
+                                                        className="size-3 rounded-sm shrink-0"
                                                         style={{
                                                             backgroundColor:
                                                                 type.backgroundColor as string,
@@ -318,7 +318,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             "w-full overflow-hidden text-ellipsis whitespace-nowrap flex items-center justify-between gap-2 px-3 py-2.5",
                             "border border-input rounded-md",
                             "hover:bg-accent hover:text-accent-foreground transition-colors",
-                            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                            "focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring",
                             "disabled:pointer-events-none disabled:opacity-50"
                         )}
                         disabled={!availableMarkingTypes.length}
@@ -326,7 +326,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <div className="flex items-center gap-2 overflow-hidden">
                             {selectedMarkingType && (
                                 <div
-                                    className="w-4 h-4 rounded-sm border border-border/40 flex-shrink-0"
+                                    className="size-4 rounded-sm border border-border/40 shrink-0"
                                     style={{
                                         backgroundColor:
                                             selectedMarkingType.backgroundColor as string,
@@ -341,13 +341,13 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <ChevronDown
                             size={16}
                             strokeWidth={ICON.STROKE_WIDTH}
-                            className="flex-shrink-0"
+                            className="shrink-0"
                         />
                     </DropdownMenuTrigger>
                     <DropdownMenuPortal>
                         <DropdownMenuContent
                             align="start"
-                            className="max-h-[50vh] overflow-y-auto z-[9999] !min-w-0 w-[var(--radix-dropdown-menu-trigger-width)]"
+                            className="max-h-[50vh] overflow-y-auto z-9999 min-w-0! w-(--radix-dropdown-menu-trigger-width)"
                         >
                             {availableMarkingTypes.map(type => {
                                 const boundKey = keybindings.find(
@@ -367,7 +367,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                     >
                                         <div className="flex items-center gap-2 overflow-hidden">
                                             <div
-                                                className="w-4 h-4 rounded-sm border border-border/40 flex-shrink-0"
+                                                className="size-4 rounded-sm border border-border/40 shrink-0"
                                                 style={{
                                                     backgroundColor:
                                                         type.backgroundColor as string,
@@ -378,7 +378,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                             </span>
                                         </div>
                                         {boundKey && (
-                                            <KbdGroup className="flex-shrink-0">
+                                            <KbdGroup className="shrink-0">
                                                 {formatCombo(boundKey).map(
                                                     part => (
                                                         <Kbd key={part}>
@@ -405,7 +405,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                 <div className="flex flex-col gap-1">
                     <Toggle
                         variant="outline"
-                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        className="w-full justify-start gap-2 h-auto min-h-10 py-2 px-3"
                         pressed={isViewportLocked}
                         onClick={
                             DashboardToolbarStore.actions.settings.viewport
@@ -414,13 +414,13 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     >
                         {isViewportLocked ? (
                             <LockKeyhole
-                                className="flex-shrink-0"
+                                className="shrink-0"
                                 size={ICON.SIZE}
                                 strokeWidth={ICON.STROKE_WIDTH}
                             />
                         ) : (
                             <LockKeyholeOpen
-                                className="flex-shrink-0"
+                                className="shrink-0"
                                 size={ICON.SIZE}
                                 strokeWidth={ICON.STROKE_WIDTH}
                             />
@@ -432,7 +432,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                     <Toggle
                         variant="outline"
-                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        className="w-full justify-start gap-2 h-auto min-h-10 py-2 px-3"
                         pressed={isViewportScaleSync}
                         onClick={
                             DashboardToolbarStore.actions.settings.viewport
@@ -440,7 +440,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }
                     >
                         <SendToBack
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -453,7 +453,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                     <Toggle
                         variant="outline"
-                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        className="w-full justify-start gap-2 h-auto min-h-10 py-2 px-3"
                         pressed={cursorMode === CURSOR_MODES.MEASUREMENT}
                         onClick={() => {
                             if (cursorMode === CURSOR_MODES.MEASUREMENT) {
@@ -468,7 +468,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }}
                     >
                         <Ruler
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />
@@ -492,7 +492,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                     <Toggle
                         variant="outline"
-                        className="w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3"
+                        className="w-full justify-start gap-2 h-auto min-h-10 py-2 px-3"
                         pressed={isRotationSync}
                         onClick={
                             DashboardToolbarStore.actions.settings.viewport
@@ -500,7 +500,7 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         }
                     >
                         <RotateCw
-                            className="flex-shrink-0"
+                            className="shrink-0"
                             size={ICON.SIZE}
                             strokeWidth={ICON.STROKE_WIDTH}
                         />

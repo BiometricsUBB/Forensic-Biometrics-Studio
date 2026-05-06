@@ -46,13 +46,13 @@ export default function Home() {
             <Tabs
                 onValueChange={tab => setCurrentTab(tab as TABS)}
                 defaultValue={initialTab}
-                className="w-full flex flex-col items-center flex-grow overflow-hidden"
+                className="w-full flex flex-col items-center grow overflow-hidden"
             >
                 <TabsContent
                     forceMount
                     value={TABS.HOMEPAGE}
                     className={cn(
-                        "flex flex-col justify-center items-center flex-grow w-full overflow-hidden",
+                        "flex flex-col justify-center items-center grow w-full overflow-hidden",
                         {
                             hidden: currentTab !== TABS.HOMEPAGE,
                         }

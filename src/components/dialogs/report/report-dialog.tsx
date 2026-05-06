@@ -138,7 +138,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger
                 className={cn(
-                    "w-full justify-start gap-2 h-auto min-h-[40px] py-2 px-3 border border-input rounded-md",
+                    "w-full justify-start gap-2 h-auto min-h-10 py-2 px-3 border border-input rounded-md",
                     "hover:bg-accent hover:text-accent-foreground transition-colors",
                     "flex items-center",
                     className
@@ -148,7 +148,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                 title={generateReportLabel}
             >
                 <FileText
-                    className="flex-shrink-0"
+                    className="shrink-0"
                     size={ICON.SIZE}
                     strokeWidth={ICON.STROKE_WIDTH}
                 />
@@ -159,7 +159,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
 
             <DialogPortal>
                 <DialogOverlay />
-                <DialogContent className="w-[640px] max-w-[92vw] max-h-[90vh] flex flex-col">
+                <DialogContent className="w-160 max-w-[92vw] max-h-[90vh] flex flex-col">
                     <DialogTitle className="text-lg font-semibold">
                         {t("Report generation", { ns: "keywords" })}
                     </DialogTitle>

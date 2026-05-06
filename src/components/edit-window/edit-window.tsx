@@ -440,7 +440,7 @@ export function EditWindow() {
     return (
         <main
             data-testid="edit-window"
-            className="flex w-full min-h-dvh h-full flex-col items-center justify-between bg-[hsl(var(--background))] relative overflow-hidden"
+            className="flex size-full min-h-dvh flex-col items-center justify-between bg-[hsl(var(--background))] relative overflow-hidden"
         >
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[85%] brightness-150 rounded-2xl bg-primary/20 blur-[150px]" />
@@ -450,12 +450,12 @@ export function EditWindow() {
                 className={cn(
                     "flex justify-between w-screen items-center",
                     IS_MACOS
-                        ? "h-[36px] pt-3 [&_button]:h-7 [&_button]:px-2"
-                        : "min-h-[56px]"
+                        ? "h-9 pt-3 [&_button]:h-7 [&_button]:px-2"
+                        : "min-h-14"
                 )}
                 data-tauri-drag-region
             >
-                <div className="flex grow-1 items-center">
+                <div className="flex grow items-center">
                     <MacOSTitleBarSpacer />
                     <div className="flex items-center px-2">
                         <Edit
@@ -545,7 +545,7 @@ export function EditWindow() {
                                         onClick={resetZoom}
                                         variant="outline"
                                         size="sm"
-                                        className="bg-background/80 backdrop-blur-sm"
+                                        className="bg-background/80 backdrop-blur-xs"
                                     >
                                         {t("Reset Zoom", { ns: "tooltip" })}
                                     </Button>
@@ -628,7 +628,7 @@ export function EditWindow() {
                                     className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                                     disabled={!imageUrl}
                                 />
-                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
+                                <span className="text-sm text-muted-foreground min-w-12 text-right">
                                     {brightness}%
                                 </span>
                             </div>
@@ -653,7 +653,7 @@ export function EditWindow() {
                                     className="flex-1 h-2 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
                                     disabled={!imageUrl}
                                 />
-                                <span className="text-sm text-muted-foreground min-w-[3rem] text-right">
+                                <span className="text-sm text-muted-foreground min-w-12 text-right">
                                     {contrast}%
                                 </span>
                             </div>

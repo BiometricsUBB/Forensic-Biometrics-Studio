@@ -53,7 +53,7 @@ function MarkingTypesDialogPortal() {
                         <DropdownMenu>
                             <DropdownMenuTrigger
                                 title={t("Add")}
-                                className={cn("h-6 w-6", "border border-input")}
+                                className={cn("size-6", "border border-input")}
                             >
                                 <Plus
                                     size={ICON.SIZE}

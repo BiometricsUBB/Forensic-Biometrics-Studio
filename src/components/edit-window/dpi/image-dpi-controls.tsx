@@ -71,14 +71,14 @@ export default function ImageDpiControls({
                         >
                             <span
                                 className={cn(
-                                    "flex h-4 w-4 items-center justify-center rounded-full border",
+                                    "flex size-4 items-center justify-center rounded-full border",
                                     targetDpi === dpi
                                         ? "border-primary"
                                         : "border-muted-foreground"
                                 )}
                             >
                                 {targetDpi === dpi && (
-                                    <span className="h-2 w-2 rounded-full bg-primary" />
+                                    <span className="size-2 rounded-full bg-primary" />
                                 )}
                             </span>
 

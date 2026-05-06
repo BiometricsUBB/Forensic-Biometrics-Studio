@@ -75,9 +75,9 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
         <div
             className={cn(
                 "flex items-center justify-between gap-2 w-full h-10 px-2",
-                "bg-gradient-to-b from-muted/50 to-muted/30",
+                "bg-linear-to-b from-muted/50 to-muted/30",
                 "border-b border-border/40",
-                "shadow-sm backdrop-blur-sm",
+                "shadow-xs backdrop-blur-xs",
                 className
             )}
             {...props}
@@ -272,7 +272,7 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                     />
                 </Button>
 
-                <span className="text-xs font-mono min-w-[2rem] text-center tabular-nums">
+                <span className="text-xs font-mono min-w-8 text-center tabular-nums">
                     {rotationDeg}&deg;
                 </span>
 

@@ -189,7 +189,7 @@ export function CanvasContainer({ ...props }: CanvasContainerProps) {
 
     return (
         <div
-            className="w-full h-full relative flex items-center justify-center"
+            className="size-full relative flex items-center justify-center"
             id={`canvas-container-${id}`}
             ref={divRef}
             {...props}

@@ -80,7 +80,7 @@ function KeyCaptureDialog({
             <DialogContent
                 ref={contentRef}
                 tabIndex={-1}
-                className="grid gap-3 max-w-xs w-full outline-none select-none"
+                className="grid gap-3 max-w-xs w-full outline-hidden select-none"
                 onOpenAutoFocus={e => {
                     e.preventDefault();
                     setPreview(null);

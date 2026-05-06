@@ -49,11 +49,11 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                     className={cn(
                         "flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md transition-all text-xs font-medium",
                         mode === "free"
-                            ? "bg-background shadow-sm text-foreground"
+                            ? "bg-background shadow-xs text-foreground"
                             : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                     )}
                 >
-                    <Edit3 className="w-4 h-4" />
+                    <Edit3 className="size-4" />
                     {t("Free", { ns: "keywords" } as unknown as string)}
                 </button>
                 <button
@@ -62,11 +62,11 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                     className={cn(
                         "flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md transition-all text-xs font-medium",
                         mode === "line"
-                            ? "bg-background shadow-sm text-foreground"
+                            ? "bg-background shadow-xs text-foreground"
                             : "text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                     )}
                 >
-                    <Minus className="w-4 h-4 rotate-45" />
+                    <Minus className="size-4 rotate-45" />
                     {t("Line", { ns: "keywords" } as unknown as string)}
                 </button>
             </div>
@@ -88,7 +88,7 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                     }
                     className="flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md transition-all text-xs font-medium text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                 >
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="size-4" />
                     {t("Undo", { ns: "keywords" } as unknown as string)}
                 </button>
                 <button
@@ -99,7 +99,7 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                     }
                     className="flex-1 flex items-center justify-center gap-2 py-1.5 px-2 rounded-md transition-all text-xs font-medium text-muted-foreground hover:bg-secondary/80 hover:text-secondary-foreground"
                 >
-                    <RotateCw className="w-4 h-4" />
+                    <RotateCw className="size-4" />
                     {t("Redo", { ns: "keywords" } as unknown as string)}
                 </button>
             </div>
@@ -113,7 +113,7 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                         type="color"
                         value={color}
                         onChange={e => setColor(e.target.value)}
-                        className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent p-0"
+                        className="size-8 rounded cursor-pointer border-0 bg-transparent p-0"
                     />
                     <span className="text-xs text-muted-foreground font-mono">
                         {color.toUpperCase()}
@@ -126,7 +126,7 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                             type="button"
                             onClick={() => setColor(presetColor)}
                             className={cn(
-                                "w-6 h-6 rounded-md border border-border/50 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1",
+                                "size-6 rounded-md border border-border/50 transition-transform hover:scale-110 focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-1",
                                 color === presetColor &&
                                     "ring-2 ring-ring ring-offset-1"
                             )}
@@ -136,7 +136,7 @@ export function TracingPanel({ className, ...props }: TracingPanelProps) {
                             {color === presetColor && (
                                 <Check
                                     className={cn(
-                                        "w-4 h-4 mx-auto",
+                                        "size-4 mx-auto",
                                         // Invert color for contrast
                                         [
                                             "#ffffff",

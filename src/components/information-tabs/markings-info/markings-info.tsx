@@ -102,7 +102,7 @@ export function MarkingsInfo({ tableHeight }: { tableHeight: number }) {
     }, [storeMarkings, storeOppositeMarkings]);
 
     return (
-        <div className="w-full h-full overflow-hidden">
+        <div className="size-full overflow-hidden">
             <MarkingsInfoTable
                 canvasId={id}
                 selectedMarking={selectedMarking}

@@ -44,7 +44,7 @@ function MarkingTypeKeybinding({
                 className={cn(
                     "group flex items-center justify-center m-auto rounded px-1 py-0.5",
                     "cursor-pointer",
-                    "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    "focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
                 )}
                 onClick={() => setOpen(true)}
             >

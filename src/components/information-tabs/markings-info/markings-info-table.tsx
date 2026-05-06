@@ -43,7 +43,7 @@ const TableHeadComponent = forwardRef<
     HTMLTableSectionElement,
     HTMLAttributes<HTMLTableSectionElement>
 >((props, ref) => (
-    <thead ref={ref} className="sticky top-0 bg-card !z-20" {...props} />
+    <thead ref={ref} className="sticky top-0 bg-card z-20!" {...props} />
 ));
 TableHeadComponent.displayName = "TableHeadComponent";
 

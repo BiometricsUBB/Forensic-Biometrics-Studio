@@ -417,7 +417,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
                     disabled={status !== "ready"}
                     variant="default"
                     size="lg"
-                    className="min-w-[200px]"
+                    className="min-w-50"
                 >
                     {viewMode === "edit"
                         ? t("Preview", { ns: "keywords" })

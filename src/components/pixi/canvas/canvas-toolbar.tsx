@@ -52,7 +52,7 @@ export function CanvasToolbar({ className, ...props }: CanvasToolbarProps) {
     return (
         <div
             className={cn(
-                "absolute flex items-center justify-center gap-2 top-0 left-1/2 -translate-x-1/2 w-fit h-fit bg-card/90 p-0.5 rounded-b-md",
+                "absolute flex items-center justify-center gap-2 top-0 left-1/2 -translate-x-1/2 size-fit bg-card/90 p-0.5 rounded-b-md",
                 className
             )}
             {...props}

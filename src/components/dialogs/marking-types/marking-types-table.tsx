@@ -74,7 +74,7 @@ function MarkingTypesTable() {
                         <TableRow key={item.id}>
                             <TableCell>
                                 <Input
-                                    className="h-6 !p-0 text-center"
+                                    className="h-6 p-0! text-center"
                                     title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                     type="text"
                                     value={item.displayName}
@@ -95,7 +95,7 @@ function MarkingTypesTable() {
                             <TableCell>
                                 {IS_DEV_ENVIRONMENT ? (
                                     <Input
-                                        className="h-6 !p-0 text-center"
+                                        className="h-6 p-0! text-center"
                                         title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                         type="text"
                                         value={item.name}
@@ -149,7 +149,7 @@ function MarkingTypesTable() {
                             </TableCell>
                             <TableCell>
                                 <Input
-                                    className="w-24 h-6 !p-0 text-center"
+                                    className="w-24 h-6 p-0! text-center"
                                     min={6}
                                     max={32}
                                     width={12}

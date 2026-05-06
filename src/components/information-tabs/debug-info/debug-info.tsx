@@ -336,7 +336,7 @@ export function DebugInfo({ ...props }: DebugInfoProps) {
     return (
         <div className="w-full h-fit overflow-auto">
             <div
-                className="w-full h-full flex flex-wrap justify-start items-start gap-1 px-2"
+                className="size-full flex flex-wrap justify-start items-start gap-1 px-2"
                 {...props}
             >
                 {app && DebugInfoTables(app, appKeys, "app", "text-red-400")}

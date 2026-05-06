@@ -57,8 +57,8 @@ export function Canvas({ options, className, ...props }: CanvasProps) {
             options={defaultOptions}
             className={cn(
                 {
-                    "!cursor-auto": !isDragging,
-                    "!cursor-move": isDragging,
+                    "cursor-auto!": !isDragging,
+                    "cursor-move!": isDragging,
                 },
                 className
             )}

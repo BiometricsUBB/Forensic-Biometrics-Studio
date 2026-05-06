@@ -37,7 +37,7 @@ export function InformationTabs() {
         <Tabs
             ref={ref}
             defaultValue={initialTab}
-            className="w-full flex flex-col items-center flex-grow p-1.5"
+            className="w-full flex flex-col items-center grow p-1.5"
         >
             <TabsList className="w-fit flex space-x-1">
                 <TabsTrigger value={TABS.MARKINGS}>{t("Markings")}</TabsTrigger>

@@ -25,7 +25,7 @@ export default function RootLayout({
         <>
             <div
                 id="app"
-                className="select-none h-full w-full flex flex-col items-center justify-between overflow-hidden"
+                className="select-none size-full flex flex-col items-center justify-between overflow-hidden"
             >
                 <KeyboardLayoutProvider>
                     <Dynamic>{children}</Dynamic>

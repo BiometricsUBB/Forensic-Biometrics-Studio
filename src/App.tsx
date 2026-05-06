@@ -62,11 +62,11 @@ export default function App() {
     return (
         <main
             data-testid="page-container"
-            className="flex w-full min-h-dvh h-full  flex-col items-center justify-between bg-[hsl(var(--background))] relative overflow-hidden"
+            className="flex size-full min-h-dvh flex-col items-center justify-between bg-[hsl(var(--background))] relative overflow-hidden"
         >
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 {currentTab === TABS.SELECT_MODE ? (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary/20 blur-[150px]" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-200 rounded-full bg-primary/20 blur-[150px]" />
                 ) : (
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] h-[85%] brightness-150 rounded-2xl bg-primary/20 blur-[150px]" />
                 )}
@@ -75,12 +75,12 @@ export default function App() {
             <Tabs
                 value={currentTab}
                 onValueChange={tab => setCurrentTab(tab as TABS)}
-                className="w-full flex flex-col items-center flex-grow"
+                className="w-full flex flex-col items-center grow"
             >
                 <TabsContent
                     forceMount
                     value={TABS.SELECT_MODE}
-                    className={cn("w-full h-full relative flex flex-grow", {
+                    className={cn("size-full relative flex grow", {
                         hidden: currentTab !== TABS.SELECT_MODE,
                     })}
                 >
@@ -96,7 +96,7 @@ export default function App() {
                     forceMount
                     value={TABS.HOMEPAGE}
                     className={cn(
-                        "flex flex-col justify-center items-center flex-grow w-full",
+                        "flex flex-col justify-center items-center grow w-full",
                         {
                             hidden: currentTab !== TABS.HOMEPAGE,
                         }

@@ -21,7 +21,7 @@ export default function SelectMode({
     return (
         <main className="w-full flex flex-col items-center justify-center">
             <div
-                className="absolute inset-0 top-2 bg-cover bg-center z-0 blur-sm"
+                className="absolute inset-0 top-2 bg-cover bg-center z-0 blur-xs"
                 aria-hidden="true"
             />
             <div className="bg-background border z-10 p-4 shadow-md">

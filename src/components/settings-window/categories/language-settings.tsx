@@ -43,7 +43,7 @@ export function LanguageSettings() {
                                 className={cn(
                                     "flex items-center justify-between px-4 py-3 rounded-lg transition-all",
                                     "hover:bg-secondary",
-                                    "focus:outline-none",
+                                    "focus:outline-hidden",
                                     isSelected
                                         ? "bg-secondary text-primary-foreground border border-primary/30"
                                         : "text-foreground/80 border border-border/30"

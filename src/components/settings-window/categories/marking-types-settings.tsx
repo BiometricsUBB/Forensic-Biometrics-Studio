@@ -112,7 +112,7 @@ export function MarkingTypesSettings() {
                     <DropdownMenu>
                         <DropdownMenuTrigger
                             className={cn(
-                                "h-8 px-3 flex items-center justify-between gap-2 min-w-[180px]",
+                                "h-8 px-3 flex items-center justify-between gap-2 min-w-45",
                                 "border border-input rounded-md",
                                 "hover:bg-accent hover:text-accent-foreground"
                             )}
@@ -148,7 +148,7 @@ export function MarkingTypesSettings() {
                         <DropdownMenuTrigger
                             title={t("Add")}
                             className={cn(
-                                "h-8 w-8 flex items-center justify-center",
+                                "size-8 flex items-center justify-center",
                                 "border border-input rounded-md",
                                 "hover:bg-accent hover:text-accent-foreground",
                                 !selectedCategory &&
@@ -227,7 +227,7 @@ export function MarkingTypesSettings() {
                         })}
                         size="icon"
                         variant="outline"
-                        className="h-8 w-8"
+                        className="size-8"
                         pressed={false}
                         onClickCapture={async () => {
                             await importMarkingTypesWithDialog();
@@ -246,7 +246,7 @@ export function MarkingTypesSettings() {
                         })}
                         size="icon"
                         variant="outline"
-                        className="h-8 w-8"
+                        className="size-8"
                         pressed={false}
                         onClickCapture={() => exportMarkingTypesWithDialog()}
                     >
@@ -333,7 +333,7 @@ export function MarkingTypesSettings() {
                                         <TableRow key={item.id}>
                                             <TableCell>
                                                 <Input
-                                                    className="h-6 !p-0 text-center"
+                                                    className="h-6 p-0! text-center"
                                                     title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                                     type="text"
                                                     value={item.displayName}
@@ -348,7 +348,7 @@ export function MarkingTypesSettings() {
                                             <TableCell>
                                                 {IS_DEV_ENVIRONMENT ? (
                                                     <Input
-                                                        className="h-6 !p-0 text-center"
+                                                        className="h-6 p-0! text-center"
                                                         title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
                                                         type="text"
                                                         value={item.name}
@@ -411,7 +411,7 @@ export function MarkingTypesSettings() {
                                             </TableCell>
                                             <TableCell>
                                                 <Input
-                                                    className="w-24 h-6 !p-0 text-center m-auto"
+                                                    className="w-24 h-6 p-0! text-center m-auto"
                                                     min={6}
                                                     max={32}
                                                     width={12}

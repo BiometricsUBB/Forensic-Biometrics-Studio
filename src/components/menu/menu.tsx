@@ -16,12 +16,12 @@ export function Menu() {
             className={cn(
                 "flex justify-between w-screen items-center",
                 IS_MACOS
-                    ? "h-[32px] pt-3 [&_button]:h-7 [&_button]:px-2"
-                    : "min-h-[40px]"
+                    ? "h-8 pt-3 [&_button]:h-7 [&_button]:px-2"
+                    : "min-h-10"
             )}
             data-tauri-drag-region
         >
-            <div className="flex grow-1 items-center">
+            <div className="flex grow items-center">
                 <MacOSTitleBarSpacer />
                 <div className="flex items-center px-2">
                     <img
@@ -34,7 +34,7 @@ export function Menu() {
                 </div>
                 <SettingsMenu />
                 {workingMode && (
-                    <div className="flex flex-row items-center [&>*]:h-full">
+                    <div className="flex flex-row items-center *:h-full">
                         <ModeMenu />
                     </div>
                 )}
