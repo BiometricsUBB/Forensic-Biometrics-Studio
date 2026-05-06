@@ -174,12 +174,12 @@ export function SettingsWindow() {
                             key={category.id}
                             onClick={() => setActiveCategory(category.id)}
                             className={cn(
-                                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-150 text-left",
+                                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-150 text-left border",
                                 "hover:bg-secondary",
                                 "focus:outline-hidden",
                                 activeCategory === category.id
-                                    ? "bg-primary/20 text-foreground border border-primary/30"
-                                    : "text-foreground/80"
+                                    ? "bg-primary/20 text-foreground border-primary/30"
+                                    : "text-foreground/80 border-transparent"
                             )}
                         >
                             {category.icon}
