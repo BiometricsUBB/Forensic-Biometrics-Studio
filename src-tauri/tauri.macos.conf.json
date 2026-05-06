@@ -57,13 +57,7 @@
         "copyright": "",
         "targets": "all",
         "externalBin": [],
-        "icon": [
-            "../public/macos/logo_32.png",
-            "../public/macos/logo_128.png",
-            "../public/macos/logo_256.png",
-            "../public/macos/logo_512.png",
-            "../public/macos/logo_1024.png"
-        ],
+        "icon": ["../public/macos/icon.png", "../public/macos/icon.icns"],
         "windows": {
             "certificateThumbprint": null,
             "digestAlgorithm": "sha256",
