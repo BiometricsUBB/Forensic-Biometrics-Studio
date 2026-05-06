@@ -278,6 +278,9 @@ export function EditWindow() {
                 applyCustomTheme(activeTheme);
             }
 
+            await new Promise(resolve => setTimeout(resolve, 0));
+            await invoke("show_current_window");
+
             const urlParams = new URLSearchParams(window.location.search);
             const pathFromUrl = urlParams.get("imagePath");
 
@@ -288,9 +291,6 @@ export function EditWindow() {
                 setImagePath(normalizedPath);
                 await loadImage(normalizedPath);
             }
-
-            await new Promise(resolve => setTimeout(resolve, 0));
-            await invoke("show_current_window");
         };
         init();
 
