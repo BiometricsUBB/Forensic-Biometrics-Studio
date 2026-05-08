@@ -15,7 +15,7 @@ const d: Dictionary = {
                     point: "Point",
                     ray: "Ray",
                     line_segment: "Line segment",
-                    bounding_box: "Bounding box (legacy)",
+                    bounding_box: "Bounding box (deprecated)",
                     rectangle: "Rectangle",
                     polygon: "Polygon",
                     triangle: "Triangle",

@@ -15,7 +15,7 @@ const d: Dictionary = {
                     point: "Punkt",
                     ray: "Linia skierowana",
                     line_segment: "Odcinek",
-                    bounding_box: "Prostokąt (legacy)",
+                    bounding_box: "Prostokąt (deprecated)",
                     rectangle: "Prostokąt",
                     polygon: "Wielokąt",
                     triangle: "Trójkąt",
