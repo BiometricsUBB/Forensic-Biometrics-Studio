@@ -65,7 +65,6 @@ const LANDSCAPE = {
 const IMAGE_CELL_SIZE = 200;
 const ROWS_PER_PAGE = 4;
 const FULL_CIRCLE = Math.PI * 2;
-const CLOCKWISE_START_ANGLE = -Math.PI / 4;
 const RAY_LINE_LENGTH_MULTIPLIER = 4;
 const CANVAS_CONTEXT_ERROR = "Failed to create canvas context.";
 
@@ -377,123 +376,672 @@ const rotateCanvas = (
     return finalCanvas;
 };
 
+type Side = "top" | "bottom" | "left" | "right";
+
+interface Placement {
+    feature: MarkingClass;
+    x: number;
+    y: number;
+    side: Side;
+}
+
+interface Bounds {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+}
+
+const getFeatureBounds = (
+    features: MarkingClass[],
+    width: number,
+    height: number
+): Bounds =>
+    features.reduce(
+        (acc, f) => ({
+            minX: Math.min(acc.minX, f.origin.x),
+            maxX: Math.max(acc.maxX, f.origin.x),
+            minY: Math.min(acc.minY, f.origin.y),
+            maxY: Math.max(acc.maxY, f.origin.y),
+        }),
+        { minX: width, maxX: 0, minY: height, maxY: 0 }
+    );
+
+const determineInitialSide = (angle: number, diagAngle: number): Side => {
+    const bias = 0.2;
+    if (angle >= -diagAngle + bias && angle < diagAngle - bias) {
+        return "right";
+    }
+    if (angle >= diagAngle - bias && angle < Math.PI - diagAngle + bias) {
+        return "bottom";
+    }
+    if (angle >= -Math.PI + diagAngle - bias && angle < -diagAngle + bias) {
+        return "top";
+    }
+    return "left";
+};
+
+const getInitialPlacement = (
+    feature: MarkingClass,
+    fBounds: Bounds,
+    cropX: number,
+    cropY: number,
+    margin: number,
+    imgLeft: number,
+    imgTop: number,
+    imgRight: number,
+    imgBottom: number,
+    cropWidth: number,
+    cropHeight: number,
+    edgeOffset: number
+): Placement => {
+    const fx = feature.origin.x - cropX + margin;
+    const fy = feature.origin.y - cropY + margin;
+
+    const dataCx = margin + (fBounds.minX - cropX + (fBounds.maxX - cropX)) / 2;
+    const dataCy = margin + (fBounds.minY - cropY + (fBounds.maxY - cropY)) / 2;
+
+    const centerX = ((imgLeft + imgRight) / 2) * 0.4 + dataCx * 0.6;
+    const centerY = ((imgTop + imgBottom) / 2) * 0.4 + dataCy * 0.6;
+
+    const dx = fx - centerX;
+    const dy = fy - centerY;
+    const angle = Math.atan2(dy, dx);
+
+    const distLeft = fx - imgLeft;
+    const distRight = imgRight - fx;
+    const distTop = fy - imgTop;
+    const distBottom = imgBottom - fy;
+
+    const diagAngle = Math.atan2(cropHeight, cropWidth);
+    let side = determineInitialSide(angle, diagAngle);
+
+    const minDist = Math.min(distTop, distBottom, distLeft, distRight);
+    const threshold = Math.min(cropWidth, cropHeight) * 0.1;
+    if (minDist < threshold) {
+        if (minDist === distTop) side = "top";
+        else if (minDist === distBottom) side = "bottom";
+        else if (minDist === distLeft) side = "left";
+        else if (minDist === distRight) side = "right";
+    }
+
+    if (side === "top") return { feature, x: fx, y: imgTop - edgeOffset, side };
+    if (side === "bottom")
+        return { feature, x: fx, y: imgBottom + edgeOffset, side };
+    if (side === "left")
+        return { feature, x: imgLeft - edgeOffset, y: fy, side };
+    return { feature, x: imgRight + edgeOffset, y: fy, side };
+};
+
+const applyClustering = (
+    placements: Placement[],
+    cropWidth: number,
+    cropHeight: number,
+    cropX: number,
+    cropY: number,
+    margin: number,
+    imgTop: number,
+    imgBottom: number,
+    imgLeft: number,
+    imgRight: number,
+    edgeOffset: number
+) => {
+    const clusterThreshold = Math.min(cropWidth, cropHeight) * 0.05;
+    const visited = new Set<MarkingClass>();
+
+    placements.forEach(p => {
+        if (visited.has(p.feature)) return;
+        const cluster = [p];
+        visited.add(p.feature);
+        placements.forEach(other => {
+            if (visited.has(other.feature)) return;
+            const d = Math.hypot(
+                p.feature.origin.x - other.feature.origin.x,
+                p.feature.origin.y - other.feature.origin.y
+            );
+            if (d < clusterThreshold) {
+                cluster.push(other);
+                visited.add(other.feature);
+            }
+        });
+
+        if (cluster.length > 1) {
+            const sideCounts: Record<Side, number> = {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+            };
+            cluster.forEach(item => {
+                const cp = item;
+                sideCounts[cp.side] += 1;
+            });
+            let bestSide: Side = cluster[0]?.side || "top";
+            let maxCount = 0;
+            (Object.entries(sideCounts) as [Side, number][]).forEach(
+                ([s, count]) => {
+                    if (count > maxCount) {
+                        maxCount = count;
+                        bestSide = s;
+                    }
+                }
+            );
+
+            cluster.forEach(item => {
+                const cp = item;
+                if (cp.side !== bestSide) {
+                    cp.side = bestSide;
+                    const fx = cp.feature.origin.x - cropX + margin;
+                    const fy = cp.feature.origin.y - cropY + margin;
+                    if (bestSide === "top") {
+                        cp.x = fx;
+                        cp.y = imgTop - edgeOffset;
+                    } else if (bestSide === "bottom") {
+                        cp.x = fx;
+                        cp.y = imgBottom + edgeOffset;
+                    } else if (bestSide === "left") {
+                        cp.x = imgLeft - edgeOffset;
+                        cp.y = fy;
+                    } else {
+                        cp.x = imgRight + edgeOffset;
+                        cp.y = fy;
+                    }
+                }
+            });
+        }
+    });
+};
+
+const updatePlacementAfterSideChange = (
+    p: Placement,
+    targetSide: Side,
+    fy: number,
+    fx: number,
+    imgTop: number,
+    imgBottom: number,
+    imgLeft: number,
+    imgRight: number,
+    edgeOffset: number
+) => {
+    const cp = p;
+    cp.side = targetSide;
+    if (targetSide === "left") {
+        cp.x = imgLeft - edgeOffset;
+        cp.y = fy;
+    } else if (targetSide === "right") {
+        cp.x = imgRight + edgeOffset;
+        cp.y = fy;
+    } else if (targetSide === "top") {
+        cp.y = imgTop - edgeOffset;
+        cp.x = fx;
+    } else {
+        cp.y = imgBottom + edgeOffset;
+        cp.x = fx;
+    }
+};
+
+const tryMovePlacementToBetterSide = (
+    p: Placement,
+    placements: Placement[],
+    cropX: number,
+    cropY: number,
+    margin: number,
+    imgTop: number,
+    imgBottom: number,
+    imgLeft: number,
+    imgRight: number,
+    edgeOffset: number
+): boolean => {
+    const fx = p.feature.origin.x - cropX + margin;
+    const fy = p.feature.origin.y - cropY + margin;
+    let targetSide: Side = p.side;
+
+    if (p.side === "top" || p.side === "bottom") {
+        targetSide = fx - imgLeft < imgRight - fx ? "left" : "right";
+    } else {
+        targetSide = fy - imgTop < imgBottom - fy ? "top" : "bottom";
+    }
+
+    const currentSideCount = placements.filter(p2 => p2.side === p.side).length;
+    const targetCount = placements.filter(p2 => p2.side === targetSide).length;
+
+    if (targetCount < currentSideCount - 1) {
+        updatePlacementAfterSideChange(
+            p,
+            targetSide,
+            fy,
+            fx,
+            imgTop,
+            imgBottom,
+            imgLeft,
+            imgRight,
+            edgeOffset
+        );
+        return true;
+    }
+    return false;
+};
+
+const balanceSides = (
+    placements: Placement[],
+    cropX: number,
+    cropY: number,
+    margin: number,
+    imgTop: number,
+    imgBottom: number,
+    imgLeft: number,
+    imgRight: number,
+    edgeOffset: number
+) => {
+    const sides: Side[] = ["top", "bottom", "left", "right"];
+    for (let pass = 0; pass < 3; pass += 1) {
+        const totalPoints = placements.length;
+        const idealPointsPerSide = totalPoints / 4;
+        const slack = 1.5 - pass * 0.2;
+        const maxPointsPerSide = Math.max(
+            3,
+            Math.ceil(idealPointsPerSide * slack)
+        );
+
+        sides.forEach(side => {
+            const sidePlacements = placements.filter(p => p.side === side);
+            if (sidePlacements.length <= maxPointsPerSide) return;
+
+            sidePlacements.sort((a, b) => {
+                if (side === "top" || side === "bottom") {
+                    return a.feature.origin.x - b.feature.origin.x;
+                }
+                return a.feature.origin.y - b.feature.origin.y;
+            });
+
+            const moveCount = Math.min(
+                sidePlacements.length - maxPointsPerSide,
+                Math.ceil(sidePlacements.length / 3)
+            );
+
+            for (let i = 0; i < moveCount; i += 1) {
+                const p =
+                    i % 2 === 0
+                        ? sidePlacements[0]
+                        : sidePlacements[sidePlacements.length - 1];
+                if (p) {
+                    const moved = tryMovePlacementToBetterSide(
+                        p,
+                        placements,
+                        cropX,
+                        cropY,
+                        margin,
+                        imgTop,
+                        imgBottom,
+                        imgLeft,
+                        imgRight,
+                        edgeOffset
+                    );
+                    if (moved) {
+                        sidePlacements.splice(sidePlacements.indexOf(p), 1);
+                    }
+                }
+            }
+        });
+    }
+};
+
+const expandPlacements = (
+    sidePlacements: Placement[],
+    side: Side,
+    availableSize: number,
+    expansionFactorLimit: number
+) => {
+    if (sidePlacements.length === 0) return;
+
+    let firstPos = 0;
+    let lastPos = 0;
+
+    const firstItem = sidePlacements[0];
+    const lastItem = sidePlacements[sidePlacements.length - 1];
+
+    if (!firstItem || !lastItem) return;
+
+    if (side === "top" || side === "bottom") {
+        firstPos = firstItem.x;
+        lastPos = lastItem.x;
+    } else {
+        firstPos = firstItem.y;
+        lastPos = lastItem.y;
+    }
+
+    const totalDim = lastPos - firstPos;
+    if (totalDim < availableSize) {
+        const expansionFactor = Math.min(
+            expansionFactorLimit,
+            availableSize / totalDim
+        );
+        const center = (firstPos + lastPos) / 2;
+        sidePlacements.forEach(p => {
+            const cp = p;
+            if (side === "top" || side === "bottom") {
+                cp.x = center + (cp.x - center) * expansionFactor;
+            } else {
+                cp.y = center + (cp.y - center) * expansionFactor;
+            }
+        });
+    }
+};
+
+const centerAndClampPlacements = (
+    sidePlacements: Placement[],
+    side: Side,
+    cropX: number,
+    cropY: number,
+    margin: number,
+    numberCircleRadius: number,
+    canvasWidth: number,
+    canvasHeight: number
+) => {
+    if (sidePlacements.length === 0) return;
+
+    let firstPos = 0;
+    let lastPos = 0;
+
+    const firstItem = sidePlacements[0];
+    const lastItem = sidePlacements[sidePlacements.length - 1];
+
+    if (!firstItem || !lastItem) return;
+
+    if (side === "top" || side === "bottom") {
+        firstPos = firstItem.x;
+        lastPos = lastItem.x;
+    } else {
+        firstPos = firstItem.y;
+        lastPos = lastItem.y;
+    }
+
+    const currentCenter = (firstPos + lastPos) / 2;
+    const idealCenter =
+        sidePlacements.reduce((sum, p) => {
+            if (side === "top" || side === "bottom") {
+                return sum + (p.feature.origin.x - cropX + margin);
+            }
+            return sum + (p.feature.origin.y - cropY + margin);
+        }, 0) / sidePlacements.length;
+
+    const offset = idealCenter - currentCenter;
+    sidePlacements.forEach(p => {
+        const cp = p;
+        if (side === "top" || side === "bottom") {
+            cp.x = clamp(
+                cp.x + offset,
+                numberCircleRadius + 2,
+                canvasWidth - numberCircleRadius - 2
+            );
+        } else {
+            cp.y = clamp(
+                cp.y + offset,
+                numberCircleRadius + 2,
+                canvasHeight - numberCircleRadius - 2
+            );
+        }
+    });
+};
+
+const resolveInitialGaps = (
+    sidePlacements: Placement[],
+    side: Side,
+    minGap: number
+) => {
+    sidePlacements.forEach((p, i) => {
+        if (i === 0) return;
+        const prev = sidePlacements[i - 1];
+        const curr = p;
+        if (prev && curr) {
+            if (side === "top" || side === "bottom") {
+                if (curr.x - prev.x < minGap) {
+                    curr.x = prev.x + minGap;
+                }
+            } else if (curr.y - prev.y < minGap) {
+                curr.y = prev.y + minGap;
+            }
+        }
+    });
+};
+
+const enforceMinimumGaps = (
+    sidePlacements: Placement[],
+    side: Side,
+    minGap: number
+) => {
+    sidePlacements.forEach((p, i) => {
+        if (i === 0) return;
+        const p1 = sidePlacements[i - 1];
+        const p2 = p;
+        if (p1 && p2) {
+            if (side === "top" || side === "bottom") {
+                if (p2.x < p1.x + minGap * 0.5) {
+                    p2.x = p1.x + minGap * 0.5;
+                }
+            } else if (p2.y < p1.y + minGap * 0.5) {
+                p2.y = p1.y + minGap * 0.5;
+            }
+        }
+    });
+};
+
+const resolveOverlaps = (
+    placements: Placement[],
+    side: Side,
+    numberCircleRadius: number,
+    cropWidth: number,
+    cropHeight: number,
+    cropX: number,
+    cropY: number,
+    margin: number,
+    canvasWidth: number,
+    canvasHeight: number
+) => {
+    const sidePlacements = placements
+        .filter(p => p.side === side)
+        .sort((a, b) => {
+            if (side === "top" || side === "bottom") {
+                return a.feature.origin.x - b.feature.origin.x;
+            }
+            return a.feature.origin.y - b.feature.origin.y;
+        });
+
+    if (sidePlacements.length === 0) return;
+
+    const minGap = numberCircleRadius * 3.0;
+
+    resolveInitialGaps(sidePlacements, side, minGap);
+
+    if (side === "top" || side === "bottom") {
+        expandPlacements(sidePlacements, side, cropWidth * 0.95, 1.5);
+    } else {
+        expandPlacements(sidePlacements, side, cropHeight * 0.95, 1.5);
+    }
+
+    centerAndClampPlacements(
+        sidePlacements,
+        side,
+        cropX,
+        cropY,
+        margin,
+        numberCircleRadius,
+        canvasWidth,
+        canvasHeight
+    );
+
+    sidePlacements.sort((a, b) => {
+        if (side === "top" || side === "bottom") {
+            return a.feature.origin.x - b.feature.origin.x;
+        }
+        return a.feature.origin.y - b.feature.origin.y;
+    });
+
+    enforceMinimumGaps(sidePlacements, side, minGap);
+};
+
 const createOverviewCalloutImage = async (
     imageBytes: Uint8Array,
     features: MarkingClass[]
 ) => {
     const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
+    const featureBounds = getFeatureBounds(features, width, height);
+
+    const padding = Math.min(width, height) * 0.15;
+    const cropX = Math.max(0, featureBounds.minX - padding);
+    const cropY = Math.max(0, featureBounds.minY - padding);
+    const cropWidth = Math.min(width, featureBounds.maxX + padding) - cropX;
+    const cropHeight = Math.min(height, featureBounds.maxY + padding) - cropY;
+
     const numberCircleRadius = Math.max(
-        12,
-        Math.round(Math.min(width, height) * 0.02)
+        16,
+        Math.round(Math.min(cropWidth, cropHeight) * 0.025)
     );
-    const margin = Math.max(84, Math.round(Math.min(width, height) * 0.22));
+    const margin = Math.max(
+        84,
+        Math.round(Math.min(cropWidth, cropHeight) * 0.22)
+    );
+
     const canvas = document.createElement("canvas");
-    canvas.width = width + margin * 2;
-    canvas.height = height + margin * 2;
+    canvas.width = cropWidth + margin * 2;
+    canvas.height = cropHeight + margin * 2;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(bitmap, margin, margin);
+    ctx.drawImage(
+        bitmap,
+        cropX,
+        cropY,
+        cropWidth,
+        cropHeight,
+        margin,
+        margin,
+        cropWidth,
+        cropHeight
+    );
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(margin, margin, cropWidth, cropHeight);
 
-    const centerX = margin + width / 2;
-    const centerY = margin + height / 2;
-    const baseLabelRadiusX = width / 2 + margin * 0.74;
-    const baseLabelRadiusY = height / 2 + margin * 0.74;
-    const labelSpacing = numberCircleRadius * 2 + 10;
-    const fontSize = Math.max(12, Math.round(numberCircleRadius * 1.1));
-    const placedLabels: Array<{ x: number; y: number }> = [];
-    const placementOrder = [...features]
-        .sort((a, b) => a.label - b.label)
-        .map((feature, index, arr) => {
-            const angle =
-                CLOCKWISE_START_ANGLE +
-                (index / Math.max(1, arr.length)) * FULL_CIRCLE;
-            return { feature, angle };
-        });
-    const angularOffsets = [0, 0.08, -0.08, 0.16, -0.16, 0.24, -0.24];
+    if (features.length === 0) return canvas.toDataURL("image/png");
 
-    ctx.strokeStyle = "#cc0000";
-    ctx.fillStyle = "#cc0000";
+    const fontSize = Math.max(14, Math.round(numberCircleRadius * 1.1));
     ctx.lineWidth = 2.2;
-    ctx.font = `${fontSize}px Arial`;
+    ctx.font = `bold ${fontSize}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    placementOrder.forEach(({ feature, angle: slotAngle }) => {
-        const fx = feature.origin.x + margin;
-        const fy = feature.origin.y + margin;
-        const baseAngle = slotAngle;
-        const baseCos = Math.cos(baseAngle);
-        const baseSin = Math.sin(baseAngle);
+    const imgLeft = margin;
+    const imgTop = margin;
+    const imgRight = margin + cropWidth;
+    const imgBottom = margin + cropHeight;
+    const edgeOffset = numberCircleRadius + 8;
 
-        let lx = centerX + baseCos * baseLabelRadiusX;
-        let ly = centerY + baseSin * baseLabelRadiusY;
+    const placements: Placement[] = features.map(f =>
+        getInitialPlacement(
+            f,
+            featureBounds,
+            cropX,
+            cropY,
+            margin,
+            imgLeft,
+            imgTop,
+            imgRight,
+            imgBottom,
+            cropWidth,
+            cropHeight,
+            edgeOffset
+        )
+    );
 
-        let placed = false;
-        for (let ring = 0; ring < 12 && !placed; ring += 1) {
-            const radialBoost = ring * (numberCircleRadius + 6);
-            // eslint-disable-next-line no-loop-func
-            angularOffsets.some(angleOffset => {
-                const angle = baseAngle + angleOffset;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                const candidateX =
-                    centerX + cos * (baseLabelRadiusX + radialBoost);
-                const candidateY =
-                    centerY + sin * (baseLabelRadiusY + radialBoost);
-                const safeX = clamp(
-                    candidateX,
-                    numberCircleRadius + 2,
-                    canvas.width - numberCircleRadius - 2
-                );
-                const safeY = clamp(
-                    candidateY,
-                    numberCircleRadius + 2,
-                    canvas.height - numberCircleRadius - 2
-                );
-                const isOutsideImage =
-                    safeX < margin ||
-                    safeX > margin + width ||
-                    safeY < margin ||
-                    safeY > margin + height;
-                const overlapsExisting = placedLabels.some(
-                    existing =>
-                        Math.hypot(existing.x - safeX, existing.y - safeY) <
-                        labelSpacing
-                );
-                if (isOutsideImage && !overlapsExisting) {
-                    lx = safeX;
-                    ly = safeY;
-                    placed = true;
-                    return true;
-                }
-                return false;
-            });
-        }
-        placedLabels.push({ x: lx, y: ly });
+    applyClustering(
+        placements,
+        cropWidth,
+        cropHeight,
+        cropX,
+        cropY,
+        margin,
+        imgTop,
+        imgBottom,
+        imgLeft,
+        imgRight,
+        edgeOffset
+    );
 
+    balanceSides(
+        placements,
+        cropX,
+        cropY,
+        margin,
+        imgTop,
+        imgBottom,
+        imgLeft,
+        imgRight,
+        edgeOffset
+    );
+
+    (["top", "bottom", "left", "right"] as Side[]).forEach(side =>
+        resolveOverlaps(
+            placements,
+            side,
+            numberCircleRadius,
+            cropWidth,
+            cropHeight,
+            cropX,
+            cropY,
+            margin,
+            canvas.width,
+            canvas.height
+        )
+    );
+
+    const slotForFeature = new Map<MarkingClass, { x: number; y: number }>();
+    placements.forEach(p => {
+        slotForFeature.set(p.feature, {
+            x: clamp(
+                p.x,
+                numberCircleRadius + 2,
+                canvas.width - numberCircleRadius - 2
+            ),
+            y: clamp(
+                p.y,
+                numberCircleRadius + 2,
+                canvas.height - numberCircleRadius - 2
+            ),
+        });
+    });
+
+    features.forEach(feature => {
+        const slot = slotForFeature.get(feature);
+        if (!slot) return;
+        const fx = feature.origin.x - cropX + margin;
+        const fy = feature.origin.y - cropY + margin;
+        const dx = slot.x - fx;
+        const dy = slot.y - fy;
+        const length = Math.max(1, Math.hypot(dx, dy));
+        const lineEndX = slot.x - (dx / length) * numberCircleRadius;
+        const lineEndY = slot.y - (dy / length) * numberCircleRadius;
+        ctx.strokeStyle = "#cc0000";
         ctx.beginPath();
         ctx.moveTo(fx, fy);
-        const dx = lx - fx;
-        const dy = ly - fy;
-        const length = Math.max(1, Math.hypot(dx, dy));
-        const lineEndX = lx - (dx / length) * numberCircleRadius;
-        const lineEndY = ly - (dy / length) * numberCircleRadius;
         ctx.lineTo(lineEndX, lineEndY);
         ctx.stroke();
+    });
 
-        const label = String(feature.label);
+    features.forEach(feature => {
+        const slot = slotForFeature.get(feature);
+        if (!slot) return;
         ctx.beginPath();
         ctx.fillStyle = "#ffffff";
-        ctx.arc(lx, ly, numberCircleRadius, 0, FULL_CIRCLE);
+        ctx.arc(slot.x, slot.y, numberCircleRadius, 0, FULL_CIRCLE);
         ctx.fill();
+        ctx.strokeStyle = "#cc0000";
         ctx.stroke();
-
         ctx.fillStyle = "#cc0000";
-        ctx.fillText(label, lx, ly + 0.5);
+        ctx.fillText(String(feature.label), slot.x, slot.y + 0.5);
     });
 
     return canvas.toDataURL("image/png");
@@ -621,7 +1169,7 @@ const createFigurePage = (
     page.innerHTML = `
         <div class="meta-block">${imageLabel}</div>
         <div class="fig">
-            <img src="${image}" />
+            <img src="${image}" alt="${imageLabel}" />
         </div>
         <div class="section-title">${title}</div>
         ${createFooter(pageNumber, reportId, tReport)}
@@ -698,31 +1246,37 @@ export const generateReportPdfWithDialog = async (
         const rightOriginal = await toDataUrl(rightMeta.bytes, rightMeta.name);
 
         stage = "render-overlays";
-        const leftAllCanvas = await renderImageWithMarkings(
-            leftMeta.bytes,
-            markingsLeft,
-            markingTypes,
-            1.6
-        );
-        const rightAllCanvas = await renderImageWithMarkings(
-            rightMeta.bytes,
-            markingsRight,
-            markingTypes,
-            1.6
-        );
-
-        const leftSelectedCanvas = await renderImageWithMarkings(
-            leftMeta.bytes,
-            selectedFeatures.map(x => x.left),
-            markingTypes,
-            1.6
-        );
-        const rightSelectedCanvas = await renderImageWithMarkings(
-            rightMeta.bytes,
-            selectedFeatures.map(x => x.right),
-            markingTypes,
-            1.6
-        );
+        const [
+            leftAllCanvas,
+            rightAllCanvas,
+            leftSelectedCanvas,
+            rightSelectedCanvas,
+        ] = await Promise.all([
+            renderImageWithMarkings(
+                leftMeta.bytes,
+                markingsLeft,
+                markingTypes,
+                1.6
+            ),
+            renderImageWithMarkings(
+                rightMeta.bytes,
+                markingsRight,
+                markingTypes,
+                1.6
+            ),
+            renderImageWithMarkings(
+                leftMeta.bytes,
+                selectedFeatures.map(x => x.left),
+                markingTypes,
+                1.6
+            ),
+            renderImageWithMarkings(
+                rightMeta.bytes,
+                selectedFeatures.map(x => x.right),
+                markingTypes,
+                1.6
+            ),
+        ]);
         const detailCrops = await Promise.all(
             selectedFeatures.map(async feature => {
                 const [leftSingleCanvas, rightSingleCanvas] = await Promise.all(
@@ -843,8 +1397,9 @@ export const generateReportPdfWithDialog = async (
 
         stage = "report-metadata";
         const reportSettings = GlobalSettingsStore.state.settings.report;
+        const rawDateTime = options.reportDateTime;
         const reportDateTime =
-            options.reportDateTime?.trim() || formatReportDateTime(new Date());
+            rawDateTime?.trim() || formatReportDateTime(new Date());
         const systemId = await getSystemId();
         const reportIdInput = [
             reportDateTime,
@@ -862,16 +1417,16 @@ export const generateReportPdfWithDialog = async (
             );
         const stripDiacritics = (value: string) => value;
 
+        const performedByRaw = options.performedBy;
         const performedBy = stripDiacritics(
             decodeUnicodeEscapes(
-                options.performedBy?.trim() ||
-                    reportSettings?.performedBy ||
-                    "-"
+                performedByRaw?.trim() || reportSettings?.performedBy || "-"
             )
         );
+        const departmentRaw = options.department;
         const department = stripDiacritics(
             decodeUnicodeEscapes(
-                options.department?.trim() || reportSettings?.department || "-"
+                departmentRaw?.trim() || reportSettings?.department || "-"
             )
         );
         const addressFallback = [
@@ -882,9 +1437,9 @@ export const generateReportPdfWithDialog = async (
         ]
             .map(line => line?.trim())
             .filter(Boolean) as string[];
+        const addressLinesRaw = options.addressLines;
         const addressLines =
-            options.addressLines?.map(line => line.trim()).filter(Boolean) ??
-            [];
+            addressLinesRaw?.map(line => line.trim()).filter(Boolean) ?? [];
         const address = (
             addressLines.length > 0 ? addressLines : addressFallback
         ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
@@ -994,98 +1549,120 @@ export const generateReportPdfWithDialog = async (
             )
         );
 
-        const leftOverview = await createOverviewCalloutImage(
-            leftMeta.bytes,
-            selectedFeatures.map(x => x.left)
-        );
-        const rightOverview = await createOverviewCalloutImage(
-            rightMeta.bytes,
-            selectedFeatures.map(x => x.right)
-        );
+        const chunks: {
+            features: typeof selectedFeatures;
+            crops: typeof detailCrops;
+        }[] = [];
+        for (let i = 0; i < selectedFeatures.length; i += 12) {
+            const chunkFeatures = selectedFeatures.slice(i, i + 12);
+            const chunkCrops = detailCrops.slice(i, i + 12);
+            chunks.push({
+                features: chunkFeatures,
+                crops: chunkCrops,
+            });
+        }
 
-        const overviewPage = createLandscapePage();
-        overviewPage.innerHTML = `
-        <div class="section-title">${tReport("Comparative table overview")}</div>
-        <div class="overview-grid landscape">
-            <img src="${leftOverview}" />
-            <img src="${rightOverview}" />
-        </div>
-        ${createFooter(pages.length + 1, reportId, tReport)}
-    `;
-        pages.push(overviewPage);
+        await Promise.all(
+            chunks.map(async (chunk, chunkIdx) => {
+                const leftOverview = await createOverviewCalloutImage(
+                    leftMeta.bytes,
+                    chunk.features.map(x => x.left)
+                );
+                const rightOverview = await createOverviewCalloutImage(
+                    rightMeta.bytes,
+                    chunk.features.map(x => x.right)
+                );
 
-        // Zoom page removed per requirement.
+                const overviewPage = createLandscapePage();
+                const overviewTitle =
+                    chunks.length > 1
+                        ? `${tReport("Comparative table overview")} (${chunkIdx + 1}/${chunks.length})`
+                        : tReport("Comparative table overview");
 
-        const detailsStartIndex = pages.length;
-        selectedFeatures.forEach((feature, idx) => {
-            const pageIndex = Math.floor(idx / ROWS_PER_PAGE);
-            const targetIndex = detailsStartIndex + pageIndex;
-            // eslint-disable-next-line security/detect-object-injection
-            if (!pages[targetIndex]) {
-                const page = createPage();
-                page.innerHTML = `
-                <div class="section-title">${tReport("Comparative table details")}</div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>${tReport("Feature")}</th>
-                            <th>${tReport("Image 1")}</th>
-                            <th>${tReport("Image 2")}</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                ${createFooter(targetIndex + 1, reportId, tReport)}
-            `;
-                // eslint-disable-next-line security/detect-object-injection
-                pages[targetIndex] = page;
-            }
-
-            // eslint-disable-next-line security/detect-object-injection
-            const tableBody = pages[targetIndex].querySelector(
-                "tbody"
-            ) as HTMLTableSectionElement | null;
-            if (!tableBody) return;
-
-            const featureTypeDefinition = markingTypes.find(
-                type => type.id === feature.left.typeId
-            );
-            const featureType = resolveFeatureTypeName(
-                featureTypeDefinition,
-                tReport
-            );
-            const markerRing = toCssColor(
-                featureTypeDefinition?.backgroundColor,
-                "#cc0000"
-            );
-            const markerOutline = toCssColor(
-                featureTypeDefinition?.textColor,
-                "#7a0000"
-            );
-            // eslint-disable-next-line security/detect-object-injection
-            const detailCrop = detailCrops[idx];
-            if (!detailCrop) return;
-            const leftCrop = detailCrop.left;
-            const rightCrop = detailCrop.right;
-
-            const row = document.createElement("tr");
-            row.innerHTML = `
-            <td>
-                    <div class="feature-cell">
-                        <div
-                            class="feature-index"
-                            style="--marker-ring: ${markerRing}; --marker-outline: ${markerOutline}; --marker-text: ${markerOutline};"
-                        >
-                            <span class="feature-index-value">${feature.left.label}</span>
-                        </div>
-                    <div class="feature-type">${tReport("Feature type")} ${featureType}</div>
+                overviewPage.innerHTML = `
+                <div class="section-title">${overviewTitle}</div>
+                <div class="overview-grid landscape">
+                    <img src="${leftOverview}" alt="Left overview" />
+                    <img src="${rightOverview}" alt="Right overview" />
                 </div>
-            </td>
-            <td><img class="feature-image" src="${leftCrop}" /></td>
-            <td><img class="feature-image" src="${rightCrop}" /></td>
-        `;
-            tableBody.appendChild(row);
-        });
+                ${createFooter(pages.length + 1, reportId, tReport)}
+            `;
+                pages.push(overviewPage);
+
+                chunk.features.forEach((feature, idx) => {
+                    const isNewPage = idx % ROWS_PER_PAGE === 0;
+
+                    if (isNewPage) {
+                        const detailPage = createPage();
+                        const detailTitle =
+                            chunks.length > 1
+                                ? `${tReport("Comparative table details")} (${chunkIdx + 1}/${chunks.length})`
+                                : tReport("Comparative table details");
+
+                        detailPage.innerHTML = `
+                        <div class="section-title">${detailTitle}</div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>${tReport("Feature")}</th>
+                                    <th>${tReport("Image 1")}</th>
+                                    <th>${tReport("Image 2")}</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        ${createFooter(pages.length + 1, reportId, tReport)}
+                    `;
+                        pages.push(detailPage);
+                    }
+
+                    const currentPage = pages[pages.length - 1];
+                    if (!currentPage) return;
+                    const tableBody = currentPage.querySelector(
+                        "tbody"
+                    ) as HTMLTableSectionElement;
+                    if (!tableBody) return;
+
+                    const featureTypeDefinition = markingTypes.find(
+                        type => type.id === feature.left.typeId
+                    );
+                    const featureType = resolveFeatureTypeName(
+                        featureTypeDefinition,
+                        tReport
+                    );
+                    const markerRing = toCssColor(
+                        featureTypeDefinition?.backgroundColor,
+                        "#cc0000"
+                    );
+                    const markerOutline = toCssColor(
+                        featureTypeDefinition?.textColor,
+                        "#7a0000"
+                    );
+
+                    const { crops } = chunk;
+                    // eslint-disable-next-line security/detect-object-injection
+                    const detailCrop = crops[idx];
+                    if (!detailCrop) return;
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>
+                        <div class="feature-cell">
+                            <div
+                                class="feature-index"
+                                style="--marker-ring: ${markerRing}; --marker-outline: ${markerOutline}; --marker-text: ${markerOutline};"
+                            >
+                                <span class="feature-index-value">${feature.left.label}</span>
+                            </div>
+                            <div class="feature-type">${tReport("Feature type")} ${featureType}</div>
+                        </div>
+                    </td>
+                    <td><img class="feature-image" src="${detailCrop.left}" alt="${featureType} (left)" /></td>
+                    <td><img class="feature-image" src="${detailCrop.right}" alt="${featureType} (right)" /></td>
+                `;
+                    tableBody.appendChild(row);
+                });
+            })
+        );
 
         pages.forEach(page => root.appendChild(page));
         document.body.appendChild(root);
@@ -1096,17 +1673,19 @@ export const generateReportPdfWithDialog = async (
             stage = "render-pdf";
             const pdf = await PDFDocument.create();
             const renderedPages = await Promise.all(
-                pages.map(page =>
-                    html2canvas(page, {
+                pages.map(page => {
+                    if (!page) return null;
+                    return html2canvas(page, {
                         scale: 2,
                         backgroundColor: "#ffffff",
-                    })
-                )
+                    });
+                })
             );
 
             await renderedPages.reduce(
                 async (chainPromise, canvas) => {
                     const chain = await chainPromise;
+                    if (!canvas) return chain;
                     const pngBytes = canvas.toDataURL("image/png");
                     const image = await pdf.embedPng(pngBytes);
                     const page = pdf.addPage([canvas.width, canvas.height]);
