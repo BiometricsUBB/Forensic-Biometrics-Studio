@@ -74,6 +74,12 @@ const d: Dictionary = {
     Edit: "Edit",
     Apply: "Apply",
     Clear: "Clear",
+    Draw: "Draw",
+    Pan: "Pan",
+    Eraser: "Eraser",
+    Shape: "Shape",
+    Round: "Round",
+    Oval: "Oval",
     "Select working mode": "Select working mode",
     "No marking types found for the selected working mode":
         "No marking types found for the selected working mode",

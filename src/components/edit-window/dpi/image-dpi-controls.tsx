@@ -8,15 +8,23 @@ import { ImageDpiCalibration } from "./imageDpiCalibration";
 interface ImageDpiControlsProps {
     imageRef: RefObject<HTMLImageElement>;
     canvasRef: RefObject<HTMLCanvasElement>;
+    disabled?: boolean;
 }
 
 export default function ImageDpiControls({
     imageRef,
     canvasRef,
+    disabled = false,
 }: ImageDpiControlsProps) {
     const [active, setActive] = useState(false);
     const [targetDpi, setTargetDpi] = useState<500 | 1000>(1000);
     const handlerRef = useRef<ImageDpiCalibration | null>(null);
+    // Disable dpi when fft editor is active
+    useEffect(() => {
+        if (disabled && active) {
+            setActive(false);
+        }
+    }, [disabled, active]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -49,6 +57,7 @@ export default function ImageDpiControls({
                 onClick={() => setActive(prev => !prev)}
                 variant={active ? "destructive" : "default"}
                 className="flex items-center justify-center gap-2"
+                disabled={disabled}
             >
                 <Ruler size={ICON.SIZE} />
                 DPI
@@ -66,7 +75,9 @@ export default function ImageDpiControls({
                                 "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 transition",
                                 targetDpi === dpi
                                     ? "border-primary bg-primary/10"
-                                    : "border-border hover:bg-muted"
+                                    : "border-border hover:bg-muted",
+                                disabled &&
+                                    "opacity-50 pointer-events-none cursor-not-allowed"
                             )}
                         >
                             <span
@@ -89,6 +100,7 @@ export default function ImageDpiControls({
                                 className="hidden"
                                 checked={targetDpi === dpi}
                                 onChange={() => setTargetDpi(dpi)}
+                                disabled={disabled}
                             />
 
                             <span className="text-sm">{dpi} DPI</span>

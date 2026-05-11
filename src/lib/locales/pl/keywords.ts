@@ -74,6 +74,12 @@ const d: Dictionary = {
     Edit: "Edycja",
     Apply: "Zastosuj",
     Clear: "Wyczyść",
+    Draw: "Rysuj",
+    Pan: "Przesuwaj",
+    Eraser: "Gumka",
+    Shape: "Kształt",
+    Round: "Okrągły",
+    Oval: "Owalny",
     "Select working mode": "Wybierz tryb pracy",
     "No marking types found for the selected working mode":
         "Nie znaleziono typów adnotacji dla wybranego trybu pracy",
