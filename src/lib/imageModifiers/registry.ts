@@ -2,8 +2,11 @@ import {
     AnyModifier,
     BrightnessModifier,
     ContrastModifier,
+    EnhancementParams,
     FftModifier,
+    GbfenModifier,
     ModifierType,
+    SnfenModifier,
 } from "./types";
 
 // We use crypto.randomUUID where available, otherwise a simple timestamp id
@@ -52,12 +55,45 @@ export function createFftModifier(): FftModifier {
     };
 }
 
+function defaultEnhancementParams(): EnhancementParams {
+    return {
+        dpi: 500,
+        status: "pending",
+        outputPath: null,
+        errorMessage: null,
+        durationMs: null,
+        runtimeOutputUrl: null,
+    };
+}
+
+export function createGbfenModifier(): GbfenModifier {
+    return {
+        id: newId(),
+        type: "gbfen",
+        label: "GBFEN",
+        enabled: true,
+        params: defaultEnhancementParams(),
+    };
+}
+
+export function createSnfenModifier(): SnfenModifier {
+    return {
+        id: newId(),
+        type: "snfen",
+        label: "SNFEN",
+        enabled: true,
+        params: defaultEnhancementParams(),
+    };
+}
+
 // ─── Registry ────────────────────────────────────────────────────────────────
 
 export interface ModifierDefinition {
     type: ModifierType;
     /** i18n key for the label shown in the "Add" menu */
     labelKey: string;
+    /** Optional grouping for the dropdown – "default" appears first, "enhancement" goes under a separator */
+    group?: "default" | "enhancement";
     create: () => AnyModifier;
 }
 
@@ -65,17 +101,32 @@ export const MODIFIER_REGISTRY: ModifierDefinition[] = [
     {
         type: "brightness",
         labelKey: "Brightness",
+        group: "default",
         create: createBrightnessModifier,
     },
     {
         type: "contrast",
         labelKey: "Contrast",
+        group: "default",
         create: createContrastModifier,
     },
     {
         type: "fft",
         labelKey: "FFT Filter",
+        group: "default",
         create: createFftModifier,
+    },
+    {
+        type: "gbfen",
+        labelKey: "GBFEN",
+        group: "enhancement",
+        create: createGbfenModifier,
+    },
+    {
+        type: "snfen",
+        labelKey: "SNFEN",
+        group: "enhancement",
+        create: createSnfenModifier,
     },
 ];
 
@@ -94,7 +145,7 @@ export function buildCssFilter(modifiers: AnyModifier[]): string {
             } else if (mod.type === "contrast") {
                 parts.push(`contrast(${mod.params.value / 100})`);
             }
-            // FFT is canvas-based – not included here
+            // FFT / GBFEN / SNFEN are pixel-based – not included here
         }
     });
     return parts.length > 0 ? parts.join(" ") : "none";

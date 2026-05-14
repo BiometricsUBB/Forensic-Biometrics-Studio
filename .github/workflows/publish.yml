@@ -1,19 +1,20 @@
 name: "publish"
 
-# This will trigger the action on each push to the `release` branch.
+# Triggers on push to the `release` branch (or manual dispatch).
 on:
     push:
         branches:
             - release
+    workflow_dispatch:
 
 jobs:
     publish-tauri:
         permissions:
             contents: write
         strategy:
-            fail-fast: true
+            fail-fast: false
             matrix:
-                platform: [macos-latest, windows-latest]
+                platform: [windows-latest]
 
         runs-on: ${{ matrix.platform }}
         steps:
@@ -35,7 +36,7 @@ jobs:
               run: |
                   echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-            - uses: actions/cache@v3
+            - uses: actions/cache@v4
               name: setup pnpm cache
               with:
                   path: ${{ env.STORE_PATH }}
@@ -46,20 +47,30 @@ jobs:
             - name: install Rust stable
               uses: dtolnay/rust-toolchain@stable
 
-            - name: install dependencies (ubuntu only)
-              if: matrix.platform == 'ubuntu-22.04'
-              run: |
-                  sudo apt-get update
-                  sudo apt-get install -y libjavascriptcoregtk-4.1-0 libsoup-3.0-0 libglib2.0-dev libgtk-3-dev build-essential libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
+            - name: install uv (Python package manager)
+              uses: astral-sh/setup-uv@v3
+              with:
+                  enable-cache: true
+
+            - name: cache pyfing PyInstaller venv
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      .venv-pyfing
+                      build-pyinstaller
+                  key: ${{ runner.os }}-pyfing-${{ hashFiles('scripts/pyfing-requirements.txt', 'scripts/pyfing_enhance.spec', 'scripts/pyfing_enhance.py') }}
 
             - name: install frontend dependencies
-              run: pnpm install # change this to npm or pnpm depending on which one you use
+              run: pnpm install
+
+            - name: build pyfing sidecar
+              run: pnpm sidecar:build:pyfing
 
             - uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  tagName: app-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
+                  tagName: app-v__VERSION__
                   releaseName: "App v__VERSION__"
                   releaseBody: "See the assets to download this version and install."
                   releaseDraft: false

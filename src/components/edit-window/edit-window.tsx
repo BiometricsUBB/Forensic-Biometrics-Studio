@@ -12,7 +12,13 @@ import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
-import { AnyModifier, ModifierType } from "@/lib/imageModifiers/types";
+import {
+    AnyModifier,
+    EnhancementModifier,
+    EnhancementParams,
+    ModifierType,
+    isEnhancementModifier,
+} from "@/lib/imageModifiers/types";
 import {
     MODIFIER_REGISTRY,
     buildCssFilter,
@@ -21,6 +27,10 @@ import { applyPipelineToImage } from "@/lib/imageModifiers/pipeline";
 import { AddModifierButton } from "@/components/edit-window/modifiers/AddModifierButton";
 import { ModifierList } from "@/components/edit-window/modifiers/ModifierList";
 import { ModifierSettingsDialog } from "@/components/edit-window/modifiers/ModifierSettingsDialog";
+import {
+    runPyfingEnhancement,
+    PyfingMethod,
+} from "@/lib/external-tools/pyfing/runPyfingEnhancement";
 
 // ─── File helpers (unchanged from old implementation) ─────────────────────────
 
@@ -79,6 +89,21 @@ async function generateFilename(p: string) {
     return { nameWithoutExt, extWithDot, timestamp };
 }
 
+async function pathToBlobUrl(path: string): Promise<string> {
+    const bytes = await readFile(path);
+    // The TS DOM lib types Blob's BlobPart with ArrayBuffer (not ArrayBufferLike)
+    // which conflicts with Tauri's Uint8Array<ArrayBufferLike>. The cast through
+    // unknown is safe because Blob accepts any TypedArray at runtime.
+    const blob = new Blob([bytes as unknown as ArrayBuffer], {
+        type: "image/png",
+    });
+    return URL.createObjectURL(blob);
+}
+
+function pyfingMethodFromType(type: "gbfen" | "snfen"): PyfingMethod {
+    return type === "gbfen" ? "GBFEN" : "SNFEN";
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function EditWindow() {
@@ -87,7 +112,7 @@ export function EditWindow() {
 
     // ── Image state ──────────────────────────────────────────────────────────
     const [imagePath, setImagePath] = useState<string | null>(null);
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [originalUrl, setOriginalUrl] = useState<string | null>(null);
     const [imageName, setImageName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
         null
@@ -118,16 +143,28 @@ export function EditWindow() {
     // ── CSS filter (live, lightweight) ───────────────────────────────────────
     const cssFilter = buildCssFilter(modifiers);
 
+    // ── Display URL: active enhancement (if any) or the original ─────────────
+    const activeEnhancement = [...modifiers]
+        .reverse()
+        .find(
+            (m): m is EnhancementModifier =>
+                isEnhancementModifier(m) &&
+                m.enabled &&
+                m.params.status === "ready" &&
+                Boolean(m.params.runtimeOutputUrl)
+        );
+
+    const displayUrl =
+        activeEnhancement?.params.runtimeOutputUrl ?? originalUrl;
+
     // ── Image loading ────────────────────────────────────────────────────────
 
-    const loadImage = async (path: string) => {
+    const loadImage = useCallback(async (path: string) => {
         try {
             setError(null);
-            setImageUrl(null);
-            const imageBytes = await readFile(path);
-            const blob = new Blob([imageBytes]);
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
+            setOriginalUrl(null);
+            const url = await pathToBlobUrl(path);
+            setOriginalUrl(url);
             setImageName(await basename(path));
             setZoom(1);
             setPan({ x: 0, y: 0 });
@@ -135,14 +172,14 @@ export function EditWindow() {
             const msg =
                 err instanceof Error ? err.message : "Failed to load image";
             setError(`${msg} (Path: ${path})`);
-            setImageUrl(null);
+            setOriginalUrl(null);
         }
-    };
+    }, []);
 
     // ── Wheel / pan handlers ─────────────────────────────────────────────────
 
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
-        if (!imageUrl || !containerRef.current || !imageRef.current) return;
+        if (!displayUrl || !containerRef.current || !imageRef.current) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newZoom = Math.max(0.1, Math.min(10, zoom * delta));
@@ -227,15 +264,32 @@ export function EditWindow() {
                 unlistenPromise.then(fn => fn());
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Revoke the original blob URL when the source image changes / unmounts.
     useEffect(() => {
         return () => {
-            if (imageUrl) {
-                URL.revokeObjectURL(imageUrl);
+            if (originalUrl) {
+                URL.revokeObjectURL(originalUrl);
             }
         };
-    }, [imageUrl]);
+    }, [originalUrl]);
+
+    // Revoke enhancement output URLs when their modifiers go away.
+    useEffect(() => {
+        const liveUrls = new Set(
+            modifiers
+                .filter(isEnhancementModifier)
+                .map(m => m.params.runtimeOutputUrl)
+                .filter((u): u is string => Boolean(u))
+        );
+        return () => {
+            // Only run on unmount; per-modifier cleanup happens in handleRemoveModifier.
+            liveUrls.forEach(u => URL.revokeObjectURL(u));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -246,7 +300,7 @@ export function EditWindow() {
         if (img.complete && img.naturalWidth) updateSize();
         img.addEventListener("load", updateSize);
         return () => img.removeEventListener("load", updateSize);
-    }, [imageUrl]);
+    }, [displayUrl]);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -268,20 +322,11 @@ export function EditWindow() {
             img.removeEventListener("load", sync);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageUrl]);
+    }, [displayUrl]);
 
-    // ── Modifier helpers ─────────────────────────────────────────────────────
+    // ── Pyfing run ───────────────────────────────────────────────────────────
 
-    const handleAddModifier = useCallback((type: ModifierType) => {
-        const def = MODIFIER_REGISTRY.find(d => d.type === type);
-        if (!def) return;
-        const newMod = def.create() as AnyModifier;
-        setModifiers(prev => [...prev, newMod]);
-        // Automatically open edit dialog for the new modifier
-        setEditingModifierId(newMod.id);
-    }, []);
-
-    const handleUpdateModifier = useCallback(
+    const updateModifierParams = useCallback(
         (id: string, params: Partial<AnyModifier["params"]>) => {
             setModifiers(prev =>
                 prev.map(m =>
@@ -297,6 +342,113 @@ export function EditWindow() {
         []
     );
 
+    const runEnhancement = useCallback(
+        async (modifierId: string, type: "gbfen" | "snfen", dpi: number) => {
+            if (!imagePath) {
+                toast.error("No source image loaded");
+                return;
+            }
+
+            const method = pyfingMethodFromType(type);
+
+            // Mark as processing
+            updateModifierParams(modifierId, {
+                status: "processing",
+                errorMessage: null,
+            } satisfies Partial<EnhancementParams> as Partial<
+                AnyModifier["params"]
+            >);
+
+            try {
+                const { nameWithoutExt, extWithDot, timestamp } =
+                    await generateFilename(imagePath);
+                const newFilename = `${nameWithoutExt}_${method}_${timestamp}${extWithDot}`;
+                const imageDir = await dirname(imagePath);
+                const outputPath = await join(imageDir, newFilename);
+
+                const result = await runPyfingEnhancement({
+                    imagePath,
+                    outputPath,
+                    method,
+                    dpi,
+                });
+
+                const url = await pathToBlobUrl(result.outputPath);
+
+                updateModifierParams(modifierId, {
+                    status: "ready",
+                    outputPath: result.outputPath,
+                    durationMs: result.durationMs,
+                    errorMessage: null,
+                    runtimeOutputUrl: url,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+
+                const toastKey =
+                    type === "gbfen"
+                        ? "Enhancement: GBFEN done in {{seconds}}s"
+                        : "Enhancement: SNFEN done in {{seconds}}s";
+                toast.success(
+                    t(toastKey, {
+                        ns: "tooltip",
+                        seconds: (result.durationMs / 1000).toFixed(1),
+                    })
+                );
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                updateModifierParams(modifierId, {
+                    status: "failed",
+                    errorMessage: msg,
+                    outputPath: null,
+                    runtimeOutputUrl: null,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+                toast.error(
+                    t("Enhancement failed: {{error}}", {
+                        ns: "tooltip",
+                        error: msg,
+                    })
+                );
+            }
+        },
+        [imagePath, t, updateModifierParams]
+    );
+
+    // ── Modifier helpers ─────────────────────────────────────────────────────
+
+    const handleAddModifier = useCallback(
+        (type: ModifierType) => {
+            const def = MODIFIER_REGISTRY.find(d => d.type === type);
+            if (!def) return;
+            const newMod = def.create() as AnyModifier;
+            setModifiers(prev => [...prev, newMod]);
+
+            if (type === "gbfen" || type === "snfen") {
+                // Fire the external tool; modifier params will be updated as it progresses.
+                const { dpi } = newMod.params as EnhancementParams;
+                runEnhancement(newMod.id, type, dpi).catch(() => {
+                    /* errors are surfaced via toast/state by runEnhancement itself */
+                });
+                return;
+            }
+
+            // For non-enhancement modifiers, open the settings dialog automatically.
+            // Use a timeout so the DropdownMenu doesn't intercept the click-outside
+            // and immediately dismiss the dialog.
+            setTimeout(() => setEditingModifierId(newMod.id), 50);
+        },
+        [runEnhancement]
+    );
+
+    const handleUpdateModifier = useCallback(
+        (id: string, params: Partial<AnyModifier["params"]>) => {
+            updateModifierParams(id, params);
+        },
+        [updateModifierParams]
+    );
+
     const handleToggleModifier = useCallback((id: string) => {
         setModifiers(prev =>
             prev.map(m => (m.id === id ? { ...m, enabled: !m.enabled } : m))
@@ -304,7 +456,14 @@ export function EditWindow() {
     }, []);
 
     const handleRemoveModifier = useCallback((id: string) => {
-        setModifiers(prev => prev.filter(m => m.id !== id));
+        setModifiers(prev => {
+            const target = prev.find(m => m.id === id);
+            if (target && isEnhancementModifier(target)) {
+                const url = target.params.runtimeOutputUrl;
+                if (url) URL.revokeObjectURL(url);
+            }
+            return prev.filter(m => m.id !== id);
+        });
         setEditingModifierId(prev => (prev === id ? null : prev));
     }, []);
 
@@ -320,13 +479,33 @@ export function EditWindow() {
         []
     );
 
+    const handleRerunEnhancement = useCallback(
+        (id: string) => {
+            const target = modifiers.find(m => m.id === id);
+            if (!target || !isEnhancementModifier(target)) return;
+            // Revoke the previous URL so we don't leak.
+            if (target.params.runtimeOutputUrl) {
+                URL.revokeObjectURL(target.params.runtimeOutputUrl);
+                updateModifierParams(id, {
+                    runtimeOutputUrl: null,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+            }
+            runEnhancement(id, target.type, target.params.dpi).catch(() => {
+                /* errors are surfaced via toast/state by runEnhancement itself */
+            });
+        },
+        [modifiers, runEnhancement, updateModifierParams]
+    );
+
     const editingModifier =
         modifiers.find(m => m.id === editingModifierId) ?? null;
 
     // ── Save ─────────────────────────────────────────────────────────────────
 
     const saveEditedImage = async () => {
-        if (!imageUrl || !imagePath || !imageRef.current) return;
+        if (!displayUrl || !imagePath || !imageRef.current) return;
         try {
             const uint8Array = await applyPipelineToImage(
                 imageRef.current,
@@ -356,12 +535,6 @@ export function EditWindow() {
                 newPath: finalPath,
             });
 
-            setImagePath(finalPath);
-            setImageName(await basename(finalPath));
-            const blob = new Blob([uint8Array], { type: "image/png" });
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
-
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
@@ -375,6 +548,12 @@ export function EditWindow() {
     };
 
     // ─────────────────────────────────────────────────────────────────────────
+
+    const enhancing = modifiers.some(
+        m =>
+            isEnhancementModifier(m) &&
+            (m.params.status === "processing" || m.params.status === "pending")
+    );
 
     return (
         <main
@@ -420,7 +599,7 @@ export function EditWindow() {
                                 </p>
                             </div>
                         </div>
-                    ) : imageUrl ? (
+                    ) : displayUrl ? (
                         <div
                             ref={containerRef}
                             className="flex-1 w-full flex items-center justify-center overflow-hidden mb-4 relative"
@@ -444,7 +623,7 @@ export function EditWindow() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
-                                src={imageUrl}
+                                src={displayUrl}
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
@@ -531,8 +710,13 @@ export function EditWindow() {
                             />
                             <AddModifierButton
                                 onAdd={handleAddModifier}
-                                disabled={!imageUrl}
+                                disabled={!originalUrl}
                             />
+                            {enhancing && (
+                                <p className="text-xs text-primary animate-pulse text-center">
+                                    {t("Enhancing image...", { ns: "tooltip" })}
+                                </p>
+                            )}
                         </div>
 
                         <div className="border-t border-border/30" />
@@ -555,7 +739,7 @@ export function EditWindow() {
                             onClick={saveEditedImage}
                             className="w-full"
                             size="lg"
-                            disabled={!imageUrl || !imagePath}
+                            disabled={!displayUrl || !imagePath}
                             id="save-edited-image-button"
                         >
                             <Save size={ICON.SIZE} className="mr-2" />
@@ -572,6 +756,7 @@ export function EditWindow() {
                 open={editingModifierId !== null}
                 onClose={() => setEditingModifierId(null)}
                 onUpdate={handleUpdateModifier}
+                onRerunEnhancement={handleRerunEnhancement}
             />
         </main>
     );

@@ -52,6 +52,11 @@
                         "args": true,
                         "name": "bin/sourceafis_cli",
                         "sidecar": true
+                    },
+                    {
+                        "args": true,
+                        "name": "bin/pyfing_enhance",
+                        "sidecar": true
                     }
                 ]
             },

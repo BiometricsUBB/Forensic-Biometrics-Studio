@@ -33,6 +33,8 @@
         "tauri": "tauri",
         "tauri:dev": "node ./scripts/tauri-dev.cjs",
         "sidecar:sync": "node ./scripts/sidecar-sync.cjs",
+        "sidecar:build:pyfing": "node ./scripts/build-pyfing-sidecar.cjs",
+        "sidecar:ensure:pyfing": "node ./scripts/ensure-pyfing-sidecar.cjs",
         "tsc:check": "tsc --noEmit",
         "tsc:watch": "tsc --noEmit --watch",
         "eslint:fix": "eslint --fix .",

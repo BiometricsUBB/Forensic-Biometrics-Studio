@@ -71,6 +71,35 @@ const d: Dictionary = {
     "Drag to reorder": "Drag to reorder",
     "Move up": "Move up",
     "Move down": "Move down",
+    "Image enhancement": "Image enhancement",
+    GBFEN: "GBFEN",
+    SNFEN: "SNFEN",
+    gbfen_desc:
+        "Classical Gabor-filter-based fingerprint enhancement. Runs locally without a neural network. Best for images with clear, regular ridge structure. Fast (~10–20 s) and deterministic.",
+    snfen_desc:
+        "Neural-network fingerprint enhancement (Spectral-Neural Fingerprint Enhancement Network). Slower than GBFEN but handles low-quality, noisy, or low-contrast prints better. Requires the bundled TensorFlow runtime.",
+    "Enhancement: GBFEN started": "GBFEN enhancement started...",
+    "Enhancement: SNFEN started": "SNFEN enhancement started...",
+    "Enhancement: GBFEN done in {{seconds}}s":
+        "GBFEN finished in {{seconds}} s",
+    "Enhancement: SNFEN done in {{seconds}}s":
+        "SNFEN finished in {{seconds}} s",
+    "Enhancement failed: {{error}}": "Enhancement failed: {{error}}",
+    "Enhancement DPI": "DPI",
+    "Enhancement DPI hint":
+        "Match the scan resolution. Re-run the enhancement after changing this value.",
+    "Enhancement status": "Status",
+    "Enhancement: pending": "Pending...",
+    "Enhancement: processing": "Processing...",
+    "Enhancement: ready": "Ready",
+    "Enhancement: failed": "Failed",
+    "Enhancement output path": "Output file",
+    "Re-run enhancement": "Re-run",
+    "Took {{seconds}} s": "Took {{seconds}} s",
+    Method: "Method",
+    "GBFEN — Gabor-based enhancement": "GBFEN — Gabor-based enhancement",
+    "SNFEN — Neural enhancement": "SNFEN — Neural enhancement",
+    "Enhancing image...": "Enhancing image...",
 };
 
 export default d;

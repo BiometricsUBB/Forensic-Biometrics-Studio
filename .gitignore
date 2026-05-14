@@ -40,3 +40,16 @@ next-env.d.ts
 /public/images/*.json
 # vite cache
 .vite/
+
+# pyfing sidecar build artifacts
+/.venv-pyfing/
+/dist-pyinstaller/
+/build-pyinstaller/
+/scripts/__pycache__/
+
+# pyfing sidecar binaries (built in CI, too large for git)
+/src-tauri/bin/pyfing_enhance*.exe
+
+# local installer / toolchain artifacts (not project files)
+/Setup.msix
+/rustup-init.exe

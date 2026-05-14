@@ -1,7 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Waves, Sun, Contrast, X, Play } from "lucide-react";
+import {
+    Trash2,
+    Waves,
+    Sun,
+    Contrast,
+    Wand2,
+    Brain,
+    X,
+    Play,
+    RefreshCw,
+} from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { ImageFFT } from "@/lib/fftProcessor";
 import { useTranslation } from "react-i18next";
@@ -9,7 +19,9 @@ import {
     AnyModifier,
     BrightnessModifier,
     ContrastModifier,
+    EnhancementModifier,
     FftModifier,
+    isEnhancementModifier,
 } from "@/lib/imageModifiers/types";
 import {
     Dialog,
@@ -529,6 +541,130 @@ function FftSettings({
     );
 }
 
+// ─── Enhancement (GBFEN / SNFEN) ─────────────────────────────────────────────
+
+function EnhancementSettings({
+    modifier,
+    onChange,
+    onRerun,
+}: {
+    modifier: EnhancementModifier;
+    onChange: (params: Partial<EnhancementModifier["params"]>) => void;
+    onRerun?: (id: string) => void;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    const { dpi, status, outputPath, errorMessage, durationMs } =
+        modifier.params;
+    const isBusy = status === "processing" || status === "pending";
+
+    const methodLabel =
+        modifier.type === "gbfen"
+            ? t("GBFEN — Gabor-based enhancement", { ns: "tooltip" })
+            : t("SNFEN — Neural enhancement", { ns: "tooltip" });
+
+    const descriptionKey: "gbfen_desc" | "snfen_desc" =
+        modifier.type === "gbfen" ? "gbfen_desc" : "snfen_desc";
+
+    const statusLabel =
+        status === "pending"
+            ? t("Enhancement: pending", { ns: "tooltip" })
+            : status === "processing"
+              ? t("Enhancement: processing", { ns: "tooltip" })
+              : status === "ready"
+                ? t("Enhancement: ready", { ns: "tooltip" })
+                : t("Enhancement: failed", { ns: "tooltip" });
+
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {t("Method", { ns: "tooltip" })}
+                </span>
+                <span className="font-medium text-sm">{methodLabel}</span>
+                <p className="text-xs text-muted-foreground leading-snug">
+                    {t(descriptionKey, { ns: "tooltip" })}
+                </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="enh-dpi" className="text-sm font-medium">
+                    {t("Enhancement DPI", { ns: "tooltip" })}
+                </Label>
+                <input
+                    id="enh-dpi"
+                    type="number"
+                    min={50}
+                    max={2400}
+                    step={50}
+                    value={dpi}
+                    disabled={isBusy}
+                    onChange={e => {
+                        const v = Number(e.target.value);
+                        if (Number.isFinite(v) && v > 0) {
+                            onChange({ dpi: v });
+                        }
+                    }}
+                    className="h-9 px-2 rounded-md border border-border/40 bg-background text-sm"
+                />
+                <span className="text-xs text-muted-foreground">
+                    {t("Enhancement DPI hint", { ns: "tooltip" })}
+                </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {t("Enhancement status", { ns: "tooltip" })}
+                </span>
+                <span
+                    className={`text-sm font-medium ${
+                        status === "ready"
+                            ? "text-emerald-500"
+                            : status === "failed"
+                              ? "text-destructive"
+                              : "text-primary"
+                    }`}
+                >
+                    {statusLabel}
+                </span>
+                {durationMs !== null && status === "ready" && (
+                    <span className="text-xs text-muted-foreground">
+                        {t("Took {{seconds}} s", {
+                            ns: "tooltip",
+                            seconds: (durationMs / 1000).toFixed(1),
+                        })}
+                    </span>
+                )}
+                {errorMessage && status === "failed" && (
+                    <p className="mt-1 text-xs text-destructive whitespace-pre-wrap break-words">
+                        {errorMessage}
+                    </p>
+                )}
+                {outputPath && status === "ready" && (
+                    <p
+                        className="mt-1 text-[11px] text-muted-foreground/70 break-all"
+                        title={outputPath}
+                    >
+                        {outputPath}
+                    </p>
+                )}
+            </div>
+
+            {onRerun && (
+                <Button
+                    onClick={() => onRerun(modifier.id)}
+                    disabled={isBusy}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                >
+                    <RefreshCw size={ICON.SIZE} className="mr-1.5" />
+                    {t("Re-run enhancement", { ns: "tooltip" })}
+                </Button>
+            )}
+        </div>
+    );
+}
+
 // ─── Dialog icon per type ─────────────────────────────────────────────────────
 
 function TitleIcon({ type }: { type: AnyModifier["type"] }) {
@@ -544,6 +680,22 @@ function TitleIcon({ type }: { type: AnyModifier["type"] }) {
     if (type === "contrast")
         return (
             <Contrast
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "gbfen")
+        return (
+            <Wand2
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "snfen")
+        return (
+            <Brain
                 size={ICON.SIZE}
                 strokeWidth={ICON.STROKE_WIDTH}
                 className={cls}
@@ -566,6 +718,7 @@ interface ModifierSettingsDialogProps {
     open: boolean;
     onClose: () => void;
     onUpdate: (id: string, params: Partial<AnyModifier["params"]>) => void;
+    onRerunEnhancement?: (id: string) => void;
 }
 
 export function ModifierSettingsDialog({
@@ -574,6 +727,7 @@ export function ModifierSettingsDialog({
     open,
     onClose,
     onUpdate,
+    onRerunEnhancement,
 }: ModifierSettingsDialogProps) {
     const { t } = useTranslation(["tooltip", "keywords"]);
 
@@ -588,7 +742,11 @@ export function ModifierSettingsDialog({
             ? t("Brightness", { ns: "tooltip" })
             : modifier.type === "contrast"
               ? t("Contrast", { ns: "tooltip" })
-              : t("FFT Filter", { ns: "tooltip" });
+              : modifier.type === "fft"
+                ? t("FFT Filter", { ns: "tooltip" })
+                : modifier.type === "gbfen"
+                  ? t("GBFEN", { ns: "tooltip" })
+                  : t("SNFEN", { ns: "tooltip" });
 
     return (
         /*
@@ -649,6 +807,17 @@ export function ModifierSettingsDialog({
                             modifier={modifier as FftModifier}
                             imageRef={imageRef}
                             onChange={p => handleChange(p)}
+                        />
+                    )}
+                    {isEnhancementModifier(modifier) && (
+                        <EnhancementSettings
+                            modifier={modifier as EnhancementModifier}
+                            onChange={p =>
+                                handleChange(
+                                    p as Partial<AnyModifier["params"]>
+                                )
+                            }
+                            onRerun={onRerunEnhancement}
                         />
                     )}
 
