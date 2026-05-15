@@ -49,6 +49,8 @@ next-env.d.ts
 
 # pyfing sidecar binaries (built in CI, too large for git)
 /src-tauri/bin/pyfing_enhance*.exe
+/src-tauri/bin/pyfing_enhance
+/src-tauri/bin/pyfing_enhance-*
 
 # local installer / toolchain artifacts (not project files)
 /Setup.msix

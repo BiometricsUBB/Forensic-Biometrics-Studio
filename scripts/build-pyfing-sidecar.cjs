@@ -1,4 +1,6 @@
 // Build PyInstaller sidecar for pyfing_enhance using uv.
+// Works on Windows, macOS (Intel + Apple Silicon) and Linux.
+//
 // Usage: pnpm sidecar:build:pyfing
 //
 // Steps:
@@ -6,9 +8,9 @@
 //  2. Ensure uv is available (install hint if missing).
 //  3. Create venv at .venv-pyfing with Python 3.11 via `uv venv --python 3.11`.
 //  4. Install requirements with `uv pip install -r ...`.
-//  5. Strip unused heavy ML deps (torch/jax) so PyInstaller does not scan them.
+//  5. Strip unused heavy ML deps that PyInstaller would otherwise scan.
 //  6. Run PyInstaller using scripts/pyfing_enhance.spec.
-//  7. Copy dist/pyfing_enhance.exe -> src-tauri/bin/pyfing_enhance-<triple>.exe
+//  7. Copy dist/pyfing_enhance(.exe) -> src-tauri/bin/pyfing_enhance-<triple>(.exe)
 //     and a generic copy without triple suffix (for Command.sidecar dev fallback).
 //  8. Smoke-test with `--check` (exit 0).
 
@@ -24,6 +26,7 @@ const DIST_DIR = path.join(ROOT, "dist-pyinstaller");
 const WORK_DIR = path.join(ROOT, "build-pyinstaller");
 const BIN_DIR = path.join(ROOT, "src-tauri", "bin");
 const IS_WINDOWS = process.platform === "win32";
+const IS_MAC = process.platform === "darwin";
 const EXE_EXT = IS_WINDOWS ? ".exe" : "";
 const PYTHON_VERSION = process.env.PYFING_PYTHON_VERSION || "3.11";
 
@@ -57,27 +60,36 @@ function detectTargetTriple() {
         const match = out.match(/host:\s*(\S+)/);
         if (match) return match[1];
     } catch (err) {
-        console.warn("WARN: rustc not found, defaulting target triple", err.message);
+        console.warn(
+            "WARN: rustc not found, defaulting target triple",
+            err.message
+        );
     }
     if (IS_WINDOWS) return "x86_64-pc-windows-msvc";
-    if (process.platform === "darwin") {
+    if (IS_MAC) {
         return process.arch === "arm64"
             ? "aarch64-apple-darwin"
             : "x86_64-apple-darwin";
     }
-    return "x86_64-unknown-linux-gnu";
+    return process.arch === "arm64"
+        ? "aarch64-unknown-linux-gnu"
+        : "x86_64-unknown-linux-gnu";
 }
 
 function ensureUv() {
-    const probe = spawnSync("uv", ["--version"], { encoding: "utf8", shell: false });
+    const probe = spawnSync("uv", ["--version"], {
+        encoding: "utf8",
+        shell: false,
+    });
     if (probe.status === 0) {
         console.log(`uv detected: ${(probe.stdout || "").trim()}`);
         return;
     }
     throw new Error(
         "uv is not installed or not on PATH. Install it first:\n" +
-            "  PowerShell:  irm https://astral.sh/uv/install.ps1 | iex\n" +
-            "  pip:         pip install uv\n" +
+            "  Windows PowerShell:  irm https://astral.sh/uv/install.ps1 | iex\n" +
+            "  macOS / Linux:       curl -LsSf https://astral.sh/uv/install.sh | sh\n" +
+            "  pip:                 pip install uv\n" +
             "Then re-run this script."
     );
 }
@@ -157,6 +169,10 @@ function copySidecar(triple) {
     ];
     for (const target of targets) {
         fs.copyFileSync(built, target);
+        if (!IS_WINDOWS) {
+            // Tauri requires sidecar binaries to be executable on Unix.
+            fs.chmodSync(target, 0o755);
+        }
         console.log(`copied -> ${target}`);
     }
 }
