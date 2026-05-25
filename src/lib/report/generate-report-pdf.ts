@@ -914,15 +914,33 @@ export const generateReportPdfWithDialog = async (
             )
         );
 
+        const addressFallback = [
+            reportSettings?.addressLine1,
+            reportSettings?.addressLine2,
+            reportSettings?.addressLine3,
+            reportSettings?.addressLine4,
+        ]
+            .map(line => line?.trim())
+            .filter(Boolean) as string[];
+        
         const addressLines =
             options.addressLines?.map(line => line.trim()).filter(Boolean) ??
             [];
+
+        const address = (
+            addressLines.length > 0 ? addressLines : addressFallback
+        ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
 
         const appVersion = await getVersion();
 
         stage = "build-dom";
         const root = createReportRoot();
         root.appendChild(createStyles());
+
+        const addressHtml =
+            address.length > 0
+                ? address.map(line => `<div>${line}</div>`).join("")
+                : "<div>-</div>";
 
         const page1 = createPage();
         page1.innerHTML = `
@@ -941,7 +959,7 @@ export const generateReportPdfWithDialog = async (
         <div class="performer-data">
             ${performedBy ? `<div>${performedBy}</div>` : ""}
             ${department ? `<div>${department}</div>` : ""}
-            ${addressLines.filter(l => l.trim() !== "").map(line => `<div>${line}</div>`).join('')}
+            ${addressHtml}
         </div>
 
         <div class="software-title">${tReport("Software information")}:</div>

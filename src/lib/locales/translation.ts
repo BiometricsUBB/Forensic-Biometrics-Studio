@@ -70,7 +70,6 @@ export type i18nKeywords = Recordify<
     | "Include matched only"
     | "Matched features"
     | "Selected features"
-    | "Features list"
     | "Feature"
     | "Cancel"
     | "Generating..."

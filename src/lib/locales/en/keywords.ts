@@ -61,7 +61,6 @@ const d: Dictionary = {
     "Include matched only": "Include matched only",
     "Matched features": "Matched features",
     "Selected features": "Selected features",
-    "Features list": "Features list",
     "Feature": "Feature",
     Cancel: "Cancel",
     "Generating...": "Generating...",
