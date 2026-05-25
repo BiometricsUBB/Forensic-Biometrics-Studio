@@ -1,11 +1,10 @@
 name: "publish"
 
-# Triggers on push to the `release` branch (or manual dispatch).
+# Triggers on push to the `release` branch.
 on:
     push:
         branches:
             - release
-    workflow_dispatch:
 
 jobs:
     publish-tauri:

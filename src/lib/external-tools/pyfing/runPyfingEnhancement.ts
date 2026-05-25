@@ -28,6 +28,12 @@ export type PyfingRunResult = {
     stderr: string;
 };
 
+type ProcessOutcome = {
+    code: number | null;
+    stdout: string;
+    stderr: string;
+};
+
 function log(
     logger: ExternalToolLogger | undefined,
     level: "info" | "error" | "debug",
@@ -35,6 +41,88 @@ function log(
     payload?: unknown
 ) {
     logger?.[level]?.(LOG_PREFIX, message, payload);
+}
+
+/**
+ * Spawn the sidecar and resolve when it exits naturally.
+ *
+ * If the timeout fires we kill the child process (so the OS reaps it
+ * immediately) and reject with `ExternalToolTimeoutError`. This is the key
+ * difference from `Command.execute()` racing a `setTimeout`: that pattern
+ * leaks the child process because the JS promise rejects but the native
+ * process keeps running.
+ */
+async function spawnWithTimeout(
+    command: Command<string>,
+    timeoutMs: number,
+    logger: ExternalToolLogger | undefined
+): Promise<ProcessOutcome> {
+    const stdoutChunks: string[] = [];
+    const stderrChunks: string[] = [];
+
+    command.stdout.on("data", line => {
+        stdoutChunks.push(line);
+    });
+    command.stderr.on("data", line => {
+        stderrChunks.push(line);
+    });
+
+    const child = await command.spawn();
+
+    return new Promise<ProcessOutcome>((resolve, reject) => {
+        let settled = false;
+        let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+
+        const finish = (outcome: ProcessOutcome | Error) => {
+            if (settled) return;
+            settled = true;
+            if (timeoutHandle !== null) {
+                clearTimeout(timeoutHandle);
+                timeoutHandle = null;
+            }
+            if (outcome instanceof Error) {
+                reject(outcome);
+            } else {
+                resolve(outcome);
+            }
+        };
+
+        command.on("close", payload => {
+            const code =
+                typeof payload === "object" &&
+                payload !== null &&
+                "code" in payload
+                    ? (payload as { code: number | null }).code ?? null
+                    : null;
+            finish({
+                code,
+                stdout: stdoutChunks.join("\n"),
+                stderr: stderrChunks.join("\n"),
+            });
+        });
+
+        command.on("error", err => {
+            finish(
+                new ExternalToolError(
+                    `pyfing process error: ${typeof err === "string" ? err : JSON.stringify(err)}`
+                )
+            );
+        });
+
+        timeoutHandle = setTimeout(() => {
+            log(logger, "error", "Process timed out, killing child", {
+                timeoutMs,
+            });
+            child.kill().catch(killErr => {
+                log(logger, "error", "Failed to kill child after timeout", {
+                    error: killErr,
+                });
+            });
+            finish(
+                new ExternalToolTimeoutError(PYFING_SIDECAR_NAME, timeoutMs)
+            );
+        }, timeoutMs);
+    });
 }
 
 export async function runPyfingEnhancement(
@@ -67,24 +155,8 @@ export async function runPyfingEnhancement(
     const command = Command.sidecar(PYFING_SIDECAR_NAME, args);
     const startedAt = Date.now();
 
-    let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
-    const timeoutPromise = new Promise<never>((_resolve, reject) => {
-        timeoutHandle = setTimeout(() => {
-            reject(
-                new ExternalToolTimeoutError(PYFING_SIDECAR_NAME, timeoutMs)
-            );
-        }, timeoutMs);
-    });
-
     try {
-        const output = (await Promise.race([
-            command.execute(),
-            timeoutPromise,
-        ])) as {
-            code: number | null;
-            stdout: string;
-            stderr: string;
-        };
+        const output = await spawnWithTimeout(command, timeoutMs, logger);
         const durationMs = Date.now() - startedAt;
 
         log(logger, "debug", "stderr", output.stderr);
@@ -118,9 +190,5 @@ export async function runPyfingEnhancement(
             log(logger, "error", "Process failed", error);
         }
         throw error;
-    } finally {
-        if (timeoutHandle !== null) {
-            clearTimeout(timeoutHandle);
-        }
     }
 }
