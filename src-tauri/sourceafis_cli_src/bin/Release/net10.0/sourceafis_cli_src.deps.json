@@ -1,0 +1,75 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "sourceafis_cli_src/1.0.0": {
+        "dependencies": {
+          "SourceAFIS": "3.14.0"
+        },
+        "runtime": {
+          "sourceafis_cli_src.dll": {}
+        }
+      },
+      "Dahomey.Cbor/1.16.1": {
+        "runtime": {
+          "lib/net6.0/Dahomey.Cbor.dll": {
+            "assemblyVersion": "1.16.1.0",
+            "fileVersion": "1.16.1.0"
+          }
+        }
+      },
+      "SixLabors.ImageSharp/2.1.3": {
+        "runtime": {
+          "lib/netcoreapp3.1/SixLabors.ImageSharp.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.1.3.0"
+          }
+        }
+      },
+      "SourceAFIS/3.14.0": {
+        "dependencies": {
+          "Dahomey.Cbor": "1.16.1",
+          "SixLabors.ImageSharp": "2.1.3"
+        },
+        "runtime": {
+          "lib/net5.0/SourceAFIS.dll": {
+            "assemblyVersion": "3.14.0.0",
+            "fileVersion": "3.14.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "sourceafis_cli_src/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dahomey.Cbor/1.16.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-NeFvt9CXi5Ew6ZnpjQsO4RoKfZiSZH3Ap7PCdqHryr/RL5WrrPl1+JbXny8ynNEmb6/1wDfT1F5I9fbPN6H84w==",
+      "path": "dahomey.cbor/1.16.1",
+      "hashPath": "dahomey.cbor.1.16.1.nupkg.sha512"
+    },
+    "SixLabors.ImageSharp/2.1.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8yonNRWX3vUE9k29ta0Hbfa0AEc0hbDjSH/nZ3vOTJEXmY6hLnGsjDKoz96Z+AgOsrdkAu6PdL/Ebaf70aitzw==",
+      "path": "sixlabors.imagesharp/2.1.3",
+      "hashPath": "sixlabors.imagesharp.2.1.3.nupkg.sha512"
+    },
+    "SourceAFIS/3.14.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TLTICwNMqBROeEAa4JNeY5eW3PyBawg6hrSqqEZ/45RtM0+e6oVHIzL4AYipF1SC2BlKh+ofhgxnuaDmPqMzuA==",
+      "path": "sourceafis/3.14.0",
+      "hashPath": "sourceafis.3.14.0.nupkg.sha512"
+    }
+  }
+}

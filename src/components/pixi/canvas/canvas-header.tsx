@@ -16,7 +16,6 @@ import {
     RotateCw,
     RotateCcw,
     RefreshCw,
-    Wand2,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
@@ -35,7 +34,6 @@ import {
     resetRotation,
 } from "@/lib/utils/viewport/applyRotation";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
-import { autoMarkWithSourceafis } from "@/lib/utils/viewport/autoMarkWithSourceafis";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -176,6 +174,7 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 loadTracingDataWithDialog(viewport);
                             },
                         },
+                        /*
                         {
                             label: "Auto-mark (SourceAFIS)",
                             icon: (
@@ -197,6 +196,7 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 }
                             },
                         },
+                        */
                     ]}
                     size="icon"
                     variant="outline"

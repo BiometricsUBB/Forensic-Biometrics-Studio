@@ -1,0 +1,2 @@
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\win-x64\publish\sourceafis_cli_src.pdb
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\win-x64\publish\sourceafis_cli_src.exe

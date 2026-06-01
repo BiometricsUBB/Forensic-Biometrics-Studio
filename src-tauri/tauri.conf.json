@@ -53,7 +53,7 @@
         "category": "DeveloperTool",
         "copyright": "",
         "targets": "all",
-        "externalBin": ["bin/sourceafis_cli"],
+        "externalBin": ["bin/sourceafis_cli","bin/sourceafis_matcher"],
         "icon": [
             "../public/logo_32.png",
             "../public/logo_128.png",

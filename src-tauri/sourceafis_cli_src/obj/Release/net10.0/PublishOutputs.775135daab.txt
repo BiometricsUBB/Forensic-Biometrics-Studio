@@ -1,0 +1,8 @@
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\sourceafis_cli_src.exe
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\sourceafis_cli_src.dll
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\sourceafis_cli_src.deps.json
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\sourceafis_cli_src.runtimeconfig.json
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\sourceafis_cli_src.pdb
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\Dahomey.Cbor.dll
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\SixLabors.ImageSharp.dll
+C:\Users\bruno\Desktop\biometrics-studio\src-tauri\sourceafis_cli_src\bin\Release\net10.0\publish\SourceAFIS.dll
