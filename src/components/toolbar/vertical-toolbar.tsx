@@ -90,6 +90,12 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const rightCore = rightMarkings.find(m => m.typeId === coreTypeId);
     const isCoreMarkedOnBoth = !!leftCore && !!rightCore;
 
+    const currentManualPairsCount = leftMarkings.filter(lm => 
+        rightMarkings.some(rm => rm.label === lm.label)
+    ).length;
+
+    const isValidationPassed = isCoreMarkedOnBoth && currentManualPairsCount >= 4;
+
     const { mode: cursorMode } = DashboardToolbarStore.use(
         state => state.settings.cursor
     );
@@ -549,38 +555,50 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                             })}
                         </span>
                     </Toggle>
+                    
                     {}
-                    <div className="flex flex-col gap-3 p-3 mt-4 border border-green-200 bg-green-50/40 rounded-md">
-                        <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-semibold text-green-900 flex items-center gap-1.5">
-                                <Wand2 size={12} />
-                                SourceAFIS Match
-                            </h4>
-                            <span className="text-[10px] font-bold text-green-800 bg-green-200 px-1.5 py-0.5 rounded">
-                                Limit: {afisLimit}
+                    <div className="mt-4 p-3.5 rounded-xl bg-card border-border shadow-2xs transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs font-semibold text-card-foreground flex items-center gap-1.5">
+                                <Wand2 size={13} className="text-primary" />
+                                Automatyczny Matcher AFIS
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 font-bold rounded-md tracking-wide border transition-all duration-300 ${
+                                isValidationPassed 
+                                    ? 'bg-primary/10 text-primary border-primary/20' 
+                                    : 'bg-muted text-muted-foreground border-border'
+                            }`}>
+                                {isValidationPassed ? "GOTOWY" : `BAZA: ${currentManualPairsCount}/4`}
                             </span>
                         </div>
-                        
-                        <div className="flex flex-col gap-1">
+
+                        <div className="mb-4 space-y-1.5">
+                            <div className="flex justify-between text-[13px] font-medium text-muted-foreground px-0.5">
+                                <span>Limit cech wynikowych</span>
+                                <span className="font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{afisLimit}</span>
+                            </div>
                             <input
                                 type="range"
                                 min="5"
-                                max="100"
+                                max="50"
                                 step="1"
                                 value={afisLimit}
                                 onChange={(e) => setAfisLimit(Number(e.target.value))}
-                                className="w-full accent-green-600 cursor-pointer"
+                                className="w-full h-1.5 rounded-lg appearance-none cursor-pointer transition-all"
+                                style={{
+                                    background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${((afisLimit - 5) / 45) * 100}%, hsl(var(--border)) ${((afisLimit - 5) / 45) * 100}%, hsl(var(--border)) 100%)`
+                                }}
                             />
-                            <div className="flex justify-between text-[9px] text-green-700/70 font-medium px-0.5">
+                            <div className="flex justify-between text-[9px] text-muted-foreground/50 font-medium px-0.5">
                                 <span>5</span>
-                                <span>100</span>
+                                <span>50</span>
                             </div>
                         </div>
 
                         <Button
-                            variant="default"
-                            disabled={!isCoreMarkedOnBoth}
-                            className="w-full h-8 text-xs bg-green-600 hover:bg-green-700 text-white shadow-sm disabled:opacity-100 disabled:!bg-gray-200 disabled:!text-gray-500 disabled:cursor-not-allowed transition-all"
+                            variant={isValidationPassed ? "default" : "secondary"}
+                            disabled={!isValidationPassed}
+                            className="w-full h-9 text-xs font-medium rounded-lg transition-all duration-200 cursor-pointer shadow-xs"
                             onClick={async () => {
                                 try {
                                     const canvasLeft = getCanvas(CANVAS_ID.LEFT, true);
@@ -609,83 +627,131 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                     const leftCoreCoords = detectCoordinatePath(lCore);
                                     const rightCoreCoords = detectCoordinatePath(rCore);
 
-                                    console.log("Wykryta struktura pozycji Core (Lewy):", leftCoreCoords);
-                                    console.log("Wykryta struktura pozycji Core (Prawy):", rightCoreCoords);
-
-                                    const leftWithRadius = data.leftMinutiae.map((l: any) => {
-                                        const rx = l.x - leftCoreCoords.x;
-                                        const ry = l.y - leftCoreCoords.y;
-                                        return {
-                                            ...l,
-                                            radius: Math.sqrt(rx * rx + ry * ry)
-                                        };
-                                    });
-
-                                    const rightWithRadius = data.rightMinutiae.map((r: any) => {
-                                        const rx = r.x - rightCoreCoords.x;
-                                        const ry = r.y - rightCoreCoords.y;
-                                        return {
-                                            ...r,
-                                            radius: Math.sqrt(rx * rx + ry * ry)
-                                        };
-                                    });
-
-                                    const allPossiblePairs: Array<{left: any, right: any, delta: number}> = [];
-
-                                    leftWithRadius.forEach((l: any) => {
-                                        rightWithRadius.forEach((r: any) => {
-                                            const delta = Math.abs(l.radius - r.radius);
-                                            allPossiblePairs.push({ left: l, right: r, delta: delta });
-                                        });
-                                    });
-
-                                    allPossiblePairs.sort((a, b) => a.delta - b.delta);
-
-                                    const selectedPairs: any[] = [];
-                                    const seenLeftKeys = new Set<string>();
-                                    const seenRightPoints = new Set<string>();
-
-                                    for (const pair of allPossiblePairs) {
-                                        const leftKey = `${pair.left.x}-${pair.left.y}`;
-                                        const rightKey = `${pair.right.x}-${pair.right.y}`;
-
-                                        if (!seenLeftKeys.has(leftKey) && !seenRightPoints.has(rightKey)) {
-                                            seenLeftKeys.add(leftKey);
-                                            seenRightPoints.add(rightKey);
-                                            selectedPairs.push(pair);
+                                    const manualPairs: Array<{ left: any, right: any, lX: number, lY: number, rX: number, rY: number }> = [];
+                                    leftMarkings.forEach((lm: any) => {
+                                        const rm = rightMarkings.find((m: any) => m.label === lm.label);
+                                        if (rm) {
+                                            const lCoords = detectCoordinatePath(lm);
+                                            const rCoords = detectCoordinatePath(rm);
+                                            manualPairs.push({
+                                                left: lm, right: rm,
+                                                lX: lCoords.x, lY: lCoords.y,
+                                                rX: rCoords.x, rY: rCoords.y
+                                            });
                                         }
+                                    });
 
-                                        if (selectedPairs.length >= afisLimit) {
-                                            break;
+                                    let bestTheta = 0;
+                                    let bestTx = 0;
+                                    let bestTy = 0;
+
+                                    if (manualPairs.length >= 2) {
+                                        let sumLx = 0, sumLy = 0, sumRx = 0, sumRy = 0;
+                                        manualPairs.forEach(p => {
+                                            sumLx += p.lX; sumLy += p.lY;
+                                            sumRx += p.rX; sumRy += p.rY;
+                                        });
+                                        const cLx = sumLx / manualPairs.length;
+                                        const cLy = sumLy / manualPairs.length;
+                                        const cRx = sumRx / manualPairs.length;
+                                        const cRy = sumRy / manualPairs.length;
+
+                                        let sxx = 0, sxy = 0, syx = 0, syy = 0;
+                                        manualPairs.forEach(p => {
+                                            const plx = p.lX - cLx; const ply = p.lY - cLy;
+                                            const prx = p.rX - cRx; const pry = p.rY - cRy;
+                                            sxx += plx * prx; sxy += plx * pry;
+                                            syx += ply * prx; syy += ply * pry;
+                                        });
+
+                                        bestTheta = Math.atan2(sxy - syx, sxx + syy);
+                                        bestTx = cRx - (cLx * Math.cos(bestTheta) - cLy * Math.sin(bestTheta));
+                                        bestTy = cRy - (cLx * Math.sin(bestTheta) + cLy * Math.cos(bestTheta));
+                                    }
+
+                                    const validPairs: any[] = [];
+                                    const STRICT_PROG = 45; 
+
+                                    data.leftMinutiae.forEach((l: any) => {
+                                        const isAlreadyManual = manualPairs.some(p => Math.sqrt(Math.pow(p.lX - l.x, 2) + Math.pow(p.lY - l.y, 2)) < 15);
+                                        if (isAlreadyManual) return;
+
+                                        const transX = l.x * Math.cos(bestTheta) - l.y * Math.sin(bestTheta) + bestTx;
+                                        const transY = l.x * Math.sin(bestTheta) + l.y * Math.cos(bestTheta) + bestTy;
+
+                                        let closestRight: any = null;
+                                        let minDistance = Infinity;
+
+                                        data.rightMinutiae.forEach((r: any) => {
+                                            if (l.type === r.type) {
+                                                const isRightManual = manualPairs.some(p => Math.sqrt(Math.pow(p.rX - r.x, 2) + Math.pow(p.rY - r.y, 2)) < 15);
+                                                if (isRightManual) return;
+
+                                                const d = Math.sqrt(Math.pow(transX - r.x, 2) + Math.pow(transY - r.y, 2));
+                                                if (d < minDistance) {
+                                                    minDistance = d;
+                                                    closestRight = r;
+                                                }
+                                            }
+                                        });
+
+                                        if (closestRight && minDistance < STRICT_PROG) {
+                                            validPairs.push({ left: l, right: closestRight, dist: minDistance });
+                                        }
+                                    });
+
+                                    validPairs.sort((a, b) => a.dist - b.dist);
+                                    const automatedPairs: any[] = [];
+                                    const seenLeft = new Set<string>();
+                                    const seenRight = new Set<string>();
+
+                                    manualPairs.forEach(p => {
+                                        seenLeft.add(`${p.lX}-${p.lY}`);
+                                        seenRight.add(`${p.rX}-${p.rY}`);
+                                    });
+
+                                    const remainingLimit = afisLimit - manualPairs.length;
+
+                                    if (remainingLimit > 0) {
+                                        for (let k = 0; k < validPairs.length; k++) {
+                                            const pair = validPairs[k];
+                                            const lKey = `${pair.left.x}-${pair.left.y}`;
+                                            const rKey = `${pair.right.x}-${pair.right.y}`;
+
+                                            if (!seenLeft.has(lKey) && !seenRight.has(rKey)) {
+                                                seenLeft.add(lKey);
+                                                seenRight.add(rKey);
+                                                automatedPairs.push(pair);
+                                            }
+                                            if (automatedPairs.length >= remainingLimit) break;
                                         }
                                     }
 
-                                    const newLeftMarkings: any[] = [leftCore]; 
-                                    const newRightMarkings: any[] = [rightCore];
+                                    const newLeftMarkings: any[] = [...leftMarkings]; 
+                                    const newRightMarkings: any[] = [...rightMarkings];
 
-                                    selectedPairs.forEach((pair, index) => {
-                                        const pairId = index + 2; 
+                                    let maxCurrentLabel = 1;
+                                    leftMarkings.forEach((m: any) => { if (Number(m.label) > maxCurrentLabel) maxCurrentLabel = Number(m.label); });
+                                    rightMarkings.forEach((m: any) => { if (Number(m.label) > maxCurrentLabel) maxCurrentLabel = Number(m.label); });
+
+                                    const leftPath = leftCoreCoords.path;
+                                    const rightPath = rightCoreCoords.path;
+
+                                    automatedPairs.forEach((pair, index) => {
+                                        const nextLabel = maxCurrentLabel + index + 1;
 
                                         const leftClone = Object.create(Object.getPrototypeOf(leftCore));
                                         Object.keys(lCore).forEach(key => {
-
                                             if (!key.startsWith('_') && key !== 'transform' && key !== 'parent' && key !== 'children') {
                                                 leftClone[key] = lCore[key];
                                             }
                                         });
-
                                         leftClone.id = crypto.randomUUID();
                                         leftClone.typeId = pair.left.type === "bifurcation" ? rozwidlenieTypeId : zakonczenieTypeId;
-                                        leftClone.label = pairId;
-
-                                        if (leftCoreCoords.path === 'origin') {
-                                            leftClone.origin = { x: pair.left.x, y: pair.left.y };
-                                        } else if (leftCoreCoords.path === 'position') {
-                                            leftClone.position = { x: pair.left.x, y: pair.left.y };
-                                        } else {
-                                            leftClone.x = pair.left.x;
-                                            leftClone.y = pair.left.y;
-                                        }
+                                        leftClone.label = nextLabel;
+                                        if (leftPath === 'origin') leftClone.origin = { x: pair.left.x, y: pair.left.y };
+                                        else if (leftPath === 'position') leftClone.position = { x: pair.left.x, y: pair.left.y };
+                                        else { leftClone.x = pair.left.x; leftClone.y = pair.left.y; }
 
                                         const rightClone = Object.create(Object.getPrototypeOf(rightCore));
                                         Object.keys(rCore).forEach(key => {
@@ -693,19 +759,12 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                                 rightClone[key] = rCore[key];
                                             }
                                         });
-
                                         rightClone.id = crypto.randomUUID();
                                         rightClone.typeId = pair.right.type === "bifurcation" ? rozwidlenieTypeId : zakonczenieTypeId;
-                                        rightClone.label = pairId;
-
-                                        if (rightCoreCoords.path === 'origin') {
-                                            rightClone.origin = { x: pair.right.x, y: pair.right.y };
-                                        } else if (rightCoreCoords.path === 'position') {
-                                            rightClone.position = { x: pair.right.x, y: pair.right.y };
-                                        } else {
-                                            rightClone.x = pair.right.x;
-                                            rightClone.y = pair.right.y;
-                                        }
+                                        rightClone.label = nextLabel;
+                                        if (rightPath === 'origin') rightClone.origin = { x: pair.right.x, y: pair.right.y };
+                                        else if (rightPath === 'position') rightClone.position = { x: pair.right.x, y: pair.right.y };
+                                        else { rightClone.x = pair.right.x; rightClone.y = pair.right.y; }
 
                                         newLeftMarkings.push(leftClone);
                                         newRightMarkings.push(rightClone);
@@ -717,14 +776,18 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                     MarkingsStore(CANVAS_ID.RIGHT).actions.markings.reset();
                                     MarkingsStore(CANVAS_ID.RIGHT).actions.markings.addMany(newRightMarkings);
 
-                                    alert(`Dopasowanie zakończone! Sparowano ${selectedPairs.length} najlepszych wspólnych cech. Score: ${data.matchScore}`);
+                                    alert(`Dopasowanie udane! Zablokowano ${manualPairs.length} punktów bazowych. Automat dobrał ${automatedPairs.length} kolejnych cech. Score: ${data.matchScore}`);
 
                                 } catch (error) {
-                                        console.error("Błąd podczas parowania cech AFIS:", error);
+                                    console.error("Błąd podczas parowania cech AFIS:", error);
                                 }
                             }}
                         >
-                            {isCoreMarkedOnBoth ? "Wyodrębnij i dopasuj" : "Zaznacz CORE na obu zdjęciach"}
+                            {!isCoreMarkedOnBoth 
+                                ? "Zaznacz CORE na obu zdjęciach" 
+                                : currentManualPairsCount < 4 
+                                    ? `Zaznacz jeszcze ${4 - currentManualPairsCount} punkty bazowe` 
+                                    : "Wyodrębnij i dopasuj"}
                         </Button>
                     </div>
                     {}
