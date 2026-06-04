@@ -39,6 +39,8 @@ const d: Dictionary = {
     "Measurement instructions":
         "Draw a line between two points on the image to measure the distance",
     "Clear measurement": "Clear measurement",
+    Distance: "Distance",
+    Unit: "Unit",
     Brightness: "Brightness",
     Contrast: "Contrast",
     "Reset Zoom": "Reset Zoom",

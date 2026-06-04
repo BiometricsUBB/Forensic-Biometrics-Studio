@@ -1,9 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { MeasurementStore } from "@/lib/stores/Measurement/Measurement";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
+import {
+    calcLinePixels,
+    convertPx,
+    DISTANCE_UNITS,
+    DistanceUnit,
+} from "@/lib/utils/measurement/distance";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils/shadcn";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, useState } from "react";
 import { Check, X } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 
@@ -14,6 +20,7 @@ export function MeasurementPanel({
     ...props
 }: MeasurementPanelProps) {
     const { t } = useTranslation();
+    const [unit, setUnit] = useState<DistanceUnit>("px");
 
     const leftLine = MeasurementStore.use(
         state => state.finishedLines[CANVAS_ID.LEFT]
@@ -24,13 +31,6 @@ export function MeasurementPanel({
 
     const leftLineExists = leftLine !== null;
     const rightLineExists = rightLine !== null;
-
-    const formatDistance = (line: typeof leftLine) => {
-        if (!line) return null;
-        const dx = line.endpoint.x - line.origin.x;
-        const dy = line.endpoint.y - line.origin.y;
-        return Math.sqrt(dx * dx + dy * dy).toFixed(2);
-    };
 
     const handleClearAll = () => {
         MeasurementStore.actions.clearAll();
@@ -43,6 +43,9 @@ export function MeasurementPanel({
     const handleClearRight = () => {
         MeasurementStore.actions.clearLine(CANVAS_ID.RIGHT);
     };
+
+    const leftPx = calcLinePixels(leftLine) ?? 0;
+    const rightPx = calcLinePixels(rightLine) ?? 0;
 
     return (
         <div
@@ -75,7 +78,7 @@ export function MeasurementPanel({
                         )}
                         {leftLineExists && (
                             <span className="text-xs text-muted-foreground">
-                                {formatDistance(leftLine)} px
+                                {convertPx(leftPx, unit)} {unit}
                             </span>
                         )}
                     </div>
@@ -108,7 +111,7 @@ export function MeasurementPanel({
                         )}
                         {rightLineExists && (
                             <span className="text-xs text-muted-foreground">
-                                {formatDistance(rightLine)} px
+                                {convertPx(rightPx, unit)} {unit}
                             </span>
                         )}
                     </div>
@@ -124,6 +127,25 @@ export function MeasurementPanel({
                     )}
                 </div>
             </div>
+
+            {(leftLineExists || rightLineExists) && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="shrink-0">
+                        {t("Unit", { ns: "tooltip" })}:
+                    </span>
+                    <select
+                        value={unit}
+                        onChange={e => setUnit(e.target.value as DistanceUnit)}
+                        className="rounded border border-border bg-background px-1 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                        {DISTANCE_UNITS.map(u => (
+                            <option key={u} value={u}>
+                                {u}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
 
             <Button
                 variant="outline"
