@@ -33,7 +33,7 @@ const AREA_TOOL_MARKING_TYPE: MarkingType = {
     markingClass: MARKING_CLASS.POLYGON,
     backgroundColor: "#00e5ff",
     textColor: "#00e5ff",
-    size: 3,
+    size: 5,
     category: "fingerprint" as MarkingType["category"],
 };
 
