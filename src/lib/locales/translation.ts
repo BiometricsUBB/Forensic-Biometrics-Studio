@@ -104,7 +104,12 @@ export type i18nModes = Recordify<WORKING_MODE>;
 
 export type i18nCursor = {
     Mode: Recordify<
-        "Selection" | "Marking" | "Rotation" | "Measurement" | "Tracing"
+        | "Selection"
+        | "Marking"
+        | "Rotation"
+        | "Measurement"
+        | "Tracing"
+        | "Area"
     >;
 };
 
@@ -200,6 +205,12 @@ export type i18nTooltip = Recordify<
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
     | "Polyline requires at least 2 segments"
+    | "Area instructions"
+    | "Area"
+    | "Clear area"
+    | "Drawing"
+    | "Points"
+    | "Ruler"
 >;
 
 export type i18nDialog = Recordify<

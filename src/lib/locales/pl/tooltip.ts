@@ -43,6 +43,12 @@ const d: Dictionary = {
     "Clear measurement": "Wyczyść miarkę",
     Distance: "Odległość",
     Unit: "Jednostka miary",
+    "Area instructions":
+        "Klikaj, aby dodawać punkty. Kliknij pierwszy punkt, aby zamknąć wielokąt.",
+    Area: "Pole powierzchni",
+    "Clear area": "Wyczyść obszar",
+    Drawing: "Rysowanie",
+    Points: "pkt",
     Brightness: "Jasność",
     Contrast: "Kontrast",
     "Reset Zoom": "Resetuj powiększenie",
@@ -62,6 +68,7 @@ const d: Dictionary = {
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
     "Polyline requires at least 2 segments":
         "Linia łamana wymaga co najmniej 2 segmentów",
+    Ruler: "Miarka",
 };
 
 export default d;

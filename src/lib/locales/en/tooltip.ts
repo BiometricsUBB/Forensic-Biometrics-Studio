@@ -41,6 +41,12 @@ const d: Dictionary = {
     "Clear measurement": "Clear measurement",
     Distance: "Distance",
     Unit: "Unit",
+    "Area instructions":
+        "Click to place points. Click the first point to close the polygon.",
+    Area: "Area",
+    "Clear area": "Clear area",
+    Drawing: "Drawing",
+    Points: "Points",
     Brightness: "Brightness",
     Contrast: "Contrast",
     "Reset Zoom": "Reset Zoom",
@@ -60,6 +66,7 @@ const d: Dictionary = {
         "Preview ready. Return to edit or save.",
     "Polyline requires at least 2 segments":
         "Polyline requires at least 2 segments",
+    Ruler: "Ruler",
 };
 
 export default d;
