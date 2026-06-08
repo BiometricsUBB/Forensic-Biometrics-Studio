@@ -19,6 +19,30 @@ export function convertPx(px: number, unit: DistanceUnit): string {
     }
 }
 
+export function calcPolygonArea(points: { x: number; y: number }[]): number {
+    if (points.length < 3) return 0;
+    let area = 0;
+    for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        area += points[i]!.x * points[j]!.y;
+        area -= points[j]!.x * points[i]!.y;
+    }
+    return Math.abs(area) / 2;
+}
+
+export function convertPxArea(px2: number, unit: DistanceUnit): string {
+    switch (unit) {
+        case "mm":
+            return (px2 / PX_PER_MM ** 2).toFixed(2);
+        case "cm":
+            return (px2 / PX_PER_CM ** 2).toFixed(2);
+        case "in":
+            return (px2 / PX_PER_INCH ** 2).toFixed(4);
+        default:
+            return px2.toFixed(2);
+    }
+}
+
 export function calcLinePixels(
     line: {
         origin: { x: number; y: number };
