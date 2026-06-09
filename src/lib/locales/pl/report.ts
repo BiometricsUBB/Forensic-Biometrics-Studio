@@ -40,6 +40,17 @@ const d: Dictionary = {
     "Note title": "Uwaga",
     "Note body":
         "Identyfikator raportu uwiarygadnia autentyczność raportu i jest wyliczany na podstawie danych wejściowych oraz identyfikatora systemu.",
+    "Shoeprint report title":
+        "Raport techniczny porównania obrazów śladów traseologicznych",
+    "Shoeprint paired features count":
+        "Liczba sparowanych cech (po etykiecie):",
+    "Shoeprint figure 3": "Rys. 3 Obraz 2 oryginalny (ślad buta)",
+    "Shoeprint figure 4":
+        "Rys. 4 Obraz 2 z wszystkimi cechami wyznaczonymi w toku ekspertyzy",
+    "Shoeprint comparative table overview":
+        "Tablica komparacyjna wybranych cech \u2013 ilustracja poglądowa",
+    "Shoeprint comparative table details":
+        "Tablica komparacyjna wybranych cech \u2013 szczegóły",
 };
 
 export default d;

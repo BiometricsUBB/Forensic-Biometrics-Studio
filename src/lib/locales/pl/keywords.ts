@@ -79,6 +79,8 @@ const d: Dictionary = {
         "Nie znaleziono typów adnotacji dla wybranego trybu pracy",
     "Select a working mode to view marking types":
         "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
+    "Shoeprint markings left": "Adnotacje na obrazie 1",
+    "Shoeprint markings right": "Adnotacje na obrazie 2",
 };
 
 export default d;

@@ -33,6 +33,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
+import { WORKING_MODE } from "@/views/selectMode";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
@@ -489,7 +491,11 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <MeasurementPanel />
                     </div>
 
-                    <ReportDialog />
+                    {workingMode === WORKING_MODE.SHOEPRINT ? (
+                        <ReportShoeprintDialog />
+                    ) : (
+                        <ReportDialog />
+                    )}
 
                     <Toggle
                         variant="outline"

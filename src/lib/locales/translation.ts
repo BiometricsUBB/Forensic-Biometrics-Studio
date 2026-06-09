@@ -86,6 +86,8 @@ export type i18nKeywords = Recordify<
     | "Select a working mode to view marking types"
     | "Select working mode"
     | "No marking types found for the selected working mode"
+    | "Shoeprint markings left"
+    | "Shoeprint markings right"
 >;
 
 export type i18nDescription = Recordify<
@@ -273,4 +275,10 @@ export type i18nReport = Recordify<
     | "Page"
     | "Note title"
     | "Note body"
+    | "Shoeprint report title"
+    | "Shoeprint paired features count"
+    | "Shoeprint figure 3"
+    | "Shoeprint figure 4"
+    | "Shoeprint comparative table overview"
+    | "Shoeprint comparative table details"
 >;
