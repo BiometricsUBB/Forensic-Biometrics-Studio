@@ -41,6 +41,8 @@ const d: Dictionary = {
     "Memory error processing high-res image":
         "Memory error processing high-resolution image",
     "Save result as...": "Save result as...",
+    "To compute the verification result, draw a signature outline (polygon) on both image A and image B.":
+        "To compute the verification result, draw a signature outline (polygon) on both image A and image B.",
 };
 
 export default d;

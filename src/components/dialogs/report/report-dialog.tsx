@@ -24,6 +24,9 @@ import {
     getPairedByLabel,
 } from "@/lib/report/report-utils";
 import { generateReportPdfWithDialog } from "@/lib/report/generate-report-pdf";
+import { generateSignatureReportPdfWithDialog } from "@/lib/report/generate-signature-report-pdf";
+import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
+import { computeSignatureParams } from "@/lib/signature/signature-params";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/shadcn";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
@@ -93,10 +96,26 @@ export function ReportDialog({ className }: ReportDialogProps) {
     const selectedCount = availableCount;
     const generateReportLabel = t("Generate report", { ns: "keywords" });
 
-    const canGenerate =
-        workingMode === WORKING_MODE.FINGERPRINT &&
-        leftCount > 0 &&
-        rightCount > 0;
+    const isFingerprintMode = workingMode === WORKING_MODE.FINGERPRINT;
+    const isSignatureMode = workingMode === WORKING_MODE.SIGNATURE;
+
+    const markingTypes = MarkingTypesStore.use(state => state.types);
+    const signatureReady = useMemo(() => {
+        if (!isSignatureMode) return false;
+        const left = computeSignatureParams(
+            MarkingsStore(CANVAS_ID.LEFT).state.markings,
+            markingTypes
+        );
+        const right = computeSignatureParams(
+            MarkingsStore(CANVAS_ID.RIGHT).state.markings,
+            markingTypes
+        );
+        return left.hasOutline && right.hasOutline;
+    }, [isSignatureMode, markingTypes, leftCount, rightCount]);
+
+    const canGenerate = isFingerprintMode
+        ? leftCount > 0 && rightCount > 0
+        : isSignatureMode && signatureReady;
 
     const onGenerate = async () => {
         if (!canGenerate) return;
@@ -105,8 +124,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
             const now = new Date();
             const timestamp = formatReportDateTime(now);
             setReportDateTime(timestamp);
-            await generateReportPdfWithDialog({
-                includeMatchedOnly,
+            const sharedOptions = {
                 reportDateTime: timestamp,
                 reportLanguage,
                 performedBy: performedBy.trim(),
@@ -117,7 +135,15 @@ export function ReportDialog({ className }: ReportDialogProps) {
                     addressLine3.trim(),
                     addressLine4.trim(),
                 ],
-            });
+            };
+            if (isSignatureMode) {
+                await generateSignatureReportPdfWithDialog(sharedOptions);
+            } else {
+                await generateReportPdfWithDialog({
+                    includeMatchedOnly,
+                    ...sharedOptions,
+                });
+            }
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
         } catch (error) {
@@ -169,35 +195,46 @@ export function ReportDialog({ className }: ReportDialogProps) {
 
                     <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
                         <div className="grid gap-3">
-                            <div className="grid gap-1 text-sm">
-                                <div>
-                                    {t("Matched features", { ns: "keywords" })}:{" "}
-                                    <strong>{matchedFeatures.length}</strong>
-                                </div>
-                                <div>
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : <strong>{selectedCount}</strong>
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : {selectedCount}
-                                </div>
-                            </div>
+                            {isFingerprintMode && (
+                                <>
+                                    <div className="grid gap-1 text-sm">
+                                        <div>
+                                            {t("Matched features", {
+                                                ns: "keywords",
+                                            })}
+                                            :{" "}
+                                            <strong>
+                                                {matchedFeatures.length}
+                                            </strong>
+                                        </div>
+                                        <div>
+                                            {t("Selected features", {
+                                                ns: "keywords",
+                                            })}
+                                            : <strong>{selectedCount}</strong>
+                                        </div>
+                                    </div>
 
-                            <label
-                                htmlFor="include-matched-only"
-                                className="flex items-center gap-2 text-sm"
-                            >
-                                <input
-                                    id="include-matched-only"
-                                    type="checkbox"
-                                    checked={includeMatchedOnly}
-                                    onChange={e =>
-                                        setIncludeMatchedOnly(e.target.checked)
-                                    }
-                                />
-                                {t("Include matched only", { ns: "keywords" })}
-                            </label>
+                                    <label
+                                        htmlFor="include-matched-only"
+                                        className="flex items-center gap-2 text-sm"
+                                    >
+                                        <input
+                                            id="include-matched-only"
+                                            type="checkbox"
+                                            checked={includeMatchedOnly}
+                                            onChange={e =>
+                                                setIncludeMatchedOnly(
+                                                    e.target.checked
+                                                )
+                                            }
+                                        />
+                                        {t("Include matched only", {
+                                            ns: "keywords",
+                                        })}
+                                    </label>
+                                </>
+                            )}
 
                             <div className="grid grid-cols-1 gap-3">
                                 <div className="flex flex-col gap-1.5">

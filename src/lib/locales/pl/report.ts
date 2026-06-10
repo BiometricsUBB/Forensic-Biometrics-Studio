@@ -40,6 +40,17 @@ const d: Dictionary = {
     "Note title": "Uwaga",
     "Note body":
         "Identyfikator raportu uwiarygadnia autentyczność raportu i jest wyliczany na podstawie danych wejściowych oraz identyfikatora systemu.",
+    "Signature verification report title":
+        "Raport techniczny porównania podpisów (metoda Grafotyp)",
+    "Parameters summary": "Zestawienie parametrów i weryfikacja zgodności",
+    "Sample A": "Próbka A",
+    "Sample B": "Próbka B",
+    "Rank correlation analysis": "Analiza korelacyjna (odcinki obrysu)",
+    "Segment length": "Długość odcinka [px]",
+    Rank: "Ranga",
+    "Signature A figure": "Rysunek: podpis A z obrysem i osiami",
+    "Signature B figure": "Rysunek: podpis B z obrysem i osiami",
+    "Not available": "b.d.",
 };
 
 export default d;

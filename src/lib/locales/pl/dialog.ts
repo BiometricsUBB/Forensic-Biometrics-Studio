@@ -44,6 +44,8 @@ const d: Dictionary = {
     "Memory error processing high-res image":
         "Błąd pamięci podczas przetwarzania obrazu o wysokiej rozdzielczości",
     "Save result as...": "Zapisz wynik jako...",
+    "To compute the verification result, draw a signature outline (polygon) on both image A and image B.":
+        "Aby obliczyć wynik weryfikacji, narysuj obrys podpisu (wielokąt) na obu obrazach A i B.",
 };
 
 export default d;

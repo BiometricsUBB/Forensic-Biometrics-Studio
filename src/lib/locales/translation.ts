@@ -86,6 +86,24 @@ export type i18nKeywords = Recordify<
     | "Select a working mode to view marking types"
     | "Select working mode"
     | "No marking types found for the selected working mode"
+    | "Parameters"
+    | "Verification result"
+    | "Segments count"
+    | "Outline area"
+    | "Outline perimeter"
+    | "Shape coefficient"
+    | "Axis W1 length"
+    | "Axis W2 length"
+    | "Size proportion"
+    | "Grafotype"
+    | "Shape coefficient agreement"
+    | "Grafotype agreement"
+    | "Rank correlation"
+    | "Critical value"
+    | "significant"
+    | "not significant"
+    | "Axes W1 and W2 are required to compute size proportion and grafotype"
+    | "Rank correlation requires the same number of outline segments in both samples"
 >;
 
 export type i18nDescription = Recordify<
@@ -227,6 +245,7 @@ export type i18nDialog = Recordify<
     | "Are you sure you want to load tracing data?\n\nIt will replace current drawing."
     | "Memory error processing high-res image"
     | "Save result as..."
+    | "To compute the verification result, draw a signature outline (polygon) on both image A and image B."
 >;
 
 export type i18nKeybindings = Recordify<
@@ -273,4 +292,14 @@ export type i18nReport = Recordify<
     | "Page"
     | "Note title"
     | "Note body"
+    | "Signature verification report title"
+    | "Parameters summary"
+    | "Sample A"
+    | "Sample B"
+    | "Rank correlation analysis"
+    | "Segment length"
+    | "Rank"
+    | "Signature A figure"
+    | "Signature B figure"
+    | "Not available"
 >;

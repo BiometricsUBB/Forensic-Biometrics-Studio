@@ -36,7 +36,7 @@ type ReportGenerationOptions = {
     addressLines: string[];
 };
 
-type ImageMeta = {
+export type ImageMeta = {
     name: string;
     width: number;
     height: number;
@@ -88,7 +88,7 @@ const getMimeTypeFromName = (name: string) => {
 
 const toBlobBytes = (bytes: Uint8Array) => new Uint8Array(bytes);
 
-const toDataUrl = (bytes: Uint8Array, name: string) =>
+export const toDataUrl = (bytes: Uint8Array, name: string) =>
     new Promise<string>(resolve => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
@@ -105,7 +105,7 @@ const md5Bytes = (bytes: Uint8Array) => {
     return SparkMD5.ArrayBuffer.hash(buffer);
 };
 
-const md5String = (value: string) => SparkMD5.hash(value);
+export const md5String = (value: string) => SparkMD5.hash(value);
 
 const toCssColor = (value: unknown, fallback: string) => {
     if (typeof value === "number" && Number.isFinite(value)) {
@@ -118,7 +118,7 @@ const toCssColor = (value: unknown, fallback: string) => {
     return fallback;
 };
 
-const getSystemId = async () => {
+export const getSystemId = async () => {
     try {
         const id = await invoke<string>("get_machine_id");
         return id || "unknown";
@@ -134,7 +134,7 @@ const getSpritePath = async (sprite: PIXI.Sprite) => {
     return path;
 };
 
-const getImageMeta = async (sprite: PIXI.Sprite) => {
+export const getImageMeta = async (sprite: PIXI.Sprite) => {
     const fullPath = await getSpritePath(sprite);
     if (!fullPath) {
         throw new Error("Missing image path for report generation.");
@@ -153,7 +153,7 @@ const getImageMeta = async (sprite: PIXI.Sprite) => {
     } satisfies ImageMeta;
 };
 
-const renderImageWithMarkings = async (
+export const renderImageWithMarkings = async (
     imageBytes: Uint8Array,
     markings: MarkingClass[],
     markingTypes: MarkingType[],
@@ -512,7 +512,7 @@ const ensureImagesLoaded = async (container: HTMLElement) => {
     );
 };
 
-const createPage = () => {
+export const createPage = () => {
     const page = document.createElement("div");
     page.className = "report-page";
     return page;
@@ -524,13 +524,13 @@ const createLandscapePage = () => {
     return page;
 };
 
-const createReportRoot = () => {
+export const createReportRoot = () => {
     const root = document.createElement("div");
     root.className = "report-root";
     return root;
 };
 
-const createStyles = () => {
+export const createStyles = () => {
     const style = document.createElement("style");
     style.textContent = `
         .report-root { position: fixed; left: -10000px; top: 0; width: ${PAGE.width}px; }
@@ -582,7 +582,7 @@ const createStyles = () => {
     return style;
 };
 
-type ReportT = TFunction<"report">;
+export type ReportT = TFunction<"report">;
 
 const resolveFeatureTypeName = (
     featureTypeDefinition: MarkingType | undefined,
@@ -598,7 +598,7 @@ const resolveFeatureTypeName = (
     return tReport(baseName as never, { defaultValue: baseName });
 };
 
-const createFooter = (
+export const createFooter = (
     pageNumber: number,
     reportId: string,
     tReport: ReportT
@@ -609,7 +609,7 @@ const createFooter = (
     </div>
 `;
 
-const createFigurePage = (
+export const createFigurePage = (
     title: string,
     image: string,
     imageLabel: string,
@@ -627,6 +627,133 @@ const createFigurePage = (
         ${createFooter(pageNumber, reportId, tReport)}
     `;
     return page;
+};
+
+const decodeUnicodeEscapes = (value: string) =>
+    value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
+        String.fromCharCode(parseInt(hex, 16))
+    );
+
+export type ReportMetadataOptions = {
+    reportDateTime?: string;
+    performedBy?: string;
+    department?: string;
+    addressLines?: string[];
+};
+
+export type ReportIdentity = {
+    reportId: string;
+    reportDateTime: string;
+    performedBy: string;
+    department: string;
+    address: string[];
+    appVersion: string;
+};
+
+/** Builds the shared report metadata (id, date, author, department, address). */
+export const buildReportIdentity = async (
+    options: ReportMetadataOptions,
+    leftMeta: ImageMeta,
+    rightMeta: ImageMeta
+): Promise<ReportIdentity> => {
+    const reportSettings = GlobalSettingsStore.state.settings.report;
+    const reportDateTime =
+        options.reportDateTime?.trim() || formatReportDateTime(new Date());
+    const systemId = await getSystemId();
+    const reportId = md5String(
+        [
+            reportDateTime,
+            leftMeta.sizeBytes,
+            leftMeta.checksum,
+            rightMeta.sizeBytes,
+            rightMeta.checksum,
+            systemId,
+        ].join("|")
+    );
+
+    const performedBy = decodeUnicodeEscapes(
+        options.performedBy?.trim() || reportSettings?.performedBy || "-"
+    );
+    const department = decodeUnicodeEscapes(
+        options.department?.trim() || reportSettings?.department || "-"
+    );
+    const addressFallback = [
+        reportSettings?.addressLine1,
+        reportSettings?.addressLine2,
+        reportSettings?.addressLine3,
+        reportSettings?.addressLine4,
+    ]
+        .map(line => line?.trim())
+        .filter(Boolean) as string[];
+    const addressLines =
+        options.addressLines?.map(line => line.trim()).filter(Boolean) ?? [];
+    const address = (
+        addressLines.length > 0 ? addressLines : addressFallback
+    ).map(line => decodeUnicodeEscapes(line));
+
+    const appVersion = await getVersion();
+
+    return {
+        reportId,
+        reportDateTime,
+        performedBy,
+        department,
+        address,
+        appVersion,
+    };
+};
+
+/** Appends pages to the DOM, rasterizes them and saves the result as a PDF. */
+export const renderPagesToPdf = async (
+    root: HTMLElement,
+    pages: HTMLElement[],
+    saveTitle: string,
+    defaultFileName: string
+) => {
+    pages.forEach(page => root.appendChild(page));
+    document.body.appendChild(root);
+    try {
+        await ensureImagesLoaded(root);
+        const pdf = await PDFDocument.create();
+        const renderedPages = await Promise.all(
+            pages.map(page =>
+                html2canvas(page, { scale: 2, backgroundColor: "#ffffff" })
+            )
+        );
+
+        await renderedPages.reduce(
+            async (chainPromise, canvas) => {
+                const chain = await chainPromise;
+                const pngBytes = canvas.toDataURL("image/png");
+                const image = await pdf.embedPng(pngBytes);
+                const page = pdf.addPage([canvas.width, canvas.height]);
+                page.drawImage(image, {
+                    x: 0,
+                    y: 0,
+                    width: canvas.width,
+                    height: canvas.height,
+                });
+                chain.push(page);
+                return chain;
+            },
+            Promise.resolve([] as ReturnType<typeof pdf.addPage>[])
+        );
+
+        const pdfBytes = await pdf.save();
+
+        const filePath = await save({
+            title: saveTitle,
+            filters: [{ name: "PDF", extensions: ["pdf"] }],
+            canCreateDirectories: true,
+            defaultPath: defaultFileName,
+        });
+
+        if (!filePath) return;
+
+        await writeFile(filePath, pdfBytes);
+    } finally {
+        root.remove();
+    }
 };
 
 /* eslint-disable sonarjs/cognitive-complexity */
@@ -842,54 +969,14 @@ export const generateReportPdfWithDialog = async (
         };
 
         stage = "report-metadata";
-        const reportSettings = GlobalSettingsStore.state.settings.report;
-        const reportDateTime =
-            options.reportDateTime?.trim() || formatReportDateTime(new Date());
-        const systemId = await getSystemId();
-        const reportIdInput = [
+        const {
+            reportId,
             reportDateTime,
-            leftMeta.sizeBytes,
-            leftMeta.checksum,
-            rightMeta.sizeBytes,
-            rightMeta.checksum,
-            systemId,
-        ].join("|");
-        const reportId = md5String(reportIdInput);
-
-        const decodeUnicodeEscapes = (value: string) =>
-            value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
-                String.fromCharCode(parseInt(hex, 16))
-            );
-        const stripDiacritics = (value: string) => value;
-
-        const performedBy = stripDiacritics(
-            decodeUnicodeEscapes(
-                options.performedBy?.trim() ||
-                    reportSettings?.performedBy ||
-                    "-"
-            )
-        );
-        const department = stripDiacritics(
-            decodeUnicodeEscapes(
-                options.department?.trim() || reportSettings?.department || "-"
-            )
-        );
-        const addressFallback = [
-            reportSettings?.addressLine1,
-            reportSettings?.addressLine2,
-            reportSettings?.addressLine3,
-            reportSettings?.addressLine4,
-        ]
-            .map(line => line?.trim())
-            .filter(Boolean) as string[];
-        const addressLines =
-            options.addressLines?.map(line => line.trim()).filter(Boolean) ??
-            [];
-        const address = (
-            addressLines.length > 0 ? addressLines : addressFallback
-        ).map(line => stripDiacritics(decodeUnicodeEscapes(line)));
-
-        const appVersion = await getVersion();
+            performedBy,
+            department,
+            address,
+            appVersion,
+        } = await buildReportIdentity(options, leftMeta, rightMeta);
 
         stage = "build-dom";
         const root = createReportRoot();
@@ -1087,56 +1174,15 @@ export const generateReportPdfWithDialog = async (
             tableBody.appendChild(row);
         });
 
-        pages.forEach(page => root.appendChild(page));
-        document.body.appendChild(root);
+        stage = "render-pdf";
         try {
-            stage = "render-html";
-            await ensureImagesLoaded(root);
-
-            stage = "render-pdf";
-            const pdf = await PDFDocument.create();
-            const renderedPages = await Promise.all(
-                pages.map(page =>
-                    html2canvas(page, {
-                        scale: 2,
-                        backgroundColor: "#ffffff",
-                    })
-                )
+            await renderPagesToPdf(
+                root,
+                pages,
+                tKeywords("Generate report"),
+                `report-${reportId}.pdf`
             );
-
-            await renderedPages.reduce(
-                async (chainPromise, canvas) => {
-                    const chain = await chainPromise;
-                    const pngBytes = canvas.toDataURL("image/png");
-                    const image = await pdf.embedPng(pngBytes);
-                    const page = pdf.addPage([canvas.width, canvas.height]);
-                    page.drawImage(image, {
-                        x: 0,
-                        y: 0,
-                        width: canvas.width,
-                        height: canvas.height,
-                    });
-                    chain.push(page);
-                    return chain;
-                },
-                Promise.resolve([] as ReturnType<typeof pdf.addPage>[])
-            );
-
-            stage = "save-pdf";
-            const pdfBytes = await pdf.save();
-
-            const filePath = await save({
-                title: tKeywords("Generate report"),
-                filters: [{ name: "PDF", extensions: ["pdf"] }],
-                canCreateDirectories: true,
-                defaultPath: `report-${reportId}.pdf`,
-            });
-
-            if (!filePath) return;
-
-            await writeFile(filePath, pdfBytes);
         } finally {
-            root.remove();
             if (languageChanged) {
                 await i18n.changeLanguage(previousLanguage);
             }
