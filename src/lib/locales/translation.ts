@@ -70,6 +70,7 @@ export type i18nKeywords = Recordify<
     | "Include matched only"
     | "Matched features"
     | "Selected features"
+    | "Feature"
     | "Cancel"
     | "Generating..."
     | "FFT Spectrum Editor"
