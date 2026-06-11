@@ -60,6 +60,19 @@ const d: Dictionary = {
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
     "Polyline requires at least 2 segments":
         "Linia łamana wymaga co najmniej 2 segmentów",
+    brightness_desc: "Dostosuj ogólną jasność obrazu",
+    contrast_desc:
+        "Dostosuj różnicę między jasnymi i ciemnymi obszarami obrazu",
+    fft_desc:
+        "Zastosuj szybką transformatę Fouriera (FFT), aby odfiltrować szum okresowy i wzorce",
+    Disable: "Wyłącz",
+    Enable: "Włącz",
+    "Edit settings": "Edytuj ustawienia",
+    'Click "Compute" to analyse the frequency spectrum':
+        "Kliknij „Oblicz”, aby przeanalizować widmo częstotliwości",
+    "Drag to reorder": "Przeciągnij, aby zmienić kolejność",
+    "Move up": "Przesuń w górę",
+    "Move down": "Przesuń w dół",
 };
 
 export default d;

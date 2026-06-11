@@ -88,6 +88,9 @@ export type i18nKeywords = Recordify<
     | "No marking types found for the selected working mode"
     | "Shoeprint markings left"
     | "Shoeprint markings right"
+    | "Modifiers"
+    | "No modifiers yet"
+    | "Compute"
 >;
 
 export type i18nDescription = Recordify<
@@ -200,6 +203,16 @@ export type i18nTooltip = Recordify<
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
     | "Polyline requires at least 2 segments"
+    | "brightness_desc"
+    | "contrast_desc"
+    | "fft_desc"
+    | "Disable"
+    | "Enable"
+    | "Edit settings"
+    | 'Click "Compute" to analyse the frequency spectrum'
+    | "Drag to reorder"
+    | "Move up"
+    | "Move down"
 >;
 
 export type i18nDialog = Recordify<

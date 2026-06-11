@@ -81,6 +81,9 @@ const d: Dictionary = {
         "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
     "Shoeprint markings left": "Adnotacje na obrazie 1",
     "Shoeprint markings right": "Adnotacje na obrazie 2",
+    Modifiers: "Modyfikatory",
+    "No modifiers yet": "Brak modyfikatorów",
+    Compute: "Oblicz",
 };
 
 export default d;
