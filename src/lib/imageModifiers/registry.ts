@@ -2,7 +2,9 @@ import {
     AnyModifier,
     BrightnessModifier,
     ContrastModifier,
+    DesaturateModifier,
     FftModifier,
+    InvertModifier,
     ModifierType,
 } from "./types";
 
@@ -22,7 +24,7 @@ export function createBrightnessModifier(): BrightnessModifier {
         type: "brightness",
         label: "Brightness",
         enabled: true,
-        params: { value: 100 },
+        params: { value: 50 },
     };
 }
 
@@ -32,7 +34,34 @@ export function createContrastModifier(): ContrastModifier {
         type: "contrast",
         label: "Contrast",
         enabled: true,
+        params: { value: 50 },
+    };
+}
+
+export function createInvertModifier(): InvertModifier {
+    return {
+        id: newId(),
+        type: "invert",
+        label: "Invert",
+        enabled: true,
         params: { value: 100 },
+    };
+}
+
+export function createDesaturateModifier(): DesaturateModifier {
+    return {
+        id: newId(),
+        type: "desaturate",
+        label: "Desaturate",
+        enabled: true,
+        params: {
+            reds: 40,
+            yellows: 60,
+            greens: 40,
+            cyans: 60,
+            blues: 20,
+            magentas: 80,
+        },
     };
 }
 
@@ -45,6 +74,7 @@ export function createFftModifier(): FftModifier {
         params: {
             brushSize: 30,
             spectrumOpacity: 75,
+            maskDataUrl: null,
             _maskCanvas: null,
             _fftResult: null,
             _processor: null,
@@ -73,6 +103,16 @@ export const MODIFIER_REGISTRY: ModifierDefinition[] = [
         create: createContrastModifier,
     },
     {
+        type: "invert",
+        labelKey: "Invert colors",
+        create: createInvertModifier,
+    },
+    {
+        type: "desaturate",
+        labelKey: "Desaturate",
+        create: createDesaturateModifier,
+    },
+    {
         type: "fft",
         labelKey: "FFT Filter",
         create: createFftModifier,
@@ -85,17 +125,24 @@ export const MODIFIER_REGISTRY: ModifierDefinition[] = [
  * Builds a CSS filter string from all lightweight (non-canvas) modifiers.
  * Only enabled modifiers are included.
  */
-export function buildCssFilter(modifiers: AnyModifier[]): string {
-    const parts: string[] = [];
-    modifiers.forEach(mod => {
-        if (mod.enabled) {
-            if (mod.type === "brightness") {
-                parts.push(`brightness(${mod.params.value / 100})`);
-            } else if (mod.type === "contrast") {
-                parts.push(`contrast(${mod.params.value / 100})`);
-            }
-            // FFT is canvas-based – not included here
-        }
-    });
-    return parts.length > 0 ? parts.join(" ") : "none";
+export function buildCssFilter(): string {
+    // Pixel-accurate preview is rendered by the canvas pipeline. Keep this
+    // helper for older callers, but do not approximate Photoshop-like sliders
+    // with CSS filters because their endpoints behave differently.
+    return "none";
+}
+
+/**
+ * Returns true if any enabled modifier requires canvas processing.
+ */
+export function hasCanvasModifiers(modifiers: AnyModifier[]): boolean {
+    return modifiers.some(
+        m =>
+            m.enabled &&
+            (m.type === "fft" ||
+                m.type === "brightness" ||
+                m.type === "contrast" ||
+                m.type === "invert" ||
+                m.type === "desaturate")
+    );
 }

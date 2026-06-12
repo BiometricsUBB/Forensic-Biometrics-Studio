@@ -43,6 +43,27 @@ const d: Dictionary = {
     "Clear measurement": "Wyczyść miarkę",
     Brightness: "Jasność",
     Contrast: "Kontrast",
+    "Invert colors": "Inwersja kolorów",
+    Desaturate: "Desaturacja",
+    "Desaturate channel weights":
+        "Konwersja do czerni i bieli z regulacją zakresów kolorów jak w Photoshopie.",
+    Reds: "Czerwienie",
+    Yellows: "Żółcie",
+    Greens: "Zielenie",
+    Cyans: "Cyjany",
+    Blues: "Błękity",
+    Magentas: "Magenty",
+    "Rotate 90° right": "Obróć o 90° w prawo",
+    "Rotate 90° left": "Obróć o 90° w lewo",
+    "Rotate 180°": "Obróć o 180°",
+    "Flip horizontal": "Odbij lustrzanie w poziomie",
+    "Flip vertical": "Odbij lustrzanie w pionie",
+    "Start crop": "Rozpocznij kadrowanie",
+    "Apply crop": "Zastosuj kadrowanie",
+    "Cancel crop": "Anuluj kadrowanie",
+    "Draw a rectangle on the image to crop it":
+        "Narysuj prostokąt na obrazie, aby go przyciąć",
+    "Crop area selected": "Wybrano obszar kadrowania",
     "Reset Zoom": "Resetuj powiększenie",
     ImageLoadPermissionError:
         "Edytowany obraz został zapisany, ale nie można go załadować z powodu ograniczeń dostępności ścieżki. Spróbuj załadować go ręcznie.",
@@ -63,6 +84,9 @@ const d: Dictionary = {
     brightness_desc: "Dostosuj ogólną jasność obrazu",
     contrast_desc:
         "Dostosuj różnicę między jasnymi i ciemnymi obszarami obrazu",
+    invert_desc: "Odwróć kolory obrazu",
+    desaturate_desc:
+        "Zamień obraz na czarno-biały z regulacją zakresów kolorów",
     fft_desc:
         "Zastosuj szybką transformatę Fouriera (FFT), aby odfiltrować szum okresowy i wzorce",
     Disable: "Wyłącz",

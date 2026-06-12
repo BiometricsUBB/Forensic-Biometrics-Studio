@@ -7,6 +7,8 @@ import {
     EyeOff,
     Sun,
     Contrast,
+    FlipHorizontal,
+    Droplets,
     Waves,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -31,6 +33,22 @@ export function ModifierIcon({
     if (type === "contrast")
         return (
             <Contrast
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "invert")
+        return (
+            <FlipHorizontal
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "desaturate")
+        return (
+            <Droplets
                 size={s}
                 strokeWidth={ICON.STROKE_WIDTH}
                 className={cls}
@@ -69,7 +87,11 @@ function ModifierItem({
             ? t("Brightness", { ns: "tooltip" })
             : modifier.type === "contrast"
               ? t("Contrast", { ns: "tooltip" })
-              : t("FFT Filter", { ns: "tooltip" });
+              : modifier.type === "invert"
+                ? t("Invert colors", { ns: "tooltip" })
+                : modifier.type === "desaturate"
+                  ? t("Desaturate", { ns: "tooltip" })
+                  : t("FFT Filter", { ns: "tooltip" });
 
     return (
         <div
