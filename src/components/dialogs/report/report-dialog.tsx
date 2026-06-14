@@ -77,6 +77,12 @@ export function ReportDialog({ className }: ReportDialogProps) {
     const rightCount = MarkingsStore(CANVAS_ID.RIGHT).use(
         state => state.markings.length
     );
+    const leftHash = MarkingsStore(CANVAS_ID.LEFT).use(
+        state => state.markingsHash
+    );
+    const rightHash = MarkingsStore(CANVAS_ID.RIGHT).use(
+        state => state.markingsHash
+    );
 
     const matchedFeatures = useMemo(() => {
         const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
@@ -111,7 +117,10 @@ export function ReportDialog({ className }: ReportDialogProps) {
             markingTypes
         );
         return left.hasOutline && right.hasOutline;
-    }, [isSignatureMode, markingTypes, leftCount, rightCount]);
+        // leftHash/rightHash change on any marking mutation (add/remove/retype/move),
+        // so readiness never goes stale when the marking count is unchanged.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isSignatureMode, markingTypes, leftHash, rightHash]);
 
     const canGenerate = isFingerprintMode
         ? leftCount > 0 && rightCount > 0

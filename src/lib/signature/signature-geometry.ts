@@ -10,7 +10,7 @@ export const dist = (a: Point, b: Point): number =>
  * connects the final vertex back to the first one.
  */
 export const polygonSegments = (points: Point[]): number[] => {
-    if (points.length < 2) return [];
+    if (points.length < 3) return [];
     return points.map((point, i) =>
         dist(point, points[(i + 1) % points.length]!)
     );
