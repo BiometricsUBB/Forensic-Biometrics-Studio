@@ -64,6 +64,7 @@ const LANDSCAPE = {
 
 const IMAGE_CELL_SIZE = 200;
 const ROWS_PER_PAGE = 4;
+const FEATURES_PER_CHUNK = 12;
 const FULL_CIRCLE = Math.PI * 2;
 const RAY_LINE_LENGTH_MULTIPLIER = 4;
 const CANVAS_CONTEXT_ERROR = "Failed to create canvas context.";
@@ -1411,6 +1412,14 @@ export const generateReportPdfWithDialog = async (
         ].join("|");
         const reportId = md5String(reportIdInput);
 
+        const escapeHtml = (value: string) =>
+            value
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
         const decodeUnicodeEscapes = (value: string) =>
             value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
                 String.fromCharCode(parseInt(hex, 16))
@@ -1553,33 +1562,47 @@ export const generateReportPdfWithDialog = async (
             features: typeof selectedFeatures;
             crops: typeof detailCrops;
         }[] = [];
-        for (let i = 0; i < selectedFeatures.length; i += 12) {
-            const chunkFeatures = selectedFeatures.slice(i, i + 12);
-            const chunkCrops = detailCrops.slice(i, i + 12);
+        for (let i = 0; i < selectedFeatures.length; i += FEATURES_PER_CHUNK) {
+            const chunkFeatures = selectedFeatures.slice(
+                i,
+                i + FEATURES_PER_CHUNK
+            );
+            const chunkCrops = detailCrops.slice(i, i + FEATURES_PER_CHUNK);
             chunks.push({
                 features: chunkFeatures,
                 crops: chunkCrops,
             });
         }
 
-        await Promise.all(
-            chunks.map(async (chunk, chunkIdx) => {
-                const leftOverview = await createOverviewCalloutImage(
-                    leftMeta.bytes,
-                    chunk.features.map(x => x.left)
-                );
-                const rightOverview = await createOverviewCalloutImage(
-                    rightMeta.bytes,
-                    chunk.features.map(x => x.right)
-                );
+        const overviewImages = await Promise.all(
+            chunks.map(async chunk => {
+                const [leftOverview, rightOverview] = await Promise.all([
+                    createOverviewCalloutImage(
+                        leftMeta.bytes,
+                        chunk.features.map(x => x.left)
+                    ),
+                    createOverviewCalloutImage(
+                        rightMeta.bytes,
+                        chunk.features.map(x => x.right)
+                    ),
+                ]);
+                return { leftOverview, rightOverview };
+            })
+        );
 
-                const overviewPage = createLandscapePage();
-                const overviewTitle =
-                    chunks.length > 1
-                        ? `${tReport("Comparative table overview")} (${chunkIdx + 1}/${chunks.length})`
-                        : tReport("Comparative table overview");
+        chunks.forEach((chunk, chunkIdx) => {
+            const images = overviewImages[chunkIdx];
+            if (!images) return;
 
-                overviewPage.innerHTML = `
+            const { leftOverview, rightOverview } = images;
+
+            const overviewPage = createLandscapePage();
+            const overviewTitle =
+                chunks.length > 1
+                    ? `${tReport("Comparative table overview")} (${chunkIdx + 1}/${chunks.length})`
+                    : tReport("Comparative table overview");
+
+            overviewPage.innerHTML = `
                 <div class="section-title">${overviewTitle}</div>
                 <div class="overview-grid landscape">
                     <img src="${leftOverview}" alt="Left overview" />
@@ -1587,19 +1610,19 @@ export const generateReportPdfWithDialog = async (
                 </div>
                 ${createFooter(pages.length + 1, reportId, tReport)}
             `;
-                pages.push(overviewPage);
+            pages.push(overviewPage);
 
-                chunk.features.forEach((feature, idx) => {
-                    const isNewPage = idx % ROWS_PER_PAGE === 0;
+            chunk.features.forEach((feature, idx) => {
+                const isNewPage = idx % ROWS_PER_PAGE === 0;
 
-                    if (isNewPage) {
-                        const detailPage = createPage();
-                        const detailTitle =
-                            chunks.length > 1
-                                ? `${tReport("Comparative table details")} (${chunkIdx + 1}/${chunks.length})`
-                                : tReport("Comparative table details");
+                if (isNewPage) {
+                    const detailPage = createPage();
+                    const detailTitle =
+                        chunks.length > 1
+                            ? `${tReport("Comparative table details")} (${chunkIdx + 1}/${chunks.length})`
+                            : tReport("Comparative table details");
 
-                        detailPage.innerHTML = `
+                    detailPage.innerHTML = `
                         <div class="section-title">${detailTitle}</div>
                         <table class="table">
                             <thead>
@@ -1613,38 +1636,39 @@ export const generateReportPdfWithDialog = async (
                         </table>
                         ${createFooter(pages.length + 1, reportId, tReport)}
                     `;
-                        pages.push(detailPage);
-                    }
+                    pages.push(detailPage);
+                }
 
-                    const currentPage = pages[pages.length - 1];
-                    if (!currentPage) return;
-                    const tableBody = currentPage.querySelector(
-                        "tbody"
-                    ) as HTMLTableSectionElement;
-                    if (!tableBody) return;
+                const currentPage = pages[pages.length - 1];
+                if (!currentPage) return;
+                const tableBody = currentPage.querySelector(
+                    "tbody"
+                ) as HTMLTableSectionElement;
+                if (!tableBody) return;
 
-                    const featureTypeDefinition = markingTypes.find(
-                        type => type.id === feature.left.typeId
-                    );
-                    const featureType = resolveFeatureTypeName(
-                        featureTypeDefinition,
-                        tReport
-                    );
-                    const markerRing = toCssColor(
-                        featureTypeDefinition?.backgroundColor,
-                        "#cc0000"
-                    );
-                    const markerOutline = toCssColor(
-                        featureTypeDefinition?.textColor,
-                        "#7a0000"
-                    );
+                const featureTypeDefinition = markingTypes.find(
+                    type => type.id === feature.left.typeId
+                );
+                const featureType = resolveFeatureTypeName(
+                    featureTypeDefinition,
+                    tReport
+                );
+                const escapedFeatureType = escapeHtml(featureType);
+                const markerRing = toCssColor(
+                    featureTypeDefinition?.backgroundColor,
+                    "#cc0000"
+                );
+                const markerOutline = toCssColor(
+                    featureTypeDefinition?.textColor,
+                    "#7a0000"
+                );
 
-                    const { crops } = chunk;
-                    // eslint-disable-next-line security/detect-object-injection
-                    const detailCrop = crops[idx];
-                    if (!detailCrop) return;
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
+                const { crops } = chunk;
+                // eslint-disable-next-line security/detect-object-injection
+                const detailCrop = crops[idx];
+                if (!detailCrop) return;
+                const row = document.createElement("tr");
+                row.innerHTML = `
                     <td>
                         <div class="feature-cell">
                             <div
@@ -1653,16 +1677,15 @@ export const generateReportPdfWithDialog = async (
                             >
                                 <span class="feature-index-value">${feature.left.label}</span>
                             </div>
-                            <div class="feature-type">${tReport("Feature type")} ${featureType}</div>
+                            <div class="feature-type">${tReport("Feature type")} ${escapedFeatureType}</div>
                         </div>
                     </td>
-                    <td><img class="feature-image" src="${detailCrop.left}" alt="${featureType} (left)" /></td>
-                    <td><img class="feature-image" src="${detailCrop.right}" alt="${featureType} (right)" /></td>
+                    <td><img class="feature-image" src="${detailCrop.left}" alt="${escapedFeatureType} (left)" /></td>
+                    <td><img class="feature-image" src="${detailCrop.right}" alt="${escapedFeatureType} (right)" /></td>
                 `;
-                    tableBody.appendChild(row);
-                });
-            })
-        );
+                tableBody.appendChild(row);
+            });
+        });
 
         pages.forEach(page => root.appendChild(page));
         document.body.appendChild(root);
