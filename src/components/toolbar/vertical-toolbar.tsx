@@ -196,8 +196,8 @@ function createTransformedMarkings(
     leftCore: AppMarking,
     rightCore: AppMarking,
     maxCurrentLabel: number,
-    rozwidlenieTypeId: string,
-    zakonczenieTypeId: string
+    bifurcationTypeId: string,
+    endingTypeId: string
 ) {
     const clonedLeft: unknown[] = [];
     const clonedRight: unknown[] = [];
@@ -233,9 +233,7 @@ function createTransformedMarkings(
 
         leftClone["id"] = crypto.randomUUID();
         leftClone["typeId"] =
-            pair.left.type === "bifurcation"
-                ? rozwidlenieTypeId
-                : zakonczenieTypeId;
+            pair.left.type === "bifurcation" ? bifurcationTypeId : endingTypeId;
         leftClone["label"] = nextLabel;
         leftClone["origin"] = { x: pair.left.x, y: pair.left.y };
 
@@ -259,8 +257,8 @@ function createTransformedMarkings(
         rightClone["id"] = crypto.randomUUID();
         rightClone["typeId"] =
             pair.right.type === "bifurcation"
-                ? rozwidlenieTypeId
-                : zakonczenieTypeId;
+                ? bifurcationTypeId
+                : endingTypeId;
         rightClone["label"] = nextLabel;
         rightClone["origin"] = { x: pair.right.x, y: pair.right.y };
 
