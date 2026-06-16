@@ -1055,14 +1055,37 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                     alert(
                                         `Dopasowanie udane! Zablokowano ${manualPairs.length} punktów bazowych. Automat dobrał ${automatedPairs.length} kolejnych cech. Score: ${data.matchScore}`
                                     );
-                                } catch (error) {}
+                                } catch (error) {
+                                    /* eslint-disable-next-line no-console */
+                                    console.error(
+                                        "Błąd podczas parowania cech AFIS:",
+                                        error
+                                    );
+
+                                    /* eslint-disable-next-line no-alert */
+                                    alert(
+                                        t(
+                                            "toolbar.afis.error",
+                                            "Wystąpił błąd podczas automatycznego dopasowywania cech. Sprawdź konsolę."
+                                        )
+                                    );
+                                }
                             }}
                         >
                             {!isCoreMarkedOnBoth
-                                ? "Zaznacz CORE na obu zdjęciach"
+                                ? t(
+                                      "toolbar.afis.markCoreBoth",
+                                      "Zaznacz CORE na obu zdjęciach"
+                                  )
                                 : currentManualPairsCount < 4
-                                  ? `Zaznacz jeszcze ${4 - currentManualPairsCount} punkty bazowe`
-                                  : "Wyodrębnij i dopasuj"}
+                                  ? t("toolbar.afis.markRemainingBasePoints", {
+                                        count: 4 - currentManualPairsCount,
+                                        defaultValue: `Zaznacz jeszcze ${4 - currentManualPairsCount} punkty bazowe`,
+                                    })
+                                  : t(
+                                        "toolbar.afis.extractAndMatch",
+                                        "Wyodrębnij i dopasuj"
+                                    )}
                         </Button>
                     </div>
                     {}
