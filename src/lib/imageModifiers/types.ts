@@ -2,7 +2,7 @@ import { ImageFFT, FFTResult } from "@/lib/fftProcessor";
 
 // ─── Modifier type discriminants ───────────────────────────────────────────
 
-export type ModifierType = "brightness" | "contrast" | "fft";
+export type ModifierType = "brightness" | "contrast" | "fft" | "levels" | "curves";
 
 // ─── Per-modifier param shapes ──────────────────────────────────────────────
 
@@ -25,9 +25,34 @@ export interface FftParams {
     _processor?: ImageFFT | null;
 }
 
+export interface LevelParam {
+    black: number;
+    white: number;
+    gamma: number;
+}
+
+export interface LevelsParams {
+    master: LevelParam;
+    r: LevelParam;
+    g: LevelParam;
+    b: LevelParam;
+}
+
+export interface CurvePoint {
+    x: number;
+    y: number;
+}
+
+export interface CurvesParams {
+    master: CurvePoint[];
+    r: CurvePoint[];
+    g: CurvePoint[];
+    b: CurvePoint[];
+}
+
 // ─── Discriminated union ─────────────────────────────────────────────────────
 
-export type ModifierParams = BrightnessParams | ContrastParams | FftParams;
+export type ModifierParams = BrightnessParams | ContrastParams | FftParams | LevelsParams | CurvesParams;
 
 export interface Modifier<P extends ModifierParams = ModifierParams> {
     /** Stable unique identifier */
@@ -46,5 +71,7 @@ export type ContrastModifier = Modifier<ContrastParams> & {
     type: "contrast";
 };
 export type FftModifier = Modifier<FftParams> & { type: "fft" };
+export type LevelsModifier = Modifier<LevelsParams> & { type: "levels" };
+export type CurvesModifier = Modifier<CurvesParams> & { type: "curves" };
 
-export type AnyModifier = BrightnessModifier | ContrastModifier | FftModifier;
+export type AnyModifier = BrightnessModifier | ContrastModifier | FftModifier | LevelsModifier | CurvesModifier;

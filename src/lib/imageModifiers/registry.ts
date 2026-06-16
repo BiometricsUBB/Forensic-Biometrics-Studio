@@ -3,6 +3,8 @@ import {
     BrightnessModifier,
     ContrastModifier,
     FftModifier,
+    LevelsModifier,
+    CurvesModifier,
     ModifierType,
 } from "./types";
 
@@ -52,6 +54,41 @@ export function createFftModifier(): FftModifier {
     };
 }
 
+export function createLevelsModifier(): LevelsModifier {
+    const defaultParam = { black: 0, white: 255, gamma: 1.0 };
+    return {
+        id: newId(),
+        type: "levels",
+        label: "Levels",
+        enabled: true,
+        params: {
+            master: { ...defaultParam },
+            r: { ...defaultParam },
+            g: { ...defaultParam },
+            b: { ...defaultParam },
+        },
+    };
+}
+
+export function createCurvesModifier(): CurvesModifier {
+    const defaultPoints = [
+        { x: 0, y: 0 },
+        { x: 255, y: 255 },
+    ];
+    return {
+        id: newId(),
+        type: "curves",
+        label: "Curves",
+        enabled: true,
+        params: {
+            master: [...defaultPoints],
+            r: [...defaultPoints],
+            g: [...defaultPoints],
+            b: [...defaultPoints],
+        },
+    };
+}
+
 // ─── Registry ────────────────────────────────────────────────────────────────
 
 export interface ModifierDefinition {
@@ -76,6 +113,16 @@ export const MODIFIER_REGISTRY: ModifierDefinition[] = [
         type: "fft",
         labelKey: "FFT Filter",
         create: createFftModifier,
+    },
+    {
+        type: "levels",
+        labelKey: "Levels",
+        create: createLevelsModifier,
+    },
+    {
+        type: "curves",
+        labelKey: "Curves",
+        create: createCurvesModifier,
     },
 ];
 
