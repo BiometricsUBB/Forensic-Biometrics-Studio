@@ -8,6 +8,8 @@ import {
     Sun,
     Contrast,
     Waves,
+    SlidersHorizontal,
+    TrendingUp,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -36,6 +38,10 @@ export function ModifierIcon({
                 className={cls}
             />
         );
+    if (type === "levels")
+        return <SlidersHorizontal size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "curves")
+        return <TrendingUp size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
     return <Waves size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
 }
 
@@ -69,7 +75,11 @@ function ModifierItem({
             ? t("Brightness", { ns: "tooltip" })
             : modifier.type === "contrast"
               ? t("Contrast", { ns: "tooltip" })
-              : t("FFT Filter", { ns: "tooltip" });
+              : modifier.type === "levels"
+                ? t("Levels" as any, { ns: "tooltip" })
+                : modifier.type === "curves"
+                  ? t("Curves" as any, { ns: "tooltip" })
+                  : t("FFT Filter", { ns: "tooltip" });
 
     return (
         <div

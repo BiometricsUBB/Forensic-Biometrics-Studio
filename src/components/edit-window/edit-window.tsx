@@ -88,6 +88,7 @@ export function EditWindow() {
     // ── Image state ──────────────────────────────────────────────────────────
     const [imagePath, setImagePath] = useState<string | null>(null);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
     const [imageName, setImageName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
         null
@@ -136,8 +137,49 @@ export function EditWindow() {
                 err instanceof Error ? err.message : "Failed to load image";
             setError(`${msg} (Path: ${path})`);
             setImageUrl(null);
+            setPreviewImageUrl(null);
         }
     };
+
+    // ── Live Preview of Canvas Modifiers ─────────────────────────────────────
+    useEffect(() => {
+        if (!imageRef.current || !imageUrl) return;
+        
+        // Check if there are any active canvas-based modifiers
+        const hasCanvasModifier = modifiers.some(
+            m => m.enabled && (m.type === "levels" || m.type === "curves" || m.type === "fft")
+        );
+        
+        if (!hasCanvasModifier) {
+            setPreviewImageUrl(null);
+            return;
+        }
+
+        const runPipeline = async () => {
+            try {
+                // Apply all modifiers to the original image and get the result
+                const uint8Array = await applyPipelineToImage(imageRef.current!, modifiers);
+                const blob = new Blob([uint8Array], { type: "image/png" });
+                const url = URL.createObjectURL(blob);
+                setPreviewImageUrl(prev => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return url;
+                });
+            } catch (err) {
+                console.error("Preview pipeline failed", err);
+            }
+        };
+
+        const timer = setTimeout(runPipeline, 100);
+        return () => clearTimeout(timer);
+    }, [modifiers, imageUrl]);
+
+    // Cleanup preview URL on unmount
+    useEffect(() => {
+        return () => {
+            if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+        };
+    }, [previewImageUrl]);
 
     // ── Wheel / pan handlers ─────────────────────────────────────────────────
 
@@ -441,14 +483,30 @@ export function EditWindow() {
                                     }
                                 }}
                             />
+                            {/* Invisible original image used as data source & sizing reference */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
                                 src={imageUrl}
+                                alt="Original"
+                                className="absolute max-w-full max-h-full object-contain select-none pointer-events-none opacity-0"
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transformOrigin: TRANSFORM_ORIGIN,
+                                    transition: isDragging
+                                        ? "none"
+                                        : "transform 0.1s ease-out",
+                                }}
+                                draggable={false}
+                            />
+                            {/* Visible image (either preview or original with CSS filters) */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={previewImageUrl || imageUrl}
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
-                                    filter: cssFilter,
+                                    filter: previewImageUrl ? "none" : cssFilter,
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                                     transformOrigin: TRANSFORM_ORIGIN,
                                     transition: isDragging

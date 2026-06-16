@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Waves, Sun, Contrast, X, Play } from "lucide-react";
+import { Trash2, Waves, Sun, Contrast, X, Play, SlidersHorizontal, TrendingUp } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { ImageFFT } from "@/lib/fftProcessor";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,10 @@ import {
     BrightnessModifier,
     ContrastModifier,
     FftModifier,
+    LevelsModifier,
+    CurvesModifier,
 } from "@/lib/imageModifiers/types";
+import { createMonotoneCubicSpline } from "@/lib/imageModifiers/pipeline";
 import {
     Dialog,
     DialogContent,
@@ -96,6 +99,326 @@ function ContrastSettings({
                     <span className="text-sm text-muted-foreground min-w-[3.5rem] text-right tabular-nums">
                         {modifier.params.value}%
                     </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Shared Histogram & Channel tools ──────────────────────────────────────────
+
+export interface HistogramData {
+    master: number[];
+    r: number[];
+    g: number[];
+    b: number[];
+}
+
+function computeHistogram(img: HTMLImageElement): HistogramData | null {
+    if (!img) return null;
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    if (!ctx) return null;
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+    const r = new Uint32Array(256);
+    const g = new Uint32Array(256);
+    const b = new Uint32Array(256);
+    const master = new Uint32Array(256);
+
+    for (let i = 0; i < data.length; i += 4) {
+        const rr = data[i]!;
+        const gg = data[i+1]!;
+        const bb = data[i+2]!;
+        r[rr] = r[rr]! + 1;
+        g[gg] = g[gg]! + 1;
+        b[bb] = b[bb]! + 1;
+        const lum = Math.round((rr + gg + bb) / 3);
+        master[lum] = master[lum]! + 1;
+    }
+
+    let maxMaster = 0, maxR = 0, maxG = 0, maxB = 0;
+    // skip 0 and 255 for max calculation to prevent black/white borders from shrinking the histogram
+    for(let i=1; i<255; i++) {
+        if(master[i]! > maxMaster) maxMaster = master[i]!;
+        if(r[i]! > maxR) maxR = r[i]!;
+        if(g[i]! > maxG) maxG = g[i]!;
+        if(b[i]! > maxB) maxB = b[i]!;
+    }
+    
+    return {
+        master: Array.from(master).map(v => Math.min(1, v / (maxMaster || 1))),
+        r: Array.from(r).map(v => Math.min(1, v / (maxR || 1))),
+        g: Array.from(g).map(v => Math.min(1, v / (maxG || 1))),
+        b: Array.from(b).map(v => Math.min(1, v / (maxB || 1))),
+    };
+}
+
+type ColorChannel = "master" | "r" | "g" | "b";
+
+function ChannelSelector({ value, onChange }: { value: ColorChannel, onChange: (v: ColorChannel) => void }) {
+    const channels: { id: ColorChannel; label: string; color?: string }[] = [
+        { id: "master", label: "RGB" },
+        { id: "r", label: "Red", color: "text-red-500" },
+        { id: "g", label: "Green", color: "text-green-500" },
+        { id: "b", label: "Blue", color: "text-blue-500" },
+    ];
+
+    return (
+        <div className="flex bg-secondary rounded-lg p-1 gap-1">
+            {channels.map(c => (
+                <button
+                    key={c.id}
+                    className={`flex-1 text-xs font-semibold py-1 rounded-md transition-colors ${
+                        value === c.id ? "bg-background shadow-sm " + (c.color || "text-foreground") : "text-muted-foreground hover:bg-background/50"
+                    }`}
+                    onClick={() => onChange(c.id as ColorChannel)}
+                >
+                    {c.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function HistogramBackground({ data, channel, className }: { data: HistogramData | null, channel: ColorChannel, className?: string }) {
+    if (!data) return null;
+    const arr = data[channel];
+    const points = arr.map((val, idx) => `${(idx / 255) * 100},${100 - val * 100}`).join(" ");
+    const path = `M 0,100 L ${points} L 100,100 Z`;
+    
+    let fill = "fill-foreground/20";
+    if (channel === "r") fill = "fill-red-500/20";
+    if (channel === "g") fill = "fill-green-500/20";
+    if (channel === "b") fill = "fill-blue-500/20";
+
+    return (
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}>
+            <path d={path} className={fill} />
+        </svg>
+    );
+}
+
+// ─── Levels ───────────────────────────────────────────────────────────────────
+
+function LevelsSettings({
+    modifier,
+    onChange,
+    histogram,
+}: {
+    modifier: LevelsModifier;
+    onChange: (params: LevelsModifier["params"]) => void;
+    histogram: HistogramData | null;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    const [channel, setChannel] = useState<ColorChannel>("master");
+    const p = modifier.params[channel];
+
+    return (
+        <div className="flex flex-col gap-4">
+            <ChannelSelector value={channel} onChange={setChannel} />
+            
+            <div className="w-full h-24 border border-border/40 rounded-md bg-background/50 relative overflow-hidden">
+                <HistogramBackground data={histogram} channel={channel} />
+                <div className="absolute inset-0 grid grid-cols-4 pointer-events-none">
+                    {[0,1,2,3].map(i => <div key={i} className="border-r border-border/20 last:border-0" />)}
+                </div>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="mod-levels-black" className="text-sm font-medium">
+                    {t("Black Point", { ns: "tooltip" })}
+                </Label>
+                <div className="flex items-center gap-3">
+                    <input
+                        id="mod-levels-black"
+                        type="range"
+                        min="0"
+                        max="254"
+                        value={p.black}
+                        onChange={e =>
+                            onChange({ ...modifier.params, [channel]: { ...p, black: Math.min(Number(e.target.value), p.white - 1) } })
+                        }
+                        className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
+                    />
+                    <span className="text-sm text-muted-foreground min-w-[2.5rem] text-right tabular-nums">
+                        {p.black}
+                    </span>
+                </div>
+            </div>
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="mod-levels-gamma" className="text-sm font-medium">
+                    {t("Gamma (Midtones)", { ns: "tooltip" })}
+                </Label>
+                <div className="flex items-center gap-3">
+                    <input
+                        id="mod-levels-gamma"
+                        type="range"
+                        min="0.1"
+                        max="9.99"
+                        step="0.01"
+                        value={p.gamma}
+                        onChange={e =>
+                            onChange({ ...modifier.params, [channel]: { ...p, gamma: Number(e.target.value) } })
+                        }
+                        className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
+                    />
+                    <span className="text-sm text-muted-foreground min-w-[2.5rem] text-right tabular-nums">
+                        {p.gamma.toFixed(2)}
+                    </span>
+                </div>
+            </div>
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="mod-levels-white" className="text-sm font-medium">
+                    {t("White Point", { ns: "tooltip" })}
+                </Label>
+                <div className="flex items-center gap-3">
+                    <input
+                        id="mod-levels-white"
+                        type="range"
+                        min="1"
+                        max="255"
+                        value={p.white}
+                        onChange={e =>
+                            onChange({ ...modifier.params, [channel]: { ...p, white: Math.max(Number(e.target.value), p.black + 1) } })
+                        }
+                        className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
+                    />
+                    <span className="text-sm text-muted-foreground min-w-[2.5rem] text-right tabular-nums">
+                        {p.white}
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Curves ───────────────────────────────────────────────────────────────────
+
+function CurvesSettings({
+    modifier,
+    onChange,
+    histogram,
+}: {
+    modifier: CurvesModifier;
+    onChange: (params: CurvesModifier["params"]) => void;
+    histogram: HistogramData | null;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    const svgRef = useRef<SVGSVGElement>(null);
+    const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+    const [channel, setChannel] = useState<ColorChannel>("master");
+    const activePoints = modifier.params[channel];
+
+    const getMousePos = (e: React.MouseEvent | React.TouchEvent) => {
+        if (!svgRef.current) return { x: 0, y: 0 };
+        const rect = svgRef.current.getBoundingClientRect();
+        const clientX = "touches" in e ? e.touches[0]!.clientX : e.clientX;
+        const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
+        const x = Math.max(0, Math.min(255, Math.round(((clientX - rect.left) / rect.width) * 255)));
+        const y = Math.max(0, Math.min(255, Math.round((1 - (clientY - rect.top) / rect.height) * 255)));
+        return { x, y };
+    };
+
+    const handlePointerDown = (e: React.MouseEvent | React.TouchEvent, idx: number) => {
+        e.stopPropagation();
+        setDraggingIdx(idx);
+    };
+
+    const handlePointerMove = (e: React.MouseEvent | React.TouchEvent) => {
+        if (draggingIdx === null) return;
+        const { x, y } = getMousePos(e);
+        const newPoints = [...activePoints];
+        
+        const minX = draggingIdx > 0 ? newPoints[draggingIdx - 1]!.x + 1 : 0;
+        const maxX = draggingIdx < newPoints.length - 1 ? newPoints[draggingIdx + 1]!.x - 1 : 255;
+        
+        newPoints[draggingIdx] = { x: Math.max(minX, Math.min(maxX, x)), y };
+        onChange({ ...modifier.params, [channel]: newPoints });
+    };
+
+    const handlePointerUp = () => {
+        setDraggingIdx(null);
+    };
+
+    const handleSvgClick = (e: React.MouseEvent) => {
+        if (draggingIdx !== null) return;
+        const { x, y } = getMousePos(e);
+        const newPoints = [...activePoints, { x, y }].sort((a, b) => a.x - b.x);
+        onChange({ ...modifier.params, [channel]: newPoints });
+    };
+
+    const handleRightClick = (e: React.MouseEvent, idx: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (idx === 0 || idx === activePoints.length - 1) return; // don't delete end points
+        const newPoints = activePoints.filter((_, i) => i !== idx);
+        onChange({ ...modifier.params, [channel]: newPoints });
+    };
+
+    const sorted = [...activePoints].sort((a, b) => a.x - b.x);
+    const spline = createMonotoneCubicSpline(sorted);
+    let curvePath = "";
+    for (let i = 0; i <= 255; i += 2) { // step 2 for performance, enough for smooth curve
+        const x = (i / 255) * 100;
+        const y = 100 - (Math.max(0, Math.min(255, spline(i))) / 255) * 100;
+        curvePath += `${i === 0 ? "M" : "L"} ${x} ${y} `;
+    }
+
+    let lineStroke = "text-primary";
+    if (channel === "r") lineStroke = "text-red-500";
+    if (channel === "g") lineStroke = "text-green-500";
+    if (channel === "b") lineStroke = "text-blue-500";
+
+    return (
+        <div className="flex flex-col gap-4">
+            <ChannelSelector value={channel} onChange={setChannel} />
+            
+            <div className="flex flex-col gap-1">
+                <Label className="text-sm font-medium">{t("Curves (Click: Add, Right-click: Remove)", { ns: "tooltip" })}</Label>
+                <div 
+                    className="w-full aspect-square border border-border/40 bg-background/50 rounded-md relative cursor-crosshair touch-none select-none"
+                    onMouseMove={handlePointerMove}
+                    onMouseUp={handlePointerUp}
+                    onMouseLeave={handlePointerUp}
+                    onTouchMove={handlePointerMove}
+                    onTouchEnd={handlePointerUp}
+                    onTouchCancel={handlePointerUp}
+                >
+                    <HistogramBackground data={histogram} channel={channel} />
+                    <svg 
+                        ref={svgRef} 
+                        viewBox="0 0 100 100" 
+                        preserveAspectRatio="none" 
+                        className="w-full h-full absolute inset-0 overflow-visible"
+                        onClick={handleSvgClick}
+                    >
+                        <g className="stroke-muted-foreground/20" strokeWidth="1">
+                            {[25, 50, 75].map(v => (
+                                <React.Fragment key={v}>
+                                    <line x1={v} y1="0" x2={v} y2="100" />
+                                    <line x1="0" y1={v} x2="100" y2={v} />
+                                </React.Fragment>
+                            ))}
+                        </g>
+                        <path d={curvePath} fill="none" stroke="currentColor" strokeWidth="1.5" className={lineStroke} />
+                        {activePoints.map((p, idx) => (
+                            <circle
+                                key={idx}
+                                cx={(p.x / 255) * 100}
+                                cy={100 - (p.y / 255) * 100}
+                                r="3"
+                                className="fill-background stroke-primary cursor-pointer hover:stroke-foreground transition-colors"
+                                strokeWidth="1.5"
+                                onMouseDown={(e) => handlePointerDown(e, idx)}
+                                onTouchStart={(e) => handlePointerDown(e, idx)}
+                                onContextMenu={(e) => handleRightClick(e, idx)}
+                            />
+                        ))}
+                    </svg>
                 </div>
             </div>
         </div>
@@ -549,6 +872,10 @@ function TitleIcon({ type }: { type: AnyModifier["type"] }) {
                 className={cls}
             />
         );
+    if (type === "levels")
+        return <SlidersHorizontal size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "curves")
+        return <TrendingUp size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
     return (
         <Waves
             size={ICON.SIZE}
@@ -576,6 +903,51 @@ export function ModifierSettingsDialog({
     onUpdate,
 }: ModifierSettingsDialogProps) {
     const { t } = useTranslation(["tooltip", "keywords"]);
+    const [histogram, setHistogram] = useState<HistogramData | null>(null);
+
+    useEffect(() => {
+        if (!open || !modifier) {
+            setOffset({ x: 0, y: 0 });
+            setIsDragging(false);
+            return;
+        }
+        if (modifier.type === "levels" || modifier.type === "curves") {
+            if (imageRef.current) {
+                setTimeout(() => {
+                    if (imageRef.current) {
+                        setHistogram(computeHistogram(imageRef.current));
+                    }
+                }, 10);
+            }
+        }
+    }, [open, modifier?.type, imageRef]);
+
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+    const handlePointerDown = (e: React.PointerEvent) => {
+        if (e.button !== 0) return; // Only left click
+        // Don't drag if clicking on the close button
+        if ((e.target as HTMLElement).closest('button')) return;
+        
+        setIsDragging(true);
+        setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e: React.PointerEvent) => {
+        if (!isDragging) return;
+        setOffset({
+            x: e.clientX - dragStart.x,
+            y: e.clientY - dragStart.y,
+        });
+    };
+
+    const handlePointerUp = (e: React.PointerEvent) => {
+        setIsDragging(false);
+        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    };
 
     if (!modifier) return null;
 
@@ -608,13 +980,20 @@ export function ModifierSettingsDialog({
             <DialogPortal>
                 {/* No DialogOverlay — non-modal dialogs don't need a backdrop */}
                 <DialogContent
-                    className="w-[440px] max-w-[95vw] max-h-[85vh] overflow-y-auto p-5 shadow-2xl border border-border/60 z-50 pointer-events-auto"
+                    className="w-[440px] max-w-[95vw] max-h-[85vh] overflow-y-auto p-5 shadow-2xl border border-border/60 z-50 pointer-events-auto transition-none"
+                    style={{ transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))` }}
                     id={`modifier-settings-dialog-${modifier.id}`}
                     onPointerDownOutside={e => e.preventDefault()}
                     onInteractOutside={e => e.preventDefault()}
                 >
                     {/* Title row with explicit close button */}
-                    <div className="flex items-center justify-between mb-4">
+                    <div 
+                        className="flex items-center justify-between mb-4 cursor-grab active:cursor-grabbing select-none -m-5 p-5 pb-4 bg-background/95 sticky top-[-1.25rem] z-10 border-b border-border/10"
+                        onPointerDown={handlePointerDown}
+                        onPointerMove={handlePointerMove}
+                        onPointerUp={handlePointerUp}
+                        onPointerCancel={handlePointerUp}
+                    >
                         <DialogTitle className="text-base font-semibold flex items-center gap-2 m-0">
                             <TitleIcon type={modifier.type} />
                             {title}
@@ -649,6 +1028,20 @@ export function ModifierSettingsDialog({
                             modifier={modifier as FftModifier}
                             imageRef={imageRef}
                             onChange={p => handleChange(p)}
+                        />
+                    )}
+                    {modifier.type === "levels" && (
+                        <LevelsSettings
+                            modifier={modifier as LevelsModifier}
+                            onChange={p => handleChange(p)}
+                            histogram={histogram}
+                        />
+                    )}
+                    {modifier.type === "curves" && (
+                        <CurvesSettings
+                            modifier={modifier as CurvesModifier}
+                            onChange={p => handleChange(p)}
+                            histogram={histogram}
                         />
                     )}
 
