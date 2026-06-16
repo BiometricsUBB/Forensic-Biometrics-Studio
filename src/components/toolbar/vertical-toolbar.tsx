@@ -204,12 +204,20 @@ function createTransformedMarkings(
     const clonedLeft: unknown[] = [];
     const clonedRight: unknown[] = [];
 
+    const LeftConstructor = leftCore.constructor as new () => Record<
+        string,
+        unknown
+    >;
+    const RightConstructor = rightCore.constructor as new () => Record<
+        string,
+        unknown
+    >;
+
     automatedPairs.forEach((pair, index) => {
         const nextLabel = maxCurrentLabel + index + 1;
 
-        const leftClone = Object.create(
-            Object.getPrototypeOf(leftCore)
-        ) as Record<string, unknown>;
+        const leftClone = new LeftConstructor();
+
         /* eslint-disable-next-line security/detect-object-injection */
         Object.keys(leftCore).forEach(key => {
             if (
@@ -240,9 +248,8 @@ function createTransformedMarkings(
             leftClone["y"] = pair.left.y;
         }
 
-        const rightClone = Object.create(
-            Object.getPrototypeOf(rightCore)
-        ) as Record<string, unknown>;
+        const rightClone = new RightConstructor();
+
         /* eslint-disable-next-line security/detect-object-injection */
         Object.keys(rightCore).forEach(key => {
             if (
