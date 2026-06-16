@@ -29,6 +29,14 @@ Find information about the tech stack, environment setup, and contribution guide
 
 ---
 
+## 🗺️ Roadmap
+
+Curious where the project is heading? Browse the planned features, current priorities, and how you can help.
+
+👉 [Project Roadmap](./docs/roadmap.md)
+
+---
+
 ## 📜 Usage Terms & Citation
 
 Forensic Biometrics Studio is developed as an open academic project.
