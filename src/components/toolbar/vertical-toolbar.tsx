@@ -5,7 +5,10 @@ import { HTMLAttributes, useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
-import { matchWithSourceafis } from "@/lib/utils/viewport/autoMarkWithSourceafis";
+import {
+    matchWithSourceafis,
+    resolveSourceafisTypeId,
+} from "@/lib/utils/viewport/autoMarkWithSourceafis";
 import {
     CURSOR_MODES,
     DashboardToolbarStore,
@@ -288,35 +291,16 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
         return name.includes("core") || display.includes("core");
     });
     const coreTypeId = coreType?.id;
-    const rozwidlenieType = allMarkingTypes.find(type => {
-        const name = (type.name || "").toLowerCase();
-        const display = (type.displayName || "").toLowerCase();
-        return (
-            name.includes("rozwidlenie") ||
-            display.includes("rozwidlenie") ||
-            name.includes("bifurcation") ||
-            display.includes("bifurcation")
-        );
-    });
-    const zakonczenieType = allMarkingTypes.find(type => {
-        const name = (type.name || "").toLowerCase();
-        const display = (type.displayName || "").toLowerCase();
-        return (
-            name.includes("zakończenie") ||
-            name.includes("zakoncenie") ||
-            display.includes("zakończenie") ||
-            display.includes("zakoncenie") ||
-            name.includes("ending") ||
-            display.includes("ending")
-        );
-    });
+
+    const resolvedBifurcationId = resolveSourceafisTypeId("bifurcation");
+    const resolvedEndingId = resolveSourceafisTypeId("ending");
 
     const nonCoreTypes = allMarkingTypes.filter(t => t.id !== coreTypeId);
 
     const rozwidlenieTypeId =
-        rozwidlenieType?.id || nonCoreTypes[0]?.id || allMarkingTypes[0]?.id;
+        resolvedBifurcationId || nonCoreTypes[0]?.id || allMarkingTypes[0]?.id;
     const zakonczenieTypeId =
-        zakonczenieType?.id ||
+        resolvedEndingId ||
         nonCoreTypes[1]?.id ||
         nonCoreTypes[0]?.id ||
         allMarkingTypes[0]?.id;
