@@ -1,5 +1,6 @@
 import React, { RefObject, useEffect, useRef, useState } from "react";
 import { Ruler } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ICON } from "@/lib/utils/const";
 import { cn } from "@/lib/utils/shadcn";
@@ -20,6 +21,7 @@ export default function ImageDpiControls({
     onActiveChange,
     onScaleComputed,
 }: ImageDpiControlsProps) {
+    const { t } = useTranslation(["tooltip"]);
     const [targetDpi, setTargetDpi] = useState<500 | 1000>(1000);
     const [referenceMm, setReferenceMm] = useState(10);
     const handlerRef = useRef<ImageDpiCalibration | null>(null);
@@ -66,7 +68,9 @@ export default function ImageDpiControls({
             </Button>
 
             <div className="space-y-2">
-                <span className="text-sm font-medium">Target DPI</span>
+                <span className="text-sm font-medium">
+                    {t("Target DPI", { ns: "tooltip" })}
+                </span>
 
                 <div className="flex gap-4">
                     {([500, 1000] as const).map(dpi => (
@@ -110,14 +114,16 @@ export default function ImageDpiControls({
 
             <div className="space-y-1">
                 <span className="block text-sm font-medium">
-                    Reference length (mm)
+                    {t("Reference length (mm)", { ns: "tooltip" })}
                 </span>
                 <input
                     type="number"
                     min={1}
                     step={1}
                     value={referenceMm}
-                    aria-label="Reference length in millimeters"
+                    aria-label={t("Reference length in millimeters", {
+                        ns: "tooltip",
+                    })}
                     onChange={event => {
                         const value = Number(event.target.value);
                         if (Number.isFinite(value) && value > 0) {
@@ -127,7 +133,7 @@ export default function ImageDpiControls({
                     className="h-9 w-full rounded-md border border-border/40 bg-background px-2 text-sm"
                 />
                 <p className="text-xs text-muted-foreground">
-                    Used when tick detection on the ruler is ambiguous.
+                    {t("DPI reference length hint", { ns: "tooltip" })}
                 </p>
             </div>
         </div>

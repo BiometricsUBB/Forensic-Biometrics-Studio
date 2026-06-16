@@ -531,7 +531,7 @@ function FftSettings({
         if (!maskCvs) return;
         const ctx = maskCvs.getContext("2d");
         ctx?.clearRect(0, 0, maskCvs.width, maskCvs.height);
-        onChange({ _maskCanvas: maskCvs, maskDataUrl: null });
+        onChange({ _maskCanvas: maskCvs });
         if (viewMode === "edit") redrawOverlay();
     }, [viewMode, redrawOverlay, onChange]);
 

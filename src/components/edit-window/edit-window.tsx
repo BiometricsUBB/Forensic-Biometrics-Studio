@@ -33,6 +33,9 @@ import { ModifierSettingsDialog } from "@/components/edit-window/modifiers/Modif
 
 const CANVAS_CONTEXT_UNAVAILABLE = "Canvas context unavailable";
 const FAILED_TO_SAVE_IMAGE_KEY = "Failed to save image: {{error}}";
+const FAILED_TO_TRANSFORM_IMAGE_KEY = "Failed to transform image: {{error}}";
+const FAILED_TO_CROP_IMAGE_KEY = "Failed to crop image: {{error}}";
+const FAILED_TO_SCALE_IMAGE_KEY = "Failed to scale image: {{error}}";
 
 // ─── File helpers (unchanged from old implementation) ─────────────────────────
 
@@ -375,8 +378,7 @@ export function EditWindow() {
         if (!def) return;
         const newMod = def.create() as AnyModifier;
         setModifiers(prev => [...prev, newMod]);
-        // Automatically open edit dialog for the new modifier
-        setTimeout(() => setEditingModifierId(newMod.id), 50);
+        setEditingModifierId(newMod.id);
     }, []);
 
     const handleUpdateModifier = useCallback(
@@ -501,7 +503,7 @@ export function EditWindow() {
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 toast.error(
-                    t(FAILED_TO_SAVE_IMAGE_KEY, {
+                    t(FAILED_TO_TRANSFORM_IMAGE_KEY, {
                         ns: "tooltip",
                         error: msg,
                     })
@@ -546,7 +548,7 @@ export function EditWindow() {
             } catch (err) {
                 const msg = err instanceof Error ? err.message : String(err);
                 toast.error(
-                    t(FAILED_TO_SAVE_IMAGE_KEY, {
+                    t(FAILED_TO_CROP_IMAGE_KEY, {
                         ns: "tooltip",
                         error: msg,
                     })
@@ -582,17 +584,25 @@ export function EditWindow() {
                             canvas.height === sourceHeight
                         ) {
                             toast.info(
-                                `DPI: skala ${scaleText}x, ` +
-                                    `rozmiar bez zmian (${canvas.width} x ` +
-                                    `${canvas.height} px)`
+                                t("DPI scale unchanged", {
+                                    ns: "tooltip",
+                                    scale: scaleText,
+                                    width: canvas.width,
+                                    height: canvas.height,
+                                })
                             );
                             return;
                         }
 
                         toast.success(
-                            `DPI: skala ${scaleText}x, ` +
-                                `${sourceWidth} x ${sourceHeight} px -> ` +
-                                `${canvas.width} x ${canvas.height} px`
+                            t("DPI scale applied", {
+                                ns: "tooltip",
+                                scale: scaleText,
+                                sourceWidth,
+                                sourceHeight,
+                                width: canvas.width,
+                                height: canvas.height,
+                            })
                         );
                     });
                 })
@@ -600,7 +610,7 @@ export function EditWindow() {
                     const msg =
                         err instanceof Error ? err.message : String(err);
                     toast.error(
-                        t(FAILED_TO_SAVE_IMAGE_KEY, {
+                        t(FAILED_TO_SCALE_IMAGE_KEY, {
                             ns: "tooltip",
                             error: msg,
                         })

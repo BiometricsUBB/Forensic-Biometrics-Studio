@@ -35,8 +35,6 @@ export interface DesaturateParams {
 export interface FftParams {
     brushSize: number;
     spectrumOpacity: number;
-    /** Serialised mask - a base64-encoded PNG data URL, or null if untouched */
-    maskDataUrl: string | null;
     /** Runtime-only: in-memory mask canvas (not persisted across re-renders) */
     _maskCanvas?: HTMLCanvasElement | null;
     /** Runtime-only: cached FFT result so we don't recompute on every render */

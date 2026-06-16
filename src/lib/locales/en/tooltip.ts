@@ -19,6 +19,19 @@ const d: Dictionary = {
     "Failed to save markings data": "Failed to save markings data",
     "Image saved successfully": "Image saved successfully",
     "Failed to save image: {{error}}": "Failed to save image: {{error}}",
+    "Failed to transform image: {{error}}":
+        "Failed to transform image: {{error}}",
+    "Failed to crop image: {{error}}": "Failed to crop image: {{error}}",
+    "Failed to scale image: {{error}}": "Failed to scale image: {{error}}",
+    "DPI scale unchanged":
+        "DPI: scale {{scale}}x, size unchanged ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: scale {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Target DPI",
+    "Reference length (mm)": "Reference length (mm)",
+    "Reference length in millimeters": "Reference length in millimeters",
+    "DPI reference length hint":
+        "Used when tick detection on the ruler is ambiguous.",
     "Image saved successfully, but could not be reloaded due to path restrictions":
         "Image saved successfully, but could not be reloaded due to path restrictions",
     Save: "Save",

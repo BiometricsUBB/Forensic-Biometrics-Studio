@@ -74,7 +74,6 @@ export function createFftModifier(): FftModifier {
         params: {
             brushSize: 30,
             spectrumOpacity: 75,
-            maskDataUrl: null,
             _maskCanvas: null,
             _fftResult: null,
             _processor: null,

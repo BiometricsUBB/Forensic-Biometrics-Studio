@@ -84,6 +84,34 @@ function applyBrightnessContrastModifiers(
     ]);
 }
 
+function applyBrightnessModifier(
+    canvas: HTMLCanvasElement,
+    mod: BrightnessModifier
+) {
+    const value = Math.max(0, Math.min(100, mod.params.value));
+    if (value === 50) return;
+
+    forEachPixel(canvas, (r, g, b) => [
+        applyBrightnessToChannel(r, value),
+        applyBrightnessToChannel(g, value),
+        applyBrightnessToChannel(b, value),
+    ]);
+}
+
+function applyContrastModifier(
+    canvas: HTMLCanvasElement,
+    mod: ContrastModifier
+) {
+    const value = Math.max(0, Math.min(100, mod.params.value));
+    if (value === 50) return;
+
+    forEachPixel(canvas, (r, g, b) => [
+        applyContrastToChannel(r, value),
+        applyContrastToChannel(g, value),
+        applyContrastToChannel(b, value),
+    ]);
+}
+
 function applyInvertModifier(canvas: HTMLCanvasElement, mod: InvertModifier) {
     const amount = Math.max(0, Math.min(100, mod.params.value)) / 100;
     if (amount === 0) return;
@@ -167,52 +195,54 @@ async function applyFftModifier(
     ctx.putImageData(output, 0, 0);
 }
 
-/**
- * Applies all enabled modifiers to `sourceImg` in sequence.
- * Returns a `Uint8Array` of PNG bytes suitable for writing to disk.
- *
- * The pipeline works as follows:
- *  1. Draw the source image to an offscreen canvas.
- *  2. Apply Photoshop-like brightness/contrast as a pair.
- *  3. Apply the remaining enabled modifiers in list order.
- *  4. Encode the final canvas as a PNG blob and return it.
- */
-export async function applyPipelineToImage(
-    sourceImg: HTMLImageElement,
-    modifiers: AnyModifier[]
-): Promise<Uint8Array> {
+function drawSourceToCanvas(sourceImg: HTMLImageElement): HTMLCanvasElement {
     const w = sourceImg.naturalWidth || sourceImg.width;
     const h = sourceImg.naturalHeight || sourceImg.height;
-
-    // --- Stage 1: draw source image ---
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas context unavailable");
-
     ctx.drawImage(sourceImg, 0, 0, w, h);
+    return canvas;
+}
 
-    const brightnessModifier = [...modifiers]
-        .reverse()
-        .find(
-            (mod): mod is BrightnessModifier =>
-                mod.enabled && mod.type === "brightness"
-        );
-    const contrastModifier = [...modifiers]
-        .reverse()
-        .find(
-            (mod): mod is ContrastModifier =>
-                mod.enabled && mod.type === "contrast"
-        );
-
-    applyBrightnessContrastModifiers(
-        canvas,
-        brightnessModifier,
-        contrastModifier
+function applyBrightnessContrastStage(
+    canvas: HTMLCanvasElement,
+    modifiers: AnyModifier[]
+) {
+    const brightnessModifiers = modifiers.filter(
+        (mod): mod is BrightnessModifier =>
+            mod.enabled && mod.type === "brightness"
+    );
+    const contrastModifiers = modifiers.filter(
+        (mod): mod is ContrastModifier => mod.enabled && mod.type === "contrast"
     );
 
-    // --- Stage 2: apply remaining modifiers in order ---
+    if (brightnessModifiers.length <= 1 && contrastModifiers.length <= 1) {
+        const [brightnessModifier] = brightnessModifiers;
+        const [contrastModifier] = contrastModifiers;
+        applyBrightnessContrastModifiers(
+            canvas,
+            brightnessModifier,
+            contrastModifier
+        );
+        return;
+    }
+
+    modifiers.forEach(mod => {
+        if (mod.enabled && mod.type === "brightness") {
+            applyBrightnessModifier(canvas, mod);
+        } else if (mod.enabled && mod.type === "contrast") {
+            applyContrastModifier(canvas, mod);
+        }
+    });
+}
+
+async function applyNonBrightnessContrastStage(
+    canvas: HTMLCanvasElement,
+    modifiers: AnyModifier[]
+) {
     for (let i = 0; i < modifiers.length; i += 1) {
         const mod = modifiers[i];
         if (
@@ -231,8 +261,9 @@ export async function applyPipelineToImage(
             }
         }
     }
+}
 
-    // --- Encode to PNG ---
+async function encodeCanvasToPng(canvas: HTMLCanvasElement) {
     const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
             b => (b ? resolve(b) : reject(new Error("Canvas toBlob failed"))),
@@ -242,4 +273,24 @@ export async function applyPipelineToImage(
     });
     const buf = await blob.arrayBuffer();
     return new Uint8Array(buf);
+}
+
+/**
+ * Applies all enabled modifiers to `sourceImg` in sequence.
+ * Returns a `Uint8Array` of PNG bytes suitable for writing to disk.
+ *
+ * The pipeline works as follows:
+ *  1. Draw the source image to an offscreen canvas.
+ *  2. Apply Photoshop-like brightness/contrast as a pair.
+ *  3. Apply the remaining enabled modifiers in list order.
+ *  4. Encode the final canvas as a PNG blob and return it.
+ */
+export async function applyPipelineToImage(
+    sourceImg: HTMLImageElement,
+    modifiers: AnyModifier[]
+): Promise<Uint8Array> {
+    const canvas = drawSourceToCanvas(sourceImg);
+    applyBrightnessContrastStage(canvas, modifiers);
+    await applyNonBrightnessContrastStage(canvas, modifiers);
+    return encodeCanvasToPng(canvas);
 }

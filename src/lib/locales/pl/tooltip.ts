@@ -20,6 +20,21 @@ const d: Dictionary = {
     "Image saved successfully": "Obraz zapisany pomyślnie",
     "Failed to save image: {{error}}":
         "Nie udało się zapisać obrazu: {{error}}",
+    "Failed to transform image: {{error}}":
+        "Nie udało się przekształcić obrazu: {{error}}",
+    "Failed to crop image: {{error}}":
+        "Nie udało się wykadrować obrazu: {{error}}",
+    "Failed to scale image: {{error}}":
+        "Nie udało się przeskalować obrazu: {{error}}",
+    "DPI scale unchanged":
+        "DPI: skala {{scale}}x, rozmiar bez zmian ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: skala {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Docelowe DPI",
+    "Reference length (mm)": "Długość referencyjna (mm)",
+    "Reference length in millimeters": "Długość referencyjna w milimetrach",
+    "DPI reference length hint":
+        "Używane, gdy wykrycie kresek na linijce jest niejednoznaczne.",
     "Image saved successfully, but could not be reloaded due to path restrictions":
         "Obraz zapisany pomyślnie, ale nie można go przeładować z powodu ograniczeń ścieżki",
     Save: "Zapisz",
