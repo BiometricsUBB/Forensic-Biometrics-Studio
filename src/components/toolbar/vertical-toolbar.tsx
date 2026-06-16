@@ -195,8 +195,6 @@ function createTransformedMarkings(
     automatedPairs: ValidPair[],
     leftCore: AppMarking,
     rightCore: AppMarking,
-    leftCoreCoords: { path: string },
-    rightCoreCoords: { path: string },
     maxCurrentLabel: number,
     rozwidlenieTypeId: string,
     zakonczenieTypeId: string
@@ -239,14 +237,7 @@ function createTransformedMarkings(
                 ? rozwidlenieTypeId
                 : zakonczenieTypeId;
         leftClone["label"] = nextLabel;
-        if (leftCoreCoords.path === "origin")
-            leftClone["origin"] = { x: pair.left.x, y: pair.left.y };
-        else if (leftCoreCoords.path === "position")
-            leftClone["position"] = { x: pair.left.x, y: pair.left.y };
-        else {
-            leftClone["x"] = pair.left.x;
-            leftClone["y"] = pair.left.y;
-        }
+        leftClone["origin"] = { x: pair.left.x, y: pair.left.y };
 
         const rightClone = new RightConstructor();
 
@@ -271,14 +262,7 @@ function createTransformedMarkings(
                 ? rozwidlenieTypeId
                 : zakonczenieTypeId;
         rightClone["label"] = nextLabel;
-        if (rightCoreCoords.path === "origin")
-            rightClone["origin"] = { x: pair.right.x, y: pair.right.y };
-        else if (rightCoreCoords.path === "position")
-            rightClone["position"] = { x: pair.right.x, y: pair.right.y };
-        else {
-            rightClone["x"] = pair.right.x;
-            rightClone["y"] = pair.right.y;
-        }
+        rightClone["origin"] = { x: pair.right.x, y: pair.right.y };
 
         clonedLeft.push(leftClone);
         clonedRight.push(rightClone);
@@ -933,11 +917,6 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                     const rCore =
                                         rightCore as unknown as AppMarking;
 
-                                    const leftCoreCoords =
-                                        detectCoordinatePath(lCore);
-                                    const rightCoreCoords =
-                                        detectCoordinatePath(rCore);
-
                                     const manualPairs: ManualPair[] = [];
                                     (
                                         leftMarkings as unknown as AppMarking[]
@@ -1024,8 +1003,6 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                             automatedPairs,
                                             lCore,
                                             rCore,
-                                            leftCoreCoords,
-                                            rightCoreCoords,
                                             maxCurrentLabel,
                                             rozwidlenieTypeId ?? "",
                                             zakonczenieTypeId ?? ""
