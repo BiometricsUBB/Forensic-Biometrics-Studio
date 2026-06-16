@@ -305,21 +305,6 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
         nonCoreTypes[0]?.id ||
         allMarkingTypes[0]?.id;
 
-    console.log(
-        "SŁOWNIK TYPÓW ADNOTACJI W APLIKACJI",
-        allMarkingTypes.map(t => ({
-            id: t.id,
-            name: t.name,
-            displayName: t.displayName,
-        }))
-    );
-    console.log(
-        "Przypisane ID robocze -> Rozwidlenie:",
-        rozwidlenieTypeId,
-        "Zakończenie:",
-        zakonczenieTypeId
-    );
-
     const leftMarkings = MarkingsStore(CANVAS_ID.LEFT).use(
         state => state.markings
     );

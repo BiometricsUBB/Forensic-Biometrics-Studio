@@ -174,29 +174,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 loadTracingDataWithDialog(viewport);
                             },
                         },
-                        /*
-                        {
-                            label: "Auto-mark (SourceAFIS)",
-                            icon: (
-                                <Wand2
-                                    size={ICON.SIZE}
-                                    strokeWidth={ICON.STROKE_WIDTH}
-                                />
-                            ),
-                            onClick: async () => {
-                                try {
-                                    // eslint-disable-next-line no-console
-                                    console.log(
-                                        "Auto-mark clicked - starting sidecar"
-                                    );
-                                    await autoMarkWithSourceafis(viewport);
-                                } catch (error) {
-                                    // eslint-disable-next-line no-console
-                                    console.error("Auto-mark failed:", error);
-                                }
-                            },
-                        },
-                        */
                     ]}
                     size="icon"
                     variant="outline"
