@@ -101,6 +101,7 @@ export type i18nDescription = Recordify<
     | "Configure report metadata"
     | "Configure default report data"
     | "Generate PDF report"
+    | "Manage marking types"
 >;
 
 export type i18nModes = Recordify<WORKING_MODE>;
