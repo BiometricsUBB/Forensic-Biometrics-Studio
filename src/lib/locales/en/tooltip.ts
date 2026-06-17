@@ -19,6 +19,19 @@ const d: Dictionary = {
     "Failed to save markings data": "Failed to save markings data",
     "Image saved successfully": "Image saved successfully",
     "Failed to save image: {{error}}": "Failed to save image: {{error}}",
+    "Failed to transform image: {{error}}":
+        "Failed to transform image: {{error}}",
+    "Failed to crop image: {{error}}": "Failed to crop image: {{error}}",
+    "Failed to scale image: {{error}}": "Failed to scale image: {{error}}",
+    "DPI scale unchanged":
+        "DPI: scale {{scale}}x, size unchanged ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: scale {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Target DPI",
+    "Reference length (mm)": "Reference length (mm)",
+    "Reference length in millimeters": "Reference length in millimeters",
+    "DPI reference length hint":
+        "Used when tick detection on the ruler is ambiguous.",
     "Image saved successfully, but could not be reloaded due to path restrictions":
         "Image saved successfully, but could not be reloaded due to path restrictions",
     Save: "Save",
@@ -41,6 +54,27 @@ const d: Dictionary = {
     "Clear measurement": "Clear measurement",
     Brightness: "Brightness",
     Contrast: "Contrast",
+    "Invert colors": "Invert colors",
+    Desaturate: "Desaturate",
+    "Desaturate channel weights":
+        "Convert to black and white using adjustable Photoshop-style color ranges.",
+    Reds: "Reds",
+    Yellows: "Yellows",
+    Greens: "Greens",
+    Cyans: "Cyans",
+    Blues: "Blues",
+    Magentas: "Magentas",
+    "Rotate 90° right": "Rotate 90° right",
+    "Rotate 90° left": "Rotate 90° left",
+    "Rotate 180°": "Rotate 180°",
+    "Flip horizontal": "Flip horizontal",
+    "Flip vertical": "Flip vertical",
+    "Start crop": "Start crop",
+    "Apply crop": "Apply crop",
+    "Cancel crop": "Cancel crop",
+    "Draw a rectangle on the image to crop it":
+        "Draw a rectangle on the image to crop it",
+    "Crop area selected": "Crop area selected",
     "Reset Zoom": "Reset Zoom",
     ImageLoadPermissionError:
         "The edited image was saved, but cannot be loaded due to path restrictions. Please try loading it manually.",
@@ -61,6 +95,9 @@ const d: Dictionary = {
     brightness_desc: "Adjust the overall brightness of the image",
     contrast_desc:
         "Adjust the difference between light and dark areas of the image",
+    invert_desc: "Invert image colors",
+    desaturate_desc:
+        "Convert the image to black and white with adjustable color ranges",
     fft_desc:
         "Apply Fast Fourier Transform to filter out periodic noise and patterns",
     Disable: "Disable",

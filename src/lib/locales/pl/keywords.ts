@@ -70,6 +70,8 @@ const d: Dictionary = {
     "Saving...": "Zapisywanie...",
     "Save as": "Zapisz jako",
     "Brush size": "Wielkość pędzla",
+    Transformations: "Przekształcenia",
+    Crop: "Kadrowanie",
     Preview: "Podgląd",
     Edit: "Edycja",
     Apply: "Zastosuj",

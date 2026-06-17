@@ -5,22 +5,37 @@ import { Menubar } from "@/components/ui/menubar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
-import { Edit, Save } from "lucide-react";
+import {
+    Edit,
+    Save,
+    RotateCw,
+    RotateCcw,
+    FlipHorizontal,
+    FlipVertical,
+} from "lucide-react";
 import { listen, emit } from "@tauri-apps/api/event";
 import { readFile, writeFile, exists } from "@tauri-apps/plugin-fs";
 import { basename, extname, join, dirname } from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
+import { ImageCropControls } from "@/components/edit-window/crop/image-crop-controls";
 import { AnyModifier, ModifierType } from "@/lib/imageModifiers/types";
 import {
     MODIFIER_REGISTRY,
     buildCssFilter,
+    hasCanvasModifiers,
 } from "@/lib/imageModifiers/registry";
 import { applyPipelineToImage } from "@/lib/imageModifiers/pipeline";
 import { AddModifierButton } from "@/components/edit-window/modifiers/AddModifierButton";
 import { ModifierList } from "@/components/edit-window/modifiers/ModifierList";
 import { ModifierSettingsDialog } from "@/components/edit-window/modifiers/ModifierSettingsDialog";
+
+const CANVAS_CONTEXT_UNAVAILABLE = "Canvas context unavailable";
+const FAILED_TO_SAVE_IMAGE_KEY = "Failed to save image: {{error}}";
+const FAILED_TO_TRANSFORM_IMAGE_KEY = "Failed to transform image: {{error}}";
+const FAILED_TO_CROP_IMAGE_KEY = "Failed to crop image: {{error}}";
+const FAILED_TO_SCALE_IMAGE_KEY = "Failed to scale image: {{error}}";
 
 // ─── File helpers (unchanged from old implementation) ─────────────────────────
 
@@ -79,6 +94,34 @@ async function generateFilename(p: string) {
     return { nameWithoutExt, extWithDot, timestamp };
 }
 
+async function pathToBlobUrl(path: string): Promise<string> {
+    const bytes = await readFile(path);
+    // The DOM Blob typings use ArrayBuffer while Tauri returns a typed array.
+    const blob = new Blob([bytes as unknown as ArrayBuffer], {
+        type: "image/png",
+    });
+    return URL.createObjectURL(blob);
+}
+
+async function canvasToBlobUrl(canvas: HTMLCanvasElement): Promise<string> {
+    const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+            b => (b ? resolve(b) : reject(new Error("Canvas toBlob failed"))),
+            "image/png",
+            1.0
+        );
+    });
+    return URL.createObjectURL(blob);
+}
+
+async function loadImageElement(src: string): Promise<HTMLImageElement> {
+    const img = new Image();
+    img.decoding = "async";
+    img.src = src;
+    await img.decode();
+    return img;
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function EditWindow() {
@@ -87,7 +130,10 @@ export function EditWindow() {
 
     // ── Image state ──────────────────────────────────────────────────────────
     const [imagePath, setImagePath] = useState<string | null>(null);
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+    const [processedPreviewUrl, setProcessedPreviewUrl] = useState<
+        string | null
+    >(null);
     const [imageName, setImageName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
         null
@@ -98,6 +144,9 @@ export function EditWindow() {
     const [zoom, setZoom] = useState<number>(1);
     const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [overlayMode, setOverlayMode] = useState<"none" | "crop" | "dpi">(
+        "none"
+    );
     const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
         x: 0,
         y: 0,
@@ -115,19 +164,23 @@ export function EditWindow() {
 
     const TRANSFORM_ORIGIN = "center center";
 
-    // ── CSS filter (live, lightweight) ───────────────────────────────────────
-    const cssFilter = buildCssFilter(modifiers);
+    // ── CSS filter fallback (pixel-accurate preview is canvas-rendered) ──────
+    const cssFilter = buildCssFilter();
+
+    const baseDisplayUrl = originalUrl;
+    const displayUrl = processedPreviewUrl ?? baseDisplayUrl;
 
     // ── Image loading ────────────────────────────────────────────────────────
 
-    const loadImage = async (path: string) => {
+    const loadImage = useCallback(async (path: string) => {
         try {
             setError(null);
-            setImageUrl(null);
-            const imageBytes = await readFile(path);
-            const blob = new Blob([imageBytes]);
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
+            setOriginalUrl(null);
+            setProcessedPreviewUrl(null);
+            setModifiers([]);
+            setOverlayMode("none");
+            const url = await pathToBlobUrl(path);
+            setOriginalUrl(url);
             setImageName(await basename(path));
             setZoom(1);
             setPan({ x: 0, y: 0 });
@@ -135,14 +188,14 @@ export function EditWindow() {
             const msg =
                 err instanceof Error ? err.message : "Failed to load image";
             setError(`${msg} (Path: ${path})`);
-            setImageUrl(null);
+            setOriginalUrl(null);
         }
-    };
+    }, []);
 
     // ── Wheel / pan handlers ─────────────────────────────────────────────────
 
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
-        if (!imageUrl || !containerRef.current || !imageRef.current) return;
+        if (!displayUrl || !containerRef.current || !imageRef.current) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newZoom = Math.max(0.1, Math.min(10, zoom * delta));
@@ -227,15 +280,23 @@ export function EditWindow() {
                 unlistenPromise.then(fn => fn());
             }
         };
-    }, []);
+    }, [loadImage]);
 
     useEffect(() => {
         return () => {
-            if (imageUrl) {
-                URL.revokeObjectURL(imageUrl);
+            if (originalUrl) {
+                URL.revokeObjectURL(originalUrl);
             }
         };
-    }, [imageUrl]);
+    }, [originalUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (processedPreviewUrl) {
+                URL.revokeObjectURL(processedPreviewUrl);
+            }
+        };
+    }, [processedPreviewUrl]);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -246,7 +307,47 @@ export function EditWindow() {
         if (img.complete && img.naturalWidth) updateSize();
         img.addEventListener("load", updateSize);
         return () => img.removeEventListener("load", updateSize);
-    }, [imageUrl]);
+    }, [displayUrl]);
+
+    useEffect(() => {
+        let cancelled = false;
+        let nextUrl: string | null = null;
+
+        async function renderPreview() {
+            if (!baseDisplayUrl || !hasCanvasModifiers(modifiers)) {
+                setProcessedPreviewUrl(current => {
+                    if (current) URL.revokeObjectURL(current);
+                    return null;
+                });
+                return;
+            }
+
+            try {
+                const source = await loadImageElement(baseDisplayUrl);
+                const bytes = await applyPipelineToImage(source, modifiers);
+                const blob = new Blob([bytes as unknown as ArrayBuffer], {
+                    type: "image/png",
+                });
+                nextUrl = URL.createObjectURL(blob);
+                if (cancelled) {
+                    URL.revokeObjectURL(nextUrl);
+                    return;
+                }
+                setProcessedPreviewUrl(current => {
+                    if (current) URL.revokeObjectURL(current);
+                    return nextUrl;
+                });
+            } catch {
+                if (nextUrl) URL.revokeObjectURL(nextUrl);
+            }
+        }
+
+        renderPreview();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [baseDisplayUrl, modifiers]);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -268,7 +369,7 @@ export function EditWindow() {
             img.removeEventListener("load", sync);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageUrl]);
+    }, [displayUrl]);
 
     // ── Modifier helpers ─────────────────────────────────────────────────────
 
@@ -277,7 +378,6 @@ export function EditWindow() {
         if (!def) return;
         const newMod = def.create() as AnyModifier;
         setModifiers(prev => [...prev, newMod]);
-        // Automatically open edit dialog for the new modifier
         setEditingModifierId(newMod.id);
     }, []);
 
@@ -323,15 +423,210 @@ export function EditWindow() {
     const editingModifier =
         modifiers.find(m => m.id === editingModifierId) ?? null;
 
+    // ── Structural edits (commit to current base image) ──────────────────────
+
+    const replaceBaseImageFromCanvas = useCallback(
+        async (canvas: HTMLCanvasElement) => {
+            const nextUrl = await canvasToBlobUrl(canvas);
+            setOriginalUrl(current => {
+                if (current) URL.revokeObjectURL(current);
+                return nextUrl;
+            });
+            setProcessedPreviewUrl(current => {
+                if (current) URL.revokeObjectURL(current);
+                return null;
+            });
+            const overlayCanvas = canvasRef.current;
+            const overlayCtx = overlayCanvas?.getContext("2d");
+            if (overlayCanvas && overlayCtx) {
+                overlayCtx.clearRect(
+                    0,
+                    0,
+                    overlayCanvas.width,
+                    overlayCanvas.height
+                );
+            }
+            setOverlayMode("none");
+            setZoom(1);
+            setPan({ x: 0, y: 0 });
+        },
+        []
+    );
+
+    const getBaseImage = useCallback(async () => {
+        if (!baseDisplayUrl) throw new Error("No image loaded");
+        return loadImageElement(baseDisplayUrl);
+    }, [baseDisplayUrl]);
+
+    const applyTransform = useCallback(
+        async (
+            operation:
+                | "rotate90cw"
+                | "rotate90ccw"
+                | "rotate180"
+                | "flipHorizontal"
+                | "flipVertical"
+        ) => {
+            try {
+                const source = await getBaseImage();
+                const rotate90 =
+                    operation === "rotate90cw" || operation === "rotate90ccw";
+                const canvas = document.createElement("canvas");
+                canvas.width = rotate90
+                    ? source.naturalHeight
+                    : source.naturalWidth;
+                canvas.height = rotate90
+                    ? source.naturalWidth
+                    : source.naturalHeight;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+
+                if (operation === "rotate90cw") {
+                    ctx.translate(canvas.width, 0);
+                    ctx.rotate(Math.PI / 2);
+                } else if (operation === "rotate90ccw") {
+                    ctx.translate(0, canvas.height);
+                    ctx.rotate(-Math.PI / 2);
+                } else if (operation === "rotate180") {
+                    ctx.translate(canvas.width, canvas.height);
+                    ctx.rotate(Math.PI);
+                } else if (operation === "flipHorizontal") {
+                    ctx.translate(canvas.width, 0);
+                    ctx.scale(-1, 1);
+                } else if (operation === "flipVertical") {
+                    ctx.translate(0, canvas.height);
+                    ctx.scale(1, -1);
+                }
+
+                ctx.drawImage(source, 0, 0);
+                await replaceBaseImageFromCanvas(canvas);
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                toast.error(
+                    t(FAILED_TO_TRANSFORM_IMAGE_KEY, {
+                        ns: "tooltip",
+                        error: msg,
+                    })
+                );
+            }
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
+    const applyCrop = useCallback(
+        async (rect: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        }) => {
+            try {
+                const source = await getBaseImage();
+                const x = Math.max(
+                    0,
+                    Math.min(source.naturalWidth - 1, rect.x)
+                );
+                const y = Math.max(
+                    0,
+                    Math.min(source.naturalHeight - 1, rect.y)
+                );
+                const width = Math.max(
+                    1,
+                    Math.min(source.naturalWidth - x, rect.width)
+                );
+                const height = Math.max(
+                    1,
+                    Math.min(source.naturalHeight - y, rect.height)
+                );
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+                ctx.drawImage(source, x, y, width, height, 0, 0, width, height);
+                await replaceBaseImageFromCanvas(canvas);
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                toast.error(
+                    t(FAILED_TO_CROP_IMAGE_KEY, {
+                        ns: "tooltip",
+                        error: msg,
+                    })
+                );
+            }
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
+    const applyScale = useCallback(
+        (scaleFactor: number) => {
+            getBaseImage()
+                .then(source => {
+                    const canvas = document.createElement("canvas");
+                    const sourceWidth = source.naturalWidth;
+                    const sourceHeight = source.naturalHeight;
+                    canvas.width = Math.max(
+                        1,
+                        Math.round(sourceWidth * scaleFactor)
+                    );
+                    canvas.height = Math.max(
+                        1,
+                        Math.round(sourceHeight * scaleFactor)
+                    );
+                    const ctx = canvas.getContext("2d");
+                    if (!ctx) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+                    ctx.imageSmoothingQuality = "low";
+                    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+                    return replaceBaseImageFromCanvas(canvas).then(() => {
+                        const scaleText = scaleFactor.toFixed(3);
+                        if (
+                            canvas.width === sourceWidth &&
+                            canvas.height === sourceHeight
+                        ) {
+                            toast.info(
+                                t("DPI scale unchanged", {
+                                    ns: "tooltip",
+                                    scale: scaleText,
+                                    width: canvas.width,
+                                    height: canvas.height,
+                                })
+                            );
+                            return;
+                        }
+
+                        toast.success(
+                            t("DPI scale applied", {
+                                ns: "tooltip",
+                                scale: scaleText,
+                                sourceWidth,
+                                sourceHeight,
+                                width: canvas.width,
+                                height: canvas.height,
+                            })
+                        );
+                    });
+                })
+                .catch(err => {
+                    const msg =
+                        err instanceof Error ? err.message : String(err);
+                    toast.error(
+                        t(FAILED_TO_SCALE_IMAGE_KEY, {
+                            ns: "tooltip",
+                            error: msg,
+                        })
+                    );
+                });
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
     // ── Save ─────────────────────────────────────────────────────────────────
 
     const saveEditedImage = async () => {
-        if (!imageUrl || !imagePath || !imageRef.current) return;
+        if (!baseDisplayUrl || !imagePath) return;
         try {
-            const uint8Array = await applyPipelineToImage(
-                imageRef.current,
-                modifiers
-            );
+            const source = await loadImageElement(baseDisplayUrl);
+            const uint8Array = await applyPipelineToImage(source, modifiers);
 
             const { nameWithoutExt, extWithDot, timestamp } =
                 await generateFilename(imagePath);
@@ -356,17 +651,11 @@ export function EditWindow() {
                 newPath: finalPath,
             });
 
-            setImagePath(finalPath);
-            setImageName(await basename(finalPath));
-            const blob = new Blob([uint8Array], { type: "image/png" });
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
-
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             toast.error(
-                t("Failed to save image: {{error}}", {
+                t(FAILED_TO_SAVE_IMAGE_KEY, {
                     ns: "tooltip",
                     error: msg,
                 })
@@ -420,7 +709,7 @@ export function EditWindow() {
                                 </p>
                             </div>
                         </div>
-                    ) : imageUrl ? (
+                    ) : displayUrl ? (
                         <div
                             ref={containerRef}
                             className="flex-1 w-full flex items-center justify-center overflow-hidden mb-4 relative"
@@ -444,7 +733,7 @@ export function EditWindow() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
-                                src={imageUrl}
+                                src={displayUrl}
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
@@ -461,6 +750,10 @@ export function EditWindow() {
                                 ref={canvasRef}
                                 className="absolute pointer-events-none"
                                 style={{
+                                    pointerEvents:
+                                        overlayMode === "none"
+                                            ? "none"
+                                            : "auto",
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                                     transformOrigin: TRANSFORM_ORIGIN,
                                 }}
@@ -517,6 +810,100 @@ export function EditWindow() {
 
                         <div className="border-t border-border/30" />
 
+                        {/* Structural operations */}
+                        <div className="flex flex-col gap-3">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                {t("Transformations", { ns: "keywords" })}
+                            </h3>
+                            <div className="grid grid-cols-2 gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!baseDisplayUrl}
+                                    title={t("Rotate 90° left", {
+                                        ns: "tooltip",
+                                    })}
+                                    onClick={() =>
+                                        applyTransform("rotate90ccw")
+                                    }
+                                >
+                                    <RotateCcw size={ICON.SIZE} />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!baseDisplayUrl}
+                                    title={t("Rotate 90° right", {
+                                        ns: "tooltip",
+                                    })}
+                                    onClick={() => applyTransform("rotate90cw")}
+                                >
+                                    <RotateCw size={ICON.SIZE} />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!baseDisplayUrl}
+                                    title={t("Rotate 180°", {
+                                        ns: "tooltip",
+                                    })}
+                                    onClick={() => applyTransform("rotate180")}
+                                >
+                                    180°
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!baseDisplayUrl}
+                                    title={t("Flip horizontal", {
+                                        ns: "tooltip",
+                                    })}
+                                    onClick={() =>
+                                        applyTransform("flipHorizontal")
+                                    }
+                                >
+                                    <FlipHorizontal size={ICON.SIZE} />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={!baseDisplayUrl}
+                                    title={t("Flip vertical", {
+                                        ns: "tooltip",
+                                    })}
+                                    onClick={() =>
+                                        applyTransform("flipVertical")
+                                    }
+                                    className="col-span-2"
+                                >
+                                    <FlipVertical
+                                        size={ICON.SIZE}
+                                        className="mr-1.5"
+                                    />
+                                    {t("Flip vertical", { ns: "tooltip" })}
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="border-t border-border/30" />
+
+                        <div className="flex flex-col gap-2">
+                            <h3 className="text-sm font-semibold text-muted-foreground">
+                                {t("Crop", { ns: "keywords" })}
+                            </h3>
+                            <ImageCropControls
+                                imageRef={imageRef}
+                                canvasRef={canvasRef}
+                                active={overlayMode === "crop"}
+                                onActiveChange={active =>
+                                    setOverlayMode(active ? "crop" : "none")
+                                }
+                                onApplyCrop={applyCrop}
+                            />
+                        </div>
+
+                        <div className="border-t border-border/30" />
+
                         {/* Modifier pipeline */}
                         <div className="flex flex-col gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground">
@@ -531,7 +918,7 @@ export function EditWindow() {
                             />
                             <AddModifierButton
                                 onAdd={handleAddModifier}
-                                disabled={!imageUrl}
+                                disabled={!originalUrl}
                             />
                         </div>
 
@@ -545,6 +932,11 @@ export function EditWindow() {
                             <ImageDpiControls
                                 imageRef={imageRef}
                                 canvasRef={canvasRef}
+                                active={overlayMode === "dpi"}
+                                onActiveChange={active =>
+                                    setOverlayMode(active ? "dpi" : "none")
+                                }
+                                onScaleComputed={applyScale}
                             />
                         </div>
                     </div>
@@ -555,7 +947,7 @@ export function EditWindow() {
                             onClick={saveEditedImage}
                             className="w-full"
                             size="lg"
-                            disabled={!imageUrl || !imagePath}
+                            disabled={!displayUrl || !imagePath}
                             id="save-edited-image-button"
                         >
                             <Save size={ICON.SIZE} className="mr-2" />

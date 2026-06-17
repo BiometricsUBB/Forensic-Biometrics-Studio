@@ -70,6 +70,8 @@ const d: Dictionary = {
     "Saving...": "Saving...",
     "Save as": "Save as",
     "Brush size": "Brush size",
+    Transformations: "Transformations",
+    Crop: "Crop",
     Preview: "Preview",
     Edit: "Edit",
     Apply: "Apply",
