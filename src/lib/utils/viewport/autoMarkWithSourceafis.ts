@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { join, tempDir } from "@tauri-apps/api/path";
 import { Sprite } from "pixi.js";
 import { Viewport } from "pixi-viewport";
@@ -7,6 +8,7 @@ import {
 } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import {
     createSourceAfisExternalTool,
+    createSourceAfisMatcherTool,
     SOURCE_AFIS_TIMEOUT_MS,
 } from "@/lib/external-tools/sourceafis/createSourceAfisExternalTool";
 import { RayMarking } from "@/lib/markings/RayMarking";
@@ -78,6 +80,7 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
         const { processResult, sourceAfisJson } = await sourceAfisTool.run(
             {
                 imagePath,
+                limit: 100,
                 outTemplatePath,
                 outJsonPath,
             },
@@ -192,4 +195,97 @@ export async function autoMarkWithSourceafis(viewport: Viewport) {
         // eslint-disable-next-line no-console
         console.error("Failed to run SourceAFIS external tool:", error);
     }
+}
+
+export async function matchWithSourceafis(
+    viewportLeft: Viewport,
+    viewportRight: Viewport,
+    limit: number
+) {
+    console.log("1. [Hybryda] Pobieranie ścieżek z widoków...");
+    const imagePathLeft = getImagePathFromViewport(viewportLeft);
+    const imagePathRight = getImagePathFromViewport(viewportRight);
+
+    const baseDir = await tempDir();
+    const stamp = Date.now();
+
+    const leftTemplatePath = await join(baseDir, `left_${stamp}.dat`);
+    const leftJsonPath = await join(baseDir, `left_${stamp}.json`);
+    const rightTemplatePath = await join(baseDir, `right_${stamp}.dat`);
+    const rightJsonPath = await join(baseDir, `right_${stamp}.json`);
+
+    const matchTemplatePath = await join(baseDir, `match_${stamp}.dat`);
+    const matchJsonPath = await join(baseDir, `match_${stamp}.json`);
+
+    console.log(
+        "2. [Hybryda] Wyciągam minucje dla LEWEGO widoku (Stary CLI)..."
+    );
+    const cliTool = await createSourceAfisExternalTool();
+    const leftExtract = await cliTool.run(
+        {
+            imagePath: imagePathLeft,
+            outTemplatePath: leftTemplatePath,
+            outJsonPath: leftJsonPath,
+            limit,
+        },
+        { timeoutMs: SOURCE_AFIS_TIMEOUT_MS }
+    );
+
+    console.log(
+        "3. [Hybryda] Wyciągam minucje dla PRAWEGO widoku (Stary CLI)..."
+    );
+    const rightExtract = await cliTool.run(
+        {
+            imagePath: imagePathRight,
+            outTemplatePath: rightTemplatePath,
+            outJsonPath: rightJsonPath,
+            limit,
+        },
+        { timeoutMs: SOURCE_AFIS_TIMEOUT_MS }
+    );
+
+    console.log(
+        "4. [Hybryda] Uruchamiam nowy Matcher C# dla obliczenia Score..."
+    );
+    const matcherTool = await createSourceAfisMatcherTool();
+    const matchResult = await matcherTool.run(
+        {
+            imagePath: imagePathLeft,
+            image2Path: imagePathRight,
+            limit,
+            outTemplatePath: matchTemplatePath,
+            outJsonPath: matchJsonPath,
+        },
+        { timeoutMs: SOURCE_AFIS_TIMEOUT_MS }
+    );
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const leftMinutiae = (leftExtract.sourceAfisJson?.minutiae ?? []).map(
+        (m: any) => ({
+            x: m.x,
+            y: m.y,
+            type: (m.type ?? "ending").toLowerCase(),
+        })
+    );
+
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    const rightMinutiae = (rightExtract.sourceAfisJson?.minutiae ?? []).map(
+        (m: any) => ({
+            x: m.x,
+            y: m.y,
+            type: (m.type ?? "ending").toLowerCase(),
+        })
+    );
+
+    const finalHybridResult = {
+        matchScore: matchResult.sourceAfisJson?.matchScore ?? 0,
+        leftMinutiae,
+        rightMinutiae,
+    };
+
+    console.log(
+        "5. [Hybryda] SUKCES! Połączono dane z obu narzędzi:",
+        finalHybridResult
+    );
+    return finalHybridResult;
 }

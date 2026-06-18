@@ -40,3 +40,7 @@ next-env.d.ts
 /public/images/*.json
 # vite cache
 .vite/
+
+# dotnet build artifacts
+src-tauri/sourceafis_cli_src/bin/
+src-tauri/sourceafis_cli_src/obj/

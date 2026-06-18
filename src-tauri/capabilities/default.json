@@ -51,6 +51,11 @@
                     "name": "bin/sourceafis_cli",
                     "sidecar": true,
                     "args": true
+                },
+                {
+                    "name": "bin/sourceafis_matcher",
+                    "sidecar": true,
+                    "args": true
                 }
             ]
         },

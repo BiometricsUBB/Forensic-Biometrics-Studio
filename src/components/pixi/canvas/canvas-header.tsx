@@ -16,7 +16,6 @@ import {
     RotateCw,
     RotateCcw,
     RefreshCw,
-    Wand2,
 } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { Toggle } from "@/components/ui/toggle";
@@ -35,7 +34,6 @@ import {
     resetRotation,
 } from "@/lib/utils/viewport/applyRotation";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
-import { autoMarkWithSourceafis } from "@/lib/utils/viewport/autoMarkWithSourceafis";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useCanvasContext } from "./hooks/useCanvasContext";
 import {
@@ -174,27 +172,6 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                             ),
                             onClick: () => {
                                 loadTracingDataWithDialog(viewport);
-                            },
-                        },
-                        {
-                            label: "Auto-mark (SourceAFIS)",
-                            icon: (
-                                <Wand2
-                                    size={ICON.SIZE}
-                                    strokeWidth={ICON.STROKE_WIDTH}
-                                />
-                            ),
-                            onClick: async () => {
-                                try {
-                                    // eslint-disable-next-line no-console
-                                    console.log(
-                                        "Auto-mark clicked - starting sidecar"
-                                    );
-                                    await autoMarkWithSourceafis(viewport);
-                                } catch (error) {
-                                    // eslint-disable-next-line no-console
-                                    console.error("Auto-mark failed:", error);
-                                }
                             },
                         },
                     ]}
