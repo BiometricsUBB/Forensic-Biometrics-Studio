@@ -40,3 +40,5 @@ next-env.d.ts
 /public/images/*.json
 # vite cache
 .vite/
+
+src-tauri/gen/schemas/capabilities.json
