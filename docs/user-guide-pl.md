@@ -7,7 +7,6 @@
 Aplikacja wymaga:
 
 * Windows 10 lub nowszy
-* Zalecana mysz z kółkiem przewijania
 * Zalecana rozdzielczość ekranu co najmniej 1920×1080
 
 > **Uwaga:** Wersja macOS może działać, jednak wersja Windows jest zalecana dla stabilnego działania.
@@ -21,7 +20,7 @@ Aplikacja wymaga:
 
 ![Strona GitHub Releases](images/common/github-releases.png)
 
-*Rysunek 1. Pobieranie aplikacji ze strony GitHub Releases.*
+*Pobieranie aplikacji ze strony GitHub Releases.*
 
 ### 1.3 Uruchamianie instalatora
 
@@ -33,25 +32,23 @@ Aplikacja wymaga:
 
 ![Ostrzeżenie Windows SmartScreen](images/polish/smartscreen-warning.png)
 
-*Rysunek 2. Ostrzeżenie Windows SmartScreen.*
+*Ostrzeżenie Windows SmartScreen.*
 
 ![Kreator instalacji](images/common/installer.png)
 
-*Rysunek 3. Kreator instalacji.*
+*Kreator instalacji.*
 
 ### 1.4 Pierwsze uruchomienie
 
 Po instalacji uruchom aplikację za pomocą skrótu na pulpicie lub z Menu Start.
 
-Podczas pierwszego uruchomienia oprogramowanie wyświetli monit o wybranie trybu pracy.
-
-Dla nowych użytkowników wybierz **Odciski palców**.
+Po uruchomieniu oprogramowanie wyświetli monit o wybranie trybu pracy.
 
 Tryb ten można zmienić później za pomocą menu **Tryb pracy**.
 
 ![Wybór trybu pracy](images/polish/select-working-mode.png)
 
-*Rysunek 4. Wybór trybu pracy.*
+*Wybór trybu pracy.*
 
 ### 1.5 Ustawienia aplikacji
 
@@ -65,7 +62,7 @@ Aby otworzyć okno Ustawień, kliknij ikonę zębatki na pasku narzędzi.
 
 ![Ustawienia aplikacji](images/common/settings.png)
 
-*Rysunek 5. Ustawienia aplikacji.*
+*Ustawienia aplikacji.*
 
 ### 1.6 Importowanie predefiniowanych typów cech
 
@@ -76,17 +73,16 @@ Aby zaimportować ustawienia wstępne:
 1. Otwórz **Ustawienia**.
 2. Otwórz okno **Typy**.
 3. Kliknij ikonę **Importuj**.
-4. Przejdź do katalogu z predefiniowanymi ustawieniami.
-5. Wybierz plik predefiniowanych ustawień odcisków palców.
-6. Potwierdź import.
+4. Wybierz plik predefiniowanych ustawień odcisków palców. W folderze znajdować się będzie zarówno polska jak i angielska wersja językowa oznaczeń. Wybierz jedną.
+5. Potwierdź import.
 
 ![Okno typów cech](images/polish/types-window.png)
 
-*Rysunek 6. Zarządzanie typami cech.*
+*Zarządzanie typami cech.*
 
 ![Importowanie ustawień wstępnych](images/polish/import-types.png)
 
-*Rysunek 7. Importowanie predefiniowanych ustawień odcisków palców.*
+*Importowanie predefiniowanych ustawień odcisków palców.*
 
 Zaimportowane definicje obejmują standardowe typy cech odcisków palców używane w całym niniejszym podręczniku.
 
@@ -122,7 +118,7 @@ Po wczytaniu oba obrazy powinny być widoczne obok siebie.
 
 ![Wczytywanie obrazów do porównania](images/common/load-images.png)
 
-*Rysunek 8. Wczytywanie dwóch obrazów odcisków palców.*
+*Wczytywanie dwóch obrazów odcisków palców.*
 
 ### 2.2 Nawigacja po obrazach
 
@@ -139,7 +135,7 @@ Podczas porównywania odcisków palców zaleca się ustawienie obrazu tak, aby p
 
 ![Narzędzie przesuwania](images/polish/pan-tool.png)
 
-*Rysunek 9. Narzędzie przesuwania.*
+*Narzędzie przesuwania.*
 
 ### 2.3 Powiększanie
 
@@ -167,7 +163,7 @@ Oba obrazy powinny być w przybliżeniu wyrównane przed rozpoczęciem porównan
 
 ![Centrowanie na Core](images/common/core-centering.png)
 
-*Rysunek 10. Wyrównywanie obrazów wokół obszaru Core.*
+*Wyrównywanie obrazów wokół obszaru Core.*
 
 ### 2.5 Blokowanie obrazów
 
@@ -187,7 +183,7 @@ Znacznie upraszcza to porównywanie cech.
 
 ![Blokowanie obrazów](images/polish/lock-tool.png)
 
-*Rysunek 11. Narzędzie blokowania.*
+*Narzędzie blokowania.*
 
 ### 2.6 Przełączanie do trybu oznaczania cech
 
@@ -200,7 +196,7 @@ Aktualnie wybrany typ cechy jest wyświetlany w polu wyboru cech.
 
 ![Tryb oznaczania cech](images/polish/marking-mode.png)
 
-*Rysunek 12. Tryb oznaczania cech.*
+*Tryb oznaczania cech.*
 
 ### 2.7 Zalecana procedura oznaczania
 
@@ -212,7 +208,7 @@ Zalecany przepływ pracy:
 2. Oznacz odpowiadającą cechę na prawym obrazie.
 3. Kontynuuj naprzemienne przełączanie między obrazami.
 
-Takie podejście automatycznie tworzy prawidłowe pary cech i minimalizuje błędy przypisania.
+Takie podejście automatycznie tworzy prawidłowe pary cech i zmniejsza liczbę błędów przypisania.
 
 Poniższe rozdziały szczegółowo opisują dostępne typy cech odcisków palców oraz zaawansowane techniki parowania.
 
@@ -232,7 +228,7 @@ Core jest reprezentowany jako cecha punktowa, dlatego wymaga tylko jednego klikn
 
 ![Oznaczanie Core](images/common/core-feature.png)
 
-*Rysunek 13. Oznaczanie cechy Core.*
+*Oznaczanie cechy Core.*
 
 ### 2.9 Oznaczanie Delty
 
@@ -249,7 +245,7 @@ Podobnie jak Core, Delta jest reprezentowana jako cecha punktowa.
 
 ![Oznaczanie Delty](images/common/delta-feature.png)
 
-*Rysunek 14. Oznaczanie cechy Delty.*
+*Oznaczanie cechy Delty.*
 
 ### 2.10 Skierowane minucje
 
@@ -280,7 +276,7 @@ Aby oznaczyć Zakończenie linii:
 
 ![Zakończenie linii](images/common/ridge-ending.png)
 
-*Rysunek 15. Zakończenie linii.*
+*Zakończenie linii.*
 
 ### 2.12 Początek listewki
 
@@ -295,7 +291,7 @@ Aby oznaczyć Początek listewki:
 
 ![Początek linii](images/common/ridge-beginning.png)
 
-*Rysunek 16. Początek linii.*
+*Początek linii.*
 
 ### 2.13 Rozwidlenie
 
@@ -310,7 +306,7 @@ Aby oznaczyć Rozwidlenie:
 
 ![Rozwidlenie](images/common/bifurcation.png)
 
-*Rysunek 17. Rozwidlenie.*
+*Rozwidlenie.*
 
 ### 2.14 Złączenie linii
 
@@ -325,7 +321,7 @@ Aby oznaczyć Złączenie linii:
 
 ![Złączenie linii](images/common/ridge-joining.png)
 
-*Rysunek 18. Złączenie linii.*
+*Złączenie linii.*
 
 ### 2.15 Zrozumienie parowania cech
 
@@ -342,7 +338,7 @@ Ten przepływ pracy automatycznie tworzy pasujące identyfikatory cech.
 
 ![Naprzemienny przepływ pracy](images/common/alternating-marking.png)
 
-*Rysunek 19. Naprzemienny sposób wprowadzania cech.*
+*Naprzemienny sposób wprowadzania cech.*
 
 ### 2.16 Wybieranie istniejących cech
 
@@ -356,7 +352,7 @@ Wybranie wiersza w tabeli:
 
 ![Tabela cech](images/polish/feature-table.png)
 
-*Rysunek 20. Tabela cech i selekcja.*
+*Tabela cech i selekcja.*
 
 ### 2.17 Usuwanie cech
 
@@ -370,7 +366,7 @@ Aby usunąć cechę:
 
 ![Usuwanie cech](images/common/delete-feature.png)
 
-*Rysunek 21. Usuwanie adnotacji.*
+*Usuwanie adnotacji.*
 
 ### 2.18 Praca z adnotacjami nieprzemiennymi
 
@@ -392,7 +388,7 @@ Aby to skorygować:
 
 ![Ręczne przypisanie pary](images/polish/manual-pairing.png)
 
-*Rysunek 22. Korygowanie przypisań par cech.*
+*Korygowanie przypisań par cech.*
 
 ---
 
@@ -414,7 +410,7 @@ Oryginalny obraz pozostaje niezmieniony.
 
 ![Zapisywanie adnotacji](images/common/save-json.png)
 
-*Rysunek 23. Zapisywanie adnotacji cech.*
+*Zapisywanie adnotacji cech.*
 
 ### 3.2 Zalecana organizacja plików
 
@@ -425,7 +421,7 @@ fingerprint.bmp
 fingerprint.bmp.json
 ```
 
-Zdecydowanie zaleca się używanie tego samego katalogu i pasujących nazw plików, ponieważ upraszcza to przyszłe wczytywanie i zarządzanie projektami.
+Zdecydowanie zaleca się używanie tego samego katalogu i pasujących nazw plików, ponieważ upraszcza to przyszłe wczytywanie tych plików.
 
 ### 3.3 Wczytywanie zapisanych adnotacji
 
@@ -439,11 +435,11 @@ Aplikacja przywraca wszystkie zapisane informacje o cechach.
 
 ![Wczytywanie adnotacji](images/common/load-json.png)
 
-*Rysunek 24. Wczytywanie poprzednio zapisanej pracy.*
+*Wczytywanie poprzednio zapisanej pracy.*
 
 ### 3.4 Praca z wieloma porównaniami
 
-Typowy przepływ pracy obejmuje porównywanie wielu odcisków z tego samego źródła.
+Typowy przepływ pracy polega na porównywaniu wielu odcisków z tego samego źródła.
 
 Na przykład:
 
@@ -491,7 +487,7 @@ Oprogramowanie aktualizuje identyfikatory tak, aby odpowiadające cechy miały t
 
 ![Przepływ pracy scalania](images/polish/merge-function.png)
 
-*Rysunek 25. Scalanie identyfikatorów cech.*
+*Scalanie identyfikatorów cech.*
 
 ### 4.4 Weryfikacja wyników scalania
 
@@ -530,7 +526,7 @@ Aby uzyskać dostęp do narzędzia:
 
 ![Narzędzie obrotu](images/polish/rotation-tool.png)
 
-*Rysunek 26. Otwieranie narzędzia obrotu.*
+*Otwieranie narzędzia obrotu.*
 
 ### Wybieranie linii referencyjnych
 
@@ -550,7 +546,7 @@ Aby zdefiniować linię referencyjną:
 
 ![Linie referencyjne](images/common/reference-lines.png)
 
-*Rysunek 27. Definiowanie linii referencyjnych.*
+*Definiowanie linii referencyjnych.*
 
 ### Obliczanie obrotu
 
@@ -562,7 +558,7 @@ Po utworzeniu obu linii referencyjnych:
 
 ![Wynik obrotu](images/common/rotation-result.png)
 
-*Rysunek 28. Wynik automatycznego wyrównania.*
+*Wynik automatycznego wyrównania.*
 
 Po obróceniu oba wzory odcisków palców powinny mieć w przybliżeniu tę samą orientację.
 
@@ -589,7 +585,7 @@ Wcześniej oznaczone cechy pozostają poprawnie ustawione względem wzoru odcisk
 
 ![Resetowanie obrotu](images/polish/reset-rotation.png)
 
-*Rysunek 29. Resetowanie obrotu obrazu.*
+*Resetowanie obrotu obrazu.*
 
 ---
 
@@ -603,7 +599,7 @@ Obsługiwane formaty obrazów zależą od wersji aplikacji.
 
 ![Otwieranie obrazu](images/polish/open-image.png)
 
-*Rysunek 30. Narzędzie otwierania obrazu.*
+*Narzędzie otwierania obrazu.*
 
 ### 5.2 Otwieranie plików adnotacji
 
@@ -613,7 +609,7 @@ Obraz i plik adnotacji można wczytywać niezależnie.
 
 ![Otwieranie adnotacji](images/common/load-json.png)
 
-*Rysunek 31. Narzędzie otwierania adnotacji.*
+*Narzędzie otwierania adnotacji.*
 
 ### 5.3 Zapisywanie pliku adnotacji
 
@@ -625,7 +621,7 @@ Obraz źródłowy pozostaje niezmieniony.
 
 ![Zapisywanie adnotacji](images/common/save-json.png)
 
-*Rysunek 32. Narzędzie zapisywania adnotacji.*
+*Narzędzie zapisywania adnotacji.*
 
 ### 5.4 Dopasowywanie obrazu do okna
 
@@ -639,7 +635,7 @@ Narzędzia te upraszczają nawigację po wczytaniu nowego obrazu.
 
 ![Dopasowanie obrazu](images/polish/fit-image.png)
 
-*Rysunek 33. Narzędzia dopasowywania obrazu.*
+*Narzędzia dopasowywania obrazu.*
 
 ### 5.5 Kontrola widoczności cech
 
@@ -655,7 +651,7 @@ Typowe przypadki użycia:
 
 ![Widoczność cech](images/common/feature-visibility.png)
 
-*Rysunek 34. Kontrolki widoczności cech.*
+*Kontrolki widoczności cech.*
 
 ### 5.6 Ukrywanie nakładek informacyjnych
 
@@ -669,7 +665,7 @@ Te nakładki można ukryć, gdy nie są potrzebne.
 
 ![Ukrywanie nakładek](images/common/hide-overlays.png)
 
-*Rysunek 35. Kontrolki nakładek interfejsu.*
+*Kontrolki nakładek interfejsu.*
 
 ### 5.7 Motywy jasny i ciemny
 
@@ -704,7 +700,7 @@ Core jest oznaczane za pomocą pojedynczego punktu.
 
 ![Core](images/common/core.png)
 
-*Rysunek 36. Core.*
+*Core.*
 
 ---
 
@@ -718,7 +714,7 @@ Cecha jest oznaczana za pomocą pojedynczego punktu.
 
 ![Delta](images/common/delta.png)
 
-*Rysunek 37. Delta.*
+*Delta.*
 
 ---
 
@@ -734,7 +730,7 @@ Drugie kliknięcie wskazuje kierunek listewki.
 
 ![Początek linii](images/common/ridge-beginning.png)
 
-*Rysunek 38. Początek linii.*
+*Początek linii.*
 
 ---
 
@@ -746,7 +742,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Zakończenie linii](images/common/ridge-ending.png)
 
-*Rysunek 39. Zakończenie linii.*
+*Zakończenie linii.*
 
 ---
 
@@ -758,7 +754,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Rozwidlenie](images/common/bifurcation.png)
 
-*Rysunek 40. Rozwidlenie.*
+*Rozwidlenie.*
 
 ---
 
@@ -770,7 +766,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Złączenie linii](images/common/ridge-joining.png)
 
-*Rysunek 41. Złączenie linii.*
+*Złączenie linii.*
 
 ---
 
@@ -784,7 +780,7 @@ Cecha jest oznaczana od punktu rozwidlenia do zakończenia listewki.
 
 ![Haczyk](images/common/hook.png)
 
-*Rysunek 42. Haczyk.*
+*Haczyk.*
 
 ---
 
@@ -798,7 +794,7 @@ Cecha jest oznaczana od rozwidlenia do połączenia listewek.
 
 ![Oczko](images/common/lake.png)
 
-*Rysunek 43. Oczko.*
+*Oczko.*
 
 ---
 
@@ -816,7 +812,7 @@ Cecha jest oznaczana od początku do zakończenia.
 
 ![Odcinek](images/common/island.png)
 
-*Rysunek 44. Odcinek.*
+*Odcinek.*
 
 ---
 
@@ -828,7 +824,7 @@ Cecha jest oznaczana od punktu rozwidlenia do punktu połączenia listewek.
 
 ![Mostek](images/common/bridge.png)
 
-*Rysunek 45. Mostek.*
+*Mostek.*
 
 ---
 
@@ -842,7 +838,7 @@ Cecha jest oznaczana za pomocą pojedynczego punktu.
 
 ![Punkt](images/common/point.png)
 
-*Rysunek 46. Punkt.*
+*Punkt.*
 
 ### Linia szczątkowa
 
@@ -854,7 +850,7 @@ Linie szczątkowe mogą być wysoce charakterystyczne i mogą być przydatne pod
 
 ![Linia szczątkowa](images/common/incipient-ridge.png)
 
-*Rysunek 47. Linia szczątkowa.*
+*Linia szczątkowa.*
 
 ---
 
@@ -870,7 +866,7 @@ Cecha jest oznaczana od jej początku do jej końca.
 
 ![Pęknięcie](images/common/crease.png)
 
-*Rysunek 48. Pęknięcie.*
+*Pęknięcie.*
 
 ---
 
@@ -886,7 +882,7 @@ Blizny są często wysoce indywidualizującymi cechami i mogą stanowić silne w
 
 ![Blizna](images/common/scar.png)
 
-*Rysunek 49. Blizna.*
+*Blizna.*
 
 ---
 
@@ -910,7 +906,7 @@ Pory są oznaczane za pomocą adnotacji punktowych.
 
 ![Pory](images/common/pores.png)
 
-*Rysunek 50. Pory.*
+*Pory.*
 
 ---
 
@@ -924,7 +920,7 @@ Cecha jest oznaczana w miejscu wypukłości.
 
 ![Wypust krawędzi](images/common/ridge-protrusions.png)
 
-*Rysunek 51. Wypust krawędzi.*
+*Wypust krawędzi.*
 
 ---
 
@@ -938,7 +934,7 @@ Cecha jest oznaczana w miejscu wgłębienia.
 
 ![Wgłębienie krawędzi](images/common/ridge-indentations.png)
 
-*Rysunek 52. Wgłębienie krawędzi.*
+*Wgłębienie krawędzi.*
 
 ---
 
@@ -950,7 +946,7 @@ Układ i rozmieszczenie tych plamek może być charakterystyczne i dlatego może
 
 ![Plamki](images/common/spots.png)
 
-*Rysunek 53. Plamki.*
+*Plamki.*
 
 ---
 
@@ -975,9 +971,9 @@ Oprogramowanie wspomaga dokumentację i wizualizację, ale nie określa automaty
 
 ---
 
-## 6.3 Tryb śladów obuwia
+## 6.3 Tryb odcisków butów
 
-Tryb śladów obuwia jest przeznaczony do porównania śladów podeszwy obuwia, odcisków podeszew i powiązanych dowodów obuwniczych.
+Tryb odcisków butów jest przeznaczony do porównania odcisków podeszwy obuwia, odcisków podeszew i powiązanych dowodów obuwniczych.
 
 Przepływ pracy jest podobny do porównywania odcisków palców:
 
@@ -989,7 +985,7 @@ Przepływ pracy jest podobny do porównywania odcisków palców:
 
 ### Typowe kategorie cech
 
-Typowe cechy obuwnicze obejmują:
+Typowe cechy odcisków butów obejmują:
 
 #### Cechy globalne
 
@@ -1029,9 +1025,9 @@ Indywidualizujące charakterystyki spowodowane uszkodzeniem:
 
 Te charakterystyki mogą być reprezentowane za pomocą adnotacji punktowych, liniowych lub obszarowych w zależności od wymagań badania.
 
-![Porównanie obuwia](images/common/footwear-comparison.png)
+![Porównanie odcisków butów](images/common/shoeprints-comparison.png)
 
-*Rysunek 54. Przepływ pracy porównania śladów obuwia.*
+*Przepływ pracy porównania odcisków butów.*
 
 ---
 

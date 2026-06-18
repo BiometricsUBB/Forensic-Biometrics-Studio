@@ -17,41 +17,24 @@
 
 ## Environment Setup
 
-Before running the project, install the Tauri 2 prerequisites: Node.js, pnpm,
-Rust, and the required system dependencies for your operating system. On
-Windows, you can use the setup script included in the repository:
+Before running the project, install the Tauri 2 prerequisites: Node.js, pnpm, Rust, and the required system dependencies for your operating system. 
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
-
-On macOS, the development commands are the same as below after installing the
-Tauri prerequisites. If you install a built app manually, it is not signed, so
-you may need to remove the quarantine flag after moving it to Applications:
+On macOS, the development commands are the same as below after installing the Tauri prerequisites. If you install a built app manually, it is not signed, so you may need to remove the quarantine flag after moving it to Applications:
 
 ```bash
 xattr -d com.apple.quarantine /Applications/biometrics-studio.app
 ```
 
-Use the actual app path if it is different.
+Use the actual app path if it is different for you.
 
 Clone the repository and run the development version:
 
 ```bash
 git clone https://github.com/BiometricsUBB/Forensic-Biometrics-Studio.git
 cd Forensic-Biometrics-Studio
-corepack enable
 pnpm install
 pnpm tauri dev
 ```
-
-For frontend-only work, run Vite:
-
-```bash
-pnpm dev
-```
-
-The default Vite server port is `1420`.
 
 ## Coding Style
 

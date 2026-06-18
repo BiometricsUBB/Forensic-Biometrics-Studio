@@ -7,10 +7,9 @@
 The application requires:
 
 * Windows 10 or newer
-* Mouse with scroll wheel recommended
 * Display resolution of at least 1920×1080 recommended
 
-> **Note:** A macOS version may function, but the Windows version is recommended for stable operation.
+> **Note:** A macOS version may function, but the Windows version is recommended for optimal performance.
 
 ### 1.2 Downloading the Application
 
@@ -21,7 +20,7 @@ The application requires:
 
 ![GitHub Releases page](images/common/github-releases.png)
 
-*Figure 1. Downloading the application from GitHub Releases.*
+*Downloading the application from GitHub Releases.*
 
 ### 1.3 Running the Installer
 
@@ -29,33 +28,31 @@ The application requires:
 2. Windows SmartScreen may display a warning indicating that the application is unrecognized.
 3. Click **More Info**.
 4. Click **Run Anyway**.
-5. Proceed through the installation wizard by selecting **Next** until installation is complete.
+5. Proceed through the installation wizard by selecting **Next** until the installation is complete.
 
 ![Windows SmartScreen warning](images/english/smartscreen-warning.png)
 
-*Figure 2. Windows SmartScreen warning.*
+*Windows SmartScreen warning.*
 
 ![Installation wizard](images/common/installer.png)
 
-*Figure 3. Installation wizard.*
+*Installation wizard.*
 
 ### 1.4 First Launch
 
-After installation, start the application from the desktop shortcut or Start Menu.
+After installation, start the application from the desktop shortcut or the Start Menu.
 
-During the first launch, the software will prompt you to select a working mode.
-
-For new users, select **Fingerprints**
+When launched, the software will prompt you to select a working mode.
 
 This mode can be changed later using the **Working Mode** menu.
 
 ![Working mode selection](images/english/select-working-mode.png)
 
-*Figure 4. Working mode selection.*
+*Working mode selection.*
 
 ### 1.5 Application Settings
 
-The Settings window allows configuration of:
+The Settings window allows you to configure:
 
 * Language
 * Light or Dark theme
@@ -65,7 +62,7 @@ To open the Settings window, click the gear icon in the toolbar.
 
 ![Application settings](images/common/settings.png)
 
-*Figure 5. Application settings.*
+*Application settings.*
 
 ### 1.6 Importing Feature Type Presets
 
@@ -76,17 +73,16 @@ To import presets:
 1. Open **Settings**.
 2. Open the **Types** window.
 3. Click the **Import** icon.
-4. Navigate to the preset directory.
-5. Select the fingerprint preset file.
-6. Confirm the import.
+4. Select the fingerprint preset file. There will be both Polish and English presets. Choose one.
+5. Confirm the import.
 
 ![Feature types window](images/english/types-window.png)
 
-*Figure 6. Feature type management.*
+*Feature type management.*
 
 ![Importing presets](images/english/import-types.png)
 
-*Figure 7. Importing fingerprint presets.*
+*Importing fingerprint presets.*
 
 The imported definitions include the standard fingerprint feature types used throughout this guide.
 
@@ -120,11 +116,11 @@ To load images:
 3. Click the image loading icon in the right panel.
 4. Select the second fingerprint image.
 
-After loading, both images should be visible side-by-side.
+After loading, both images should be visible side by side.
 
 ![Loading comparison images](images/common/load-images.png)
 
-*Figure 8. Loading two fingerprint images.*
+*Loading two fingerprint images.*
 
 ### 2.2 Navigating Images
 
@@ -135,13 +131,13 @@ To move an image:
 1. Select the hand icon.
 2. Click and drag the image.
 
-While moving the image, reference lines are displayed to assist alignment.
+Reference lines are displayed while moving the image to assist with alignment.
 
 For fingerprint comparison, it is recommended to position the image so that the approximate centre of the fingerprint pattern (Core region) is located near the centre of the viewing area.
 
 ![Pan Tool](images/english/pan-tool.png)
 
-*Figure 9. Pan Tool.*
+*Pan Tool.*
 
 ### 2.3 Zooming
 
@@ -155,7 +151,7 @@ Zooming is essential when marking:
 * Small scars
 * Ridge details
 
-The software preserves feature positions regardless of zoom level.
+The software preserves feature positions regardless of the zoom level.
 
 ### 2.4 Aligning Images
 
@@ -163,13 +159,13 @@ Before feature marking begins:
 
 1. Locate the Core region on the left image.
 2. Centre the image.
-3. Repeat the process for the right image.
+3. Repeat the process for the image on the right.
 
-Both images should be approximately aligned before comparison starts.
+Both images should be approximately aligned before the comparison starts.
 
 ![Centering on the Core](images/common/core-centering.png)
 
-*Figure 10. Aligning images around the Core region.*
+*Aligning images around the Core region.*
 
 ### 2.5 Locking Images
 
@@ -189,7 +185,7 @@ This greatly simplifies feature comparison.
 
 ![Image locking](images/english/lock-tool.png)
 
-*Figure 11. Lock Tool.*
+*Lock Tool.*
 
 ### 2.6 Switching to Feature Marking Mode
 
@@ -202,7 +198,7 @@ The currently selected feature type is displayed in the feature selection field.
 
 ![Feature marking mode](images/english/marking-mode.png)
 
-*Figure 12. Feature marking mode.*
+*Feature marking mode.*
 
 ### 2.7 Recommended Marking Procedure
 
@@ -214,12 +210,12 @@ The recommended workflow is:
 2. Mark the corresponding feature on the right image.
 3. Continue alternating between images.
 
-This approach automatically creates correct feature pairs and minimizes assignment errors.
+This approach automatically creates the correct feature pairs and decreases the number of assignment errors.
 
-The following chapters describe the available fingerprint feature types and advanced pairing techniques in detail.
+The following chapters provide detailed descriptions of the available fingerprint feature types and advanced pairing techniques.
 ### 2.8 Marking the Core
 
-The Core is one of the most important reference features in fingerprint comparison and is typically marked before other characteristics.
+The Core is one of the most important reference features in fingerprint comparison and is usually marked before other characteristics.
 
 To mark the Core:
 
@@ -233,7 +229,7 @@ The Core is represented as a point feature and therefore requires only a single 
 
 ![Marking the Core](images/common/core-feature.png)
 
-*Figure 13. Marking the Core feature.*
+*Marking the Core feature.*
 
 ### 2.9 Marking the Delta
 
@@ -250,11 +246,11 @@ Like the Core, the Delta is represented as a point feature.
 
 ![Marking the Delta](images/common/delta-feature.png)
 
-*Figure 14. Marking a Delta feature.*
+*Marking a Delta feature.*
 
 ### 2.10 Directed Minutiae
 
-Many fingerprint features are directional features.
+Many fingerprint features are directional.
 
 Unlike point features, directional features require two clicks:
 
@@ -281,7 +277,7 @@ To mark a Ridge Ending:
 
 ![Ridge ending](images/common/ridge-ending.png)
 
-*Figure 15. Ridge Ending.*
+*Ridge Ending.*
 
 ### 2.12 Ridge Beginning
 
@@ -296,7 +292,7 @@ To mark a Ridge Beginning:
 
 ![Ridge beginning](images/common/ridge-beginning.png)
 
-*Figure 16. Ridge Beginning.*
+*Ridge Beginning.*
 
 ### 2.13 Bifurcation
 
@@ -305,28 +301,28 @@ A Bifurcation occurs when a ridge splits into two branches.
 To mark a Bifurcation:
 
 1. Select **Bifurcation**.
-2. Click the bifurcation location.
+2. Click the location of the **Bifurcation**.
 3. Indicate the ridge direction.
 4. Confirm with a second click.
 
 ![Bifurcation](images/common/bifurcation.png)
 
-*Figure 17. Bifurcation.*
+*Bifurcation.*
 
 ### 2.14 Ridge Joining
 
-A Ridge Joining is the inverse of a bifurcation and represents two ridge paths joining into one.
+A Ridge Joining is the inverse of a bifurcation and represents two ridge paths merging into one.
 
 To mark a Ridge Joining:
 
 1. Select **Ridge Joining**.
-2. Click the Ridge Joining location.
+2. Click the location of the **Ridge Joining**.
 3. Define the direction.
 4. Confirm with a second click.
 
 ![Ridge Joining](images/common/ridge-joining.png)
 
-*Figure 18. Ridge Joining.*
+*Ridge Joining.*
 
 ### 2.15 Understanding Feature Pairing
 
@@ -343,7 +339,7 @@ This workflow automatically creates matching feature identifiers.
 
 ![Alternating workflow](images/common/alternating-marking.png)
 
-*Figure 19. Alternating feature entry.*
+*Alternating feature entry.*
 
 ### 2.16 Selecting Existing Features
 
@@ -357,7 +353,7 @@ Selecting a row in the table:
 
 ![Feature table](images/english/feature-table.png)
 
-*Figure 20. Feature table and selection.*
+*Feature table and selection.*
 
 ### 2.17 Deleting Features
 
@@ -367,11 +363,11 @@ To delete a feature:
 
 1. Select the feature in the table.
 2. Click the trash icon.
-3. Confirm the deletion if prompted.
+3. If prompted, confirm the deletion..
 
 ![Deleting features](images/common/delete-feature.png)
 
-*Figure 21. Deleting an annotation.*
+*Deleting an annotation.*
 
 ### 2.18 Working with Non-Alternating Annotations
 
@@ -383,9 +379,9 @@ Example:
 2. Switch to the right image.
 3. Add matching features.
 
-In this situation the software may automatically continue numbering rather than assigning the intended pair identifiers.
+In this situation, the software may continue numbering automatically rather than assigning the intended pair identifiers.
 
-To correct this:
+To correct this, do the following:
 
 1. Select the empty row corresponding to the desired identifier.
 2. Mark the matching feature.
@@ -393,7 +389,7 @@ To correct this:
 
 ![Manual pair assignment](images/english/manual-pairing.png)
 
-*Figure 22. Correcting feature pair assignments.*
+*Correcting feature pair assignments.*
 
 ---
 
@@ -403,7 +399,7 @@ To correct this:
 
 Feature annotations are stored separately from the original image files.
 
-The application saves annotations as JSON files.
+The application saves them as JSON files.
 
 To save your work:
 
@@ -411,22 +407,22 @@ To save your work:
 2. Choose the destination.
 3. Confirm the file name.
 
-The original image remains unchanged.
+The original image will remain unchanged.
 
 ![Saving annotations](images/common/save-json.png)
 
-*Figure 23. Saving feature annotations.*
+*Saving feature annotations.*
 
 ### 3.2 Recommended File Organisation
 
-The application automatically suggests:
+The application automatically suggests the following file names:
 
 ```text
 fingerprint.bmp
 fingerprint.bmp.json
 ```
 
-Using the same directory and matching filenames is strongly recommended because it simplifies future loading and project management.
+Using the same directory and matching file names is strongly recommended because it simplifies loading those files in the future.
 
 ### 3.3 Loading Saved Annotations
 
@@ -436,15 +432,15 @@ To continue a previous examination:
 2. Click the annotation loading icon.
 3. Select the corresponding JSON file.
 
-The application restores all saved feature information.
+The application will restore all saved feature information.
 
 ![Loading annotations](images/common/load-json.png)
 
-*Figure 24. Loading previously saved work.*
+*Loading previously saved work.*
 
 ### 3.4 Working with Multiple Comparisons
 
-A common workflow involves comparing multiple impressions of the same source.
+A common workflow is to compare multiple impressions of the same source.
 
 For example:
 
@@ -452,7 +448,7 @@ For example:
 * Impression A vs Impression C
 * Impression B vs Impression C
 
-Each comparison may generate separate JSON annotation files that can later be combined using the Merge function described in the next chapter.
+Each comparison may generate a separate JSON annotation file, which can be combined later using the Merge function described in the next chapter.
 
 ---
 
@@ -460,12 +456,12 @@ Each comparison may generate separate JSON annotation files that can later be co
 
 ### 4.1 Merge Function
 
-The Merge function allows feature identifiers from different annotation files to be unified.
+The Merge function unifies feature identifiers from different annotation files.
 
 This is particularly useful when:
 
 * Multiple comparisons have been performed independently.
-* The same physical feature received different identifiers.
+* The same physical feature has different identifiers.
 * Existing annotations need to be reconciled.
 
 ### 4.2 Typical Merge Scenario
@@ -475,9 +471,9 @@ Consider two previously annotated image pairs.
 The same Core feature may have:
 
 * Identifier 1 in one comparison
-* Identifier 7 in another comparison
+* Identifier 7 in another
 
-The Merge function allows these identifiers to be combined into a single shared identifier.
+The Merge function combines these identifiers into a single, shared identifier.
 
 ### 4.3 Merging Features
 
@@ -488,11 +484,11 @@ To merge two features:
 3. Click the Merge icon.
 4. Repeat for all matching features.
 
-The software updates identifiers so that corresponding features share the same reference number.
+The software updates the identifiers so that the corresponding features share the same reference number.
 
 ![Merge workflow](images/english/merge-function.png)
 
-*Figure 25. Merging feature identifiers.*
+*Merging feature identifiers.*
 
 ### 4.4 Verifying Merge Results
 
@@ -508,18 +504,18 @@ Save the updated annotations after completing the merge process.
 
 Fingerprint impressions are often captured at different angles.
 
-The Rotation Tool allows temporary rotation of the right image to simplify feature comparison while preserving feature coordinates.
+The Rotation Tool allows you to temporarily rotate the right image to simplify feature comparison while preserving feature coordinates.
 
 The complete rotation workflow is described in the next chapter.
 ### 4.6 Automatic Rotation Tool
 
 ### Purpose
 
-Fingerprint impressions are frequently captured at different angles. Even when two images originate from the same finger, differences in hand positioning, scanner placement, or acquisition conditions may result in rotational discrepancies.
+Fingerprint impressions are often captured at different angles. Even when two images originate from the same finger, differences in hand positioning, scanner placement, or acquisition conditions may result in rotational discrepancies.
 
-The Rotation Tool provides a temporary alignment mechanism that allows the examiner to rotate the right image to match the orientation of the left image.
+The Rotation Tool provides a temporary alignment mechanism that allows the examiner to rotate the image for proper orientation.
 
-The operation does not modify the original image file and does not alter the stored feature coordinates.
+The operation does not modify the original image file or alter the stored feature coordinates.
 
 ### Starting the Rotation Tool
 
@@ -530,7 +526,7 @@ To access the tool:
 
 ![Rotation tool](images/english/rotation-tool.png)
 
-*Figure 26. Opening the Rotation Tool.*
+*Opening the Rotation Tool.*
 
 ### Selecting Reference Lines
 
@@ -550,19 +546,19 @@ To define the reference line:
 
 ![Reference lines](images/common/reference-lines.png)
 
-*Figure 27. Defining reference lines.*
+*Defining reference lines.*
 
 ### Calculating Rotation
 
 After both reference lines have been created:
 
 1. Click **Calculate and Align**.
-2. The software calculates the angular difference.
-3. The right image is rotated automatically.
+2. The software will calculate the angular difference.
+3. The right image rotates automatically.
 
 ![Rotation result](images/common/rotation-result.png)
 
-*Figure 28. Automatic alignment result.*
+*Automatic alignment result.*
 
 After rotation, both fingerprint patterns should have approximately the same orientation.
 
@@ -571,8 +567,8 @@ After rotation, both fingerprint patterns should have approximately the same ori
 Once alignment is complete:
 
 1. Return to Feature Marking Mode.
-2. Continue marking features normally.
-3. Add new features as required.
+2. Continue marking features as usual.
+3. Add new features as needed.
 
 All annotations are automatically associated with the original image coordinates.
 
@@ -583,13 +579,13 @@ At any time:
 1. Return to the Rotation Tool.
 2. Click **Reset Rotation**.
 
-The image returns to its original orientation.
+The image will return to its original orientation.
 
 Previously marked features remain correctly positioned relative to the fingerprint pattern.
 
 ![Reset rotation](images/english/reset-rotation.png)
 
-*Figure 29. Resetting image rotation.*
+*Resetting image rotation.*
 
 ---
 
@@ -603,7 +599,7 @@ Supported image formats depend on the application version.
 
 ![Open image](images/english/open-image.png)
 
-*Figure 30. Open image tool.*
+*Open image tool.*
 
 ### 5.2 Opening Annotation Files
 
@@ -613,7 +609,7 @@ The image and annotation file can be loaded independently.
 
 ![Open annotation](images/common/load-json.png)
 
-*Figure 31. Open annotation tool.*
+*Open annotation tool.*
 
 ### 5.3 Save Annotation File
 
@@ -625,7 +621,7 @@ The source image remains unchanged.
 
 ![Save annotation](images/common/save-json.png)
 
-*Figure 32. Save annotation tool.*
+*Save annotation tool.*
 
 ### 5.4 Fit Image to Window
 
@@ -639,7 +635,7 @@ These tools simplify navigation after loading a new image.
 
 ![Fit image](images/english/fit-image.png)
 
-*Figure 33. Image fitting tools.*
+*Image fitting tools.*
 
 ### 5.5 Feature Visibility Control
 
@@ -655,7 +651,7 @@ Typical use cases:
 
 ![Feature visibility](images/common/feature-visibility.png)
 
-*Figure 34. Feature visibility controls.*
+*Feature visibility controls.*
 
 ### 5.6 Hiding Information Overlays
 
@@ -669,7 +665,7 @@ These overlays can be hidden when they are not needed.
 
 ![Hide overlays](images/common/hide-overlays.png)
 
-*Figure 35. Interface overlay controls.*
+*Interface overlay controls.*
 
 ### 5.7 Light and Dark Themes
 
@@ -678,7 +674,7 @@ The application supports both:
 * Light Theme
 * Dark Theme
 
-Dark mode is recommended during prolonged examination sessions and low-light working conditions.
+Dark mode is recommended for prolonged examination sessions and low-light working conditions.
 
 ![Theme selection](images/english/theme-selection.png)
 
@@ -688,7 +684,7 @@ Dark mode is recommended during prolonged examination sessions and low-light wor
 
 ## 6.1 Fingerprint Mode
 
-Fingerprint Mode provides the most complete functionality currently available in the application.
+Fingerprint Mode provides the application's most complete functionality.
 
 The following sections describe all supported fingerprint feature types.
 
@@ -698,13 +694,13 @@ The following sections describe all supported fingerprint feature types.
 
 The Core represents the approximate center of the fingerprint pattern.
 
-It is usually located near the innermost recurve of a loop or whorl structure.
+It is typically found near the innermost curve of a loop or whorl.
 
 The Core is marked using a single point.
 
 ![Core](images/common/core.png)
 
-*Figure 36. Core.*
+*Core.*
 
 ---
 
@@ -718,7 +714,7 @@ The feature is marked using a single point.
 
 ![Delta](images/common/delta.png)
 
-*Figure 37. Delta.*
+*Delta.*
 
 ---
 
@@ -734,7 +730,7 @@ The second click indicates ridge direction.
 
 ![Ridge beginning](images/common/ridge-beginning.png)
 
-*Figure 38. Ridge Beginning.*
+*Ridge Beginning.*
 
 ---
 
@@ -746,7 +742,7 @@ Marked as a directed feature.
 
 ![Ridge ending](images/common/ridge-ending.png)
 
-*Figure 39. Ridge Ending.*
+*Ridge Ending.*
 
 ---
 
@@ -758,7 +754,7 @@ Marked as a directed feature.
 
 ![Bifurcation](images/common/bifurcation.png)
 
-*Figure 40. Bifurcation.*
+*Bifurcation.*
 
 ---
 
@@ -770,7 +766,7 @@ Marked as a directed feature.
 
 ![Ridge Joining](images/common/ridge-joining.png)
 
-*Figure 41. Ridge Joining.*
+*Ridge Joining.*
 
 ---
 
@@ -784,7 +780,7 @@ The feature is marked from the bifurcation point to the ridge ending.
 
 ![Hook](images/common/hook.png)
 
-*Figure 42. Hook.*
+*Hook.*
 
 ---
 
@@ -798,7 +794,7 @@ The feature is marked from the bifurcation to the Ridge Joining.
 
 ![Lake](images/common/lake.png)
 
-*Figure 43. Lake.*
+*Lake.*
 
 ---
 
@@ -816,7 +812,7 @@ The feature is marked from beginning to ending.
 
 ![Island](images/common/island.png)
 
-*Figure 44. Island.*
+*Island.*
 
 ---
 
@@ -828,7 +824,7 @@ The feature is marked from the bifurcation point to the Ridge Joining point.
 
 ![Bridge](images/common/bridge.png)
 
-*Figure 45. Bridge.*
+*Bridge.*
 
 ---
 
@@ -842,7 +838,7 @@ The feature is marked using a single point.
 
 ![Point](images/common/point.png)
 
-*Figure 46. Point.*
+*Point.*
 ### Incipient Ridge
 
 A Incipient Ridge is a poorly developed ridge structure whose width is less than half the width of neighboring ridges. Incipient Ridges are often interrupted and may appear as incomplete ridge traces.
@@ -853,7 +849,7 @@ Incipient Ridges may be highly characteristic and can be useful during detailed 
 
 ![Incipient Ridge](images/common/incipient-ridge.png)
 
-*Figure 47. Incipient Ridge.*
+*Incipient Ridge.*
 
 ---
 
@@ -869,13 +865,13 @@ The feature is marked from its beginning to its end.
 
 ![Crease](images/common/crease.png)
 
-*Figure 48. Crease.*
+*Crease.*
 
 ---
 
 ### Scar
 
-A Scar is a permanent disruption of ridge flow caused by injury and healing.
+A Scar is a permanent disruption to the flow of the ridge caused by injury and the subsequent healing process.
 
 Unlike Creases, scars visibly alter the surrounding ridge structure. Neighboring ridges may be pulled together, distorted, interrupted, or displaced around the scarred region.
 
@@ -885,7 +881,7 @@ Scars are often highly individualizing features and can provide strong support d
 
 ![Scar](images/common/scar.png)
 
-*Figure 49. Scar.*
+*Scar.*
 
 ---
 
@@ -909,7 +905,7 @@ Pores are marked using point annotations.
 
 ![Pores](images/common/pores.png)
 
-*Figure 50. Pores.*
+*Pores.*
 
 ---
 
@@ -923,7 +919,7 @@ The feature is marked at the location of the protrusion.
 
 ![Ridge Protrusions](images/english/ridge-protrusions.png)
 
-*Figure 51. Ridge Protrusions.*
+*Ridge Protrusions.*
 
 ---
 
@@ -937,7 +933,7 @@ The feature is marked at the location of the indentation.
 
 ![Ridge Indentations](images/common/ridge-indentations.png)
 
-*Figure 52. Ridge Indentations.*
+*Ridge Indentations.*
 
 ---
 
@@ -949,7 +945,7 @@ The arrangement and distribution of these spots may be characteristic and can th
 
 ![Spots](images/common/spots.png)
 
-*Figure 53. Spots.*
+*Spots.*
 
 ---
 
@@ -974,9 +970,9 @@ The software assists with documentation and visualization but does not automatic
 
 ---
 
-## 6.3 Footwear Impression Mode
+## 6.3 Shoeprints Mode
 
-Footwear Impression Mode is intended for the comparison of shoeprints, outsole impressions, and related footwear evidence.
+Shoeprints Mode is intended for the comparison of shoeprints, outsole impressions, and related footwear evidence.
 
 The workflow is similar to fingerprint comparison:
 
@@ -988,7 +984,7 @@ The workflow is similar to fingerprint comparison:
 
 ### Typical Feature Categories
 
-Common footwear characteristics include:
+Common shoeprints characteristics include:
 
 #### Global Features
 
@@ -1028,9 +1024,9 @@ Individualizing characteristics caused by damage:
 
 These characteristics may be represented using point, line, or area annotations depending on the examination requirements.
 
-![Footwear comparison](images/common/footwear-comparison.png)
+![Shoeprints comparison](images/common/shoeprints-comparison.png)
 
-*Figure 54. Footwear comparison workflow.*
+*Shoeprints comparison workflow.*
 
 ---
 
@@ -1038,7 +1034,7 @@ These characteristics may be represented using point, line, or area annotations 
 
 Earprint Mode is currently under development.
 
-The mode is intended to support comparison of ear impressions and ear morphology features.
+It is intended to support the comparison of ear impressions and ear morphology features.
 
 Future versions are expected to include:
 
@@ -1074,7 +1070,7 @@ Focus on reproducible and clearly visible characteristics.
 
 ### Use Rotation Before Detailed Marking
 
-When impressions are captured at different angles, use the Rotation Tool before extensive feature annotation.
+When capturing impressions at different angles, use the Rotation Tool before extensively annotating features.
 
 ### Preserve Examination Transparency
 

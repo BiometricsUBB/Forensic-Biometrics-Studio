@@ -13,9 +13,3 @@ This roadmap is a **living document** — it lists the high-level direction of *
 | 5 | Additional UI languages (beyond English & Polish) | ⚪ Planned | _TBD_ | _Describe scope, blockers, and owner…_ |
 
 > ℹ️ The items above are **examples** to illustrate the format. Replace or extend them with the project's actual priorities.
-
-## How to contribute to the roadmap
-
-- Open a pull request to add, edit, or reprioritize an entry.
-- When you start working on an item, set its status to 🟡 **In progress** and add yourself as the owner in the **Details** column.
-- When an item ships, set its status to 🟢 **Done** and link the release or pull request.
