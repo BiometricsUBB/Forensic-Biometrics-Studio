@@ -76,9 +76,9 @@ function ModifierItem({
             : modifier.type === "contrast"
               ? t("Contrast", { ns: "tooltip" })
               : modifier.type === "levels"
-                ? t("Levels" as any, { ns: "tooltip" })
+                ? t("Levels", { ns: "tooltip" })
                 : modifier.type === "curves"
-                  ? t("Curves" as any, { ns: "tooltip" })
+                  ? t("Curves", { ns: "tooltip" })
                   : t("FFT Filter", { ns: "tooltip" });
 
     return (

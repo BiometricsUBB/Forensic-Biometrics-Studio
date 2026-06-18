@@ -188,7 +188,6 @@ export type i18nTooltip = Recordify<
     | "Clear measurement"
     | "Brightness"
     | "Contrast"
-    | "contrast_desc"
     | "Levels"
     | "levels_desc"
     | "Curves"

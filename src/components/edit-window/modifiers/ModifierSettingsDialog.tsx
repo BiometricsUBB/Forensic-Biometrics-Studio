@@ -141,7 +141,6 @@ function computeHistogram(img: HTMLImageElement): HistogramData | null {
     }
 
     let maxMaster = 0, maxR = 0, maxG = 0, maxB = 0;
-    // skip 0 and 255 for max calculation to prevent black/white borders from shrinking the histogram
     for(let i=1; i<255; i++) {
         if(master[i]! > maxMaster) maxMaster = master[i]!;
         if(r[i]! > maxR) maxR = r[i]!;
@@ -354,7 +353,7 @@ function CurvesSettings({
     const handleRightClick = (e: React.MouseEvent, idx: number) => {
         e.preventDefault();
         e.stopPropagation();
-        if (idx === 0 || idx === activePoints.length - 1) return; // don't delete end points
+        if (idx === 0 || idx === activePoints.length - 1) return;
         const newPoints = activePoints.filter((_, i) => i !== idx);
         onChange({ ...modifier.params, [channel]: newPoints });
     };
@@ -362,7 +361,7 @@ function CurvesSettings({
     const sorted = [...activePoints].sort((a, b) => a.x - b.x);
     const spline = createMonotoneCubicSpline(sorted);
     let curvePath = "";
-    for (let i = 0; i <= 255; i += 2) { // step 2 for performance, enough for smooth curve
+    for (let i = 0; i <= 255; i += 2) {
         const x = (i / 255) * 100;
         const y = 100 - (Math.max(0, Math.min(255, spline(i))) / 255) * 100;
         curvePath += `${i === 0 ? "M" : "L"} ${x} ${y} `;
@@ -927,8 +926,7 @@ export function ModifierSettingsDialog({
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const handlePointerDown = (e: React.PointerEvent) => {
-        if (e.button !== 0) return; // Only left click
-        // Don't drag if clicking on the close button
+        if (e.button !== 0) return;
         if ((e.target as HTMLElement).closest('button')) return;
         
         setIsDragging(true);

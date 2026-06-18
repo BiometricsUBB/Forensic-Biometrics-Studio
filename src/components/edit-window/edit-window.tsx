@@ -141,13 +141,11 @@ export function EditWindow() {
         }
     };
 
-    // ── Live Preview of Canvas Modifiers ─────────────────────────────────────
     useEffect(() => {
         if (!imageRef.current || !imageUrl) return;
         
-        // Check if there are any active canvas-based modifiers
         const hasCanvasModifier = modifiers.some(
-            m => m.enabled && (m.type === "levels" || m.type === "curves" || m.type === "fft")
+            m => m.enabled && (m.type === "levels" || m.type === "curves")
         );
         
         if (!hasCanvasModifier) {
@@ -155,10 +153,11 @@ export function EditWindow() {
             return;
         }
 
+        let cancelled = false;
         const runPipeline = async () => {
             try {
-                // Apply all modifiers to the original image and get the result
                 const uint8Array = await applyPipelineToImage(imageRef.current!, modifiers);
+                if (cancelled) return;
                 const blob = new Blob([uint8Array], { type: "image/png" });
                 const url = URL.createObjectURL(blob);
                 setPreviewImageUrl(prev => {
@@ -166,15 +165,14 @@ export function EditWindow() {
                     return url;
                 });
             } catch (err) {
-                console.error("Preview pipeline failed", err);
+                if (!cancelled) console.error("Preview pipeline failed", err);
             }
         };
 
         const timer = setTimeout(runPipeline, 100);
-        return () => clearTimeout(timer);
+        return () => { cancelled = true; clearTimeout(timer); };
     }, [modifiers, imageUrl]);
 
-    // Cleanup preview URL on unmount
     useEffect(() => {
         return () => {
             if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
@@ -483,7 +481,6 @@ export function EditWindow() {
                                     }
                                 }}
                             />
-                            {/* Invisible original image used as data source & sizing reference */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
@@ -499,7 +496,6 @@ export function EditWindow() {
                                 }}
                                 draggable={false}
                             />
-                            {/* Visible image (either preview or original with CSS filters) */}
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={previewImageUrl || imageUrl}
