@@ -84,6 +84,8 @@ const d: Dictionary = {
         "GBFEN finished in {{seconds}} s",
     "Enhancement: SNFEN done in {{seconds}}s":
         "SNFEN finished in {{seconds}} s",
+    "Enhancement: using existing output":
+        "Enhancement already exists — using cached output.",
     "Enhancement failed: {{error}}": "Enhancement failed: {{error}}",
     "Enhancement DPI": "DPI",
     "Enhancement DPI hint":

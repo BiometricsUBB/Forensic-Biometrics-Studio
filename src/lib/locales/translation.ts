@@ -221,6 +221,7 @@ export type i18nTooltip = Recordify<
     | "Enhancement: SNFEN started"
     | "Enhancement: GBFEN done in {{seconds}}s"
     | "Enhancement: SNFEN done in {{seconds}}s"
+    | "Enhancement: using existing output"
     | "Enhancement failed: {{error}}"
     | "Enhancement DPI"
     | "Enhancement DPI hint"

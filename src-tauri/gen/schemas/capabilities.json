@@ -22,6 +22,7 @@
                 "identifier": "fs:allow-exists",
                 "allow": ["**", "**/*", "/**/*"]
             },
+            { "identifier": "fs:allow-stat", "allow": ["**", "**/*", "/**/*"] },
             {
                 "identifier": "fs:allow-read-file",
                 "allow": ["**", "**/*", "/**/*"]

@@ -21,6 +21,7 @@ Exit codes:
 import os
 import sys
 import argparse
+from pathlib import Path
 
 # Hush TensorFlow CPU/oneDNN advisory output and pre-pick a backend.
 # If TF is bundled we use it (so SNFEN works); else fall back to a numpy backend
@@ -167,12 +168,15 @@ def main() -> int:
         return 3
 
     _emit("writing")
-    success = cv.imwrite(args.output, enhanced)
+    out_path = Path(args.output).with_suffix(".png")
+    tmp_path = out_path.with_suffix(".tmp.png")
+    success = cv.imwrite(str(tmp_path), enhanced)
     if not success:
-        print(f"ERROR: failed to write output: {args.output}", file=sys.stderr)
+        print(f"ERROR: failed to write output: {tmp_path}", file=sys.stderr)
         return 4
+    tmp_path.replace(out_path)
 
-    print(f"DONE: {args.output}", file=sys.stderr, flush=True)
+    print(f"DONE: {out_path}", file=sys.stderr, flush=True)
     return 0
 
 

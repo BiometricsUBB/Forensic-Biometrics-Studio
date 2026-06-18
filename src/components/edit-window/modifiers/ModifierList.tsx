@@ -229,6 +229,7 @@ function ModifierItem({
                     "border-destructive/60"
             )}
         >
+            {/* Drag handle — mouse DnD and keyboard (↑ / ↓) reordering */}
             <button
                 type="button"
                 tabIndex={0}
@@ -300,7 +301,6 @@ export function ModifierList({
             const to = e.key === "ArrowUp" ? idx - 1 : idx + 1;
             if (to < 0 || to >= modifiers.length) return;
             onReorder(idx, to);
-            // Keep focus on the handle after the list re-renders
             requestAnimationFrame(() => {
                 const handles = document.querySelectorAll<HTMLElement>(
                     "[data-modifier-grip]"

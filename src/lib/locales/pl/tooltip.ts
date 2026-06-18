@@ -86,6 +86,8 @@ const d: Dictionary = {
         "GBFEN ukończone w {{seconds}} s",
     "Enhancement: SNFEN done in {{seconds}}s":
         "SNFEN ukończone w {{seconds}} s",
+    "Enhancement: using existing output":
+        "Wzmocnienie już istnieje — używam zapisanego wyniku.",
     "Enhancement failed: {{error}}": "Wzmocnienie nie powiodło się: {{error}}",
     "Enhancement DPI": "Rozdzielczość (DPI)",
     "Enhancement DPI hint":

@@ -22,6 +22,14 @@
             "allow": ["**", "**/*", "/**/*"]
         },
         {
+            "identifier": "fs:allow-stat",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        {
+            "identifier": "fs:allow-mkdir",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        {
             "identifier": "fs:allow-read-file",
             "allow": ["**", "**/*", "/**/*"]
         },
@@ -46,6 +54,21 @@
         "dialog:allow-confirm",
         {
             "identifier": "shell:allow-execute",
+            "allow": [
+                {
+                    "name": "bin/sourceafis_cli",
+                    "sidecar": true,
+                    "args": true
+                },
+                {
+                    "name": "bin/pyfing_enhance",
+                    "sidecar": true,
+                    "args": true
+                }
+            ]
+        },
+        {
+            "identifier": "shell:allow-spawn",
             "allow": [
                 {
                     "name": "bin/sourceafis_cli",

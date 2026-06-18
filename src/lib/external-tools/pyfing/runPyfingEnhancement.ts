@@ -10,7 +10,8 @@ import {
 } from "@/lib/external-tools/core/errors";
 
 const PYFING_SIDECAR_NAME = "bin/pyfing_enhance";
-const PYFING_TIMEOUT_MS = 120_000; // 2 min — enhancement can be slow
+const PYFING_TIMEOUT_MS = 120_000;
+const PYFING_POLL_INTERVAL_MS = 3_000;
 const LOG_PREFIX = "[Pyfing ExternalTool]";
 
 export type PyfingMethod = "GBFEN" | "SNFEN";
@@ -43,18 +44,11 @@ function log(
     logger?.[level]?.(LOG_PREFIX, message, payload);
 }
 
-/**
- * Spawn the sidecar and resolve when it exits naturally.
- *
- * If the timeout fires we kill the child process (so the OS reaps it
- * immediately) and reject with `ExternalToolTimeoutError`. This is the key
- * difference from `Command.execute()` racing a `setTimeout`: that pattern
- * leaks the child process because the JS promise rejects but the native
- * process keeps running.
- */
 async function spawnWithTimeout(
     command: Command<string>,
+    outputPath: string,
     timeoutMs: number,
+    pollIntervalMs: number,
     logger: ExternalToolLogger | undefined
 ): Promise<ProcessOutcome> {
     const stdoutChunks: string[] = [];
@@ -72,14 +66,23 @@ async function spawnWithTimeout(
     return new Promise<ProcessOutcome>((resolve, reject) => {
         let settled = false;
         let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+        let pollHandle: ReturnType<typeof setInterval> | null = null;
 
-        const finish = (outcome: ProcessOutcome | Error) => {
-            if (settled) return;
-            settled = true;
+        const cleanup = () => {
             if (timeoutHandle !== null) {
                 clearTimeout(timeoutHandle);
                 timeoutHandle = null;
             }
+            if (pollHandle !== null) {
+                clearInterval(pollHandle);
+                pollHandle = null;
+            }
+        };
+
+        const finish = (outcome: ProcessOutcome | Error) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
             if (outcome instanceof Error) {
                 reject(outcome);
             } else {
@@ -108,6 +111,34 @@ async function spawnWithTimeout(
                 )
             );
         });
+
+        pollHandle = setInterval(() => {
+            exists(outputPath)
+                .then(found => {
+                    if (!found || settled) return;
+                    log(
+                        logger,
+                        "info",
+                        "Output file detected via poll — resolving early"
+                    );
+                    child.kill().catch(e => {
+                        log(
+                            logger,
+                            "error",
+                            "Failed to kill child after output detected",
+                            { error: e }
+                        );
+                    });
+                    finish({
+                        code: 0,
+                        stdout: stdoutChunks.join("\n"),
+                        stderr: stderrChunks.join("\n"),
+                    });
+                })
+                .catch(() => {
+                    /* ignore fs errors during poll */
+                });
+        }, pollIntervalMs);
 
         timeoutHandle = setTimeout(() => {
             log(logger, "error", "Process timed out, killing child", {
@@ -156,7 +187,13 @@ export async function runPyfingEnhancement(
     const startedAt = Date.now();
 
     try {
-        const output = await spawnWithTimeout(command, timeoutMs, logger);
+        const output = await spawnWithTimeout(
+            command,
+            request.outputPath,
+            timeoutMs,
+            PYFING_POLL_INTERVAL_MS,
+            logger
+        );
         const durationMs = Date.now() - startedAt;
 
         log(logger, "debug", "stderr", output.stderr);
@@ -184,11 +221,7 @@ export async function runPyfingEnhancement(
             stderr: output.stderr,
         };
     } catch (error) {
-        if (error instanceof ExternalToolTimeoutError) {
-            log(logger, "error", "Process timed out");
-        } else {
-            log(logger, "error", "Process failed", error);
-        }
+        log(logger, "error", "Process failed", error);
         throw error;
     }
 }
