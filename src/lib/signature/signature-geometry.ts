@@ -1,14 +1,10 @@
 /* eslint-disable security/detect-object-injection */
 import { Point } from "@/lib/markings/Point";
 
-/** Euclidean distance between two points. */
 export const dist = (a: Point, b: Point): number =>
     Math.hypot(b.x - a.x, b.y - a.y);
 
-/**
- * Lengths of the edges of a closed polygon (l1..lN), where the last edge
- * connects the final vertex back to the first one.
- */
+// Closed polygon: the last edge wraps from the final vertex back to the first.
 export const polygonSegments = (points: Point[]): number[] => {
     if (points.length < 3) return [];
     return points.map((point, i) =>
@@ -16,11 +12,10 @@ export const polygonSegments = (points: Point[]): number[] => {
     );
 };
 
-/** Perimeter of a closed polygon: P = sum of edge lengths. */
 export const polygonPerimeter = (points: Point[]): number =>
     polygonSegments(points).reduce((acc, len) => acc + len, 0);
 
-/** Area of a polygon via the shoelace (Gauss) formula, absolute value. */
+// Shoelace (Gauss) formula.
 export const polygonArea = (points: Point[]): number => {
     if (points.length < 3) return 0;
     const twiceArea = points.reduce((acc, point, i) => {

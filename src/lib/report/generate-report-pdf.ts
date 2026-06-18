@@ -118,6 +118,14 @@ const toCssColor = (value: unknown, fallback: string) => {
     return fallback;
 };
 
+export const escapeHtml = (value: string) =>
+    value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
 export const getSystemId = async () => {
     try {
         const id = await invoke<string>("get_machine_id");
@@ -1199,7 +1207,6 @@ export type ReportIdentity = {
     appVersion: string;
 };
 
-/** Builds the shared report metadata (id, date, author, department, address). */
 export const buildReportIdentity = async (
     options: ReportMetadataOptions,
     leftMeta: ImageMeta,
@@ -1252,7 +1259,6 @@ export const buildReportIdentity = async (
     };
 };
 
-/** Appends pages to the DOM, rasterizes them and saves the result as a PDF. */
 export const renderPagesToPdf = async (
     root: HTMLElement,
     pages: HTMLElement[],

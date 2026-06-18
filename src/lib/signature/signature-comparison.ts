@@ -2,10 +2,7 @@
 import { getRkr } from "./signature-constants";
 import { SignatureParams } from "./signature-params";
 
-/**
- * Ranks values in descending order (largest value gets rank 1, as in
- * GRAFOTYP 2.0), assigning average ranks to ties.
- */
+// Descending ranks (largest value = rank 1, as in GRAFOTYP 2.0); ties averaged.
 export const computeRanks = (values: number[]): number[] => {
     const indexed = values.map((value, index) => ({ value, index }));
     indexed.sort((x, y) => y.value - x.value);
@@ -38,20 +35,34 @@ export type SpearmanResult = {
     ranksB: number[];
 };
 
-/**
- * Spearman rank correlation between two equally long, index-paired sequences.
- * Returns null when the sequences differ in length or are too short (N < 3).
- */
+// Null when either vector has zero variance (correlation undefined).
+const pearson = (x: number[], y: number[]): number | null => {
+    const n = x.length;
+    const meanX = x.reduce((acc, v) => acc + v, 0) / n;
+    const meanY = y.reduce((acc, v) => acc + v, 0) / n;
+    let sxy = 0;
+    let sxx = 0;
+    let syy = 0;
+    for (let i = 0; i < n; i += 1) {
+        const dx = x[i]! - meanX;
+        const dy = y[i]! - meanY;
+        sxy += dx * dy;
+        sxx += dx * dx;
+        syy += dy * dy;
+    }
+    const denom = Math.sqrt(sxx * syy);
+    return denom === 0 ? null : sxy / denom;
+};
+
+// Spearman rho computed as Pearson over the rank vectors: exact with ties
+// (the 1 - 6*Sum(d^2)/(n(n^2-1)) shortcut is only valid without ties).
 export const spearman = (a: number[], b: number[]): SpearmanResult | null => {
     if (a.length !== b.length || a.length < 3) return null;
     const n = a.length;
     const ranksA = computeRanks(a);
     const ranksB = computeRanks(b);
-    const dSquaredSum = ranksA.reduce(
-        (acc, rank, i) => acc + (rank - ranksB[i]!) ** 2,
-        0
-    );
-    const r = 1 - (6 * dSquaredSum) / (n * (n * n - 1));
+    const r = pearson(ranksA, ranksB);
+    if (r === null) return null;
     const rkr = getRkr(n);
     return {
         n,
@@ -80,7 +91,17 @@ export type SignatureComparison = {
     sameSegmentCount: boolean;
 };
 
-/** Compares two sets of signature parameters using the Grafotype metrics. */
+/**
+ * IMPORTANT - rank correlation alignment: the Spearman correlation pairs the
+ * two outlines by edge index (l_i in A vs l_i in B), so it assumes both
+ * outlines were traced with the same starting vertex and direction. This is by
+ * design of the GRAFOTYP method, where the examiner marks corresponding points
+ * in both signatures; the sequences are NOT auto-aligned. Two outlines of the
+ * same shape traced from a different vertex or in the opposite direction will
+ * therefore yield a low correlation. `sameSegmentCount` only checks the vertex
+ * count, not this ordering - it is the examiner's responsibility to trace the
+ * outlines consistently.
+ */
 export const compareSignatures = (
     a: SignatureParams,
     b: SignatureParams
@@ -100,10 +121,8 @@ export const compareSignatures = (
 
 export type ReadinessReason = "missing-outline";
 
-/**
- * Hard requirement for any verification result: a signature outline polygon
- * (>= 3 vertices) on BOTH images. W1/W2 axes are optional (best-effort).
- */
+// Ready requires an outline polygon (>= 3 vertices) on BOTH images;
+// W1/W2 axes are optional (best-effort).
 export const getComparisonReadiness = (
     a: SignatureParams,
     b: SignatureParams

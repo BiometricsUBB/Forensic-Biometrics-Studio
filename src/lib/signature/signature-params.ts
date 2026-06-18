@@ -6,10 +6,6 @@ import { LineSegmentMarking } from "@/lib/markings/LineSegmentMarking";
 import { SIGNATURE_TYPE_NAME } from "./signature-constants";
 import { dist, polygonArea, polygonSegments } from "./signature-geometry";
 
-/**
- * Grafotype parameters derived from a single signature outline (+ optional axes).
- * Computed fields are `null` when the required markings are missing.
- */
 export type SignatureParams = {
     hasOutline: boolean;
     segmentCount: number; // N - number of outline edges
@@ -26,11 +22,8 @@ export type SignatureParams = {
 const typeIdsByName = (types: MarkingType[], name: string): Set<string> =>
     new Set(types.filter(type => type.name === name).map(type => type.id));
 
-/**
- * Computes Grafotype parameters from the markings of a single image.
- * Uses the first outline polygon / W1 / W2 markings found (matched by the
- * stable marking-type `name`, see {@link SIGNATURE_TYPE_NAME}).
- */
+// Matches the outline polygon and W1/W2 axes by the stable marking-type
+// `name` (see SIGNATURE_TYPE_NAME); uses the first of each found.
 export const computeSignatureParams = (
     markings: MarkingClass[],
     types: MarkingType[]

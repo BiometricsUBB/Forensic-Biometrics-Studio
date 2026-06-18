@@ -18,6 +18,7 @@ import {
     createPage,
     createReportRoot,
     createStyles,
+    escapeHtml,
     getImageMeta,
     renderImageWithMarkings,
     renderPagesToPdf,
@@ -30,11 +31,6 @@ type SignatureReportOptions = ReportMetadataOptions & {
 
 const NA_KEY = "Not available";
 
-/**
- * Generates a PDF report for the signature (Grafotype) working mode:
- * a parameter summary (A/B), conformity verification, the rank-correlation
- * breakdown and the annotated signature images.
- */
 /* eslint-disable sonarjs/cognitive-complexity */
 export const generateSignatureReportPdfWithDialog = async (
     options: SignatureReportOptions
@@ -137,7 +133,7 @@ export const generateSignatureReportPdfWithDialog = async (
 
         const addressHtml =
             address.length > 0
-                ? address.map(line => `<div>${line}</div>`).join("")
+                ? address.map(line => `<div>${escapeHtml(line)}</div>`).join("")
                 : "<div>-</div>";
 
         const pages: HTMLElement[] = [];
@@ -150,8 +146,8 @@ export const generateSignatureReportPdfWithDialog = async (
             <div>${tReport("Report date and time label")} ${reportDateTime}</div>
             <div>${tReport("Performed by label")}</div>
             <div class="meta-block">
-                <div>${performedBy || "-"}</div>
-                <div>${department || "-"}</div>
+                <div>${escapeHtml(performedBy) || "-"}</div>
+                <div>${escapeHtml(department) || "-"}</div>
                 ${addressHtml}
             </div>
         </div>
@@ -166,14 +162,14 @@ export const generateSignatureReportPdfWithDialog = async (
         <div class="input-grid">
             <div class="meta-block">
                 <div><strong>${tReport("Image 1")} (${tReport("Sample A")}):</strong></div>
-                <div>${tReport("File name")} ${leftMeta.name}</div>
+                <div>${tReport("File name")} ${escapeHtml(leftMeta.name)}</div>
                 <div>${tReport("Image dimensions")} ${leftMeta.width} x ${leftMeta.height} px</div>
                 <div>${tReport("Size")} ${formatBytes(leftMeta.sizeBytes)}</div>
                 <div>${tReport("Checksum")} ${leftMeta.checksum}</div>
             </div>
             <div class="meta-block">
                 <div><strong>${tReport("Image 2")} (${tReport("Sample B")}):</strong></div>
-                <div>${tReport("File name")} ${rightMeta.name}</div>
+                <div>${tReport("File name")} ${escapeHtml(rightMeta.name)}</div>
                 <div>${tReport("Image dimensions")} ${rightMeta.width} x ${rightMeta.height} px</div>
                 <div>${tReport("Size")} ${formatBytes(rightMeta.sizeBytes)}</div>
                 <div>${tReport("Checksum")} ${rightMeta.checksum}</div>

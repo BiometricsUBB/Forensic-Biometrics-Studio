@@ -30,6 +30,14 @@ const makeType = (name: string, markingClass: MARKING_CLASS): MarkingType => ({
     category: WORKING_MODE.SIGNATURE,
 });
 
+// GRAFOTYP 2.0 reference sample: outline segment lengths for samples A and B.
+const SAMPLE_SEGMENTS_A = [
+    94, 68, 71, 126, 235, 186, 114, 158, 291, 175, 226, 330, 211, 177,
+];
+const SAMPLE_SEGMENTS_B = [
+    63, 81, 49, 114, 242, 194, 87, 208, 379, 170, 209, 317, 212, 180,
+];
+
 describe("signature geometry", () => {
     it("computes area and perimeter of a 100x100 square", () => {
         const square = [
@@ -102,12 +110,8 @@ describe("computeSignatureParams", () => {
 });
 
 describe("Spearman rank correlation (GRAFOTYP 2.0 sample, N=14)", () => {
-    const segmentsA = [
-        94, 68, 71, 126, 235, 186, 114, 158, 291, 175, 226, 330, 211, 177,
-    ];
-    const segmentsB = [
-        63, 81, 49, 114, 242, 194, 87, 208, 379, 170, 209, 317, 212, 180,
-    ];
+    const segmentsA = SAMPLE_SEGMENTS_A;
+    const segmentsB = SAMPLE_SEGMENTS_B;
 
     it("ranks descending (largest = 1) matching the reference", () => {
         expect(computeRanks(segmentsA)).toEqual([
@@ -132,27 +136,68 @@ describe("Spearman rank correlation (GRAFOTYP 2.0 sample, N=14)", () => {
     });
 });
 
-describe("compareSignatures agreements (GRAFOTYP 2.0 sample)", () => {
+describe("compareSignatures (GRAFOTYP 2.0 sample)", () => {
+    const a = {
+        hasOutline: true,
+        segmentCount: 14,
+        area: 151080,
+        perimeter: 2462,
+        shapeCoefficient: 2.49,
+        w1: 774,
+        w2: 717,
+        sizeProportion: 0.93,
+        grafotype: 2.32,
+        segments: SAMPLE_SEGMENTS_A,
+    };
+    const b = {
+        ...a,
+        shapeCoefficient: 2.35,
+        grafotype: 2,
+        segments: SAMPLE_SEGMENTS_B,
+    };
+
     it("computes shape and grafotype agreement percentages", () => {
-        const a = {
-            hasOutline: true,
-            segmentCount: 14,
-            area: 151080,
-            perimeter: 2462,
-            shapeCoefficient: 2.49,
-            w1: 774,
-            w2: 717,
-            sizeProportion: 0.93,
-            grafotype: 2.32,
-            segments: [1, 2, 3],
-        };
-        const b = {
-            ...a,
-            shapeCoefficient: 2.35,
-            grafotype: 2,
-        };
         const comparison = compareSignatures(a, b);
         expect(comparison.shapeAgreement).toBeCloseTo(94.38, 1);
         expect(comparison.grafotypeAgreement).toBeCloseTo(86.21, 1);
+    });
+
+    it("runs the spearman branch when segment counts match", () => {
+        const comparison = compareSignatures(a, b);
+        expect(comparison.sameSegmentCount).toBe(true);
+        expect(comparison.spearman).not.toBeNull();
+        expect(comparison.spearman!.r).toBeCloseTo(0.952, 3);
+        expect(comparison.spearman!.significant).toBe(true);
+    });
+
+    it("skips correlation when segment counts differ", () => {
+        const comparison = compareSignatures(a, {
+            ...b,
+            segmentCount: 10,
+            segments: SAMPLE_SEGMENTS_B.slice(0, 10),
+        });
+        expect(comparison.sameSegmentCount).toBe(false);
+        expect(comparison.spearman).toBeNull();
+        // agreements are still computed regardless of segment alignment
+        expect(comparison.shapeAgreement).toBeCloseTo(94.38, 1);
+    });
+});
+
+describe("Spearman with ties (Pearson over ranks)", () => {
+    it("stays in [-1, 1] and yields -1 for reversed tied rank vectors", () => {
+        // ranksA = [4, 2.5, 2.5, 1], ranksB = [1, 2.5, 2.5, 4].
+        // The 1 - 6*Sum(d^2)/(n(n^2-1)) shortcut would give a biased -0.8;
+        // Pearson over the rank vectors gives the correct -1.
+        const result = spearman([1, 2, 2, 3], [3, 2, 2, 1]);
+        expect(result).not.toBeNull();
+        expect(result!.r).toBeCloseTo(-1, 6);
+        expect(result!.r).toBeGreaterThanOrEqual(-1);
+        expect(result!.r).toBeLessThanOrEqual(1);
+    });
+
+    it("yields 1 for identical tied rank vectors", () => {
+        const result = spearman([10, 10, 20, 30], [5, 5, 15, 25]);
+        expect(result).not.toBeNull();
+        expect(result!.r).toBeCloseTo(1, 6);
     });
 });
