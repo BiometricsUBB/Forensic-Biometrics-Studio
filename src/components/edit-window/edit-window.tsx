@@ -156,7 +156,8 @@ export function EditWindow() {
         let cancelled = false;
         const runPipeline = async () => {
             try {
-                const uint8Array = await applyPipelineToImage(imageRef.current!, modifiers);
+                const previewModifiers = modifiers.filter(m => m.type !== "fft");
+                const uint8Array = await applyPipelineToImage(imageRef.current!, previewModifiers);
                 if (cancelled) return;
                 const blob = new Blob([uint8Array], { type: "image/png" });
                 const url = URL.createObjectURL(blob);
