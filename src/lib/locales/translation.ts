@@ -101,6 +101,7 @@ export type i18nDescription = Recordify<
     | "Configure report metadata"
     | "Configure default report data"
     | "Generate PDF report"
+    | "Manage marking types"
 >;
 
 export type i18nModes = Recordify<WORKING_MODE>;
@@ -219,6 +220,31 @@ export type i18nTooltip = Recordify<
     | "Drag to reorder"
     | "Move up"
     | "Move down"
+    | "Image enhancement"
+    | "GBFEN"
+    | "SNFEN"
+    | "gbfen_desc"
+    | "snfen_desc"
+    | "Enhancement: GBFEN started"
+    | "Enhancement: SNFEN started"
+    | "Enhancement: GBFEN done in {{seconds}}s"
+    | "Enhancement: SNFEN done in {{seconds}}s"
+    | "Enhancement: using existing output"
+    | "Enhancement failed: {{error}}"
+    | "Enhancement DPI"
+    | "Enhancement DPI hint"
+    | "Enhancement status"
+    | "Enhancement: pending"
+    | "Enhancement: processing"
+    | "Enhancement: ready"
+    | "Enhancement: failed"
+    | "Enhancement output path"
+    | "Re-run enhancement"
+    | "Took {{seconds}} s"
+    | "Method"
+    | "GBFEN — Gabor-based enhancement"
+    | "SNFEN — Neural enhancement"
+    | "Enhancing image..."
 >;
 
 export type i18nDialog = Recordify<

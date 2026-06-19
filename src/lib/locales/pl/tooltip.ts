@@ -81,6 +81,37 @@ const d: Dictionary = {
     "Drag to reorder": "Przeciągnij, aby zmienić kolejność",
     "Move up": "Przesuń w górę",
     "Move down": "Przesuń w dół",
+    "Image enhancement": "Wzmocnienie obrazu",
+    GBFEN: "GBFEN",
+    SNFEN: "SNFEN",
+    gbfen_desc:
+        "Klasyczne wzmocnienie linii papilarnych filtrami Gabora. Działa lokalnie, bez sieci neuronowej. Najlepsze dla obrazów o wyraźnej, regularnej teksturze grzbietów. Szybkie (~10–20 s) i deterministyczne.",
+    snfen_desc:
+        "Wzmocnienie linii papilarnych siecią neuronową (Spectral-Neural Fingerprint Enhancement Network). Działa wolniej niż GBFEN, ale lepiej radzi sobie z obrazami niskiej jakości, zaszumionymi lub o słabym kontraście grzbietów. Wymaga modułu TensorFlow dołączonego do aplikacji.",
+    "Enhancement: GBFEN started": "Wzmacnianie GBFEN rozpoczęte...",
+    "Enhancement: SNFEN started": "Wzmacnianie SNFEN rozpoczęte...",
+    "Enhancement: GBFEN done in {{seconds}}s":
+        "GBFEN ukończone w {{seconds}} s",
+    "Enhancement: SNFEN done in {{seconds}}s":
+        "SNFEN ukończone w {{seconds}} s",
+    "Enhancement: using existing output":
+        "Wzmocnienie już istnieje — używam zapisanego wyniku.",
+    "Enhancement failed: {{error}}": "Wzmocnienie nie powiodło się: {{error}}",
+    "Enhancement DPI": "Rozdzielczość (DPI)",
+    "Enhancement DPI hint":
+        "Ustaw zgodnie z rozdzielczością skanu. Po zmianie wartości uruchom wzmocnienie ponownie.",
+    "Enhancement status": "Status",
+    "Enhancement: pending": "Oczekiwanie...",
+    "Enhancement: processing": "Przetwarzanie...",
+    "Enhancement: ready": "Gotowe",
+    "Enhancement: failed": "Błąd",
+    "Enhancement output path": "Plik wyjściowy",
+    "Re-run enhancement": "Uruchom ponownie",
+    "Took {{seconds}} s": "Zajęło {{seconds}} s",
+    Method: "Metoda",
+    "GBFEN — Gabor-based enhancement": "GBFEN — wzmocnienie filtrami Gabora",
+    "SNFEN — Neural enhancement": "SNFEN — wzmocnienie siecią neuronową",
+    "Enhancing image...": "Wzmacnianie obrazu...",
 };
 
 export default d;

@@ -24,6 +24,7 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Sprite } from "pixi.js";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
+import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
 import { loadSprite } from "./loadSprite";
 
 export async function loadImage(filePath: string, viewport: Viewport) {
@@ -74,6 +75,7 @@ export async function loadImage(filePath: string, viewport: Viewport) {
     sprite.position.set(sprite.width / 2, sprite.height / 2);
     viewport.addChild(sprite);
 
+    GlobalHistoryManager.clear();
     ShallowViewportStore(canvasId).state.reset();
     CanvasToolbarStore(canvasId).state.reset();
     CachedViewportStore(canvasId).state.reset();

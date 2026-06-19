@@ -1,7 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Trash2, Waves, Sun, Contrast, X, Play, SlidersHorizontal, TrendingUp } from "lucide-react";
+import {
+    Trash2,
+    Waves,
+    Sun,
+    Contrast,
+    Wand2,
+    Brain,
+    X,
+    Play,
+    RefreshCw,
+    SlidersHorizontal,
+    TrendingUp,
+} from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { ImageFFT } from "@/lib/fftProcessor";
 import { useTranslation } from "react-i18next";
@@ -9,9 +21,11 @@ import {
     AnyModifier,
     BrightnessModifier,
     ContrastModifier,
+    EnhancementModifier,
     FftModifier,
     LevelsModifier,
     CurvesModifier,
+    isEnhancementModifier,
 } from "@/lib/imageModifiers/types";
 import { createMonotoneCubicSpline } from "@/lib/imageModifiers/pipeline";
 import {
@@ -122,7 +136,7 @@ function computeHistogram(img: HTMLImageElement): HistogramData | null {
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return null;
     ctx.drawImage(img, 0, 0);
-    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
     const r = new Uint32Array(256);
     const g = new Uint32Array(256);
@@ -131,8 +145,8 @@ function computeHistogram(img: HTMLImageElement): HistogramData | null {
 
     for (let i = 0; i < data.length; i += 4) {
         const rr = data[i]!;
-        const gg = data[i+1]!;
-        const bb = data[i+2]!;
+        const gg = data[i + 1]!;
+        const bb = data[i + 2]!;
         r[rr] = r[rr]! + 1;
         g[gg] = g[gg]! + 1;
         b[bb] = b[bb]! + 1;
@@ -140,14 +154,17 @@ function computeHistogram(img: HTMLImageElement): HistogramData | null {
         master[lum] = master[lum]! + 1;
     }
 
-    let maxMaster = 0, maxR = 0, maxG = 0, maxB = 0;
-    for(let i=1; i<255; i++) {
-        if(master[i]! > maxMaster) maxMaster = master[i]!;
-        if(r[i]! > maxR) maxR = r[i]!;
-        if(g[i]! > maxG) maxG = g[i]!;
-        if(b[i]! > maxB) maxB = b[i]!;
+    let maxMaster = 0;
+    let maxR = 0;
+    let maxG = 0;
+    let maxB = 0;
+    for (let i = 1; i < 255; i += 1) {
+        if (master[i]! > maxMaster) maxMaster = master[i]!;
+        if (r[i]! > maxR) maxR = r[i]!;
+        if (g[i]! > maxG) maxG = g[i]!;
+        if (b[i]! > maxB) maxB = b[i]!;
     }
-    
+
     return {
         master: Array.from(master).map(v => Math.min(1, v / (maxMaster || 1))),
         r: Array.from(r).map(v => Math.min(1, v / (maxR || 1))),
@@ -158,7 +175,13 @@ function computeHistogram(img: HTMLImageElement): HistogramData | null {
 
 type ColorChannel = "master" | "r" | "g" | "b";
 
-function ChannelSelector({ value, onChange }: { value: ColorChannel, onChange: (v: ColorChannel) => void }) {
+function ChannelSelector({
+    value,
+    onChange,
+}: {
+    value: ColorChannel;
+    onChange: (v: ColorChannel) => void;
+}) {
     const channels: { id: ColorChannel; label: string; color?: string }[] = [
         { id: "master", label: "RGB" },
         { id: "r", label: "Red", color: "text-red-500" },
@@ -170,9 +193,14 @@ function ChannelSelector({ value, onChange }: { value: ColorChannel, onChange: (
         <div className="flex bg-secondary rounded-lg p-1 gap-1">
             {channels.map(c => (
                 <button
+                    type="button"
                     key={c.id}
                     className={`flex-1 text-xs font-semibold py-1 rounded-md transition-colors ${
-                        value === c.id ? "bg-background shadow-sm " + (c.color || "text-foreground") : "text-muted-foreground hover:bg-background/50"
+                        value === c.id
+                            ? `bg-background shadow-sm ${
+                                  c.color || "text-foreground"
+                              }`
+                            : "text-muted-foreground hover:bg-background/50"
                     }`}
                     onClick={() => onChange(c.id as ColorChannel)}
                 >
@@ -183,19 +211,33 @@ function ChannelSelector({ value, onChange }: { value: ColorChannel, onChange: (
     );
 }
 
-function HistogramBackground({ data, channel, className }: { data: HistogramData | null, channel: ColorChannel, className?: string }) {
+function HistogramBackground({
+    data,
+    channel,
+    className,
+}: {
+    data: HistogramData | null;
+    channel: ColorChannel;
+    className?: string;
+}) {
     if (!data) return null;
     const arr = data[channel];
-    const points = arr.map((val, idx) => `${(idx / 255) * 100},${100 - val * 100}`).join(" ");
+    const points = arr
+        .map((val, idx) => `${(idx / 255) * 100},${100 - val * 100}`)
+        .join(" ");
     const path = `M 0,100 L ${points} L 100,100 Z`;
-    
+
     let fill = "fill-foreground/20";
     if (channel === "r") fill = "fill-red-500/20";
     if (channel === "g") fill = "fill-green-500/20";
     if (channel === "b") fill = "fill-blue-500/20";
 
     return (
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}>
+        <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            className={`absolute inset-0 w-full h-full pointer-events-none ${className}`}
+        >
             <path d={path} className={fill} />
         </svg>
     );
@@ -219,16 +261,24 @@ function LevelsSettings({
     return (
         <div className="flex flex-col gap-4">
             <ChannelSelector value={channel} onChange={setChannel} />
-            
+
             <div className="w-full h-24 border border-border/40 rounded-md bg-background/50 relative overflow-hidden">
                 <HistogramBackground data={histogram} channel={channel} />
                 <div className="absolute inset-0 grid grid-cols-4 pointer-events-none">
-                    {[0,1,2,3].map(i => <div key={i} className="border-r border-border/20 last:border-0" />)}
+                    {[0, 1, 2, 3].map(i => (
+                        <div
+                            key={i}
+                            className="border-r border-border/20 last:border-0"
+                        />
+                    ))}
                 </div>
             </div>
 
             <div className="flex flex-col gap-1">
-                <Label htmlFor="mod-levels-black" className="text-sm font-medium">
+                <Label
+                    htmlFor="mod-levels-black"
+                    className="text-sm font-medium"
+                >
                     {t("Black Point", { ns: "tooltip" })}
                 </Label>
                 <div className="flex items-center gap-3">
@@ -239,7 +289,16 @@ function LevelsSettings({
                         max="254"
                         value={p.black}
                         onChange={e =>
-                            onChange({ ...modifier.params, [channel]: { ...p, black: Math.min(Number(e.target.value), p.white - 1) } })
+                            onChange({
+                                ...modifier.params,
+                                [channel]: {
+                                    ...p,
+                                    black: Math.min(
+                                        Number(e.target.value),
+                                        p.white - 1
+                                    ),
+                                },
+                            })
                         }
                         className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
                     />
@@ -249,7 +308,10 @@ function LevelsSettings({
                 </div>
             </div>
             <div className="flex flex-col gap-1">
-                <Label htmlFor="mod-levels-gamma" className="text-sm font-medium">
+                <Label
+                    htmlFor="mod-levels-gamma"
+                    className="text-sm font-medium"
+                >
                     {t("Gamma (Midtones)", { ns: "tooltip" })}
                 </Label>
                 <div className="flex items-center gap-3">
@@ -261,7 +323,13 @@ function LevelsSettings({
                         step="0.01"
                         value={p.gamma}
                         onChange={e =>
-                            onChange({ ...modifier.params, [channel]: { ...p, gamma: Number(e.target.value) } })
+                            onChange({
+                                ...modifier.params,
+                                [channel]: {
+                                    ...p,
+                                    gamma: Number(e.target.value),
+                                },
+                            })
                         }
                         className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
                     />
@@ -271,7 +339,10 @@ function LevelsSettings({
                 </div>
             </div>
             <div className="flex flex-col gap-1">
-                <Label htmlFor="mod-levels-white" className="text-sm font-medium">
+                <Label
+                    htmlFor="mod-levels-white"
+                    className="text-sm font-medium"
+                >
                     {t("White Point", { ns: "tooltip" })}
                 </Label>
                 <div className="flex items-center gap-3">
@@ -282,7 +353,16 @@ function LevelsSettings({
                         max="255"
                         value={p.white}
                         onChange={e =>
-                            onChange({ ...modifier.params, [channel]: { ...p, white: Math.max(Number(e.target.value), p.black + 1) } })
+                            onChange({
+                                ...modifier.params,
+                                [channel]: {
+                                    ...p,
+                                    white: Math.max(
+                                        Number(e.target.value),
+                                        p.black + 1
+                                    ),
+                                },
+                            })
                         }
                         className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
                     />
@@ -317,12 +397,27 @@ function CurvesSettings({
         const rect = svgRef.current.getBoundingClientRect();
         const clientX = "touches" in e ? e.touches[0]!.clientX : e.clientX;
         const clientY = "touches" in e ? e.touches[0]!.clientY : e.clientY;
-        const x = Math.max(0, Math.min(255, Math.round(((clientX - rect.left) / rect.width) * 255)));
-        const y = Math.max(0, Math.min(255, Math.round((1 - (clientY - rect.top) / rect.height) * 255)));
+        const x = Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round(((clientX - rect.left) / rect.width) * 255)
+            )
+        );
+        const y = Math.max(
+            0,
+            Math.min(
+                255,
+                Math.round((1 - (clientY - rect.top) / rect.height) * 255)
+            )
+        );
         return { x, y };
     };
 
-    const handlePointerDown = (e: React.MouseEvent | React.TouchEvent, idx: number) => {
+    const handlePointerDown = (
+        e: React.MouseEvent | React.TouchEvent,
+        idx: number
+    ) => {
         e.stopPropagation();
         setDraggingIdx(idx);
     };
@@ -331,10 +426,13 @@ function CurvesSettings({
         if (draggingIdx === null) return;
         const { x, y } = getMousePos(e);
         const newPoints = [...activePoints];
-        
+
         const minX = draggingIdx > 0 ? newPoints[draggingIdx - 1]!.x + 1 : 0;
-        const maxX = draggingIdx < newPoints.length - 1 ? newPoints[draggingIdx + 1]!.x - 1 : 255;
-        
+        const maxX =
+            draggingIdx < newPoints.length - 1
+                ? newPoints[draggingIdx + 1]!.x - 1
+                : 255;
+
         newPoints[draggingIdx] = { x: Math.max(minX, Math.min(maxX, x)), y };
         onChange({ ...modifier.params, [channel]: newPoints });
     };
@@ -375,10 +473,15 @@ function CurvesSettings({
     return (
         <div className="flex flex-col gap-4">
             <ChannelSelector value={channel} onChange={setChannel} />
-            
+
             <div className="flex flex-col gap-1">
-                <Label className="text-sm font-medium">{t("Curves (Click: Add, Right-click: Remove)", { ns: "tooltip" })}</Label>
-                <div 
+                <Label className="text-sm font-medium">
+                    {t("Curves (Click: Add, Right-click: Remove)", {
+                        ns: "tooltip",
+                    })}
+                </Label>
+                {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+                <div
                     className="w-full aspect-square border border-border/40 bg-background/50 rounded-md relative cursor-crosshair touch-none select-none"
                     onMouseMove={handlePointerMove}
                     onMouseUp={handlePointerUp}
@@ -388,14 +491,17 @@ function CurvesSettings({
                     onTouchCancel={handlePointerUp}
                 >
                     <HistogramBackground data={histogram} channel={channel} />
-                    <svg 
-                        ref={svgRef} 
-                        viewBox="0 0 100 100" 
-                        preserveAspectRatio="none" 
+                    <svg
+                        ref={svgRef}
+                        viewBox="0 0 100 100"
+                        preserveAspectRatio="none"
                         className="w-full h-full absolute inset-0 overflow-visible"
                         onClick={handleSvgClick}
                     >
-                        <g className="stroke-muted-foreground/20" strokeWidth="1">
+                        <g
+                            className="stroke-muted-foreground/20"
+                            strokeWidth="1"
+                        >
                             {[25, 50, 75].map(v => (
                                 <React.Fragment key={v}>
                                     <line x1={v} y1="0" x2={v} y2="100" />
@@ -403,8 +509,15 @@ function CurvesSettings({
                                 </React.Fragment>
                             ))}
                         </g>
-                        <path d={curvePath} fill="none" stroke="currentColor" strokeWidth="1.5" className={lineStroke} />
+                        <path
+                            d={curvePath}
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            className={lineStroke}
+                        />
                         {activePoints.map((p, idx) => (
+                            /* eslint-disable-next-line react/no-array-index-key */
                             <circle
                                 key={idx}
                                 cx={(p.x / 255) * 100}
@@ -412,9 +525,9 @@ function CurvesSettings({
                                 r="3"
                                 className="fill-background stroke-primary cursor-pointer hover:stroke-foreground transition-colors"
                                 strokeWidth="1.5"
-                                onMouseDown={(e) => handlePointerDown(e, idx)}
-                                onTouchStart={(e) => handlePointerDown(e, idx)}
-                                onContextMenu={(e) => handleRightClick(e, idx)}
+                                onMouseDown={e => handlePointerDown(e, idx)}
+                                onTouchStart={e => handlePointerDown(e, idx)}
+                                onContextMenu={e => handleRightClick(e, idx)}
                             />
                         ))}
                     </svg>
@@ -851,6 +964,130 @@ function FftSettings({
     );
 }
 
+// ─── Enhancement (GBFEN / SNFEN) ─────────────────────────────────────────────
+
+function EnhancementSettings({
+    modifier,
+    onChange,
+    onRerun,
+}: {
+    modifier: EnhancementModifier;
+    onChange: (params: Partial<EnhancementModifier["params"]>) => void;
+    onRerun?: (id: string) => void;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    const { dpi, status, outputPath, errorMessage, durationMs } =
+        modifier.params;
+    const isBusy = status === "processing" || status === "pending";
+
+    const methodLabel =
+        modifier.type === "gbfen"
+            ? t("GBFEN — Gabor-based enhancement", { ns: "tooltip" })
+            : t("SNFEN — Neural enhancement", { ns: "tooltip" });
+
+    const descriptionKey: "gbfen_desc" | "snfen_desc" =
+        modifier.type === "gbfen" ? "gbfen_desc" : "snfen_desc";
+
+    const statusLabel =
+        status === "pending"
+            ? t("Enhancement: pending", { ns: "tooltip" })
+            : status === "processing"
+              ? t("Enhancement: processing", { ns: "tooltip" })
+              : status === "ready"
+                ? t("Enhancement: ready", { ns: "tooltip" })
+                : t("Enhancement: failed", { ns: "tooltip" });
+
+    return (
+        <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {t("Method", { ns: "tooltip" })}
+                </span>
+                <span className="font-medium text-sm">{methodLabel}</span>
+                <p className="text-xs text-muted-foreground leading-snug">
+                    {t(descriptionKey, { ns: "tooltip" })}
+                </p>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="enh-dpi" className="text-sm font-medium">
+                    {t("Enhancement DPI", { ns: "tooltip" })}
+                </Label>
+                <input
+                    id="enh-dpi"
+                    type="number"
+                    min={50}
+                    max={2400}
+                    step={50}
+                    value={dpi}
+                    disabled={isBusy}
+                    onChange={e => {
+                        const v = Number(e.target.value);
+                        if (Number.isFinite(v) && v > 0) {
+                            onChange({ dpi: v });
+                        }
+                    }}
+                    className="h-9 px-2 rounded-md border border-border/40 bg-background text-sm"
+                />
+                <span className="text-xs text-muted-foreground">
+                    {t("Enhancement DPI hint", { ns: "tooltip" })}
+                </span>
+            </div>
+
+            <div className="flex flex-col gap-1">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">
+                    {t("Enhancement status", { ns: "tooltip" })}
+                </span>
+                <span
+                    className={`text-sm font-medium ${
+                        status === "ready"
+                            ? "text-emerald-500"
+                            : status === "failed"
+                              ? "text-destructive"
+                              : "text-primary"
+                    }`}
+                >
+                    {statusLabel}
+                </span>
+                {durationMs !== null && status === "ready" && (
+                    <span className="text-xs text-muted-foreground">
+                        {t("Took {{seconds}} s", {
+                            ns: "tooltip",
+                            seconds: (durationMs / 1000).toFixed(1),
+                        })}
+                    </span>
+                )}
+                {errorMessage && status === "failed" && (
+                    <p className="mt-1 text-xs text-destructive whitespace-pre-wrap break-words">
+                        {errorMessage}
+                    </p>
+                )}
+                {outputPath && status === "ready" && (
+                    <p
+                        className="mt-1 text-[11px] text-muted-foreground/70 break-all"
+                        title={outputPath}
+                    >
+                        {outputPath}
+                    </p>
+                )}
+            </div>
+
+            {onRerun && (
+                <Button
+                    onClick={() => onRerun(modifier.id)}
+                    disabled={isBusy}
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                >
+                    <RefreshCw size={ICON.SIZE} className="mr-1.5" />
+                    {t("Re-run enhancement", { ns: "tooltip" })}
+                </Button>
+            )}
+        </div>
+    );
+}
+
 // ─── Dialog icon per type ─────────────────────────────────────────────────────
 
 function TitleIcon({ type }: { type: AnyModifier["type"] }) {
@@ -872,9 +1109,37 @@ function TitleIcon({ type }: { type: AnyModifier["type"] }) {
             />
         );
     if (type === "levels")
-        return <SlidersHorizontal size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+        return (
+            <SlidersHorizontal
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     if (type === "curves")
-        return <TrendingUp size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+        return (
+            <TrendingUp
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "gbfen")
+        return (
+            <Wand2
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "snfen")
+        return (
+            <Brain
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     return (
         <Waves
             size={ICON.SIZE}
@@ -892,6 +1157,7 @@ interface ModifierSettingsDialogProps {
     open: boolean;
     onClose: () => void;
     onUpdate: (id: string, params: Partial<AnyModifier["params"]>) => void;
+    onRerunEnhancement?: (id: string) => void;
 }
 
 export function ModifierSettingsDialog({
@@ -900,9 +1166,14 @@ export function ModifierSettingsDialog({
     open,
     onClose,
     onUpdate,
+    onRerunEnhancement,
 }: ModifierSettingsDialogProps) {
     const { t } = useTranslation(["tooltip", "keywords"]);
     const [histogram, setHistogram] = useState<HistogramData | null>(null);
+
+    const [offset, setOffset] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         if (!open || !modifier) {
@@ -910,25 +1181,19 @@ export function ModifierSettingsDialog({
             setIsDragging(false);
             return;
         }
-        if (modifier.type === "levels" || modifier.type === "curves") {
-            if (imageRef.current) {
-                setTimeout(() => {
-                    if (imageRef.current) {
-                        setHistogram(computeHistogram(imageRef.current));
-                    }
-                }, 10);
-            }
+        if ((modifier.type === "levels" || modifier.type === "curves") && imageRef.current) {
+            setTimeout(() => {
+                if (imageRef.current) {
+                    setHistogram(computeHistogram(imageRef.current));
+                }
+            }, 10);
         }
-    }, [open, modifier?.type, imageRef]);
-
-    const [offset, setOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    }, [open, modifier, imageRef]);
 
     const handlePointerDown = (e: React.PointerEvent) => {
         if (e.button !== 0) return;
-        if ((e.target as HTMLElement).closest('button')) return;
-        
+        if ((e.target as HTMLElement).closest("button")) return;
+
         setIsDragging(true);
         setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -958,7 +1223,11 @@ export function ModifierSettingsDialog({
             ? t("Brightness", { ns: "tooltip" })
             : modifier.type === "contrast"
               ? t("Contrast", { ns: "tooltip" })
-              : t("FFT Filter", { ns: "tooltip" });
+              : modifier.type === "fft"
+                ? t("FFT Filter", { ns: "tooltip" })
+                : modifier.type === "gbfen"
+                  ? t("GBFEN", { ns: "tooltip" })
+                  : t("SNFEN", { ns: "tooltip" });
 
     return (
         /*
@@ -979,13 +1248,15 @@ export function ModifierSettingsDialog({
                 {/* No DialogOverlay — non-modal dialogs don't need a backdrop */}
                 <DialogContent
                     className="w-[440px] max-w-[95vw] max-h-[85vh] overflow-y-auto p-5 shadow-2xl border border-border/60 z-50 pointer-events-auto transition-none"
-                    style={{ transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))` }}
+                    style={{
+                        transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
+                    }}
                     id={`modifier-settings-dialog-${modifier.id}`}
                     onPointerDownOutside={e => e.preventDefault()}
                     onInteractOutside={e => e.preventDefault()}
                 >
                     {/* Title row with explicit close button */}
-                    <div 
+                    <div
                         className="flex items-center justify-between mb-4 cursor-grab active:cursor-grabbing select-none -m-5 p-5 pb-4 bg-background/95 sticky top-[-1.25rem] z-10 border-b border-border/10"
                         onPointerDown={handlePointerDown}
                         onPointerMove={handlePointerMove}
@@ -1040,6 +1311,17 @@ export function ModifierSettingsDialog({
                             modifier={modifier as CurvesModifier}
                             onChange={p => handleChange(p)}
                             histogram={histogram}
+                        />
+                    )}
+                    {isEnhancementModifier(modifier) && (
+                        <EnhancementSettings
+                            modifier={modifier as EnhancementModifier}
+                            onChange={p =>
+                                handleChange(
+                                    p as Partial<AnyModifier["params"]>
+                                )
+                            }
+                            onRerun={onRerunEnhancement}
                         />
                     )}
 

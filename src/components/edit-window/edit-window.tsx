@@ -6,13 +6,31 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
 import { Edit, Save } from "lucide-react";
-import { listen, emit } from "@tauri-apps/api/event";
-import { readFile, writeFile, exists } from "@tauri-apps/plugin-fs";
-import { basename, extname, join, dirname } from "@tauri-apps/api/path";
+import { listen } from "@tauri-apps/api/event";
+import {
+    readFile,
+    writeFile,
+    exists,
+    mkdir,
+    stat,
+} from "@tauri-apps/plugin-fs";
+import {
+    basename,
+    extname,
+    join,
+    dirname,
+    appLocalDataDir,
+} from "@tauri-apps/api/path";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
-import { AnyModifier, ModifierType } from "@/lib/imageModifiers/types";
+import {
+    AnyModifier,
+    EnhancementModifier,
+    EnhancementParams,
+    ModifierType,
+    isEnhancementModifier,
+} from "@/lib/imageModifiers/types";
 import {
     MODIFIER_REGISTRY,
     buildCssFilter,
@@ -21,43 +39,10 @@ import { applyPipelineToImage } from "@/lib/imageModifiers/pipeline";
 import { AddModifierButton } from "@/components/edit-window/modifiers/AddModifierButton";
 import { ModifierList } from "@/components/edit-window/modifiers/ModifierList";
 import { ModifierSettingsDialog } from "@/components/edit-window/modifiers/ModifierSettingsDialog";
-
-// ─── File helpers (unchanged from old implementation) ─────────────────────────
-
-async function findUniqueFilePath(
-    directory: string,
-    baseName: string,
-    timestamp: string,
-    extension: string,
-    initialPath: string
-): Promise<string> {
-    let fileExists = false;
-    try {
-        fileExists = await exists(initialPath);
-    } catch {
-        return initialPath;
-    }
-    if (!fileExists) return initialPath;
-
-    const maxAttempts = 100;
-    const pathsToCheck: Promise<{ path: string; exists: boolean }>[] = [];
-    for (let i = 1; i <= maxAttempts; i += 1) {
-        const numberedFilename = `${baseName}_edited_${timestamp}_${i}${extension}`;
-        const numberedPathPromise = join(directory, numberedFilename);
-        pathsToCheck.push(
-            numberedPathPromise.then(path =>
-                exists(path)
-                    .then(e => ({ path, exists: e }))
-                    .catch(() => ({ path, exists: false }))
-            )
-        );
-    }
-    const results = await Promise.all(pathsToCheck);
-    const firstAvailable = results.find(r => !r.exists);
-    return (
-        firstAvailable?.path ?? results[results.length - 1]?.path ?? initialPath
-    );
-}
+import {
+    runPyfingEnhancement,
+    PyfingMethod,
+} from "@/lib/external-tools/pyfing/runPyfingEnhancement";
 
 async function generateFilename(p: string) {
     const originalFilename = await basename(p);
@@ -79,15 +64,50 @@ async function generateFilename(p: string) {
     return { nameWithoutExt, extWithDot, timestamp };
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+async function pathToBlobUrl(path: string): Promise<string> {
+    const bytes = await readFile(path);
+    // The TS DOM lib types Blob's BlobPart with ArrayBuffer (not ArrayBufferLike)
+    // which conflicts with Tauri's Uint8Array<ArrayBufferLike>. The cast through
+    // unknown is safe because Blob accepts any TypedArray at runtime.
+    const blob = new Blob([bytes as unknown as ArrayBuffer], {
+        type: "image/png",
+    });
+    return URL.createObjectURL(blob);
+}
+
+function pyfingMethodFromType(type: "gbfen" | "snfen"): PyfingMethod {
+    return type === "gbfen" ? "GBFEN" : "SNFEN";
+}
+
+function cacheKeyHash(s: string): string {
+    let h = 0;
+    for (let i = 0; i < s.length; i += 1) {
+        h = (h * 31 + s.charCodeAt(i)) % 2147483647;
+    }
+    return Math.abs(h).toString(16).padStart(8, "0");
+}
+
+async function buildEnhancementOutputPath(
+    imagePath: string,
+    nameWithoutExt: string,
+    method: string,
+    dpi: number
+): Promise<string> {
+    const fileSize = await stat(imagePath)
+        .then(s => String(s.size))
+        .catch(() => "0");
+    const key = cacheKeyHash(imagePath + fileSize);
+    const base = await appLocalDataDir();
+    const cacheDir = await join(base, "pyfing-cache");
+    return join(cacheDir, `${nameWithoutExt}_${key}_${method}_${dpi}dpi.png`);
+}
 
 export function EditWindow() {
     const { t } = useTranslation(["tooltip", "keywords"]);
     useSettingsSync();
 
-    // ── Image state ──────────────────────────────────────────────────────────
     const [imagePath, setImagePath] = useState<string | null>(null);
-    const [imageUrl, setImageUrl] = useState<string | null>(null);
+    const [originalUrl, setOriginalUrl] = useState<string | null>(null);
     const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
     const [imageName, setImageName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
@@ -95,7 +115,6 @@ export function EditWindow() {
     );
     const [error, setError] = useState<string | null>(null);
 
-    // ── View state ───────────────────────────────────────────────────────────
     const [zoom, setZoom] = useState<number>(1);
     const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -104,7 +123,6 @@ export function EditWindow() {
         y: 0,
     });
 
-    // ── Modifier pipeline state ──────────────────────────────────────────────
     const [modifiers, setModifiers] = useState<AnyModifier[]>([]);
     const [editingModifierId, setEditingModifierId] = useState<string | null>(
         null
@@ -116,19 +134,27 @@ export function EditWindow() {
 
     const TRANSFORM_ORIGIN = "center center";
 
-    // ── CSS filter (live, lightweight) ───────────────────────────────────────
     const cssFilter = buildCssFilter(modifiers);
 
-    // ── Image loading ────────────────────────────────────────────────────────
+    const activeEnhancement = [...modifiers]
+        .reverse()
+        .find(
+            (m): m is EnhancementModifier =>
+                isEnhancementModifier(m) &&
+                m.enabled &&
+                m.params.status === "ready" &&
+                Boolean(m.params.runtimeOutputUrl)
+        );
 
-    const loadImage = async (path: string) => {
+    const displayUrl =
+        activeEnhancement?.params.runtimeOutputUrl ?? originalUrl;
+
+    const loadImage = useCallback(async (path: string) => {
         try {
             setError(null);
-            setImageUrl(null);
-            const imageBytes = await readFile(path);
-            const blob = new Blob([imageBytes]);
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
+            setOriginalUrl(null);
+            const url = await pathToBlobUrl(path);
+            setOriginalUrl(url);
             setImageName(await basename(path));
             setZoom(1);
             setPan({ x: 0, y: 0 });
@@ -136,13 +162,13 @@ export function EditWindow() {
             const msg =
                 err instanceof Error ? err.message : "Failed to load image";
             setError(`${msg} (Path: ${path})`);
-            setImageUrl(null);
+            setOriginalUrl(null);
             setPreviewImageUrl(null);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        if (!imageRef.current || !imageUrl) return;
+        if (!imageRef.current || !originalUrl) return;
         
         const hasCanvasModifier = modifiers.some(
             m => m.enabled && (m.type === "levels" || m.type === "curves")
@@ -172,7 +198,7 @@ export function EditWindow() {
 
         const timer = setTimeout(runPipeline, 100);
         return () => { cancelled = true; clearTimeout(timer); };
-    }, [modifiers, imageUrl]);
+    }, [modifiers, originalUrl]);
 
     useEffect(() => {
         return () => {
@@ -180,10 +206,8 @@ export function EditWindow() {
         };
     }, [previewImageUrl]);
 
-    // ── Wheel / pan handlers ─────────────────────────────────────────────────
-
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
-        if (!imageUrl || !containerRef.current || !imageRef.current) return;
+        if (!displayUrl || !containerRef.current || !imageRef.current) return;
         e.preventDefault();
         const delta = e.deltaY > 0 ? 0.9 : 1.1;
         const newZoom = Math.max(0.1, Math.min(10, zoom * delta));
@@ -226,8 +250,6 @@ export function EditWindow() {
         setPan({ x: 0, y: 0 });
     };
 
-    // ── Canvas sync (DPI overlay) ────────────────────────────────────────────
-
     function syncCanvasToImage(img: HTMLImageElement, cvs: HTMLCanvasElement) {
         const width = img.naturalWidth;
         const height = img.naturalHeight;
@@ -242,8 +264,6 @@ export function EditWindow() {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
-    // ── Effects ──────────────────────────────────────────────────────────────
-
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const pathFromUrl = urlParams.get("imagePath");
@@ -257,6 +277,14 @@ export function EditWindow() {
 
         let unlistenPromise: Promise<() => void> | null = null;
         listen<string>("image-path-changed", event => {
+            setModifiers(prev => {
+                prev.filter(isEnhancementModifier).forEach(m => {
+                    if (m.params.runtimeOutputUrl) {
+                        URL.revokeObjectURL(m.params.runtimeOutputUrl);
+                    }
+                });
+                return [];
+            });
             setImagePath(event.payload);
             loadImage(event.payload);
         }).then(u => {
@@ -268,15 +296,29 @@ export function EditWindow() {
                 unlistenPromise.then(fn => fn());
             }
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         return () => {
-            if (imageUrl) {
-                URL.revokeObjectURL(imageUrl);
+            if (originalUrl) {
+                URL.revokeObjectURL(originalUrl);
             }
         };
-    }, [imageUrl]);
+    }, [originalUrl]);
+
+    useEffect(() => {
+        const liveUrls = new Set(
+            modifiers
+                .filter(isEnhancementModifier)
+                .map(m => m.params.runtimeOutputUrl)
+                .filter((u): u is string => Boolean(u))
+        );
+        return () => {
+            liveUrls.forEach(u => URL.revokeObjectURL(u));
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -287,7 +329,7 @@ export function EditWindow() {
         if (img.complete && img.naturalWidth) updateSize();
         img.addEventListener("load", updateSize);
         return () => img.removeEventListener("load", updateSize);
-    }, [imageUrl]);
+    }, [displayUrl]);
 
     useEffect(() => {
         const img = imageRef.current;
@@ -309,20 +351,9 @@ export function EditWindow() {
             img.removeEventListener("load", sync);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageUrl]);
+    }, [displayUrl]);
 
-    // ── Modifier helpers ─────────────────────────────────────────────────────
-
-    const handleAddModifier = useCallback((type: ModifierType) => {
-        const def = MODIFIER_REGISTRY.find(d => d.type === type);
-        if (!def) return;
-        const newMod = def.create() as AnyModifier;
-        setModifiers(prev => [...prev, newMod]);
-        // Automatically open edit dialog for the new modifier
-        setEditingModifierId(newMod.id);
-    }, []);
-
-    const handleUpdateModifier = useCallback(
+    const updateModifierParams = useCallback(
         (id: string, params: Partial<AnyModifier["params"]>) => {
             setModifiers(prev =>
                 prev.map(m =>
@@ -338,6 +369,140 @@ export function EditWindow() {
         []
     );
 
+    const runEnhancement = useCallback(
+        async (
+            modifierId: string,
+            type: "gbfen" | "snfen",
+            dpi: number,
+            forceRerun = false
+        ) => {
+            if (!imagePath) {
+                toast.error("No source image loaded");
+                return;
+            }
+
+            const method = pyfingMethodFromType(type);
+
+            updateModifierParams(modifierId, {
+                status: "processing",
+                errorMessage: null,
+            } satisfies Partial<EnhancementParams> as Partial<
+                AnyModifier["params"]
+            >);
+
+            try {
+                const { nameWithoutExt } = await generateFilename(imagePath);
+
+                const outputPath = await buildEnhancementOutputPath(
+                    imagePath,
+                    nameWithoutExt,
+                    method,
+                    dpi
+                );
+                const alreadyDone =
+                    !forceRerun &&
+                    (await exists(outputPath).catch(() => false));
+
+                let finalOutputPath: string;
+                let durationMs: number;
+
+                if (alreadyDone) {
+                    finalOutputPath = outputPath;
+                    durationMs = 0;
+                } else {
+                    const cacheDir = await join(
+                        await appLocalDataDir(),
+                        "pyfing-cache"
+                    );
+                    await mkdir(cacheDir, { recursive: true });
+
+                    const result = await runPyfingEnhancement({
+                        imagePath,
+                        outputPath,
+                        method,
+                        dpi,
+                    });
+                    finalOutputPath = result.outputPath;
+                    durationMs = result.durationMs;
+                }
+
+                const url = await pathToBlobUrl(finalOutputPath);
+
+                updateModifierParams(modifierId, {
+                    status: "ready",
+                    outputPath: finalOutputPath,
+                    durationMs,
+                    errorMessage: null,
+                    runtimeOutputUrl: url,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+
+                if (alreadyDone) {
+                    toast.info(
+                        t("Enhancement: using existing output", {
+                            ns: "tooltip",
+                        })
+                    );
+                } else {
+                    const toastKey =
+                        type === "gbfen"
+                            ? "Enhancement: GBFEN done in {{seconds}}s"
+                            : "Enhancement: SNFEN done in {{seconds}}s";
+                    toast.success(
+                        t(toastKey, {
+                            ns: "tooltip",
+                            seconds: (durationMs / 1000).toFixed(1),
+                        })
+                    );
+                }
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                updateModifierParams(modifierId, {
+                    status: "failed",
+                    errorMessage: msg,
+                    outputPath: null,
+                    runtimeOutputUrl: null,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+                toast.error(
+                    t("Enhancement failed: {{error}}", {
+                        ns: "tooltip",
+                        error: msg,
+                    })
+                );
+            }
+        },
+        [imagePath, t, updateModifierParams]
+    );
+
+    const handleAddModifier = useCallback(
+        (type: ModifierType) => {
+            const def = MODIFIER_REGISTRY.find(d => d.type === type);
+            if (!def) return;
+            const newMod = def.create() as AnyModifier;
+            setModifiers(prev => [...prev, newMod]);
+
+            if (type === "gbfen" || type === "snfen") {
+                const { dpi } = newMod.params as EnhancementParams;
+                runEnhancement(newMod.id, type, dpi).catch(() => {});
+                return;
+            }
+
+            // setTimeout so the DropdownMenu close event doesn't immediately dismiss the dialog
+            setTimeout(() => setEditingModifierId(newMod.id), 50);
+        },
+        [runEnhancement]
+    );
+
+    const handleUpdateModifier = useCallback(
+        (id: string, params: Partial<AnyModifier["params"]>) => {
+            updateModifierParams(id, params);
+        },
+        [updateModifierParams]
+    );
+
     const handleToggleModifier = useCallback((id: string) => {
         setModifiers(prev =>
             prev.map(m => (m.id === id ? { ...m, enabled: !m.enabled } : m))
@@ -345,7 +510,14 @@ export function EditWindow() {
     }, []);
 
     const handleRemoveModifier = useCallback((id: string) => {
-        setModifiers(prev => prev.filter(m => m.id !== id));
+        setModifiers(prev => {
+            const target = prev.find(m => m.id === id);
+            if (target && isEnhancementModifier(target)) {
+                const url = target.params.runtimeOutputUrl;
+                if (url) URL.revokeObjectURL(url);
+            }
+            return prev.filter(m => m.id !== id);
+        });
         setEditingModifierId(prev => (prev === id ? null : prev));
     }, []);
 
@@ -361,47 +533,61 @@ export function EditWindow() {
         []
     );
 
+    const handleRerunEnhancement = useCallback(
+        (id: string) => {
+            const target = modifiers.find(m => m.id === id);
+            if (!target || !isEnhancementModifier(target)) return;
+            if (target.params.runtimeOutputUrl) {
+                URL.revokeObjectURL(target.params.runtimeOutputUrl);
+                updateModifierParams(id, {
+                    runtimeOutputUrl: null,
+                } satisfies Partial<EnhancementParams> as Partial<
+                    AnyModifier["params"]
+                >);
+            }
+            runEnhancement(id, target.type, target.params.dpi, true).catch(
+                () => {}
+            );
+        },
+        [modifiers, runEnhancement, updateModifierParams]
+    );
+
     const editingModifier =
         modifiers.find(m => m.id === editingModifierId) ?? null;
 
-    // ── Save ─────────────────────────────────────────────────────────────────
-
     const saveEditedImage = async () => {
-        if (!imageUrl || !imagePath || !imageRef.current) return;
+        if (!displayUrl || !imagePath || !imageRef.current) return;
         try {
             const uint8Array = await applyPipelineToImage(
                 imageRef.current,
                 modifiers
             );
 
-            const { nameWithoutExt, extWithDot, timestamp } =
+            const { nameWithoutExt, extWithDot } =
                 await generateFilename(imagePath);
-            const newFilename = `${nameWithoutExt}_edited_${timestamp}${extWithDot}`;
             const imageDir = await dirname(imagePath);
-            const newImagePath = await join(imageDir, newFilename);
-            const finalPath = await findUniqueFilePath(
+
+            const modifierSuffix = modifiers
+                .filter(m => m.enabled)
+                .map(m => {
+                    if (m.type === "gbfen") return "GBFEN";
+                    if (m.type === "snfen") return "SNFEN";
+                    if (m.type === "brightness") return "brightness";
+                    if (m.type === "contrast") return "contrast";
+                    return "fft";
+                })
+                .join("_");
+
+            const suffix = modifierSuffix ? `_${modifierSuffix}` : "_edited";
+            const finalPath = await join(
                 imageDir,
-                nameWithoutExt,
-                timestamp,
-                extWithDot,
-                newImagePath
+                `${nameWithoutExt}${suffix}${extWithDot}`
             );
 
             await writeFile(finalPath, uint8Array);
             const fileWasWritten = await exists(finalPath);
             if (!fileWasWritten)
                 throw new Error(`File was not created at path: ${finalPath}`);
-
-            await emit("image-reload-requested", {
-                originalPath: imagePath,
-                newPath: finalPath,
-            });
-
-            setImagePath(finalPath);
-            setImageName(await basename(finalPath));
-            const blob = new Blob([uint8Array], { type: "image/png" });
-            const url = URL.createObjectURL(blob);
-            setImageUrl(url);
 
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
         } catch (err) {
@@ -415,7 +601,11 @@ export function EditWindow() {
         }
     };
 
-    // ─────────────────────────────────────────────────────────────────────────
+    const enhancing = modifiers.some(
+        m =>
+            isEnhancementModifier(m) &&
+            (m.params.status === "processing" || m.params.status === "pending")
+    );
 
     return (
         <main
@@ -448,7 +638,6 @@ export function EditWindow() {
             </Menubar>
 
             <div className="flex flex-1 w-full overflow-hidden flex-row">
-                {/* ── Image viewer ─────────────────────────────────────────── */}
                 <div className="flex flex-1 overflow-hidden p-4 flex-col">
                     {error ? (
                         <div className="text-center flex-1 flex items-center justify-center">
@@ -461,7 +650,7 @@ export function EditWindow() {
                                 </p>
                             </div>
                         </div>
-                    ) : imageUrl ? (
+                    ) : displayUrl ? (
                         <div
                             ref={containerRef}
                             className="flex-1 w-full flex items-center justify-center overflow-hidden mb-4 relative"
@@ -485,8 +674,8 @@ export function EditWindow() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
-                                src={imageUrl}
-                                alt="Original"
+                                src={originalUrl || ""}
+                                alt="Original hidden"
                                 className="absolute max-w-full max-h-full object-contain select-none pointer-events-none opacity-0"
                                 style={{
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
@@ -499,7 +688,7 @@ export function EditWindow() {
                             />
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                                src={previewImageUrl || imageUrl}
+                                src={previewImageUrl || displayUrl || ""}
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
@@ -547,10 +736,8 @@ export function EditWindow() {
                     )}
                 </div>
 
-                {/* ── Sidebar ───────────────────────────────────────────────── */}
                 <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col h-[calc(100vh-56px)]">
                     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-                        {/* Image info */}
                         {imageName && (
                             <div className="flex flex-col gap-1">
                                 <h3 className="text-sm font-semibold text-muted-foreground">
@@ -572,7 +759,6 @@ export function EditWindow() {
 
                         <div className="border-t border-border/30" />
 
-                        {/* Modifier pipeline */}
                         <div className="flex flex-col gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground">
                                 {t("Adjustments", { ns: "keywords" })}
@@ -586,13 +772,17 @@ export function EditWindow() {
                             />
                             <AddModifierButton
                                 onAdd={handleAddModifier}
-                                disabled={!imageUrl}
+                                disabled={!originalUrl}
                             />
+                            {enhancing && (
+                                <p className="text-xs text-primary animate-pulse text-center">
+                                    {t("Enhancing image...", { ns: "tooltip" })}
+                                </p>
+                            )}
                         </div>
 
                         <div className="border-t border-border/30" />
 
-                        {/* DPI controls (unchanged) */}
                         <div className="flex flex-col gap-2">
                             <h3 className="text-sm font-semibold text-muted-foreground">
                                 DPI
@@ -604,13 +794,12 @@ export function EditWindow() {
                         </div>
                     </div>
 
-                    {/* Fixed bottom save button */}
                     <div className="p-4 border-t border-border/30 bg-background">
                         <Button
                             onClick={saveEditedImage}
                             className="w-full"
                             size="lg"
-                            disabled={!imageUrl || !imagePath}
+                            disabled={!displayUrl || !imagePath}
                             id="save-edited-image-button"
                         >
                             <Save size={ICON.SIZE} className="mr-2" />
@@ -620,13 +809,13 @@ export function EditWindow() {
                 </div>
             </div>
 
-            {/* Modifier settings dialog (rendered outside the sidebar for correct stacking) */}
             <ModifierSettingsDialog
                 modifier={editingModifier}
                 imageRef={imageRef}
                 open={editingModifierId !== null}
                 onClose={() => setEditingModifierId(null)}
                 onUpdate={handleUpdateModifier}
+                onRerunEnhancement={handleRerunEnhancement}
             />
         </main>
     );

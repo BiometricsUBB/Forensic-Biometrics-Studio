@@ -33,6 +33,8 @@
         "tauri": "tauri",
         "tauri:dev": "node ./scripts/tauri-dev.cjs",
         "sidecar:sync": "node ./scripts/sidecar-sync.cjs",
+        "sidecar:build:pyfing": "node ./scripts/build-pyfing-sidecar.cjs",
+        "sidecar:ensure:pyfing": "node ./scripts/ensure-pyfing-sidecar.cjs",
         "tsc:check": "tsc --noEmit",
         "tsc:watch": "tsc --noEmit --watch",
         "eslint:fix": "eslint --fix .",
@@ -45,6 +47,9 @@
     },
     "dependencies": {
         "@atlaskit/pragmatic-drag-and-drop-flourish": "1.1.0",
+        "@dnd-kit/core": "6.3.1",
+        "@dnd-kit/sortable": "10.0.0",
+        "@dnd-kit/utilities": "3.2.2",
         "@pixi/core": "7.4.3",
         "@pixi/react": "7.1.0",
         "@pixi/text-bitmap": "7.4.3",
