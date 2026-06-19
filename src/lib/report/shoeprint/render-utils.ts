@@ -3,7 +3,7 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { drawMarking } from "@/components/pixi/overlays/markings/marking.utils";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
-import { clamp, toBlobBytes, md5Bytes } from "../report-utils";
+import { clamp, toBlobBytes, sha256Bytes } from "../report-utils";
 import { ImageMeta, CANVAS_CONTEXT_ERROR } from "./types";
 
 export const getSpritePath = (sprite: PIXI.Sprite): string | null => {
@@ -21,7 +21,7 @@ export const getImageMeta = async (sprite: PIXI.Sprite): Promise<ImageMeta> => {
         width: bitmap.width,
         height: bitmap.height,
         sizeBytes: bytes.byteLength,
-        checksum: md5Bytes(bytes),
+        checksum: await sha256Bytes(bytes),
         bytes,
     };
 };

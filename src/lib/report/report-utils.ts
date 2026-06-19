@@ -103,8 +103,21 @@ export const toDataUrl = (bytes: Uint8Array, name: string): Promise<string> =>
     });
 
 export const md5Bytes = (bytes: Uint8Array): string => {
-    const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    const buffer = bytes.buffer.slice(
+        bytes.byteOffset,
+        bytes.byteOffset + bytes.byteLength
+    );
     return SparkMD5.ArrayBuffer.hash(buffer);
 };
 
 export const md5String = (value: string): string => SparkMD5.hash(value);
+
+export const sha256Bytes = async (bytes: Uint8Array): Promise<string> => {
+    const buffer = bytes.buffer.slice(
+        bytes.byteOffset,
+        bytes.byteOffset + bytes.byteLength
+    );
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+};
