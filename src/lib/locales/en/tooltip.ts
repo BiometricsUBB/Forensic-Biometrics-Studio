@@ -39,6 +39,14 @@ const d: Dictionary = {
     "Measurement instructions":
         "Draw a line between two points on the image to measure the distance",
     "Clear measurement": "Clear measurement",
+    Unit: "Unit",
+    DPI: "DPI",
+    "Area instructions":
+        "Click to place points. Click the first point to close the polygon.",
+    Area: "Area",
+    "Clear area": "Clear area",
+    Drawing: "Drawing",
+    Points: "Points",
     Brightness: "Brightness",
     Contrast: "Contrast",
     Levels: "Levels",
@@ -66,6 +74,9 @@ const d: Dictionary = {
         "Preview ready. Return to edit or save.",
     "Polyline requires at least 2 segments":
         "Polyline requires at least 2 segments",
+    Ruler: "Ruler",
+    LeftCanvasLabel: "L",
+    RightCanvasLabel: "R",
     "Save ANSI/NIST (XML)": "Save ANSI/NIST (XML)",
     "Load ANSI/NIST (XML) from file": "Load ANSI/NIST (XML) from file",
     "Save ANSI/NIST (XML) data": "Save ANSI/NIST (XML) data",

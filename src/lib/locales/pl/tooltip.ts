@@ -41,6 +41,14 @@ const d: Dictionary = {
     "Measurement instructions":
         "Narysuj linię pomiędzy dwoma punktami na obrazie, aby zmierzyć odległość",
     "Clear measurement": "Wyczyść miarkę",
+    Unit: "Jednostka miary",
+    DPI: "DPI",
+    "Area instructions":
+        "Klikaj, aby dodawać punkty. Kliknij pierwszy punkt, aby zamknąć wielokąt.",
+    Area: "Pole powierzchni",
+    "Clear area": "Wyczyść obszar",
+    Drawing: "Rysowanie",
+    Points: "pkt",
     Brightness: "Jasność",
     Contrast: "Kontrast",
     Levels: "Poziomy",
@@ -68,6 +76,9 @@ const d: Dictionary = {
         "Podgląd gotowy. Wróć do edycji lub zapisz.",
     "Polyline requires at least 2 segments":
         "Linia łamana wymaga co najmniej 2 segmentów",
+    Ruler: "Miarka",
+    LeftCanvasLabel: "L",
+    RightCanvasLabel: "P",
     "Save ANSI/NIST (XML)": "Zapisz ANSI/NIST (XML)",
     "Load ANSI/NIST (XML) from file": "Wczytaj ANSI/NIST (XML) z pliku",
     "Save ANSI/NIST (XML) data": "Zapisz dane ANSI/NIST (XML)",
