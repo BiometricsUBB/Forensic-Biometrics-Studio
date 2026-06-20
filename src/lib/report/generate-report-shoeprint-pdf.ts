@@ -513,7 +513,7 @@ export const generateShoeprintReportPdfWithDialog = async (
                 row1.innerHTML = `
                     <td rowspan="2">
                         <div class="feature-cell">
-                            <div class="feature-label" style="color: ${markerRing};">${feature.left.label}</div>
+                            <div class="feature-label" style="color: ${markerRing};">${escapeHtml(String(feature.left.label))}</div>
                             <div class="feature-type">${tReport("Feature type")}:<br/><strong>${escapeHtml(featureType)}</strong></div>
                         </div>
                     </td>
