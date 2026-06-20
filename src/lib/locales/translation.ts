@@ -210,6 +210,11 @@ export type i18nTooltip = Recordify<
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
     | "Polyline requires at least 2 segments"
+    | "Save ANSI/NIST (XML)"
+    | "Load ANSI/NIST (XML) from file"
+    | "Save ANSI/NIST (XML) data"
+    | "Load ANSI/NIST (XML) data"
+    | "Load Traditional ANSI/NIST (.an2, .eft)"
     | "brightness_desc"
     | "contrast_desc"
     | "fft_desc"
@@ -274,6 +279,15 @@ export type i18nDialog = Recordify<
     | "Are you sure you want to load tracing data?\n\nIt will replace current drawing."
     | "Memory error processing high-res image"
     | "Save result as..."
+    | "XML file is corrupt or has an invalid format. Rejected by parser."
+    | "No usable biometric data found in the file (neither supported image nor minutiae)."
+    | "Loaded image from file, but it did not contain any saved minutiae."
+    | "Loaded minutiae, but the file did not contain an image (or the image format is not supported)."
+    | "File info"
+    | "Info"
+    | "No biometric data."
+    | "Loaded image, no minutiae."
+    | "Loaded minutiae, no image."
 >;
 
 export type i18nKeybindings = Recordify<

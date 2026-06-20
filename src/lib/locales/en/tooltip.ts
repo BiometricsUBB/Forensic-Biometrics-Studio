@@ -66,6 +66,12 @@ const d: Dictionary = {
         "Preview ready. Return to edit or save.",
     "Polyline requires at least 2 segments":
         "Polyline requires at least 2 segments",
+    "Save ANSI/NIST (XML)": "Save ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) from file": "Load ANSI/NIST (XML) from file",
+    "Save ANSI/NIST (XML) data": "Save ANSI/NIST (XML) data",
+    "Load ANSI/NIST (XML) data": "Load ANSI/NIST (XML) data",
+    "Load Traditional ANSI/NIST (.an2, .eft)":
+        "Load Traditional ANSI/NIST (.an2, .eft)",
     brightness_desc: "Adjust the overall brightness of the image",
     contrast_desc:
         "Adjust the difference between light and dark areas of the image",
