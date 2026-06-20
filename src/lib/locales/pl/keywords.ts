@@ -79,6 +79,9 @@ const d: Dictionary = {
         "Nie znaleziono typów adnotacji dla wybranego trybu pracy",
     "Select a working mode to view marking types":
         "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
+    Modifiers: "Modyfikatory",
+    "No modifiers yet": "Brak modyfikatorów",
+    Compute: "Oblicz",
 };
 
 export default d;

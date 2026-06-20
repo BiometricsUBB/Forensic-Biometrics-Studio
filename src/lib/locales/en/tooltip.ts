@@ -49,6 +49,14 @@ const d: Dictionary = {
     Points: "Points",
     Brightness: "Brightness",
     Contrast: "Contrast",
+    Levels: "Levels",
+    levels_desc: "Adjust the tonal range and color balance of the image",
+    Curves: "Curves",
+    curves_desc: "Adjust the tonal range and color balance using curves",
+    "Black Point": "Black Point",
+    "White Point": "White Point",
+    "Gamma (Midtones)": "Gamma (Midtones)",
+    "Curves (Click: Add, Right-click: Remove)": "Curves (Click: Add, Right-click: Remove)",
     "Reset Zoom": "Reset Zoom",
     ImageLoadPermissionError:
         "The edited image was saved, but cannot be loaded due to path restrictions. Please try loading it manually.",
@@ -69,6 +77,56 @@ const d: Dictionary = {
     Ruler: "Ruler",
     LeftCanvasLabel: "L",
     RightCanvasLabel: "R",
+    "Save ANSI/NIST (XML)": "Save ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) from file": "Load ANSI/NIST (XML) from file",
+    "Save ANSI/NIST (XML) data": "Save ANSI/NIST (XML) data",
+    "Load ANSI/NIST (XML) data": "Load ANSI/NIST (XML) data",
+    "Load Traditional ANSI/NIST (.an2, .eft)":
+        "Load Traditional ANSI/NIST (.an2, .eft)",
+    brightness_desc: "Adjust the overall brightness of the image",
+    contrast_desc:
+        "Adjust the difference between light and dark areas of the image",
+    fft_desc:
+        "Apply Fast Fourier Transform to filter out periodic noise and patterns",
+    Disable: "Disable",
+    Enable: "Enable",
+    "Edit settings": "Edit settings",
+    'Click "Compute" to analyse the frequency spectrum':
+        'Click "Compute" to analyse the frequency spectrum',
+    "Drag to reorder": "Drag to reorder",
+    "Move up": "Move up",
+    "Move down": "Move down",
+    "Image enhancement": "Image enhancement",
+    GBFEN: "GBFEN",
+    SNFEN: "SNFEN",
+    gbfen_desc:
+        "Classical Gabor-filter-based fingerprint enhancement. Runs locally without a neural network. Best for images with clear, regular ridge structure. Fast (~10–20 s) and deterministic.",
+    snfen_desc:
+        "Neural-network fingerprint enhancement (Spectral-Neural Fingerprint Enhancement Network). Slower than GBFEN but handles low-quality, noisy, or low-contrast prints better. Requires the bundled TensorFlow runtime.",
+    "Enhancement: GBFEN started": "GBFEN enhancement started...",
+    "Enhancement: SNFEN started": "SNFEN enhancement started...",
+    "Enhancement: GBFEN done in {{seconds}}s":
+        "GBFEN finished in {{seconds}} s",
+    "Enhancement: SNFEN done in {{seconds}}s":
+        "SNFEN finished in {{seconds}} s",
+    "Enhancement: using existing output":
+        "Enhancement already exists — using cached output.",
+    "Enhancement failed: {{error}}": "Enhancement failed: {{error}}",
+    "Enhancement DPI": "DPI",
+    "Enhancement DPI hint":
+        "Match the scan resolution. Re-run the enhancement after changing this value.",
+    "Enhancement status": "Status",
+    "Enhancement: pending": "Pending...",
+    "Enhancement: processing": "Processing...",
+    "Enhancement: ready": "Ready",
+    "Enhancement: failed": "Failed",
+    "Enhancement output path": "Output file",
+    "Re-run enhancement": "Re-run",
+    "Took {{seconds}} s": "Took {{seconds}} s",
+    Method: "Method",
+    "GBFEN — Gabor-based enhancement": "GBFEN — Gabor-based enhancement",
+    "SNFEN — Neural enhancement": "SNFEN — Neural enhancement",
+    "Enhancing image...": "Enhancing image...",
 };
 
 export default d;

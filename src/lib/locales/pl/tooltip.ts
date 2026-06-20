@@ -51,6 +51,14 @@ const d: Dictionary = {
     Points: "pkt",
     Brightness: "Jasność",
     Contrast: "Kontrast",
+    Levels: "Poziomy",
+    levels_desc: "Dostosuj zakres tonalny i balans kolorów obrazu",
+    Curves: "Krzywe",
+    curves_desc: "Dostosuj zakres tonalny i balans kolorów za pomocą krzywych",
+    "Black Point": "Punkt czerni",
+    "White Point": "Punkt bieli",
+    "Gamma (Midtones)": "Gamma (Półcienie)",
+    "Curves (Click: Add, Right-click: Remove)": "Krzywe (Kliknij: Dodaj, Prawy przycisk: Usuń)",
     "Reset Zoom": "Resetuj powiększenie",
     ImageLoadPermissionError:
         "Edytowany obraz został zapisany, ale nie można go załadować z powodu ograniczeń dostępności ścieżki. Spróbuj załadować go ręcznie.",
@@ -71,6 +79,56 @@ const d: Dictionary = {
     Ruler: "Miarka",
     LeftCanvasLabel: "L",
     RightCanvasLabel: "P",
+    "Save ANSI/NIST (XML)": "Zapisz ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) from file": "Wczytaj ANSI/NIST (XML) z pliku",
+    "Save ANSI/NIST (XML) data": "Zapisz dane ANSI/NIST (XML)",
+    "Load ANSI/NIST (XML) data": "Wczytaj dane ANSI/NIST (XML)",
+    "Load Traditional ANSI/NIST (.an2, .eft)":
+        "Wczytaj binarny ANSI/NIST (.an2, .eft)",
+    brightness_desc: "Dostosuj ogólną jasność obrazu",
+    contrast_desc:
+        "Dostosuj różnicę między jasnymi i ciemnymi obszarami obrazu",
+    fft_desc:
+        "Zastosuj szybką transformatę Fouriera (FFT), aby odfiltrować szum okresowy i wzorce",
+    Disable: "Wyłącz",
+    Enable: "Włącz",
+    "Edit settings": "Edytuj ustawienia",
+    'Click "Compute" to analyse the frequency spectrum':
+        "Kliknij „Oblicz”, aby przeanalizować widmo częstotliwości",
+    "Drag to reorder": "Przeciągnij, aby zmienić kolejność",
+    "Move up": "Przesuń w górę",
+    "Move down": "Przesuń w dół",
+    "Image enhancement": "Wzmocnienie obrazu",
+    GBFEN: "GBFEN",
+    SNFEN: "SNFEN",
+    gbfen_desc:
+        "Klasyczne wzmocnienie linii papilarnych filtrami Gabora. Działa lokalnie, bez sieci neuronowej. Najlepsze dla obrazów o wyraźnej, regularnej teksturze grzbietów. Szybkie (~10–20 s) i deterministyczne.",
+    snfen_desc:
+        "Wzmocnienie linii papilarnych siecią neuronową (Spectral-Neural Fingerprint Enhancement Network). Działa wolniej niż GBFEN, ale lepiej radzi sobie z obrazami niskiej jakości, zaszumionymi lub o słabym kontraście grzbietów. Wymaga modułu TensorFlow dołączonego do aplikacji.",
+    "Enhancement: GBFEN started": "Wzmacnianie GBFEN rozpoczęte...",
+    "Enhancement: SNFEN started": "Wzmacnianie SNFEN rozpoczęte...",
+    "Enhancement: GBFEN done in {{seconds}}s":
+        "GBFEN ukończone w {{seconds}} s",
+    "Enhancement: SNFEN done in {{seconds}}s":
+        "SNFEN ukończone w {{seconds}} s",
+    "Enhancement: using existing output":
+        "Wzmocnienie już istnieje — używam zapisanego wyniku.",
+    "Enhancement failed: {{error}}": "Wzmocnienie nie powiodło się: {{error}}",
+    "Enhancement DPI": "Rozdzielczość (DPI)",
+    "Enhancement DPI hint":
+        "Ustaw zgodnie z rozdzielczością skanu. Po zmianie wartości uruchom wzmocnienie ponownie.",
+    "Enhancement status": "Status",
+    "Enhancement: pending": "Oczekiwanie...",
+    "Enhancement: processing": "Przetwarzanie...",
+    "Enhancement: ready": "Gotowe",
+    "Enhancement: failed": "Błąd",
+    "Enhancement output path": "Plik wyjściowy",
+    "Re-run enhancement": "Uruchom ponownie",
+    "Took {{seconds}} s": "Zajęło {{seconds}} s",
+    Method: "Metoda",
+    "GBFEN — Gabor-based enhancement": "GBFEN — wzmocnienie filtrami Gabora",
+    "SNFEN — Neural enhancement": "SNFEN — wzmocnienie siecią neuronową",
+    "Enhancing image...": "Wzmacnianie obrazu...",
 };
 
 export default d;

@@ -2,6 +2,7 @@ import { Command } from "./Command";
 
 class HistoryManagerClass {
     private undoStack: Command[] = [];
+
     private redoStack: Command[] = [];
 
     executeCommand(command: Command): void {
@@ -31,7 +32,6 @@ class HistoryManagerClass {
         this.redoStack = [];
     }
 }
-
 
 const GlobalHistoryManager = new HistoryManagerClass();
 
