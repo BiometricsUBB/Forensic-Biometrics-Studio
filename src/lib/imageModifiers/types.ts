@@ -7,7 +7,9 @@ export type ModifierType =
     | "contrast"
     | "fft"
     | "gbfen"
-    | "snfen";
+    | "snfen"
+    | "levels"
+    | "curves";
 
 export type EnhancementMethod = "gbfen" | "snfen";
 
@@ -49,13 +51,40 @@ export interface EnhancementParams {
     runtimeOutputUrl?: string | null;
 }
 
+export interface LevelParam {
+    black: number;
+    white: number;
+    gamma: number;
+}
+
+export interface LevelsParams {
+    master: LevelParam;
+    r: LevelParam;
+    g: LevelParam;
+    b: LevelParam;
+}
+
+export interface CurvePoint {
+    x: number;
+    y: number;
+}
+
+export interface CurvesParams {
+    master: CurvePoint[];
+    r: CurvePoint[];
+    g: CurvePoint[];
+    b: CurvePoint[];
+}
+
 // ─── Discriminated union ─────────────────────────────────────────────────────
 
 export type ModifierParams =
     | BrightnessParams
     | ContrastParams
     | FftParams
-    | EnhancementParams;
+    | EnhancementParams
+    | LevelsParams
+    | CurvesParams;
 
 export interface Modifier<P extends ModifierParams = ModifierParams> {
     /** Stable unique identifier */
@@ -76,13 +105,17 @@ export type ContrastModifier = Modifier<ContrastParams> & {
 export type FftModifier = Modifier<FftParams> & { type: "fft" };
 export type GbfenModifier = Modifier<EnhancementParams> & { type: "gbfen" };
 export type SnfenModifier = Modifier<EnhancementParams> & { type: "snfen" };
+export type LevelsModifier = Modifier<LevelsParams> & { type: "levels" };
+export type CurvesModifier = Modifier<CurvesParams> & { type: "curves" };
 
 export type AnyModifier =
     | BrightnessModifier
     | ContrastModifier
     | FftModifier
     | GbfenModifier
-    | SnfenModifier;
+    | SnfenModifier
+    | LevelsModifier
+    | CurvesModifier;
 
 export type EnhancementModifier = GbfenModifier | SnfenModifier;
 

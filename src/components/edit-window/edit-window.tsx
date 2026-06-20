@@ -108,6 +108,7 @@ export function EditWindow() {
 
     const [imagePath, setImagePath] = useState<string | null>(null);
     const [originalUrl, setOriginalUrl] = useState<string | null>(null);
+    const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
     const [imageName, setImageName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<{ w: number; h: number } | null>(
         null
@@ -162,8 +163,48 @@ export function EditWindow() {
                 err instanceof Error ? err.message : "Failed to load image";
             setError(`${msg} (Path: ${path})`);
             setOriginalUrl(null);
+            setPreviewImageUrl(null);
         }
     }, []);
+
+    useEffect(() => {
+        if (!imageRef.current || !originalUrl) return;
+        
+        const hasCanvasModifier = modifiers.some(
+            m => m.enabled && (m.type === "levels" || m.type === "curves")
+        );
+        
+        if (!hasCanvasModifier) {
+            setPreviewImageUrl(null);
+            return;
+        }
+
+        let cancelled = false;
+        const runPipeline = async () => {
+            try {
+                const previewModifiers = modifiers.filter(m => m.type !== "fft");
+                const uint8Array = await applyPipelineToImage(imageRef.current!, previewModifiers);
+                if (cancelled) return;
+                const blob = new Blob([uint8Array], { type: "image/png" });
+                const url = URL.createObjectURL(blob);
+                setPreviewImageUrl(prev => {
+                    if (prev) URL.revokeObjectURL(prev);
+                    return url;
+                });
+            } catch (err) {
+                if (!cancelled) console.error("Preview pipeline failed", err);
+            }
+        };
+
+        const timer = setTimeout(runPipeline, 100);
+        return () => { cancelled = true; clearTimeout(timer); };
+    }, [modifiers, originalUrl]);
+
+    useEffect(() => {
+        return () => {
+            if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
+        };
+    }, [previewImageUrl]);
 
     const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
         if (!displayUrl || !containerRef.current || !imageRef.current) return;
@@ -633,11 +674,25 @@ export function EditWindow() {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 ref={imageRef}
-                                src={displayUrl}
+                                src={originalUrl || ""}
+                                alt="Original hidden"
+                                className="absolute max-w-full max-h-full object-contain select-none pointer-events-none opacity-0"
+                                style={{
+                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+                                    transformOrigin: TRANSFORM_ORIGIN,
+                                    transition: isDragging
+                                        ? "none"
+                                        : "transform 0.1s ease-out",
+                                }}
+                                draggable={false}
+                            />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                                src={previewImageUrl || displayUrl || ""}
                                 alt={imagePath || "Loaded image"}
                                 className="max-w-full max-h-full object-contain select-none pointer-events-none"
                                 style={{
-                                    filter: cssFilter,
+                                    filter: previewImageUrl ? "none" : cssFilter,
                                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                                     transformOrigin: TRANSFORM_ORIGIN,
                                     transition: isDragging

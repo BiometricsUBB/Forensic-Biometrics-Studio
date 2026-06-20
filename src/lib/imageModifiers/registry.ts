@@ -4,6 +4,8 @@ import {
     ContrastModifier,
     EnhancementParams,
     FftModifier,
+    LevelsModifier,
+    CurvesModifier,
     GbfenModifier,
     ModifierType,
     SnfenModifier,
@@ -86,6 +88,41 @@ export function createSnfenModifier(): SnfenModifier {
     };
 }
 
+export function createLevelsModifier(): LevelsModifier {
+    const defaultParam = { black: 0, white: 255, gamma: 1.0 };
+    return {
+        id: newId(),
+        type: "levels",
+        label: "Levels",
+        enabled: true,
+        params: {
+            master: { ...defaultParam },
+            r: { ...defaultParam },
+            g: { ...defaultParam },
+            b: { ...defaultParam },
+        },
+    };
+}
+
+export function createCurvesModifier(): CurvesModifier {
+    const defaultPoints = [
+        { x: 0, y: 0 },
+        { x: 255, y: 255 },
+    ];
+    return {
+        id: newId(),
+        type: "curves",
+        label: "Curves",
+        enabled: true,
+        params: {
+            master: [...defaultPoints],
+            r: [...defaultPoints],
+            g: [...defaultPoints],
+            b: [...defaultPoints],
+        },
+    };
+}
+
 // ─── Registry ────────────────────────────────────────────────────────────────
 
 export interface ModifierDefinition {
@@ -127,6 +164,18 @@ export const MODIFIER_REGISTRY: ModifierDefinition[] = [
         labelKey: "SNFEN",
         group: "enhancement",
         create: createSnfenModifier,
+    },
+    {
+        type: "levels",
+        labelKey: "Levels",
+        group: "default",
+        create: createLevelsModifier,
+    },
+    {
+        type: "curves",
+        labelKey: "Curves",
+        group: "default",
+        create: createCurvesModifier,
     },
 ];
 

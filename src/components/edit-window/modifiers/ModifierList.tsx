@@ -8,6 +8,8 @@ import {
     Sun,
     Contrast,
     Waves,
+    SlidersHorizontal,
+    TrendingUp,
     Sparkles,
     Wand2,
     Brain,
@@ -46,6 +48,10 @@ export function ModifierIcon({
                 className={cls}
             />
         );
+    if (type === "levels")
+        return <SlidersHorizontal size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "curves")
+        return <TrendingUp size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
     if (type === "gbfen")
         return (
             <Wand2 size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
@@ -192,6 +198,12 @@ function ModifierItem({
             break;
         case "contrast":
             label = t("Contrast", { ns: "tooltip" });
+            break;
+        case "levels":
+            label = t("Levels", { ns: "tooltip" });
+            break;
+        case "curves":
+            label = t("Curves", { ns: "tooltip" });
             break;
         case "fft":
             label = t("FFT Filter", { ns: "tooltip" });
