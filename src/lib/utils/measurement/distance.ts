@@ -9,16 +9,13 @@ export function convertPx(
     unit: DistanceUnit,
     dpi = DEFAULT_DPI
 ): string {
-    const pxPerInch = dpi;
-    const pxPerCm = pxPerInch / 2.54;
-    const pxPerMm = pxPerCm / 10;
     switch (unit) {
         case "mm":
-            return (px / pxPerMm).toFixed(2);
+            return (px / (dpi / 25.4)).toFixed(2);
         case "cm":
-            return (px / pxPerCm).toFixed(2);
+            return (px / (dpi / 2.54)).toFixed(2);
         case "in":
-            return (px / pxPerInch).toFixed(3);
+            return (px / dpi).toFixed(3);
         default:
             return px.toFixed(2);
     }
@@ -38,16 +35,13 @@ export function convertPxArea(
     unit: DistanceUnit,
     dpi = DEFAULT_DPI
 ): string {
-    const pxPerInch = dpi;
-    const pxPerCm = pxPerInch / 2.54;
-    const pxPerMm = pxPerCm / 10;
     switch (unit) {
         case "mm":
-            return (px2 / pxPerMm ** 2).toFixed(2);
+            return (px2 / (dpi / 25.4) ** 2).toFixed(2);
         case "cm":
-            return (px2 / pxPerCm ** 2).toFixed(2);
+            return (px2 / (dpi / 2.54) ** 2).toFixed(2);
         case "in":
-            return (px2 / pxPerInch ** 2).toFixed(4);
+            return (px2 / dpi ** 2).toFixed(4);
         default:
             return px2.toFixed(2);
     }
