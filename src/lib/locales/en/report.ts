@@ -39,6 +39,24 @@ const d: Dictionary = {
     "Note title": "Note",
     "Note body":
         "The report identifier confirms the authenticity of the report and is calculated from the input data and the system identifier.",
+    "Shoeprint report title":
+        "Technical report of forensic shoeprint image comparison",
+    "Shoeprint paired features count": "Number of paired features (by label):",
+    "Shoeprint figure 3": "Fig. 3 Image 2 original (shoeprint)",
+    "Shoeprint figure 4":
+        "Fig. 4 Image 2 with all features determined during examination",
+    "Shoeprint comparative table overview":
+        "Comparative table of selected features - overview",
+    "Shoeprint comparative table details":
+        "Comparative table of selected features - details",
+    "Shoeprint pattern features title":
+        "Structural features of classificatory significance",
+    "Shoeprint group features title":
+        "Group features of classificatory significance",
+    "Shoeprint feature type prefix": 
+        "Feature type:",
+    "Shoeprint no unique features": 
+        "No unique features found.",
 };
 
 export default d;

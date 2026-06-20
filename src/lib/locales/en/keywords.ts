@@ -79,9 +79,15 @@ const d: Dictionary = {
         "No marking types found for the selected working mode",
     "Select a working mode to view marking types":
         "Select a working mode to view marking types",
+    "Shoeprint markings left": "Markings on image 1",
+    "Shoeprint markings right": "Markings on image 2",
     Modifiers: "Modifiers",
     "No modifiers yet": "No modifiers yet",
     Compute: "Compute",
+    "Unique features color": "Unique features color",
+    "Color red": "Red",
+    "Color green": "Green",
+    "Report title": "Report title",
 };
 
 export default d;
