@@ -26,12 +26,10 @@ export function convertPx(
 
 export function calcPolygonArea(points: { x: number; y: number }[]): number {
     if (points.length < 3) return 0;
-    let area = 0;
-    for (let i = 0; i < points.length; i++) {
-        const j = (i + 1) % points.length;
-        area += points[i]!.x * points[j]!.y;
-        area -= points[j]!.x * points[i]!.y;
-    }
+    const area = points.reduce((acc, p, i) => {
+        const q = points[(i + 1) % points.length]!;
+        return acc + p.x * q.y - q.x * p.y;
+    }, 0);
     return Math.abs(area) / 2;
 }
 

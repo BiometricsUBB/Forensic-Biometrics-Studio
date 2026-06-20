@@ -80,6 +80,5 @@ module.exports = {
         "react/prop-types": "off",
         "class-methods-use-this": "off",
         "no-shadow": ["off"],
-        "no-plusplus": "off",
     },
 };
