@@ -20,20 +20,141 @@ import {
     CURSOR_MODES,
     DashboardToolbarStore,
 } from "@/lib/stores/DashboardToolbar";
+import { Point } from "@/lib/markings/Point";
+
+type UnitSelectorProps = {
+    value: DistanceUnit;
+    onChange: (unit: DistanceUnit) => void;
+    squared?: boolean;
+};
+
+function UnitSelector({ value, onChange, squared = false }: UnitSelectorProps) {
+    return (
+        <select
+            value={value}
+            onChange={e => onChange(e.target.value as DistanceUnit)}
+            className="rounded border border-border bg-background px-1 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+            {DISTANCE_UNITS.map(u => (
+                <option key={u} value={u}>
+                    {squared ? (u === "px" ? "px²" : `${u}²`) : u}
+                </option>
+            ))}
+        </select>
+    );
+}
+
+type LineRowProps = {
+    label: string;
+    lineExists: boolean;
+    px: number;
+    unit: DistanceUnit;
+    dpi: number;
+    canvasId: CANVAS_ID;
+};
+
+function LineRow({ label, lineExists, px, unit, dpi, canvasId }: LineRowProps) {
+    return (
+        <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+                <span className="font-semibold">{label}</span>
+                {lineExists ? (
+                    <Check
+                        size={ICON.SIZE}
+                        strokeWidth={ICON.STROKE_WIDTH}
+                        className="text-green-500"
+                    />
+                ) : (
+                    <X
+                        size={ICON.SIZE}
+                        strokeWidth={ICON.STROKE_WIDTH}
+                        className="text-muted-foreground"
+                    />
+                )}
+                {lineExists && (
+                    <span className="text-xs text-muted-foreground">
+                        {convertPx(px, unit, dpi)} {unit}
+                    </span>
+                )}
+            </div>
+            {lineExists && (
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => MeasurementStore.actions.clearLine(canvasId)}
+                >
+                    <X size={12} strokeWidth={ICON.STROKE_WIDTH} />
+                </Button>
+            )}
+        </div>
+    );
+}
+
+type AreaCanvasRowProps = {
+    label: string;
+    tempPoints: Point[];
+    finished: Point[] | null;
+    unit: DistanceUnit;
+    dpi: number;
+    canvasId: CANVAS_ID;
+};
+
+function AreaCanvasRow({
+    label,
+    tempPoints,
+    finished,
+    unit,
+    dpi,
+    canvasId,
+}: AreaCanvasRowProps) {
+    const { t } = useTranslation();
+    const isDrawing = tempPoints.length > 0;
+    const hasResult = finished !== null && finished.length >= 3;
+
+    if (!isDrawing && !hasResult) return null;
+
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold">{label}</span>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => AreaStore.actions.clearCanvas(canvasId)}
+                >
+                    ×
+                </Button>
+            </div>
+            {isDrawing && !hasResult && (
+                <p className="text-xs text-muted-foreground pl-1">
+                    {t("Drawing", { ns: "tooltip" })}: {tempPoints.length}{" "}
+                    {t("Points", { ns: "tooltip" })}
+                </p>
+            )}
+            {hasResult && finished && (
+                <div className="flex justify-between pl-1">
+                    <span className="text-xs text-muted-foreground">
+                        {t("Area", { ns: "tooltip" })}:
+                    </span>
+                    <span className="font-mono text-xs font-medium">
+                        {convertPxArea(calcPolygonArea(finished), unit, dpi)}{" "}
+                        {unit === "px" ? "px²" : `${unit}²`}
+                    </span>
+                </div>
+            )}
+        </div>
+    );
+}
 
 type AreaModeSectionProps = {
     unit: DistanceUnit;
     setUnit: (unit: DistanceUnit) => void;
-    unitLabel: string;
     dpi: number;
 };
 
-function AreaModeSection({
-    unit,
-    setUnit,
-    unitLabel,
-    dpi,
-}: AreaModeSectionProps) {
+function AreaModeSection({ unit, setUnit, dpi }: AreaModeSectionProps) {
     const { t } = useTranslation();
 
     const leftTempPoints = AreaStore.use(
@@ -49,12 +170,13 @@ function AreaModeSection({
         state => state.finishedPolygon[CANVAS_ID.RIGHT]
     );
 
-    const leftIsDrawing = leftTempPoints.length > 0;
-    const rightIsDrawing = rightTempPoints.length > 0;
     const leftHasResult = leftFinished !== null && leftFinished.length >= 3;
     const rightHasResult = rightFinished !== null && rightFinished.length >= 3;
     const hasAnyArea =
-        leftIsDrawing || rightIsDrawing || leftHasResult || rightHasResult;
+        leftTempPoints.length > 0 ||
+        rightTempPoints.length > 0 ||
+        leftHasResult ||
+        rightHasResult;
 
     return (
         <>
@@ -64,108 +186,33 @@ function AreaModeSection({
 
             {hasAnyArea && (
                 <div className="flex flex-col gap-2 text-sm">
-                    {(leftIsDrawing || leftHasResult) && (
-                        <div className="flex flex-col gap-1">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-semibold">L</span>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() =>
-                                        AreaStore.actions.clearCanvas(
-                                            CANVAS_ID.LEFT
-                                        )
-                                    }
-                                >
-                                    ×
-                                </Button>
-                            </div>
-                            {leftIsDrawing && !leftHasResult && (
-                                <p className="text-xs text-muted-foreground pl-1">
-                                    {t("Drawing", { ns: "tooltip" })}:{" "}
-                                    {leftTempPoints.length}{" "}
-                                    {t("Points", { ns: "tooltip" })}
-                                </p>
-                            )}
-                            {leftHasResult && leftFinished && (
-                                <div className="flex justify-between pl-1">
-                                    <span className="text-xs text-muted-foreground">
-                                        {t("Area", { ns: "tooltip" })}:
-                                    </span>
-                                    <span className="font-mono text-xs font-medium">
-                                        {convertPxArea(
-                                            calcPolygonArea(leftFinished),
-                                            unit,
-                                            dpi
-                                        )}{" "}
-                                        {unitLabel}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {(rightIsDrawing || rightHasResult) && (
-                        <div className="flex flex-col gap-1">
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs font-semibold">P</span>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() =>
-                                        AreaStore.actions.clearCanvas(
-                                            CANVAS_ID.RIGHT
-                                        )
-                                    }
-                                >
-                                    ×
-                                </Button>
-                            </div>
-                            {rightIsDrawing && !rightHasResult && (
-                                <p className="text-xs text-muted-foreground pl-1">
-                                    {t("Drawing", { ns: "tooltip" })}:{" "}
-                                    {rightTempPoints.length}{" "}
-                                    {t("Points", { ns: "tooltip" })}
-                                </p>
-                            )}
-                            {rightHasResult && rightFinished && (
-                                <div className="flex justify-between pl-1">
-                                    <span className="text-xs text-muted-foreground">
-                                        {t("Area", { ns: "tooltip" })}:
-                                    </span>
-                                    <span className="font-mono text-xs font-medium">
-                                        {convertPxArea(
-                                            calcPolygonArea(rightFinished),
-                                            unit,
-                                            dpi
-                                        )}{" "}
-                                        {unitLabel}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <AreaCanvasRow
+                        label="L"
+                        tempPoints={leftTempPoints}
+                        finished={leftFinished}
+                        unit={unit}
+                        dpi={dpi}
+                        canvasId={CANVAS_ID.LEFT}
+                    />
+                    <AreaCanvasRow
+                        label="P"
+                        tempPoints={rightTempPoints}
+                        finished={rightFinished}
+                        unit={unit}
+                        dpi={dpi}
+                        canvasId={CANVAS_ID.RIGHT}
+                    />
 
                     {(leftHasResult || rightHasResult) && (
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span className="shrink-0">
                                 {t("Unit", { ns: "tooltip" })}:
                             </span>
-                            <select
+                            <UnitSelector
                                 value={unit}
-                                onChange={e =>
-                                    setUnit(e.target.value as DistanceUnit)
-                                }
-                                className="rounded border border-border bg-background px-1 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                            >
-                                {DISTANCE_UNITS.map(u => (
-                                    <option key={u} value={u}>
-                                        {u === "px" ? "px²" : `${u}²`}
-                                    </option>
-                                ))}
-                            </select>
+                                onChange={setUnit}
+                                squared
+                            />
                         </div>
                     )}
                 </div>
@@ -211,7 +258,6 @@ export function MeasurementPanel({
 
     const leftPx = calcLinePixels(leftLine) ?? 0;
     const rightPx = calcLinePixels(rightLine) ?? 0;
-    const unitLabel = unit === "px" ? "px²" : `${unit}²`;
 
     return (
         <div
@@ -279,86 +325,22 @@ export function MeasurementPanel({
                     </p>
 
                     <div className="flex flex-col gap-2 text-sm">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-semibold">L</span>
-                                {leftLineExists ? (
-                                    <Check
-                                        size={ICON.SIZE}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                        className="text-green-500"
-                                    />
-                                ) : (
-                                    <X
-                                        size={ICON.SIZE}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                        className="text-muted-foreground"
-                                    />
-                                )}
-                                {leftLineExists && (
-                                    <span className="text-xs text-muted-foreground">
-                                        {convertPx(leftPx, unit, dpi)} {unit}
-                                    </span>
-                                )}
-                            </div>
-                            {leftLineExists && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() =>
-                                        MeasurementStore.actions.clearLine(
-                                            CANVAS_ID.LEFT
-                                        )
-                                    }
-                                >
-                                    <X
-                                        size={12}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                    />
-                                </Button>
-                            )}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1.5">
-                                <span className="font-semibold">P</span>
-                                {rightLineExists ? (
-                                    <Check
-                                        size={ICON.SIZE}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                        className="text-green-500"
-                                    />
-                                ) : (
-                                    <X
-                                        size={ICON.SIZE}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                        className="text-muted-foreground"
-                                    />
-                                )}
-                                {rightLineExists && (
-                                    <span className="text-xs text-muted-foreground">
-                                        {convertPx(rightPx, unit, dpi)} {unit}
-                                    </span>
-                                )}
-                            </div>
-                            {rightLineExists && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 px-2 text-xs"
-                                    onClick={() =>
-                                        MeasurementStore.actions.clearLine(
-                                            CANVAS_ID.RIGHT
-                                        )
-                                    }
-                                >
-                                    <X
-                                        size={12}
-                                        strokeWidth={ICON.STROKE_WIDTH}
-                                    />
-                                </Button>
-                            )}
-                        </div>
+                        <LineRow
+                            label="L"
+                            lineExists={leftLineExists}
+                            px={leftPx}
+                            unit={unit}
+                            dpi={dpi}
+                            canvasId={CANVAS_ID.LEFT}
+                        />
+                        <LineRow
+                            label="P"
+                            lineExists={rightLineExists}
+                            px={rightPx}
+                            unit={unit}
+                            dpi={dpi}
+                            canvasId={CANVAS_ID.RIGHT}
+                        />
                     </div>
 
                     {(leftLineExists || rightLineExists) && (
@@ -366,19 +348,7 @@ export function MeasurementPanel({
                             <span className="shrink-0">
                                 {t("Unit", { ns: "tooltip" })}:
                             </span>
-                            <select
-                                value={unit}
-                                onChange={e =>
-                                    setUnit(e.target.value as DistanceUnit)
-                                }
-                                className="rounded border border-border bg-background px-1 py-0.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                            >
-                                {DISTANCE_UNITS.map(u => (
-                                    <option key={u} value={u}>
-                                        {u}
-                                    </option>
-                                ))}
-                            </select>
+                            <UnitSelector value={unit} onChange={setUnit} />
                         </div>
                     )}
 
@@ -395,12 +365,7 @@ export function MeasurementPanel({
             )}
 
             {isAreaMode && (
-                <AreaModeSection
-                    unit={unit}
-                    setUnit={setUnit}
-                    unitLabel={unitLabel}
-                    dpi={dpi}
-                />
+                <AreaModeSection unit={unit} setUnit={setUnit} dpi={dpi} />
             )}
         </div>
     );
