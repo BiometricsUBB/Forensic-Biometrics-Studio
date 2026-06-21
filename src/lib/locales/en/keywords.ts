@@ -99,9 +99,15 @@ const d: Dictionary = {
         "Axes W1 and W2 are required to compute size proportion and grafotype.",
     "Rank correlation requires the same number of outline segments in both samples":
         "Rank correlation requires the same number of outline segments in both samples.",
+    "Shoeprint markings left": "Markings on image 1",
+    "Shoeprint markings right": "Markings on image 2",
     Modifiers: "Modifiers",
     "No modifiers yet": "No modifiers yet",
     Compute: "Compute",
+    "Unique features color": "Unique features color",
+    "Color red": "Red",
+    "Color green": "Green",
+    "Report title": "Report title",
 };
 
 export default d;

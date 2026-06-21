@@ -52,7 +52,7 @@
                 "name": "Odcinek",
                 "displayName": "G: Linia prosta",
                 "markingClass": "line_segment",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -62,7 +62,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Łuk",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -72,7 +72,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Okrąg / Kółko",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -82,7 +82,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Elipsa",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -92,7 +92,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Trójkąt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -102,7 +102,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Czworokąt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -112,7 +112,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Pięciokąt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -122,7 +122,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Sześciokąt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -132,7 +132,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Wielokąt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -142,7 +142,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Gwiazda",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -152,7 +152,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Krzyż / Plus",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -162,7 +162,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Strzałka",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -172,7 +172,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Serce",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -182,7 +182,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Cel",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -192,7 +192,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Motylek",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -202,7 +202,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Kapelusz",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -212,7 +212,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Tekst",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -222,7 +222,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Logo",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"
@@ -232,7 +232,7 @@
                 "name": "Prostokąt",
                 "displayName": "G: Inny powtarzający się kształt",
                 "markingClass": "bounding_box",
-                "backgroundColor": "#aac8aa",
+                "backgroundColor": "#cc0000",
                 "textColor": "#0a130a",
                 "size": 10,
                 "category": "SHOEPRINT"

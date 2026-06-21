@@ -51,6 +51,25 @@ const d: Dictionary = {
     "Signature A figure": "Rysunek: podpis A z obrysem i osiami",
     "Signature B figure": "Rysunek: podpis B z obrysem i osiami",
     "Not available": "b.d.",
+    "Shoeprint report title":
+        "Raport techniczny porównania obrazów śladów traseologicznych",
+    "Shoeprint paired features count":
+        "Liczba sparowanych cech (po etykiecie):",
+    "Shoeprint figure 3": "Rys. 3 Obraz 2 oryginalny (ślad buta)",
+    "Shoeprint figure 4":
+        "Rys. 4 Obraz 2 z wszystkimi cechami wyznaczonymi w toku ekspertyzy",
+    "Shoeprint comparative table overview":
+        "Tablica komparacyjna wybranych cech – ilustracja poglądowa",
+    "Shoeprint comparative table details":
+        "Tablica komparacyjna wybranych cech – szczegóły",
+    "Shoeprint pattern features title":
+        "Cechy strukturalne o znaczeniu klasyfikacyjnym",
+    "Shoeprint group features title":
+        "Cechy grupowe o znaczeniu klasyfikacyjnym",
+    "Shoeprint feature type prefix": 
+        "Cechy typu:",
+    "Shoeprint no unique features": 
+        "Brak cech unikalnych.",
 };
 
 export default d;

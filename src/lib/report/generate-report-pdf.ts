@@ -7,7 +7,6 @@ import { invoke } from "@tauri-apps/api/core";
 import i18n from "@/lib/locales/i18n";
 import type { TFunction } from "i18next";
 import * as PIXI from "pixi.js";
-import SparkMD5 from "spark-md5";
 import { drawMarking } from "@/components/pixi/overlays/markings/marking.utils";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getCanvas } from "@/components/pixi/canvas/hooks/useCanvas";
@@ -25,6 +24,8 @@ import {
     formatBytes,
     getMatchedFeatures,
     getPairedByLabel,
+    md5Bytes,
+    md5String,
 } from "./report-utils";
 
 type ReportGenerationOptions = {
@@ -96,16 +97,6 @@ export const toDataUrl = (bytes: Uint8Array, name: string) =>
             new Blob([toBlobBytes(bytes)], { type: getMimeTypeFromName(name) })
         );
     });
-
-const md5Bytes = (bytes: Uint8Array) => {
-    const buffer = bytes.buffer.slice(
-        bytes.byteOffset,
-        bytes.byteOffset + bytes.byteLength
-    );
-    return SparkMD5.ArrayBuffer.hash(buffer);
-};
-
-export const md5String = (value: string) => SparkMD5.hash(value);
 
 const toCssColor = (value: unknown, fallback: string) => {
     if (typeof value === "number" && Number.isFinite(value)) {

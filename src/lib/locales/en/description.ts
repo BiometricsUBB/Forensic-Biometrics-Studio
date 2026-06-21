@@ -12,6 +12,7 @@ const d: Dictionary = {
     "Configure report metadata": "Configure report metadata",
     "Configure default report data": "Configure default report data",
     "Generate PDF report": "Generate PDF report",
+    "Manage marking types": "Manage marking types",
 };
 
 export default d;

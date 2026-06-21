@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { CanvasMetadata } from "@/components/pixi/canvas/hooks/useCanvasContext";
+import { MarkingClass } from "@/lib/markings/MarkingClass";
 // eslint-disable-next-line import/no-cycle
 import { Immer, produceCallback } from "../immer.helpers";
-import { MarkingClass } from "@/lib/markings/MarkingClass";
 
 // Type for the last added marking state
 export type LastAddedMarkerState = {

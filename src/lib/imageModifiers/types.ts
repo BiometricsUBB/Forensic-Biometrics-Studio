@@ -2,7 +2,16 @@ import { ImageFFT, FFTResult } from "@/lib/fftProcessor";
 
 // ─── Modifier type discriminants ───────────────────────────────────────────
 
-export type ModifierType = "brightness" | "contrast" | "fft";
+export type ModifierType =
+    | "brightness"
+    | "contrast"
+    | "fft"
+    | "gbfen"
+    | "snfen"
+    | "levels"
+    | "curves";
+
+export type EnhancementMethod = "gbfen" | "snfen";
 
 // ─── Per-modifier param shapes ──────────────────────────────────────────────
 
@@ -25,9 +34,57 @@ export interface FftParams {
     _processor?: ImageFFT | null;
 }
 
+export type EnhancementStatus = "pending" | "processing" | "ready" | "failed";
+
+export interface EnhancementParams {
+    /** DPI passed to pyfing (default 500) */
+    dpi: number;
+    /** Lifecycle status of the external enhancement run */
+    status: EnhancementStatus;
+    /** Absolute path of the enhanced PNG written by pyfing (set when ready) */
+    outputPath: string | null;
+    /** Last error message returned by the pyfing run (set when failed) */
+    errorMessage: string | null;
+    /** Total pyfing duration in milliseconds */
+    durationMs: number | null;
+    /** Runtime-only: blob URL of the enhanced image (not persisted) */
+    runtimeOutputUrl?: string | null;
+}
+
+export interface LevelParam {
+    black: number;
+    white: number;
+    gamma: number;
+}
+
+export interface LevelsParams {
+    master: LevelParam;
+    r: LevelParam;
+    g: LevelParam;
+    b: LevelParam;
+}
+
+export interface CurvePoint {
+    x: number;
+    y: number;
+}
+
+export interface CurvesParams {
+    master: CurvePoint[];
+    r: CurvePoint[];
+    g: CurvePoint[];
+    b: CurvePoint[];
+}
+
 // ─── Discriminated union ─────────────────────────────────────────────────────
 
-export type ModifierParams = BrightnessParams | ContrastParams | FftParams;
+export type ModifierParams =
+    | BrightnessParams
+    | ContrastParams
+    | FftParams
+    | EnhancementParams
+    | LevelsParams
+    | CurvesParams;
 
 export interface Modifier<P extends ModifierParams = ModifierParams> {
     /** Stable unique identifier */
@@ -46,5 +103,30 @@ export type ContrastModifier = Modifier<ContrastParams> & {
     type: "contrast";
 };
 export type FftModifier = Modifier<FftParams> & { type: "fft" };
+export type GbfenModifier = Modifier<EnhancementParams> & { type: "gbfen" };
+export type SnfenModifier = Modifier<EnhancementParams> & { type: "snfen" };
+export type LevelsModifier = Modifier<LevelsParams> & { type: "levels" };
+export type CurvesModifier = Modifier<CurvesParams> & { type: "curves" };
 
-export type AnyModifier = BrightnessModifier | ContrastModifier | FftModifier;
+export type AnyModifier =
+    | BrightnessModifier
+    | ContrastModifier
+    | FftModifier
+    | GbfenModifier
+    | SnfenModifier
+    | LevelsModifier
+    | CurvesModifier;
+
+export type EnhancementModifier = GbfenModifier | SnfenModifier;
+
+export function isEnhancementModifier(
+    m: AnyModifier
+): m is EnhancementModifier {
+    return m.type === "gbfen" || m.type === "snfen";
+}
+
+export function getEnhancementMethod(
+    m: EnhancementModifier
+): EnhancementMethod {
+    return m.type;
+}

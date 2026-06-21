@@ -8,12 +8,24 @@ import {
     Sun,
     Contrast,
     Waves,
+    SlidersHorizontal,
+    TrendingUp,
+    Sparkles,
+    Wand2,
+    Brain,
+    Loader2,
+    AlertTriangle,
+    CheckCircle2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
-import { AnyModifier } from "@/lib/imageModifiers/types";
+import {
+    AnyModifier,
+    EnhancementModifier,
+    isEnhancementModifier,
+} from "@/lib/imageModifiers/types";
 
 // ─── Icon per modifier type ───────────────────────────────────────────────────
 
@@ -36,7 +48,58 @@ export function ModifierIcon({
                 className={cls}
             />
         );
-    return <Waves size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "levels")
+        return <SlidersHorizontal size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "curves")
+        return <TrendingUp size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+    if (type === "gbfen")
+        return (
+            <Wand2 size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
+        );
+    if (type === "snfen")
+        return (
+            <Brain size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
+        );
+    if (type === "fft")
+        return (
+            <Waves size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
+        );
+    return (
+        <Sparkles size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
+    );
+}
+
+function EnhancementStatusBadge({
+    modifier,
+}: {
+    modifier: EnhancementModifier;
+}) {
+    const { status } = modifier.params;
+    if (status === "processing" || status === "pending") {
+        return (
+            <Loader2
+                size={12}
+                className="text-primary animate-spin shrink-0"
+                aria-label={status}
+            />
+        );
+    }
+    if (status === "failed") {
+        return (
+            <AlertTriangle
+                size={12}
+                className="text-destructive shrink-0"
+                aria-label="failed"
+            />
+        );
+    }
+    return (
+        <CheckCircle2
+            size={12}
+            className="text-emerald-500 shrink-0"
+            aria-label="ready"
+        />
+    );
 }
 
 // ─── Single item ──────────────────────────────────────────────────────────────
@@ -53,6 +116,70 @@ interface ModifierItemProps {
     onGripKeyDown: (e: React.KeyboardEvent) => void;
 }
 
+interface ItemActionsProps {
+    modifier: AnyModifier;
+    toggleDisabled: boolean;
+    removeDisabled: boolean;
+    onEdit: () => void;
+    onToggle: () => void;
+    onRemove: () => void;
+}
+
+function ItemActions({
+    modifier,
+    toggleDisabled,
+    removeDisabled,
+    onEdit,
+    onToggle,
+    onRemove,
+}: ItemActionsProps) {
+    const { t } = useTranslation(["tooltip", "keywords"]);
+    return (
+        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                title={
+                    modifier.enabled
+                        ? t("Disable", { ns: "tooltip" })
+                        : t("Enable", { ns: "tooltip" })
+                }
+                onClick={onToggle}
+                disabled={toggleDisabled}
+                id={`modifier-toggle-${modifier.id}`}
+            >
+                {modifier.enabled ? (
+                    <Eye size={12} strokeWidth={2} />
+                ) : (
+                    <EyeOff size={12} strokeWidth={2} />
+                )}
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                title={t("Edit settings", { ns: "tooltip" })}
+                onClick={onEdit}
+                id={`modifier-edit-${modifier.id}`}
+            >
+                <Pencil size={12} strokeWidth={2} />
+            </Button>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 hover:text-destructive"
+                title={t("Remove", { ns: "keywords" })}
+                onClick={onRemove}
+                disabled={removeDisabled}
+                id={`modifier-remove-${modifier.id}`}
+            >
+                <Trash2 size={12} strokeWidth={2} />
+            </Button>
+        </div>
+    );
+}
+
 function ModifierItem({
     modifier,
     isDragging,
@@ -62,14 +189,46 @@ function ModifierItem({
     onGripMouseDown,
     onGripKeyDown,
 }: ModifierItemProps) {
-    const { t } = useTranslation(["tooltip", "keywords"]);
+    const { t } = useTranslation(["tooltip"]);
 
-    const label =
-        modifier.type === "brightness"
-            ? t("Brightness", { ns: "tooltip" })
-            : modifier.type === "contrast"
-              ? t("Contrast", { ns: "tooltip" })
-              : t("FFT Filter", { ns: "tooltip" });
+    let label: string;
+    switch (modifier.type) {
+        case "brightness":
+            label = t("Brightness", { ns: "tooltip" });
+            break;
+        case "contrast":
+            label = t("Contrast", { ns: "tooltip" });
+            break;
+        case "levels":
+            label = t("Levels", { ns: "tooltip" });
+            break;
+        case "curves":
+            label = t("Curves", { ns: "tooltip" });
+            break;
+        case "fft":
+            label = t("FFT Filter", { ns: "tooltip" });
+            break;
+        case "gbfen":
+            label = t("GBFEN", { ns: "tooltip" });
+            break;
+        default:
+            label = t("SNFEN", { ns: "tooltip" });
+            break;
+    }
+
+    const enhancement = isEnhancementModifier(modifier) ? modifier : null;
+    const isProcessing =
+        enhancement !== null &&
+        (enhancement.params.status === "processing" ||
+            enhancement.params.status === "pending");
+    const toggleDisabled =
+        enhancement !== null && enhancement.params.status !== "ready";
+
+    const itemTitle = enhancement?.params.errorMessage
+        ? enhancement.params.errorMessage
+        : enhancement
+          ? `${label} (${enhancement.params.status})`
+          : label;
 
     return (
         <div
@@ -77,7 +236,9 @@ function ModifierItem({
                 "group flex items-center gap-1.5 rounded-md border border-border/40 bg-background/60 px-2 py-1.5 text-sm transition-all duration-150",
                 "hover:border-border/80 hover:bg-accent/20",
                 isDragging && "opacity-30 scale-[0.97] pointer-events-none",
-                !modifier.enabled && "opacity-60"
+                !modifier.enabled && "opacity-60",
+                enhancement?.params.status === "failed" &&
+                    "border-destructive/60"
             )}
         >
             {/* Drag handle — mouse DnD and keyboard (↑ / ↓) reordering */}
@@ -104,51 +265,21 @@ function ModifierItem({
                     "flex-1 truncate font-medium leading-tight",
                     !modifier.enabled && "line-through text-muted-foreground"
                 )}
+                title={itemTitle}
             >
                 {label}
             </span>
 
-            {/* Action buttons — visible on hover */}
-            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    title={
-                        modifier.enabled
-                            ? t("Disable", { ns: "tooltip" })
-                            : t("Enable", { ns: "tooltip" })
-                    }
-                    onClick={onToggle}
-                    id={`modifier-toggle-${modifier.id}`}
-                >
-                    {modifier.enabled ? (
-                        <Eye size={12} strokeWidth={2} />
-                    ) : (
-                        <EyeOff size={12} strokeWidth={2} />
-                    )}
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    title={t("Edit settings", { ns: "tooltip" })}
-                    onClick={onEdit}
-                    id={`modifier-edit-${modifier.id}`}
-                >
-                    <Pencil size={12} strokeWidth={2} />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 hover:text-destructive"
-                    title={t("Remove", { ns: "keywords" })}
-                    onClick={onRemove}
-                    id={`modifier-remove-${modifier.id}`}
-                >
-                    <Trash2 size={12} strokeWidth={2} />
-                </Button>
-            </div>
+            {enhancement && <EnhancementStatusBadge modifier={enhancement} />}
+
+            <ItemActions
+                modifier={modifier}
+                toggleDisabled={toggleDisabled}
+                removeDisabled={isProcessing}
+                onEdit={onEdit}
+                onToggle={onToggle}
+                onRemove={onRemove}
+            />
         </div>
     );
 }
@@ -182,7 +313,6 @@ export function ModifierList({
             const to = e.key === "ArrowUp" ? idx - 1 : idx + 1;
             if (to < 0 || to >= modifiers.length) return;
             onReorder(idx, to);
-            // Keep focus on the handle after the list re-renders
             requestAnimationFrame(() => {
                 const handles = document.querySelectorAll<HTMLElement>(
                     "[data-modifier-grip]"
@@ -246,8 +376,6 @@ export function ModifierList({
 
                 if (drag2 !== null && drop !== -1) {
                     const { fromIdx: from } = drag2;
-                    // Convert visual drop-position to splice index
-                    // drop > from → removal shifts array → subtract 1
                     const to = drop > from ? drop - 1 : drop;
                     if (to !== from) {
                         onReorder(from, to);

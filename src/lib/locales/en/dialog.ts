@@ -43,6 +43,19 @@ const d: Dictionary = {
     "Save result as...": "Save result as...",
     "To compute the verification result, draw a signature outline (polygon) on both image A and image B.":
         "To compute the verification result, draw a signature outline (polygon) on both image A and image B.",
+    "XML file is corrupt or has an invalid format. Rejected by parser.":
+        "The selected XML file is corrupt or has an invalid format. It was rejected by the parser.",
+    "No usable biometric data found in the file (neither supported image nor minutiae).":
+        "No usable biometric data found in the file (neither supported image nor minutiae). It might contain text data only.",
+    "Loaded image from file, but it did not contain any saved minutiae.":
+        "Loaded image from file, but it did not contain any saved minutiae (missing Type-9 record).",
+    "Loaded minutiae, but the file did not contain an image (or the image format is not supported).":
+        "Loaded minutiae, but the file did not contain an image (or the image format is not supported).",
+    "File info": "File info",
+    Info: "Info",
+    "No biometric data.": "No biometric data.",
+    "Loaded image, no minutiae.": "Loaded image, no minutiae.",
+    "Loaded minutiae, no image.": "Loaded minutiae, no image.",
 };
 
 export default d;

@@ -99,9 +99,15 @@ const d: Dictionary = {
         "Osie W1 i W2 są wymagane do obliczenia proporcji wielkości i grafotypu.",
     "Rank correlation requires the same number of outline segments in both samples":
         "Korelacja rangowa wymaga tej samej liczby odcinków obrysu w obu próbkach.",
+    "Shoeprint markings left": "Adnotacje na obrazie 1",
+    "Shoeprint markings right": "Adnotacje na obrazie 2",
     Modifiers: "Modyfikatory",
     "No modifiers yet": "Brak modyfikatorów",
     Compute: "Oblicz",
+    "Unique features color": "Kolor cech unikalnych",
+    "Color red": "Czerwony",
+    "Color green": "Zielony",
+    "Report title": "Tytuł raportu",
 };
 
 export default d;

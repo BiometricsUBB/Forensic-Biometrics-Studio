@@ -46,6 +46,19 @@ const d: Dictionary = {
     "Save result as...": "Zapisz wynik jako...",
     "To compute the verification result, draw a signature outline (polygon) on both image A and image B.":
         "Aby obliczyć wynik weryfikacji, narysuj obrys podpisu (wielokąt) na obu obrazach A i B.",
+    "XML file is corrupt or has an invalid format. Rejected by parser.":
+        "Wybrany plik XML jest uszkodzony lub ma nieprawidłowy format. Został odrzucony przez parser.",
+    "No usable biometric data found in the file (neither supported image nor minutiae).":
+        "W pliku nie znaleziono żadnych użytecznych danych biometrycznych (ani obsługiwanego obrazu, ani minucji). Możliwe, że jest to plik zawierający wyłącznie dane tekstowe.",
+    "Loaded image from file, but it did not contain any saved minutiae.":
+        "Wczytano obraz z pliku, ale nie zawierał on żadnych zapisanych minucji (brak rekordu Type-9).",
+    "Loaded minutiae, but the file did not contain an image (or the image format is not supported).":
+        "Wczytano minucje, ale plik nie zawierał obrazu (lub format obrazu nie jest obsługiwany).",
+    "File info": "Informacja o pliku",
+    Info: "Info",
+    "No biometric data.": "Brak danych biometrycznych.",
+    "Loaded image, no minutiae.": "Wczytano obraz, brak minucji.",
+    "Loaded minutiae, no image.": "Wczytano minucje, brak obrazu.",
 };
 
 export default d;

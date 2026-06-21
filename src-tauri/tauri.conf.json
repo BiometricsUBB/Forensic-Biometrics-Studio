@@ -4,7 +4,7 @@
     "version": "0.6.10",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "pnpm build",
+        "beforeBuildCommand": "pnpm sidecar:ensure:pyfing && pnpm build",
         "beforeDevCommand": "pnpm dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
@@ -53,7 +53,7 @@
         "category": "DeveloperTool",
         "copyright": "",
         "targets": "all",
-        "externalBin": ["bin/sourceafis_cli"],
+        "externalBin": ["bin/sourceafis_cli", "bin/pyfing_enhance"],
         "icon": [
             "../public/logo_32.png",
             "../public/logo_128.png",
@@ -76,4 +76,3 @@
         }
     }
 }
-
