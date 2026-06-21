@@ -33,6 +33,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { SignatureVerificationDialog } from "@/components/dialogs/signature/signature-verification-dialog";
 import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
 import { WORKING_MODE } from "@/views/selectMode";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
@@ -504,6 +505,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <ReportShoeprintDialog />
                     ) : (
                         <ReportDialog />
+                    )}
+
+                    {workingMode === WORKING_MODE.SIGNATURE && (
+                        <SignatureVerificationDialog />
                     )}
 
                     <Toggle

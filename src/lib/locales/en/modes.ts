@@ -4,6 +4,7 @@ const d: Dictionary = {
     FINGERPRINT: "Fingerprints",
     EAR: "Ears",
     SHOEPRINT: "Shoeprints",
+    SIGNATURE: "Signatures",
 };
 
 export default d;
