@@ -28,6 +28,9 @@ import { saveMarkingsDataWithDialog } from "@/lib/utils/viewport/saveMarkingsDat
 import { loadMarkingsDataWithDialog } from "@/lib/utils/viewport/loadMarkingsData";
 import { saveTracingDataWithDialog } from "@/lib/utils/viewport/saveTracingDataWithDialog";
 import { loadTracingDataWithDialog } from "@/lib/utils/viewport/loadTracingDataWithDialog";
+import { loadAnsiNistWithDialog } from "@/lib/utils/viewport/loadAnsiNistWithDialog";
+import { loadTraditionalAnsiNistWithDialog } from "@/lib/utils/viewport/loadTraditionalAnsiNistWithDialog";
+import { saveAnsiNistWithDialog } from "@/lib/utils/viewport/saveAnsiNistWithDialog";
 import { invoke } from "@tauri-apps/api/core";
 import { Sprite } from "pixi.js";
 import {
@@ -127,6 +130,20 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                                 saveTracingDataWithDialog(viewport);
                             },
                         },
+                        {
+                            label: t("Save ANSI/NIST (XML)", {
+                                ns: "tooltip",
+                            }),
+                            icon: (
+                                <Save
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                saveAnsiNistWithDialog(viewport);
+                            },
+                        },
                     ]}
                     size="icon"
                     variant="outline"
@@ -174,6 +191,37 @@ export function CanvasHeader({ className, ...props }: CanvasHeaderProps) {
                             ),
                             onClick: () => {
                                 loadTracingDataWithDialog(viewport);
+                            },
+                        },
+                        {
+                            label: t("Load ANSI/NIST (XML) from file", {
+                                ns: "tooltip",
+                            }),
+                            icon: (
+                                <FileInput
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                loadAnsiNistWithDialog(viewport);
+                            },
+                        },
+                        {
+                            label: t(
+                                "Load Traditional ANSI/NIST (.an2, .eft)",
+                                {
+                                    ns: "tooltip",
+                                }
+                            ),
+                            icon: (
+                                <FileInput
+                                    size={ICON.SIZE}
+                                    strokeWidth={ICON.STROKE_WIDTH}
+                                />
+                            ),
+                            onClick: () => {
+                                loadTraditionalAnsiNistWithDialog(viewport);
                             },
                         },
                         {

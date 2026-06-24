@@ -66,6 +66,35 @@ class StoreClass {
 
                 this.actions.selectedType.set(null);
             },
+            reorder: (fromIdx: number, toIdx: number, category: string) => {
+                this.state.set(draft => {
+                    const catItems = draft.types.filter(
+                        t => t.category === category
+                    );
+
+                    if (
+                        fromIdx < 0 ||
+                        toIdx < 0 ||
+                        fromIdx >= catItems.length ||
+                        toIdx >= catItems.length
+                    )
+                        return;
+
+                    const moved = catItems.splice(fromIdx, 1)[0] as MarkingType;
+                    catItems.splice(toIdx, 0, moved);
+
+                    let catIdx = 0;
+                    for (let i = 0; i < draft.types.length; i += 1) {
+                        const current = draft.types[`${i}`];
+                        if (current && current.category === category) {
+                            draft.types[`${i}`] = catItems[
+                                `${catIdx}`
+                            ] as MarkingType;
+                            catIdx += 1;
+                        }
+                    }
+                });
+            },
             setType: (
                 typeId: MarkingType["id"],
                 newValues: Partial<MarkingType>

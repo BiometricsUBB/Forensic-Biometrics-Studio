@@ -4,7 +4,7 @@
     "version": "0.6.10",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "bun run build",
+        "beforeBuildCommand": "bun run sidecar:ensure:pyfing && bun run build",
         "beforeDevCommand": "bun run dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
@@ -53,7 +53,7 @@
         "category": "DeveloperTool",
         "copyright": "",
         "targets": "all",
-        "externalBin": ["bin/sourceafis_cli"],
+        "externalBin": ["bin/sourceafis_cli", "bin/pyfing_enhance"],
         "icon": [
             "../public/logo_32.png",
             "../public/logo_128.png",

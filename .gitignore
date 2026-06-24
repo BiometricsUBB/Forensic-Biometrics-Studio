@@ -42,3 +42,18 @@ next-env.d.ts
 
 #tauri auto-generated capability schemas
 /src-tauri/gen/schemas/
+
+# pyfing sidecar build artifacts
+/.venv-pyfing/
+/dist-pyinstaller/
+/build-pyinstaller/
+/scripts/__pycache__/
+
+# pyfing sidecar binaries (built in CI, too large for git)
+/src-tauri/bin/pyfing_enhance*.exe
+/src-tauri/bin/pyfing_enhance
+/src-tauri/bin/pyfing_enhance-*
+
+# local installer / toolchain artifacts (not project files)
+/Setup.msix
+/rustup-init.exe

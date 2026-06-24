@@ -13,6 +13,7 @@ import { SelectionModePlugin } from "./plugins/selectionModePlugin";
 import { AutoRotatePlugin } from "./plugins/autoRotatePlugin";
 import { MeasurementPlugin } from "./plugins/measurementPlugin";
 import { ManualRotatePlugin } from "./plugins/manualRotatePlugin";
+import { AreaPlugin } from "./plugins/areaPlugin";
 
 export type ViewportProps = {
     children?: ReactNode;
@@ -83,6 +84,8 @@ export const Viewport = forwardRef<PixiViewport, ViewportProps>(
                         "manualRotate",
                         new ManualRotatePlugin(viewport, id)
                     );
+
+                    viewport.plugins.add("area", new AreaPlugin(viewport, id));
 
                     viewport.on("childAdded", updateViewport);
                     viewport.on("childRemoved", updateViewport);

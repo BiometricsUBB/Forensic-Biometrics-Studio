@@ -33,9 +33,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
+import { WORKING_MODE } from "@/views/selectMode";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { useFormatCombo } from "@/lib/hooks/useKeyboardLayout";
+import { AreaStore } from "@/lib/stores/Area/Area";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { RotationPanel } from "./rotation-panel";
 import { TracingPanel } from "./tracing-panel";
@@ -454,9 +457,16 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     <Toggle
                         variant="outline"
                         className="w-full justify-start gap-2 h-auto min-h-10 py-2 px-3"
-                        pressed={cursorMode === CURSOR_MODES.MEASUREMENT}
+                        pressed={
+                            cursorMode === CURSOR_MODES.MEASUREMENT ||
+                            cursorMode === CURSOR_MODES.AREA
+                        }
                         onClick={() => {
-                            if (cursorMode === CURSOR_MODES.MEASUREMENT) {
+                            if (
+                                cursorMode === CURSOR_MODES.MEASUREMENT ||
+                                cursorMode === CURSOR_MODES.AREA
+                            ) {
+                                AreaStore.actions.clearAll();
                                 DashboardToolbarStore.actions.settings.cursor.setCursorMode(
                                     CURSOR_MODES.SELECTION
                                 );
@@ -480,7 +490,8 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     <div
                         className={cn(
                             collapsiblePanelTransitionClass,
-                            cursorMode === CURSOR_MODES.MEASUREMENT
+                            cursorMode === CURSOR_MODES.MEASUREMENT ||
+                                cursorMode === CURSOR_MODES.AREA
                                 ? collapsiblePanelExpandedClass
                                 : collapsiblePanelCollapsedClass
                         )}
@@ -488,7 +499,11 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <MeasurementPanel />
                     </div>
 
-                    <ReportDialog />
+                    {workingMode === WORKING_MODE.SHOEPRINT ? (
+                        <ReportShoeprintDialog />
+                    ) : (
+                        <ReportDialog />
+                    )}
 
                     <Toggle
                         variant="outline"

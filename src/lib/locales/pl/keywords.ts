@@ -80,6 +80,15 @@ const d: Dictionary = {
         "Nie znaleziono typów adnotacji dla wybranego trybu pracy",
     "Select a working mode to view marking types":
         "Wybierz tryb pracy, aby wyświetlić typy adnotacji",
+    "Shoeprint markings left": "Adnotacje na obrazie 1",
+    "Shoeprint markings right": "Adnotacje na obrazie 2",
+    Modifiers: "Modyfikatory",
+    "No modifiers yet": "Brak modyfikatorów",
+    Compute: "Oblicz",
+    "Unique features color": "Kolor cech unikalnych",
+    "Color red": "Czerwony",
+    "Color green": "Zielony",
+    "Report title": "Tytuł raportu",
 };
 
 export default d;

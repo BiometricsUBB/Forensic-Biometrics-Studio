@@ -1,102 +1,21 @@
-import { cn } from "@/lib/utils/shadcn";
-import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
-import { useDebouncedCallback } from "use-debounce";
-import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
-import { TableCell, TableHead, TableRow } from "@/components/ui/table";
-import {
-    Trash2,
-    Download,
-    Upload,
-    Plus,
-    ChevronDown,
-    LayoutGrid,
-} from "lucide-react";
-import { ICON, IS_DEV_ENVIRONMENT } from "@/lib/utils/const";
-import { Toggle } from "@/components/ui/toggle";
-import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
-import { WORKING_MODE } from "@/views/selectMode";
-import TypeKeybinding from "@/components/dialogs/marking-types/marking-type-keybinding";
-import { KeybindingsStore } from "@/lib/stores/Keybindings";
-import { exportMarkingTypesWithDialog } from "@/components/dialogs/marking-types/exportMarkingTypesWithDialog";
-import { importMarkingTypesWithDialog } from "@/components/dialogs/marking-types/importMarkingTypesWithDialog";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuPortal,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
-import {
-    defaultBackgroundColor,
-    defaultSize,
-    defaultTextColor,
-} from "@/lib/markings/MarkingType";
-import { useState, useEffect } from "react";
-import {
-    emitMarkingTypesChange,
-    emitKeybindingsChange,
-} from "@/lib/hooks/useSettingsSync";
-import { invoke } from "@tauri-apps/api/core";
+import { useMarkingTypes } from "./marking-types/use-marking-types";
+import { MarkingTypesToolbar } from "./marking-types/toolbar";
+import { MarkingTypesTable } from "./marking-types/table";
 
 export function MarkingTypesSettings() {
     const { t } = useTranslation();
-
-    const [selectedCategory, setSelectedCategory] = useState<
-        WORKING_MODE | undefined
-    >(undefined);
-
-    useEffect(() => {
-        invoke<WORKING_MODE | null>("get_working_mode").then(mode => {
-            if (mode) setSelectedCategory(mode);
-        });
-    }, []);
-
-    const types = MarkingTypesStore.use(state =>
-        selectedCategory
-            ? state.types.filter(c => c.category === selectedCategory)
-            : state.types
-    );
-
-    const setType = useDebouncedCallback((id, value) => {
-        MarkingTypesStore.actions.types.setType(id, value);
-        emitMarkingTypesChange();
-    }, 10);
-
-    const keybindings = KeybindingsStore.use(state =>
-        selectedCategory
-            ? state.typesKeybindings.filter(
-                  k => k.workingMode === selectedCategory
-              )
-            : state.typesKeybindings
-    );
-
-    const allKeybindings = KeybindingsStore.use(
-        state => state.typesKeybindings
-    );
-
-    useEffect(() => {
-        emitKeybindingsChange();
-    }, [allKeybindings]);
-
-    const workingModes = Object.values(WORKING_MODE);
-
-    const activeKeybindings = types
-        .map(item => keybindings.find(k => k.typeId === item.id))
-        .filter((k): k is NonNullable<typeof k> => !!k?.boundKey);
-
-    const conflictingKeys = new Set(
-        activeKeybindings
-            .filter((k, _, arr) =>
-                arr.some(
-                    other =>
-                        other.boundKey === k.boundKey &&
-                        other.typeId !== k.typeId
-                )
-            )
-            .map(k => k.boundKey)
-    );
+    const {
+        selectedCategory,
+        setSelectedCategory,
+        types,
+        setType,
+        keybindings,
+        conflictingKeys,
+        sensors,
+        handleDragEnd,
+        handleRemove,
+    } = useMarkingTypes();
 
     return (
         <div className="flex flex-col gap-4 p-2 h-full">
@@ -104,159 +23,17 @@ export function MarkingTypesSettings() {
                 <h2 className="text-lg font-semibold">
                     {t("Types", { ns: "keywords" })}
                 </h2>
-                <p className="text-sm text-muted-foreground">{t("Types")}</p>
+                <p className="text-sm text-muted-foreground">
+                    {t("Manage marking types", {
+                        ns: "description",
+                    })}
+                </p>
             </div>
 
-            <div className="flex justify-between items-center gap-2 flex-wrap">
-                <div className="flex flex-row gap-1.5 items-center">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger
-                            className={cn(
-                                "h-8 px-3 flex items-center justify-between gap-2 min-w-45",
-                                "border border-input rounded-md",
-                                "hover:bg-accent hover:text-accent-foreground"
-                            )}
-                        >
-                            <span className="text-sm">
-                                {selectedCategory ? (
-                                    t(selectedCategory, { ns: "modes" })
-                                ) : (
-                                    <span className="text-muted-foreground">
-                                        {t("Select working mode")}
-                                    </span>
-                                )}
-                            </span>
-                            <ChevronDown size={14} />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuPortal>
-                            <DropdownMenuContent>
-                                {workingModes.map(mode => (
-                                    <DropdownMenuItem
-                                        key={mode}
-                                        onClick={() =>
-                                            setSelectedCategory(mode)
-                                        }
-                                    >
-                                        {t(mode, { ns: "modes" })}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenu>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger
-                            title={t("Add")}
-                            className={cn(
-                                "size-8 flex items-center justify-center",
-                                "border border-input rounded-md",
-                                "hover:bg-accent hover:text-accent-foreground",
-                                !selectedCategory &&
-                                    "opacity-50 cursor-not-allowed"
-                            )}
-                            disabled={!selectedCategory}
-                        >
-                            <Plus
-                                size={ICON.SIZE}
-                                strokeWidth={ICON.STROKE_WIDTH}
-                            />
-                        </DropdownMenuTrigger>
-
-                        <DropdownMenuPortal>
-                            <DropdownMenuContent>
-                                {(
-                                    Object.keys(
-                                        MARKING_CLASS
-                                    ) as (keyof typeof MARKING_CLASS)[]
-                                )
-                                    .filter(
-                                        key =>
-                                            MARKING_CLASS[key] !==
-                                            MARKING_CLASS.MEASUREMENT
-                                    )
-                                    .map(key => {
-                                        return (
-                                            <DropdownMenuItem
-                                                key={key}
-                                                onClick={() => {
-                                                    MarkingTypesStore.actions.types.add(
-                                                        {
-                                                            id: crypto.randomUUID(),
-                                                            name: t(
-                                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                                {
-                                                                    ns: "object",
-                                                                }
-                                                            ),
-                                                            displayName: t(
-                                                                `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                                {
-                                                                    ns: "object",
-                                                                }
-                                                            ),
-                                                            markingClass:
-                                                                MARKING_CLASS[
-                                                                    key
-                                                                ],
-                                                            backgroundColor:
-                                                                defaultBackgroundColor,
-                                                            textColor:
-                                                                defaultTextColor,
-                                                            size: defaultSize,
-                                                            category:
-                                                                selectedCategory!,
-                                                        }
-                                                    );
-                                                    emitMarkingTypesChange();
-                                                }}
-                                            >
-                                                {t(
-                                                    `Marking.Keys.markingClass.Keys.${MARKING_CLASS[key]}`,
-                                                    { ns: "object" }
-                                                )}
-                                            </DropdownMenuItem>
-                                        );
-                                    })}
-                            </DropdownMenuContent>
-                        </DropdownMenuPortal>
-                    </DropdownMenu>
-
-                    <Toggle
-                        title={t("Import marking types", {
-                            ns: "tooltip",
-                        })}
-                        size="icon"
-                        variant="outline"
-                        className="size-8"
-                        pressed={false}
-                        onClickCapture={async () => {
-                            await importMarkingTypesWithDialog();
-                            emitMarkingTypesChange();
-                        }}
-                    >
-                        <Download
-                            size={ICON.SIZE}
-                            strokeWidth={ICON.STROKE_WIDTH}
-                        />
-                    </Toggle>
-
-                    <Toggle
-                        title={t("Export marking types", {
-                            ns: "tooltip",
-                        })}
-                        size="icon"
-                        variant="outline"
-                        className="size-8"
-                        pressed={false}
-                        onClickCapture={() => exportMarkingTypesWithDialog()}
-                    >
-                        <Upload
-                            size={ICON.SIZE}
-                            strokeWidth={ICON.STROKE_WIDTH}
-                        />
-                    </Toggle>
-                </div>
-            </div>
+            <MarkingTypesToolbar
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+            />
 
             {selectedCategory !== undefined && conflictingKeys.size > 0 && (
                 <p className="text-sm text-destructive">
@@ -265,229 +42,16 @@ export function MarkingTypesSettings() {
             )}
 
             <div className="flex-1 overflow-auto">
-                {selectedCategory === undefined ? (
-                    <div className="flex flex-col items-center text-center gap-2 border border-dashed py-8 rounded-lg">
-                        <LayoutGrid className="size-12" />
-                        <p>
-                            {t("Select a working mode to view marking types")}
-                        </p>
-                    </div>
-                ) : (
-                    <table className="w-full">
-                        <thead className="sticky top-0 bg-card">
-                            <TableRow className={cn("bg-card border-b")}>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.displayName`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.name`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.markingClass`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.backgroundColor`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.textColor`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t(`MarkingType.Keys.size`, {
-                                        ns: "object",
-                                    })}
-                                </TableHead>
-                                <TableHead className="text-center text-card-foreground whitespace-nowrap">
-                                    {t("Keybinding", { ns: "keybindings" })}
-                                </TableHead>
-                                {IS_DEV_ENVIRONMENT && <TableHead />}
-                            </TableRow>
-                        </thead>
-                        <tbody>
-                            {types.length === 0 ? (
-                                <TableRow>
-                                    <TableCell
-                                        colSpan={8}
-                                        className="text-center py-8 text-muted-foreground"
-                                    >
-                                        {t(
-                                            "No marking types found for the selected working mode"
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                types.map(item => {
-                                    const itemBoundKey = keybindings.find(
-                                        k => k.typeId === item.id
-                                    )?.boundKey;
-                                    return (
-                                        <TableRow key={item.id}>
-                                            <TableCell>
-                                                <Input
-                                                    className="h-6 p-0! text-center"
-                                                    title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
-                                                    type="text"
-                                                    value={item.displayName}
-                                                    onChange={e => {
-                                                        setType(item.id, {
-                                                            displayName:
-                                                                e.target.value,
-                                                        });
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {IS_DEV_ENVIRONMENT ? (
-                                                    <Input
-                                                        className="h-6 p-0! text-center"
-                                                        title={`${t("MarkingType.Keys.name", { ns: "object" })}`}
-                                                        type="text"
-                                                        value={item.name}
-                                                        onChange={e => {
-                                                            setType(item.id, {
-                                                                name: e.target
-                                                                    .value,
-                                                            });
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <span className="p-1 cursor-default">
-                                                        {item.name}
-                                                    </span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell
-                                                className={cn(
-                                                    "p-1 cursor-default text-center"
-                                                )}
-                                            >
-                                                {t(
-                                                    `Marking.Keys.markingClass.Keys.${item.markingClass}`,
-                                                    {
-                                                        ns: "object",
-                                                    }
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Input
-                                                    className="size-6 cursor-pointer m-auto"
-                                                    title={`${t("MarkingType.Keys.backgroundColor", { ns: "object" })}`}
-                                                    type="color"
-                                                    value={
-                                                        item.backgroundColor as string
-                                                    }
-                                                    onChange={e => {
-                                                        setType(item.id, {
-                                                            backgroundColor:
-                                                                e.target.value,
-                                                        });
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Input
-                                                    className="size-6 cursor-pointer m-auto"
-                                                    title={`${t("MarkingType.Keys.textColor", { ns: "object" })}`}
-                                                    type="color"
-                                                    value={
-                                                        item.textColor as string
-                                                    }
-                                                    onChange={e => {
-                                                        setType(item.id, {
-                                                            textColor:
-                                                                e.target.value,
-                                                        });
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <Input
-                                                    className="w-24 h-6 p-0! text-center m-auto"
-                                                    min={6}
-                                                    max={32}
-                                                    width={12}
-                                                    title={`${t("MarkingType.Keys.size", { ns: "object" })}`}
-                                                    type="number"
-                                                    value={item.size}
-                                                    onChange={e => {
-                                                        setType(item.id, {
-                                                            size: Number(
-                                                                e.target.value
-                                                            ),
-                                                        });
-                                                    }}
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TypeKeybinding
-                                                    boundKey={itemBoundKey}
-                                                    workingMode={item.category}
-                                                    typeId={item.id}
-                                                    isConflict={
-                                                        !!itemBoundKey &&
-                                                        conflictingKeys.has(
-                                                            itemBoundKey
-                                                        )
-                                                    }
-                                                />
-                                            </TableCell>
-                                            {IS_DEV_ENVIRONMENT && (
-                                                <TableCell>
-                                                    <Toggle
-                                                        title={t("Remove")}
-                                                        className="m-auto"
-                                                        size="icon"
-                                                        variant="outline"
-                                                        pressed={false}
-                                                        disabled={
-                                                            MarkingTypesStore.actions.types.checkIfTypeIsInUse(
-                                                                item.id,
-                                                                CANVAS_ID.LEFT
-                                                            ) ||
-                                                            MarkingTypesStore.actions.types.checkIfTypeIsInUse(
-                                                                item.id,
-                                                                CANVAS_ID.RIGHT
-                                                            )
-                                                        }
-                                                        onClickCapture={() => {
-                                                            MarkingTypesStore.actions.types.removeById(
-                                                                item.id
-                                                            );
-
-                                                            KeybindingsStore.actions.typesKeybindings.remove(
-                                                                item.id,
-                                                                item.category
-                                                            );
-
-                                                            emitMarkingTypesChange();
-                                                        }}
-                                                    >
-                                                        <Trash2
-                                                            className="hover:text-destructive"
-                                                            size={ICON.SIZE}
-                                                            strokeWidth={
-                                                                ICON.STROKE_WIDTH
-                                                            }
-                                                        />
-                                                    </Toggle>
-                                                </TableCell>
-                                            )}
-                                        </TableRow>
-                                    );
-                                })
-                            )}
-                        </tbody>
-                    </table>
-                )}
+                <MarkingTypesTable
+                    selectedCategory={selectedCategory}
+                    types={types}
+                    keybindings={keybindings}
+                    conflictingKeys={conflictingKeys}
+                    sensors={sensors}
+                    onDragEnd={handleDragEnd}
+                    onRemove={handleRemove}
+                    setType={setType}
+                />
             </div>
         </div>
     );

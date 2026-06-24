@@ -24,6 +24,19 @@ const MEASUREMENT_TOOL_MARKING_TYPE: MarkingType = {
     category: "fingerprint" as MarkingType["category"],
 };
 
+export const AREA_TOOL_TYPE_ID = "__area__";
+
+const AREA_TOOL_MARKING_TYPE: MarkingType = {
+    id: AREA_TOOL_TYPE_ID,
+    name: "area-tool",
+    displayName: "Area",
+    markingClass: MARKING_CLASS.POLYGON,
+    backgroundColor: "#00e5ff",
+    textColor: "#00e5ff",
+    size: 5,
+    category: "fingerprint" as MarkingType["category"],
+};
+
 export type MarkingsProps = {
     markings: MarkingClass[];
     canvasId: CANVAS_ID;
@@ -83,6 +96,8 @@ export const Markings = memo(
                     let markingType: MarkingType | undefined;
                     if (marking.typeId === MEASUREMENT_TOOL_TYPE_ID) {
                         markingType = MEASUREMENT_TOOL_MARKING_TYPE;
+                    } else if (marking.typeId === AREA_TOOL_TYPE_ID) {
+                        markingType = AREA_TOOL_MARKING_TYPE;
                     } else {
                         markingType = markingTypes.find(
                             t => t.id === marking.typeId
