@@ -650,7 +650,7 @@ export function EditWindow() {
                 className={cn(
                     "flex justify-between w-screen items-center",
                     IS_MACOS
-                        ? "h-9 pt-3 [&_button]:h-7 [&_button]:px-2"
+                        ? "min-h-14 [&_button]:h-7 [&_button]:px-2"
                         : "min-h-14"
                 )}
                 data-tauri-drag-region

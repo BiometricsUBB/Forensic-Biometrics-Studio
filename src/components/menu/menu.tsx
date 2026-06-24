@@ -15,9 +15,7 @@ export function Menu() {
         <Menubar
             className={cn(
                 "flex justify-between w-screen items-center",
-                IS_MACOS
-                    ? "h-8 pt-3 [&_button]:h-7 [&_button]:px-2"
-                    : "min-h-10"
+                IS_MACOS ? "h-10 [&_button]:h-7 [&_button]:px-2" : "min-h-10"
             )}
             data-tauri-drag-region
         >
