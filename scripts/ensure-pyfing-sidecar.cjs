@@ -1,7 +1,7 @@
 // Idempotent: ensures src-tauri/bin/pyfing_enhance.exe exists.
 // If missing, runs build-pyfing-sidecar.cjs to build it.
 //
-// Used as a pre-build step so `pnpm tauri build` "just works" on a fresh clone.
+// Used as a pre-build step so `bun run tauri build` "just works" on a fresh clone.
 
 const fs = require("fs");
 const path = require("path");

@@ -1,7 +1,7 @@
 // Build PyInstaller sidecar for pyfing_enhance using uv.
 // Works on Windows, macOS (Intel + Apple Silicon) and Linux.
 //
-// Usage: pnpm sidecar:build:pyfing
+// Usage: bun run sidecar:build:pyfing
 //
 // Steps:
 //  1. Detect Rust target triple via `rustc -vV` (host: ...).
