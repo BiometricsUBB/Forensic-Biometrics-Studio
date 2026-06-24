@@ -1,12 +1,7 @@
+import i18n from "@/lib/locales/i18n";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { clamp, toBlobBytes } from "../report-utils";
-import {
-    Side,
-    Placement,
-    Bounds,
-    FULL_CIRCLE,
-    CANVAS_CONTEXT_ERROR,
-} from "./types";
+import { Side, Placement, Bounds, FULL_CIRCLE } from "./types";
 
 const getFeatureBounds = (
     features: MarkingClass[],
@@ -447,7 +442,8 @@ export const createOverviewCalloutImage = async (
     canvas.width = width + margin * 2;
     canvas.height = height + margin * 2;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
+    if (!ctx)
+        throw new Error(i18n.t("Canvas context error", { ns: "report" }));
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, margin, margin);

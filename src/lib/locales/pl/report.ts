@@ -57,6 +57,14 @@ const d: Dictionary = {
         "Cechy grupowe o znaczeniu klasyfikacyjnym",
     "Shoeprint feature type prefix": "Cechy typu:",
     "Shoeprint no unique features": "Brak cech unikalnych.",
+    "Earprint report title":
+        "Raport techniczny porównania obrazów śladów uszu",
+    "Earprint paired features count":
+        "Liczba sparowanych cech (po etykiecie):",
+    "Earprint feature characteristics": "Charakterystyka cechy",
+    "Earprint attribute": "Atrybut",
+    "Earprint no features": "Nie znaleziono sparowanych cech.",
+    "Canvas context error": "Nie udało się utworzyć kontekstu canvas.",
 };
 
 export default d;

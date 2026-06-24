@@ -3,8 +3,12 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { drawMarking } from "@/components/pixi/overlays/markings/marking.utils";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
-import { clamp, toBlobBytes, sha256Bytes } from "../report-utils";
-import { ImageMeta, CANVAS_CONTEXT_ERROR } from "./types";
+import i18n from "@/lib/locales/i18n";
+import { clamp, toBlobBytes, md5Bytes } from "../report-utils";
+import { ImageMeta } from "./types";
+
+const canvasContextError = () =>
+    new Error(i18n.t("Canvas context error", { ns: "report" }));
 
 export const getSpritePath = (sprite: PIXI.Sprite): string | null => {
     // @ts-expect-error custom property
@@ -21,7 +25,7 @@ export const getImageMeta = async (sprite: PIXI.Sprite): Promise<ImageMeta> => {
         width: bitmap.width,
         height: bitmap.height,
         sizeBytes: bytes.byteLength,
-        checksum: await sha256Bytes(bytes),
+        checksum: md5Bytes(bytes),
         bytes,
     };
 };
@@ -92,7 +96,7 @@ export const cropCanvas = (
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
+    if (!ctx) throw canvasContextError();
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, size, size);
     const half = size / 2;

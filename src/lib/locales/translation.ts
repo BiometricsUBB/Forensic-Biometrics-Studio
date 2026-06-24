@@ -368,4 +368,10 @@ export type i18nReport = Recordify<
     | "Shoeprint group features title"
     | "Shoeprint feature type prefix"
     | "Shoeprint no unique features"
+    | "Earprint report title"
+    | "Earprint paired features count"
+    | "Earprint feature characteristics"
+    | "Earprint attribute"
+    | "Earprint no features"
+    | "Canvas context error"
 >;

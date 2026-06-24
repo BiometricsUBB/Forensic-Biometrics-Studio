@@ -32,8 +32,9 @@ import {
     DropdownMenuPortal,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ReportDialog } from "@/components/dialogs/report/report-dialog";
+import { ReportFingerprintDialog } from "@/components/dialogs/report/report-fingerprint-dialog";
 import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
+import { ReportEarprintDialog } from "@/components/dialogs/report/report-earprint-dialog";
 import { WORKING_MODE } from "@/views/selectMode";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
@@ -501,8 +502,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
 
                     {workingMode === WORKING_MODE.SHOEPRINT ? (
                         <ReportShoeprintDialog />
+                    ) : workingMode === WORKING_MODE.EAR ? (
+                        <ReportEarprintDialog />
                     ) : (
-                        <ReportDialog />
+                        <ReportFingerprintDialog />
                     )}
 
                     <Toggle

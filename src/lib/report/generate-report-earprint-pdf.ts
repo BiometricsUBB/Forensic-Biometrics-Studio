@@ -20,17 +20,7 @@ import {
     toDataUrl,
     md5String,
 } from "./report-utils";
-
-// Shoeprint submodules
-import {
-    type ShoeprintReportGenerationOptions,
-    PREFIX_PATTERN,
-    PREFIX_GROUP,
-    PREFIX_UNIQUE,
-    UNIQUE_ROWS_PER_PAGE,
-    IMAGE_CELL_SIZE,
-    OVERVIEW_CHUNK_SIZE,
-} from "./shoeprint/types";
+import { IMAGE_CELL_SIZE } from "./shared/types";
 import {
     getImageMeta,
     renderImageWithMarkings,
@@ -48,14 +38,38 @@ import {
     createReportRoot,
     createStyles,
     createFigurePage,
-    createCategoryPages,
-    groupPairedByPrefix,
     ensureImagesLoaded,
-} from "./shoeprint/page-builders";
+} from "./shared/page-builders";
+import { resolveMetadataComparison } from "./shared/resolve-marking-metadata";
 
-const getTypePrefix = (displayName: string): string => {
-    const match = displayName.match(/^([A-Z]+):/);
-    return match ? `${match[1]}:` : "";
+export type EarprintReportGenerationOptions = {
+    reportDateTime: string;
+    reportLanguage?: string;
+    performedBy: string;
+    department: string;
+    addressLines: string[];
+    reportTitle?: string;
+    calloutColor?: "red" | "green";
+};
+
+const OVERVIEW_CHUNK_SIZE = 32;
+
+const createEarprintStyles = () => {
+    const style = document.createElement("style");
+    style.textContent = `
+        .ear-feature-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+        .ear-feature-label { font-size: 20px; font-weight: 700; }
+        .ear-feature-type { font-size: 11px; color: #333; }
+        .ear-crops { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+        .ear-crop-col { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+        .ear-crop-img { width: 240px; height: 240px; object-fit: cover; border: 1px solid #ddd; }
+        .meta-table { table-layout: fixed; width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 4px; }
+        .meta-table th { border: 1px solid #ccc; padding: 4px 6px; background: #f0f0f0; font-weight: 700; text-align: left; }
+        .meta-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+        .meta-table th:first-child, .meta-table td:first-child { width: 44%; font-weight: 600; }
+        .meta-empty { font-size: 11px; color: #777; margin-top: 6px; }
+    `;
+    return style;
 };
 
 const getSystemId = async () => {
@@ -67,11 +81,8 @@ const getSystemId = async () => {
     }
 };
 
-// ─── Main export ──────────────────────────────────────────────────────────────
-
-/* eslint-disable sonarjs/cognitive-complexity */
-export const generateShoeprintReportPdfWithDialog = async (
-    options: ShoeprintReportGenerationOptions
+export const generateEarprintReportPdfWithDialog = async (
+    options: EarprintReportGenerationOptions
 ) => {
     let stage = "init";
     const previousLanguage = i18n.language;
@@ -79,9 +90,9 @@ export const generateShoeprintReportPdfWithDialog = async (
     try {
         stage = "check-working-mode";
         const { workingMode } = WorkingModeStore.state;
-        if (workingMode !== WORKING_MODE.SHOEPRINT) {
+        if (workingMode !== WORKING_MODE.EAR) {
             throw new Error(
-                "Report generation is available only for shoeprints."
+                "Report generation is available only for earprints."
             );
         }
 
@@ -124,34 +135,6 @@ export const generateShoeprintReportPdfWithDialog = async (
 
         const paired = getPairedByLabel(markingsLeft, markingsRight);
 
-        const reportPaired = paired.filter(p => {
-            const type = markingTypes.find(t => t.id === p.left.typeId);
-            if (!type) return false;
-            const dn = type.displayName ?? type.name ?? "";
-            const prefix = getTypePrefix(dn);
-            return (
-                prefix === PREFIX_PATTERN ||
-                prefix === PREFIX_GROUP ||
-                prefix === PREFIX_UNIQUE
-            );
-        });
-
-        const patternGrouped = groupPairedByPrefix(
-            reportPaired,
-            markingTypes,
-            PREFIX_PATTERN
-        );
-        const groupGrouped = groupPairedByPrefix(
-            reportPaired,
-            markingTypes,
-            PREFIX_GROUP
-        );
-        const uniquePaired = reportPaired.filter(p => {
-            const type = markingTypes.find(t => t.id === p.left.typeId);
-            const dn = type?.displayName ?? type?.name ?? "";
-            return getTypePrefix(dn) === PREFIX_UNIQUE;
-        });
-
         stage = "read-image-meta";
         const leftMeta = await getImageMeta(leftSprite);
         const rightMeta = await getImageMeta(rightSprite);
@@ -161,110 +144,71 @@ export const generateShoeprintReportPdfWithDialog = async (
         const rightOriginal = await toDataUrl(rightMeta.bytes, rightMeta.name);
 
         stage = "render-overlays";
-        const leftAllCanvas = await renderImageWithMarkings(
-            leftMeta.bytes,
-            markingsLeft,
-            markingTypes,
-            1.6,
-            { showMarkingLabels: true }
-        );
-        const rightAllCanvas = await renderImageWithMarkings(
-            rightMeta.bytes,
-            markingsRight,
-            markingTypes,
-            1.6,
-            { showMarkingLabels: true }
-        );
-
-        stage = "unique-crops";
-
-        const [leftOrigCanvas, rightOrigCanvas] = await Promise.all([
-            renderImageWithMarkings(leftMeta.bytes, [], markingTypes, 1.6),
-            renderImageWithMarkings(rightMeta.bytes, [], markingTypes, 1.6),
+        const [leftAllCanvas, rightAllCanvas] = await Promise.all([
+            renderImageWithMarkings(leftMeta.bytes, markingsLeft, markingTypes, 1.6, {
+                showMarkingLabels: true,
+            }),
+            renderImageWithMarkings(
+                rightMeta.bytes,
+                markingsRight,
+                markingTypes,
+                1.6,
+                { showMarkingLabels: true }
+            ),
         ]);
 
+        stage = "feature-crops";
         const BATCH_SIZE = 4;
-        const uniqueCrops: Array<{
-            leftWith: string;
-            rightWith: string;
-            leftOrig: string;
-            rightOrig: string;
-        }> = [];
-
-        for (let i = 0; i < uniquePaired.length; i += BATCH_SIZE) {
-            const batch = uniquePaired.slice(i, i + BATCH_SIZE);
-            // eslint-disable-next-line no-await-in-loop
+        const featureCrops: Array<{ left: string; right: string }> = [];
+        for (let i = 0; i < paired.length; i += BATCH_SIZE) {
+            const batch = paired.slice(i, i + BATCH_SIZE);
             const batchResults = await Promise.all(
                 batch.map(async feature => {
-                    const [leftWithCanvas, rightWithCanvas] = await Promise.all(
-                        [
-                            renderImageWithMarkings(
-                                leftMeta.bytes,
-                                [feature.left],
-                                markingTypes,
-                                1.6,
-                                {
-                                    showMarkingLabels: false,
-                                    markingsAlpha: 0.45,
-                                }
-                            ),
-                            renderImageWithMarkings(
-                                rightMeta.bytes,
-                                [feature.right],
-                                markingTypes,
-                                1.6,
-                                {
-                                    showMarkingLabels: false,
-                                    markingsAlpha: 0.45,
-                                }
-                            ),
-                        ]
-                    );
-
+                    const [leftWithCanvas, rightWithCanvas] = await Promise.all([
+                        renderImageWithMarkings(
+                            leftMeta.bytes,
+                            [feature.left],
+                            markingTypes,
+                            1.6,
+                            { showMarkingLabels: false, markingsAlpha: 0.5 }
+                        ),
+                        renderImageWithMarkings(
+                            rightMeta.bytes,
+                            [feature.right],
+                            markingTypes,
+                            1.6,
+                            { showMarkingLabels: false, markingsAlpha: 0.5 }
+                        ),
+                    ]);
                     const leftCenter = getMarkingCenter(feature.left);
                     const rightCenter = getMarkingCenter(feature.right);
-                    const leftExtent = getMarkingExtent(feature.left);
-                    const rightExtent = getMarkingExtent(feature.right);
-                    const maxExtent = Math.max(leftExtent, rightExtent);
-                    const targetSize = Math.max(
-                        60,
-                        Math.min(IMAGE_CELL_SIZE, Math.round(maxExtent / 0.7))
+                    const maxExtent = Math.max(
+                        getMarkingExtent(feature.left),
+                        getMarkingExtent(feature.right)
                     );
-
-                    const leftWith = cropCanvas(
+                    const targetSize = Math.max(
+                        80,
+                        Math.min(IMAGE_CELL_SIZE * 1.4, Math.round(maxExtent / 0.6))
+                    );
+                    const leftCrop = cropCanvas(
                         leftWithCanvas,
                         leftCenter.x,
                         leftCenter.y,
                         targetSize
                     );
-                    const rightWith = cropCanvas(
+                    const rightCrop = cropCanvas(
                         rightWithCanvas,
                         rightCenter.x,
                         rightCenter.y,
                         targetSize
                     );
-                    const leftOrig = cropCanvas(
-                        leftOrigCanvas,
-                        leftCenter.x,
-                        leftCenter.y,
-                        targetSize
-                    );
-                    const rightOrig = cropCanvas(
-                        rightOrigCanvas,
-                        rightCenter.x,
-                        rightCenter.y,
-                        targetSize
-                    );
-
                     return {
-                        leftWith: leftWith.toDataURL("image/png"),
-                        rightWith: rightWith.toDataURL("image/png"),
-                        leftOrig: leftOrig.toDataURL("image/png"),
-                        rightOrig: rightOrig.toDataURL("image/png"),
+                        left: leftCrop.toDataURL("image/png"),
+                        right: rightCrop.toDataURL("image/png"),
                     };
                 })
             );
-            uniqueCrops.push(...batchResults);
+            featureCrops.push(...batchResults);
         }
 
         stage = "report-metadata";
@@ -272,15 +216,16 @@ export const generateShoeprintReportPdfWithDialog = async (
         const reportDateTime =
             options.reportDateTime?.trim() || formatReportDateTime(new Date());
         const systemId = await getSystemId();
-        const reportIdInput = [
-            reportDateTime,
-            leftMeta.sizeBytes,
-            leftMeta.checksum,
-            rightMeta.sizeBytes,
-            rightMeta.checksum,
-            systemId,
-        ].join("|");
-        const reportId = md5String(reportIdInput);
+        const reportId = md5String(
+            [
+                reportDateTime,
+                leftMeta.sizeBytes,
+                leftMeta.checksum,
+                rightMeta.sizeBytes,
+                rightMeta.checksum,
+                systemId,
+            ].join("|")
+        );
 
         const performedBy =
             options.performedBy?.trim() || reportSettings?.performedBy || "-";
@@ -295,44 +240,42 @@ export const generateShoeprintReportPdfWithDialog = async (
             .map(line => line?.trim())
             .filter(Boolean) as string[];
         const addressLines =
-            options.addressLines?.map(line => line.trim()).filter(Boolean) ??
-            [];
-        const address =
-            addressLines.length > 0 ? addressLines : addressFallback;
+            options.addressLines?.map(line => line.trim()).filter(Boolean) ?? [];
+        const address = addressLines.length > 0 ? addressLines : addressFallback;
+        const addressHtml =
+            address.length > 0
+                ? address.map(line => `<div>${escapeHtml(line)}</div>`).join("")
+                : "<div>-</div>";
 
         const appVersion = await getVersion();
 
         stage = "build-dom";
         const root = createReportRoot();
         root.appendChild(createStyles());
-
-        const addressHtml =
-            address.length > 0
-                ? address.map(line => `<div>${escapeHtml(line)}</div>`).join("")
-                : "<div>-</div>";
+        root.appendChild(createEarprintStyles());
 
         const page1 = createPage();
         page1.innerHTML = `
-        <div class="report-title">${escapeHtml(options.reportTitle?.trim() || tReport("Shoeprint report title"))}</div>
-    
+        <div class="report-title">${escapeHtml(options.reportTitle?.trim() || tReport("Earprint report title"))}</div>
+
         <div class="meta-block">
             <div class="meta-row"><span class="meta-label">${tReport("Report ID label")}</span><span>${reportId}</span></div>
             <div class="meta-row"><span class="meta-label">${tReport("Report date and time label")}</span><span>${reportDateTime}</span></div>
         </div>
-    
+
         <div class="meta-block">
             <div style="font-weight:700;font-size:11px;margin-bottom:3px;">${tReport("Performed by label")}</div>
             <div style="font-size:11px;">${escapeHtml(performedBy)}</div>
             <div style="font-size:11px;">${escapeHtml(department)}</div>
             ${addressHtml}
         </div>
-    
+
         <div class="section-title">${tReport("Software information")}</div>
         <div class="software-grid">
-            <div class="software-row"><span class="software-label">${tReport("Application name")}</span><span>Biometrics-Studio</span></div>
+            <div class="software-row"><span class="software-label">${tReport("Application name")}</span><span>Forensic Biometrics Studio</span></div>
             <div class="software-row"><span class="software-label">${tReport("Application version")}</span><span>${appVersion}</span></div>
         </div>
-    
+
         <div class="section-title">${tReport("Input material")}</div>
         <div class="input-stack">
             <div class="input-block-title">${tReport("Image 1")}:</div>
@@ -350,20 +293,19 @@ export const generateShoeprintReportPdfWithDialog = async (
         </div>
 
         <div class="counts">
-            <div class="input-row"><span class="input-label">${tReport("Shoeprint paired features count")}</span><span>${reportPaired.length}</span></div>
+            <div class="input-row"><span class="input-label">${tReport("Earprint paired features count")}</span><span>${paired.length}</span></div>
         </div>
-    
+
         <div class="note">
             <div class="note-title">${tReport("Note title")}</div>
             <div>${tReport("Note body")}</div>
         </div>
-    
+
         ${createFooter(1, reportId, tReport)}
         `;
 
         const pages: HTMLElement[] = [page1];
 
-        // Pages 2-5: Fig 1-4
         pages.push(
             createFigurePage(
                 tReport("Figure 1"),
@@ -386,7 +328,7 @@ export const generateShoeprintReportPdfWithDialog = async (
         );
         pages.push(
             createFigurePage(
-                tReport("Shoeprint figure 3"),
+                tReport("Figure 3"),
                 rightOriginal,
                 tReport("Image 2 label"),
                 4,
@@ -396,7 +338,7 @@ export const generateShoeprintReportPdfWithDialog = async (
         );
         pages.push(
             createFigurePage(
-                tReport("Shoeprint figure 4"),
+                tReport("Figure 4"),
                 rightAllCanvas.toDataURL("image/png"),
                 tReport("Image 2 label"),
                 5,
@@ -405,54 +347,35 @@ export const generateShoeprintReportPdfWithDialog = async (
             )
         );
 
-        // P: pages - one page per type
-        const patternPages = await createCategoryPages(
-            patternGrouped,
-            leftMeta,
-            rightMeta,
-            markingTypes,
-            tReport("Shoeprint pattern features title"),
-            pages.length + 1,
-            reportId,
-            tReport
-        );
-        patternPages.forEach(p => pages.push(p));
-
-        // G: pages - one page per type
-        const groupPages = await createCategoryPages(
-            groupGrouped,
-            leftMeta,
-            rightMeta,
-            markingTypes,
-            tReport("Shoeprint group features title"),
-            pages.length + 1,
-            reportId,
-            tReport
-        );
-        groupPages.forEach(p => pages.push(p));
-
-        // U: overview pages (chunked to max OVERVIEW_CHUNK_SIZE per page)
-        if (uniquePaired.length > 0) {
+        if (paired.length === 0) {
+            const noFeaturesPage = createPage();
+            noFeaturesPage.innerHTML = `
+                <div class="section-title">${tReport("Comparative table overview")}</div>
+                <div style="font-size:12px; margin-top: 16px;">${tReport("Earprint no features")}</div>
+                ${createFooter(pages.length + 1, reportId, tReport)}
+            `;
+            pages.push(noFeaturesPage);
+        } else {
             const calloutColor =
-                options.uniqueColor === "green" ? "#2ecc71" : "#cc0000";
+                options.calloutColor === "green" ? "#2ecc71" : "#cc0000";
 
-            for (let i = 0; i < uniquePaired.length; i += OVERVIEW_CHUNK_SIZE) {
-                const chunk = uniquePaired.slice(i, i + OVERVIEW_CHUNK_SIZE);
-                // eslint-disable-next-line no-await-in-loop
-                const leftOverview = await createOverviewCalloutImage(
-                    leftMeta.bytes,
-                    chunk.map(x => x.left),
-                    calloutColor
-                );
-                // eslint-disable-next-line no-await-in-loop
-                const rightOverview = await createOverviewCalloutImage(
-                    rightMeta.bytes,
-                    chunk.map(x => x.right),
-                    calloutColor
-                );
+            for (let i = 0; i < paired.length; i += OVERVIEW_CHUNK_SIZE) {
+                const chunk = paired.slice(i, i + OVERVIEW_CHUNK_SIZE);
+                    const [leftOverview, rightOverview] = await Promise.all([
+                    createOverviewCalloutImage(
+                        leftMeta.bytes,
+                        chunk.map(x => x.left),
+                        calloutColor
+                    ),
+                    createOverviewCalloutImage(
+                        rightMeta.bytes,
+                        chunk.map(x => x.right),
+                        calloutColor
+                    ),
+                ]);
                 const overviewPage = createPage();
                 overviewPage.innerHTML = `
-                    <div class="category-title">${tReport("Shoeprint comparative table overview")}</div>
+                    <div class="category-title">${tReport("Comparative table overview")}</div>
                     <div class="overview-grid">
                         <div class="fig"><img src="${leftOverview}" /></div>
                         <div class="fig"><img src="${rightOverview}" /></div>
@@ -462,37 +385,7 @@ export const generateShoeprintReportPdfWithDialog = async (
                 pages.push(overviewPage);
             }
 
-            const detailsStartIndex = pages.length;
-            uniquePaired.forEach((feature, idx) => {
-                const pageIndex = Math.floor(idx / UNIQUE_ROWS_PER_PAGE);
-                const targetIndex = detailsStartIndex + pageIndex;
-                // eslint-disable-next-line security/detect-object-injection
-                if (!pages[targetIndex]) {
-                    const page = createPage();
-                    page.innerHTML = `
-                        <div class="section-title">${tReport("Shoeprint comparative table details")}</div>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>${tReport("Feature")}</th>
-                                    <th>${tReport("Image 1")}</th>
-                                    <th>${tReport("Image 2")}</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        ${createFooter(targetIndex + 1, reportId, tReport)}
-                    `;
-                    // eslint-disable-next-line security/detect-object-injection
-                    pages[targetIndex] = page;
-                }
-
-                // eslint-disable-next-line security/detect-object-injection
-                const tableBody = pages[targetIndex].querySelector(
-                    "tbody"
-                ) as HTMLTableSectionElement | null;
-                if (!tableBody) return;
-
+            paired.forEach((feature, idx) => {
                 const featureTypeDefinition = markingTypes.find(
                     t => t.id === feature.left.typeId
                 );
@@ -504,40 +397,62 @@ export const generateShoeprintReportPdfWithDialog = async (
                     featureTypeDefinition?.backgroundColor,
                     "#c0392b"
                 );
-                // eslint-disable-next-line security/detect-object-injection
-                const crop = uniqueCrops[idx];
-                if (!crop) return;
+                const crop = featureCrops[idx];
+                const comparison = resolveMetadataComparison(
+                    feature.left,
+                    feature.right,
+                    featureTypeDefinition
+                );
 
-                // Row 1: with marking overlay
-                const row1 = document.createElement("tr");
-                row1.innerHTML = `
-                    <td rowspan="2">
-                        <div class="feature-cell">
-                            <div class="feature-label" style="color: ${markerRing};">${escapeHtml(String(feature.left.label))}</div>
-                            <div class="feature-type">${tReport("Feature type")}:<br/><strong>${escapeHtml(featureType)}</strong></div>
+                const metaTableHtml =
+                    comparison.length > 0
+                        ? `
+                        <table class="meta-table">
+                            <thead>
+                                <tr>
+                                    <th>${tReport("Earprint attribute")}</th>
+                                    <th>${tReport("Image 1")}</th>
+                                    <th>${tReport("Image 2")}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${comparison
+                                    .map(
+                                        row => `
+                                    <tr>
+                                        <td>${escapeHtml(row.fieldLabel)}</td>
+                                        <td>${escapeHtml(row.leftLabel)}</td>
+                                        <td>${escapeHtml(row.rightLabel)}</td>
+                                    </tr>`
+                                    )
+                                    .join("")}
+                            </tbody>
+                        </table>`
+                        : `<div class="meta-empty">${tReport("Earprint no features")}</div>`;
+
+                const page = createPage();
+                page.innerHTML = `
+                    <div class="section-title">${tReport("Comparative table details")}</div>
+                    <div class="ear-feature-head">
+                        <span class="ear-feature-label" style="color:${markerRing};">${escapeHtml(String(feature.left.label))}</span>
+                        <span class="ear-feature-type">${tReport("Feature type")} <strong>${escapeHtml(featureType)}</strong></span>
+                    </div>
+                    <div class="ear-crops">
+                        <div class="ear-crop-col">
+                            <div class="img-label">${tReport("Image 1")}</div>
+                            ${crop ? `<img class="ear-crop-img" src="${crop.left}" />` : ""}
                         </div>
-                    </td>
-                    <td><img class="feature-image" src="${crop.leftWith}" /></td>
-                    <td><img class="feature-image" src="${crop.rightWith}" /></td>
+                        <div class="ear-crop-col">
+                            <div class="img-label">${tReport("Image 2")}</div>
+                            ${crop ? `<img class="ear-crop-img" src="${crop.right}" />` : ""}
+                        </div>
+                    </div>
+                    <div class="section-title">${tReport("Earprint feature characteristics")}</div>
+                    ${metaTableHtml}
+                    ${createFooter(pages.length + 1, reportId, tReport)}
                 `;
-                tableBody.appendChild(row1);
-
-                // Row 2: original without marking
-                const row2 = document.createElement("tr");
-                row2.innerHTML = `
-                    <td><img class="feature-image" src="${crop.leftOrig}" /></td>
-                    <td><img class="feature-image" src="${crop.rightOrig}" /></td>
-                `;
-                tableBody.appendChild(row2);
+                pages.push(page);
             });
-        } else {
-            const noUniquePage = createPage();
-            noUniquePage.innerHTML = `
-                <div class="section-title">${tReport("Shoeprint comparative table overview")}</div>
-                <div style="font-size:12px; margin-top: 16px;">${tReport("Shoeprint no unique features")}</div>
-                ${createFooter(pages.length + 1, reportId, tReport)}
-            `;
-            pages.push(noUniquePage);
         }
 
         pages.forEach(page => root.appendChild(page));
@@ -578,7 +493,7 @@ export const generateShoeprintReportPdfWithDialog = async (
                 title: tKeywords("Generate report"),
                 filters: [{ name: "PDF", extensions: ["pdf"] }],
                 canCreateDirectories: true,
-                defaultPath: `shoeprint-report-${reportId}.pdf`,
+                defaultPath: `earprint-report-${reportId}.pdf`,
             });
             if (!filePath) return;
             await writeFile(filePath, pdfBytes);
@@ -590,14 +505,9 @@ export const generateShoeprintReportPdfWithDialog = async (
         }
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        // eslint-disable-next-line no-console
-        console.error(
-            `[shoeprint-report] failed at ${stage}: ${message}`,
-            error
-        );
-        throw new Error(`Shoeprint report failed at ${stage}: ${message}`, {
+        console.error(`[earprint-report] failed at ${stage}: ${message}`, error);
+        throw new Error(`Earprint report failed at ${stage}: ${message}`, {
             cause: error,
         });
     }
 };
-/* eslint-enable sonarjs/cognitive-complexity */

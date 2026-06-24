@@ -55,6 +55,13 @@ const d: Dictionary = {
         "Group features of classificatory significance",
     "Shoeprint feature type prefix": "Feature type:",
     "Shoeprint no unique features": "No unique features found.",
+    "Earprint report title":
+        "Technical report of forensic earprint image comparison",
+    "Earprint paired features count": "Number of paired features (by label):",
+    "Earprint feature characteristics": "Feature characteristics",
+    "Earprint attribute": "Attribute",
+    "Earprint no features": "No paired features found.",
+    "Canvas context error": "Failed to create canvas context.",
 };
 
 export default d;

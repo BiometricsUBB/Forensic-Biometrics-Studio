@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Dialog,
     DialogClose,
@@ -20,25 +20,23 @@ import { WorkingModeStore } from "@/lib/stores/WorkingMode";
 import { WORKING_MODE } from "@/views/selectMode";
 import {
     formatReportDateTime,
-    getMatchedFeatures,
     getPairedByLabel,
 } from "@/lib/report/report-utils";
-import { generateReportPdfWithDialog } from "@/lib/report/generate-report-pdf";
+import { generateEarprintReportPdfWithDialog } from "@/lib/report/generate-report-earprint-pdf";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils/shadcn";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
 import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
 import i18n from "@/lib/locales/i18n";
 
-type ReportDialogProps = {
+type ReportEarprintDialogProps = {
     className?: string;
 };
 
-export function ReportDialog({ className }: ReportDialogProps) {
-    const { t } = useTranslation();
+export function ReportEarprintDialog({ className }: ReportEarprintDialogProps) {
+    const { t } = useTranslation("keywords");
     const [isOpen, setIsOpen] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
-    const [includeMatchedOnly, setIncludeMatchedOnly] = useState(true);
 
     const reportDefaults = GlobalSettingsStore.use(
         state => state.settings.report
@@ -54,6 +52,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
     const [addressLine3, setAddressLine3] = useState("");
     const [addressLine4, setAddressLine4] = useState("");
     const [reportLanguage, setReportLanguage] = useState(i18n.language);
+    const [reportTitle, setReportTitle] = useState("");
 
     useEffect(() => {
         if (!isOpen) return;
@@ -65,49 +64,35 @@ export function ReportDialog({ className }: ReportDialogProps) {
         setAddressLine3(reportDefaults?.addressLine3 ?? "");
         setAddressLine4(reportDefaults?.addressLine4 ?? "");
         setReportLanguage(i18n.language);
+        setReportTitle(t("Earprint report title", { ns: "report" }));
     }, [isOpen, reportDefaults]);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
-    const leftCount = MarkingsStore(CANVAS_ID.LEFT).use(
-        state => state.markings.length
+    const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).use(
+        state => state.markings
     );
-    const rightCount = MarkingsStore(CANVAS_ID.RIGHT).use(
-        state => state.markings.length
+    const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).use(
+        state => state.markings
     );
+    const leftCount = markingsLeft.length;
+    const rightCount = markingsRight.length;
+    const pairedCount = getPairedByLabel(markingsLeft, markingsRight).length;
 
-    const matchedFeatures = useMemo(() => {
-        const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
-        return getMatchedFeatures(left, right);
-        // oxlint-disable-next-line react-hooks/exhaustive-deps -- counts gate re-memo, body reads via store.state
-    }, [leftCount, rightCount]);
-
-    const pairedFeatures = useMemo(() => {
-        const left = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const right = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
-        return getPairedByLabel(left, right);
-        // oxlint-disable-next-line react-hooks/exhaustive-deps -- counts gate re-memo, body reads via store.state
-    }, [leftCount, rightCount]);
-
-    const selectedCount = includeMatchedOnly
-        ? matchedFeatures.length
-        : pairedFeatures.length;
     const generateReportLabel = t("Generate report", { ns: "keywords" });
 
     const canGenerate =
-        workingMode === WORKING_MODE.FINGERPRINT &&
+        workingMode === WORKING_MODE.EAR &&
         leftCount > 0 &&
-        rightCount > 0;
+        rightCount > 0 &&
+        pairedCount > 0;
 
     const onGenerate = async () => {
         if (!canGenerate) return;
         try {
             setIsGenerating(true);
-            const now = new Date();
-            const timestamp = formatReportDateTime(now);
+            const timestamp = formatReportDateTime(new Date());
             setReportDateTime(timestamp);
-            await generateReportPdfWithDialog({
-                includeMatchedOnly,
+            await generateEarprintReportPdfWithDialog({
                 reportDateTime: timestamp,
                 reportLanguage,
                 performedBy: performedBy.trim(),
@@ -118,6 +103,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                     addressLine3.trim(),
                     addressLine4.trim(),
                 ],
+                reportTitle: reportTitle.trim() || undefined,
             });
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
@@ -125,10 +111,10 @@ export function ReportDialog({ className }: ReportDialogProps) {
             console.error(error);
             const message =
                 error instanceof Error ? error.message : String(error);
-            toast.error(
-                `${t("Failed to generate report", { ns: "tooltip" })}: ${message}`
+            showErrorDialog(
+                `${t("Failed to generate report", { ns: "tooltip" })}: ${message}`,
+                "error"
             );
-            showErrorDialog(message, "error");
         } finally {
             setIsGenerating(false);
         }
@@ -148,7 +134,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
                 title={generateReportLabel}
             >
                 <FileText
-                    className="shrink-0"
+                    className="flex-shrink-0"
                     size={ICON.SIZE}
                     strokeWidth={ICON.STROKE_WIDTH}
                 />
@@ -159,7 +145,7 @@ export function ReportDialog({ className }: ReportDialogProps) {
 
             <DialogPortal>
                 <DialogOverlay />
-                <DialogContent className="w-160 max-w-[92vw] max-h-[90vh] flex flex-col">
+                <DialogContent className="w-[640px] max-w-[92vw] max-h-[90vh] flex flex-col">
                     <DialogTitle className="text-lg font-semibold">
                         {t("Report generation", { ns: "keywords" })}
                     </DialogTitle>
@@ -171,44 +157,49 @@ export function ReportDialog({ className }: ReportDialogProps) {
                         <div className="grid gap-3">
                             <div className="grid gap-1 text-sm">
                                 <div>
-                                    {t("Matched features", { ns: "keywords" })}:{" "}
-                                    <strong>{matchedFeatures.length}</strong>
+                                    {t("Image 1", { ns: "report" })}:{" "}
+                                    <strong>{leftCount}</strong>
                                 </div>
                                 <div>
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : <strong>{selectedCount}</strong>
+                                    {t("Image 2", { ns: "report" })}:{" "}
+                                    <strong>{rightCount}</strong>
                                 </div>
-                                <div className="text-xs text-muted-foreground">
-                                    {t("Selected features", { ns: "keywords" })}
-                                    : {selectedCount}
+                                <div>
+                                    {t("Earprint paired features count", {
+                                        ns: "report",
+                                    })}{" "}
+                                    <strong>{pairedCount}</strong>
                                 </div>
                             </div>
-
-                            <label
-                                htmlFor="include-matched-only"
-                                className="flex items-center gap-2 text-sm"
-                            >
-                                <input
-                                    id="include-matched-only"
-                                    type="checkbox"
-                                    checked={includeMatchedOnly}
-                                    onChange={e =>
-                                        setIncludeMatchedOnly(e.target.checked)
-                                    }
-                                />
-                                {t("Include matched only", { ns: "keywords" })}
-                            </label>
 
                             <div className="grid grid-cols-1 gap-3">
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-language"
+                                        htmlFor="earprint-report-title"
+                                        className="text-sm font-medium"
+                                    >
+                                        {t("Report title", { ns: "keywords" })}
+                                    </label>
+                                    <Input
+                                        id="earprint-report-title"
+                                        value={reportTitle}
+                                        onChange={e =>
+                                            setReportTitle(e.target.value)
+                                        }
+                                        placeholder={t("Earprint report title", {
+                                            ns: "report",
+                                        })}
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label
+                                        htmlFor="earprint-report-language"
                                         className="text-sm font-medium"
                                     >
                                         {t("Language", { ns: "keywords" })}
                                     </label>
                                     <select
-                                        id="report-language"
+                                        id="earprint-report-language"
                                         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                                         value={reportLanguage}
                                         onChange={e =>
@@ -219,34 +210,33 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         <option value="en">English</option>
                                     </select>
                                 </div>
+
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-datetime"
+                                        htmlFor="earprint-report-datetime"
                                         className="text-sm font-medium"
                                     >
                                         {t("Report date and time", {
                                             ns: "keywords",
                                         })}
                                     </label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="report-datetime"
-                                            value={reportDateTime}
-                                            readOnly
-                                            placeholder="30.12.2025 - 15:28:31"
-                                        />
-                                    </div>
+                                    <Input
+                                        id="earprint-report-datetime"
+                                        value={reportDateTime}
+                                        readOnly
+                                        placeholder="30.12.2025 - 15:28:31"
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-performed-by"
+                                        htmlFor="earprint-report-performed-by"
                                         className="text-sm font-medium"
                                     >
                                         {t("Performed by", { ns: "keywords" })}
                                     </label>
                                     <Input
-                                        id="report-performed-by"
+                                        id="earprint-report-performed-by"
                                         value={performedBy}
                                         onChange={e =>
                                             setPerformedBy(e.target.value)
@@ -257,24 +247,24 @@ export function ReportDialog({ className }: ReportDialogProps) {
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-department"
+                                        htmlFor="earprint-report-department"
                                         className="text-sm font-medium"
                                     >
                                         {t("Department", { ns: "keywords" })}
                                     </label>
                                     <Input
-                                        id="report-department"
+                                        id="earprint-report-department"
                                         value={department}
                                         onChange={e =>
                                             setDepartment(e.target.value)
                                         }
-                                        placeholder="Wydzia\u0142 Bada\u0144 Daktyloskopijnych i Traseologicznych"
+                                        placeholder="Wydział Badań Daktyloskopijnych"
                                     />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-address-1"
+                                        htmlFor="earprint-report-address-1"
                                         className="text-sm font-medium"
                                     >
                                         {t("Address line 1", {
@@ -282,18 +272,17 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         })}
                                     </label>
                                     <Input
-                                        id="report-address-1"
+                                        id="earprint-report-address-1"
                                         value={addressLine1}
                                         onChange={e =>
                                             setAddressLine1(e.target.value)
                                         }
-                                        placeholder="ul. Mi\u0142a 1"
                                     />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-address-2"
+                                        htmlFor="earprint-report-address-2"
                                         className="text-sm font-medium"
                                     >
                                         {t("Address line 2", {
@@ -301,18 +290,17 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         })}
                                     </label>
                                     <Input
-                                        id="report-address-2"
+                                        id="earprint-report-address-2"
                                         value={addressLine2}
                                         onChange={e =>
                                             setAddressLine2(e.target.value)
                                         }
-                                        placeholder="02-520 Warszawa"
                                     />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-address-3"
+                                        htmlFor="earprint-report-address-3"
                                         className="text-sm font-medium"
                                     >
                                         {t("Address line 3", {
@@ -320,18 +308,17 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         })}
                                     </label>
                                     <Input
-                                        id="report-address-3"
+                                        id="earprint-report-address-3"
                                         value={addressLine3}
                                         onChange={e =>
                                             setAddressLine3(e.target.value)
                                         }
-                                        placeholder=""
                                     />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="report-address-4"
+                                        htmlFor="earprint-report-address-4"
                                         className="text-sm font-medium"
                                     >
                                         {t("Address line 4", {
@@ -339,12 +326,11 @@ export function ReportDialog({ className }: ReportDialogProps) {
                                         })}
                                     </label>
                                     <Input
-                                        id="report-address-4"
+                                        id="earprint-report-address-4"
                                         value={addressLine4}
                                         onChange={e =>
                                             setAddressLine4(e.target.value)
                                         }
-                                        placeholder=""
                                     />
                                 </div>
                             </div>

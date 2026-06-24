@@ -1,13 +1,12 @@
 import html2canvas from "html2canvas";
 import { PDFDocument } from "pdf-lib";
 import { save } from "@tauri-apps/plugin-dialog";
-import { readFile, writeFile } from "@tauri-apps/plugin-fs";
+import { writeFile } from "@tauri-apps/plugin-fs";
 import { getVersion } from "@tauri-apps/api/app";
 import { invoke } from "@tauri-apps/api/core";
 import i18n from "@/lib/locales/i18n";
 import type { TFunction } from "i18next";
 import * as PIXI from "pixi.js";
-import { drawMarking } from "@/components/pixi/overlays/markings/marking.utils";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { getCanvas } from "@/components/pixi/canvas/hooks/useCanvas";
 import { MarkingsStore } from "@/lib/stores/Markings";
@@ -24,9 +23,32 @@ import {
     formatBytes,
     getMatchedFeatures,
     getPairedByLabel,
-    md5Bytes,
     md5String,
+    toBlobBytes,
+    toDataUrl,
 } from "./report-utils";
+import {
+    PAGE,
+    LANDSCAPE,
+    IMAGE_CELL_SIZE,
+    FULL_CIRCLE,
+    type Side,
+    type Placement,
+    type Bounds,
+} from "./shared/types";
+import {
+    getImageMeta,
+    renderImageWithMarkings,
+    cropCanvas,
+} from "./shared/render-utils";
+import {
+    toCssColor,
+    createPage,
+    createReportRoot,
+    createFooter,
+    resolveFeatureTypeName,
+    ensureImagesLoaded,
+} from "./shared/page-builders";
 
 type ReportGenerationOptions = {
     includeMatchedOnly: boolean;
@@ -37,76 +59,24 @@ type ReportGenerationOptions = {
     addressLines: string[];
 };
 
-type ImageMeta = {
-    name: string;
-    width: number;
-    height: number;
-    sizeBytes: number;
-    checksum: string;
-    bytes: Uint8Array;
-};
-
 type RenderedImages = {
     originalDataUrl: string;
     allMarkingsCanvas: HTMLCanvasElement;
     selectedMarkingsCanvas: HTMLCanvasElement;
 };
 
-const PAGE = {
-    width: 794,
-    height: 1123,
-    margin: 95,
-};
-const LANDSCAPE = {
-    width: PAGE.height,
-    height: PAGE.width,
-    margin: 70,
-};
-
-const IMAGE_CELL_SIZE = 200;
 const ROWS_PER_PAGE = 4;
 const FEATURES_PER_CHUNK = 12;
-const FULL_CIRCLE = Math.PI * 2;
 const RAY_LINE_LENGTH_MULTIPLIER = 4;
-const CANVAS_CONTEXT_ERROR = "Failed to create canvas context.";
+
+const canvasContextError = () =>
+    new Error(i18n.t("Canvas context error", { ns: "report" }));
 
 const normalizeAngleRad = (value: number) => {
     let angle = value;
     while (angle <= -Math.PI) angle += FULL_CIRCLE;
     while (angle > Math.PI) angle -= FULL_CIRCLE;
     return angle;
-};
-
-const getMimeTypeFromName = (name: string) => {
-    const lower = name.toLowerCase();
-    if (lower.endsWith(".png")) return "image/png";
-    if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
-    if (lower.endsWith(".webp")) return "image/webp";
-    if (lower.endsWith(".gif")) return "image/gif";
-    if (lower.endsWith(".bmp")) return "image/bmp";
-    return "application/octet-stream";
-};
-
-const toBlobBytes = (bytes: Uint8Array) => new Uint8Array(bytes);
-
-const toDataUrl = (bytes: Uint8Array, name: string) =>
-    new Promise<string>(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(
-            new Blob([toBlobBytes(bytes)], { type: getMimeTypeFromName(name) })
-        );
-    });
-
-const toCssColor = (value: unknown, fallback: string) => {
-    if (typeof value === "number" && Number.isFinite(value)) {
-        // eslint-disable-next-line no-bitwise
-        return `#${(value >>> 0).toString(16).padStart(6, "0").slice(-6)}`;
-    }
-    if (typeof value === "string" && value.trim().length > 0) {
-        return value;
-    }
-    return fallback;
 };
 
 const getSystemId = async () => {
@@ -116,91 +86,6 @@ const getSystemId = async () => {
     } catch {
         return "unknown";
     }
-};
-
-const getSpritePath = async (sprite: PIXI.Sprite) => {
-    // @ts-expect-error custom property
-    const path = sprite.path as string | null;
-    if (!path) return null;
-    return path;
-};
-
-const getImageMeta = async (sprite: PIXI.Sprite) => {
-    const fullPath = await getSpritePath(sprite);
-    if (!fullPath) {
-        throw new Error("Missing image path for report generation.");
-    }
-    const bytes = await readFile(fullPath);
-    const bitmap = await createImageBitmap(new Blob([toBlobBytes(bytes)]));
-    const checksum = md5Bytes(bytes);
-
-    return {
-        name: sprite.name ?? "image",
-        width: bitmap.width,
-        height: bitmap.height,
-        sizeBytes: bytes.byteLength,
-        checksum,
-        bytes,
-    } satisfies ImageMeta;
-};
-
-const renderImageWithMarkings = async (
-    imageBytes: Uint8Array,
-    markings: MarkingClass[],
-    markingTypes: MarkingType[],
-    sizeScale: number,
-    options?: {
-        showMarkingLabels?: boolean;
-        markingsAlpha?: number;
-    }
-) => {
-    const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
-    const { width, height } = bitmap;
-    const showMarkingLabels = options?.showMarkingLabels ?? true;
-    const markingsAlpha = options?.markingsAlpha ?? 1;
-
-    const app = new PIXI.Application({
-        width,
-        height,
-        backgroundAlpha: 0,
-        antialias: true,
-        preserveDrawingBuffer: true,
-    });
-
-    const sprite = new PIXI.Sprite(PIXI.Texture.from(bitmap));
-    sprite.position.set(0, 0);
-    app.stage.addChild(sprite);
-
-    const g = new PIXI.Graphics();
-    g.alpha = markingsAlpha;
-    app.stage.addChild(g);
-
-    const scaledTypes = markingTypes.map(type => ({
-        ...type,
-        size: Math.max(2, type.size * sizeScale),
-    }));
-
-    markings.forEach(marking => {
-        const type = scaledTypes.find(t => t.id === marking.typeId);
-        if (!type) return;
-        drawMarking(
-            g,
-            false,
-            marking,
-            type,
-            1,
-            1,
-            showMarkingLabels,
-            undefined,
-            0,
-            width / 2,
-            height / 2
-        );
-    });
-
-    const canvas = app.renderer.extract.canvas(app.stage);
-    app.destroy(true, { children: true, texture: true, baseTexture: true });
-    return canvas as HTMLCanvasElement;
 };
 
 const getMarkingDirectionRad = (marking: MarkingClass) => {
@@ -289,48 +174,6 @@ const getExpandedCropSizeForRotation = (
     return Math.ceil(targetSize * (absSin + absCos));
 };
 
-const cropCanvas = (
-    source: HTMLCanvasElement,
-    centerX: number,
-    centerY: number,
-    size: number
-) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, size, size);
-
-    const half = size / 2;
-    const sx = Math.round(centerX - half);
-    const sy = Math.round(centerY - half);
-
-    const srcX = clamp(sx, 0, source.width);
-    const srcY = clamp(sy, 0, source.height);
-    const dstX = Math.max(0, -sx);
-    const dstY = Math.max(0, -sy);
-    const srcWidth = Math.max(0, Math.min(source.width - srcX, size - dstX));
-    const srcHeight = Math.max(0, Math.min(source.height - srcY, size - dstY));
-
-    if (srcWidth > 0 && srcHeight > 0) {
-        ctx.drawImage(
-            source,
-            srcX,
-            srcY,
-            srcWidth,
-            srcHeight,
-            dstX,
-            dstY,
-            srcWidth,
-            srcHeight
-        );
-    }
-
-    return canvas;
-};
-
 const rotateCanvas = (
     source: HTMLCanvasElement,
     rotateRad: number,
@@ -341,7 +184,7 @@ const rotateCanvas = (
     rotated.width = safeSize;
     rotated.height = safeSize;
     const rotatedCtx = rotated.getContext("2d");
-    if (!rotatedCtx) throw new Error(CANVAS_CONTEXT_ERROR);
+    if (!rotatedCtx) throw canvasContextError();
     rotatedCtx.translate(safeSize / 2, safeSize / 2);
     rotatedCtx.rotate(rotateRad);
     rotatedCtx.drawImage(source, -safeSize / 2, -safeSize / 2);
@@ -351,7 +194,7 @@ const rotateCanvas = (
     finalCanvas.width = targetSize;
     finalCanvas.height = targetSize;
     const finalCtx = finalCanvas.getContext("2d");
-    if (!finalCtx) throw new Error(CANVAS_CONTEXT_ERROR);
+    if (!finalCtx) throw canvasContextError();
     const cutOffset = Math.max(0, (safeSize - targetSize) / 2);
     finalCtx.drawImage(
         rotated,
@@ -367,22 +210,6 @@ const rotateCanvas = (
 
     return finalCanvas;
 };
-
-type Side = "top" | "bottom" | "left" | "right";
-
-interface Placement {
-    feature: MarkingClass;
-    x: number;
-    y: number;
-    side: Side;
-}
-
-interface Bounds {
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-}
 
 const getFeatureBounds = (
     features: MarkingClass[],
@@ -899,7 +726,7 @@ const createOverviewCalloutImage = async (
     canvas.width = cropWidth + margin * 2;
     canvas.height = cropHeight + margin * 2;
     const ctx = canvas.getContext("2d");
-    if (!ctx) throw new Error(CANVAS_CONTEXT_ERROR);
+    if (!ctx) throw canvasContextError();
 
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1039,35 +866,10 @@ const createOverviewCalloutImage = async (
     return canvas.toDataURL("image/png");
 };
 
-const ensureImagesLoaded = async (container: HTMLElement) => {
-    const images = Array.from(container.querySelectorAll("img"));
-    await Promise.all(
-        images.map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise<void>(resolve => {
-                img.addEventListener("load", () => resolve(), { once: true });
-                img.addEventListener("error", () => resolve(), { once: true });
-            });
-        })
-    );
-};
-
-const createPage = () => {
-    const page = document.createElement("div");
-    page.className = "report-page";
-    return page;
-};
-
 const createLandscapePage = () => {
     const page = document.createElement("div");
     page.className = "report-page landscape";
     return page;
-};
-
-const createReportRoot = () => {
-    const root = document.createElement("div");
-    root.className = "report-root";
-    return root;
 };
 
 const createStyles = () => {
@@ -1124,31 +926,6 @@ const createStyles = () => {
 
 type ReportT = TFunction<"report">;
 
-const resolveFeatureTypeName = (
-    featureTypeDefinition: MarkingType | undefined,
-    tReport: ReportT
-) => {
-    if (!featureTypeDefinition) return "-";
-
-    const baseName =
-        featureTypeDefinition.displayName?.trim() ||
-        featureTypeDefinition.name?.trim() ||
-        "-";
-
-    return tReport(baseName as never, { defaultValue: baseName });
-};
-
-const createFooter = (
-    pageNumber: number,
-    reportId: string,
-    tReport: ReportT
-) => `
-    <div class="footer">
-        <div>${tReport("Page")} ${pageNumber}</div>
-        <div>${tReport("Report ID label")} ${reportId}</div>
-    </div>
-`;
-
 const createFigurePage = (
     title: string,
     image: string,
@@ -1169,8 +946,7 @@ const createFigurePage = (
     return page;
 };
 
-/* eslint-disable sonarjs/cognitive-complexity */
-export const generateReportPdfWithDialog = async (
+export const generateFingerprintReportPdfWithDialog = async (
     options: ReportGenerationOptions
 ) => {
     let stage = "init";
@@ -1743,4 +1519,3 @@ export const generateReportPdfWithDialog = async (
         });
     }
 };
-/* eslint-enable sonarjs/cognitive-complexity */
