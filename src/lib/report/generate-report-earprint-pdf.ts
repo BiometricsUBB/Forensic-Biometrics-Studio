@@ -145,9 +145,15 @@ export const generateEarprintReportPdfWithDialog = async (
 
         stage = "render-overlays";
         const [leftAllCanvas, rightAllCanvas] = await Promise.all([
-            renderImageWithMarkings(leftMeta.bytes, markingsLeft, markingTypes, 1.6, {
-                showMarkingLabels: true,
-            }),
+            renderImageWithMarkings(
+                leftMeta.bytes,
+                markingsLeft,
+                markingTypes,
+                1.6,
+                {
+                    showMarkingLabels: true,
+                }
+            ),
             renderImageWithMarkings(
                 rightMeta.bytes,
                 markingsRight,
@@ -164,22 +170,24 @@ export const generateEarprintReportPdfWithDialog = async (
             const batch = paired.slice(i, i + BATCH_SIZE);
             const batchResults = await Promise.all(
                 batch.map(async feature => {
-                    const [leftWithCanvas, rightWithCanvas] = await Promise.all([
-                        renderImageWithMarkings(
-                            leftMeta.bytes,
-                            [feature.left],
-                            markingTypes,
-                            1.6,
-                            { showMarkingLabels: false, markingsAlpha: 0.5 }
-                        ),
-                        renderImageWithMarkings(
-                            rightMeta.bytes,
-                            [feature.right],
-                            markingTypes,
-                            1.6,
-                            { showMarkingLabels: false, markingsAlpha: 0.5 }
-                        ),
-                    ]);
+                    const [leftWithCanvas, rightWithCanvas] = await Promise.all(
+                        [
+                            renderImageWithMarkings(
+                                leftMeta.bytes,
+                                [feature.left],
+                                markingTypes,
+                                1.6,
+                                { showMarkingLabels: false, markingsAlpha: 0.5 }
+                            ),
+                            renderImageWithMarkings(
+                                rightMeta.bytes,
+                                [feature.right],
+                                markingTypes,
+                                1.6,
+                                { showMarkingLabels: false, markingsAlpha: 0.5 }
+                            ),
+                        ]
+                    );
                     const leftCenter = getMarkingCenter(feature.left);
                     const rightCenter = getMarkingCenter(feature.right);
                     const maxExtent = Math.max(
@@ -188,7 +196,10 @@ export const generateEarprintReportPdfWithDialog = async (
                     );
                     const targetSize = Math.max(
                         80,
-                        Math.min(IMAGE_CELL_SIZE * 1.4, Math.round(maxExtent / 0.6))
+                        Math.min(
+                            IMAGE_CELL_SIZE * 1.4,
+                            Math.round(maxExtent / 0.6)
+                        )
                     );
                     const leftCrop = cropCanvas(
                         leftWithCanvas,
@@ -240,8 +251,10 @@ export const generateEarprintReportPdfWithDialog = async (
             .map(line => line?.trim())
             .filter(Boolean) as string[];
         const addressLines =
-            options.addressLines?.map(line => line.trim()).filter(Boolean) ?? [];
-        const address = addressLines.length > 0 ? addressLines : addressFallback;
+            options.addressLines?.map(line => line.trim()).filter(Boolean) ??
+            [];
+        const address =
+            addressLines.length > 0 ? addressLines : addressFallback;
         const addressHtml =
             address.length > 0
                 ? address.map(line => `<div>${escapeHtml(line)}</div>`).join("")
@@ -361,7 +374,7 @@ export const generateEarprintReportPdfWithDialog = async (
 
             for (let i = 0; i < paired.length; i += OVERVIEW_CHUNK_SIZE) {
                 const chunk = paired.slice(i, i + OVERVIEW_CHUNK_SIZE);
-                    const [leftOverview, rightOverview] = await Promise.all([
+                const [leftOverview, rightOverview] = await Promise.all([
                     createOverviewCalloutImage(
                         leftMeta.bytes,
                         chunk.map(x => x.left),
@@ -505,7 +518,10 @@ export const generateEarprintReportPdfWithDialog = async (
         }
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`[earprint-report] failed at ${stage}: ${message}`, error);
+        console.error(
+            `[earprint-report] failed at ${stage}: ${message}`,
+            error
+        );
         throw new Error(`Earprint report failed at ${stage}: ${message}`, {
             cause: error,
         });

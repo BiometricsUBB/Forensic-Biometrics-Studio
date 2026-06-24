@@ -442,8 +442,7 @@ export const createOverviewCalloutImage = async (
     canvas.width = width + margin * 2;
     canvas.height = height + margin * 2;
     const ctx = canvas.getContext("2d");
-    if (!ctx)
-        throw new Error(i18n.t("Canvas context error", { ns: "report" }));
+    if (!ctx) throw new Error(i18n.t("Canvas context error", { ns: "report" }));
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(bitmap, margin, margin);

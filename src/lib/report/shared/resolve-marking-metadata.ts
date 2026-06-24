@@ -1,5 +1,8 @@
 import { MarkingClass } from "@/lib/markings/MarkingClass";
-import { MarkingType, MARKING_ATTRIBUTE_KIND } from "@/lib/markings/MarkingType";
+import {
+    MarkingType,
+    MARKING_ATTRIBUTE_KIND,
+} from "@/lib/markings/MarkingType";
 
 export type ResolvedMetadataRow = {
     fieldLabel: string;
@@ -19,7 +22,7 @@ export const resolveMarkingMetadata = (
         const items =
             attribute.kind === MARKING_ATTRIBUTE_KIND.CHOICE
                 ? attribute.options
-                : (attribute.ranges ?? []);
+                : attribute.ranges ?? [];
         const selected = items.find(item => item.id === selectedId);
         if (!selected) return [];
 
@@ -56,7 +59,7 @@ export const resolveMetadataComparison = (
         const items =
             attribute.kind === MARKING_ATTRIBUTE_KIND.CHOICE
                 ? attribute.options
-                : (attribute.ranges ?? []);
+                : attribute.ranges ?? [];
         const labelFor = (marking: MarkingClass) => {
             const id = marking.attributeValues?.[attribute.id];
             if (!id) return "";

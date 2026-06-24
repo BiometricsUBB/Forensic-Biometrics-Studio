@@ -186,9 +186,12 @@ export function ReportEarprintDialog({ className }: ReportEarprintDialogProps) {
                                         onChange={e =>
                                             setReportTitle(e.target.value)
                                         }
-                                        placeholder={t("Earprint report title", {
-                                            ns: "report",
-                                        })}
+                                        placeholder={t(
+                                            "Earprint report title",
+                                            {
+                                                ns: "report",
+                                            }
+                                        )}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
