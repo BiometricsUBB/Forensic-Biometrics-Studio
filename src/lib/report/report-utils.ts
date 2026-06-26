@@ -92,9 +92,11 @@ export const toBlobBytes = (bytes: Uint8Array): BlobPart =>
     new Uint8Array(bytes);
 
 export const toDataUrl = (bytes: Uint8Array, name: string): Promise<string> =>
-    new Promise(resolve => {
+    new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () =>
+            reject(reader.error ?? new Error(`Failed to read ${name}`));
         reader.readAsDataURL(
             new Blob([toBlobBytes(bytes)], {
                 type: getMimeTypeFromName(name),
