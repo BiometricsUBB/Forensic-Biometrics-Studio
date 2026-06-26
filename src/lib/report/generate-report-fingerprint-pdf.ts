@@ -48,6 +48,7 @@ import {
     createFooter,
     resolveFeatureTypeName,
     ensureImagesLoaded,
+    applyReportPdfMetadata,
 } from "./shared/page-builders";
 
 type ReportGenerationOptions = {
@@ -1462,6 +1463,12 @@ export const generateFingerprintReportPdfWithDialog = async (
 
             stage = "render-pdf";
             const pdf = await PDFDocument.create();
+            applyReportPdfMetadata(
+                pdf,
+                appVersion,
+                tReport("Technical report title"),
+                reportId
+            );
             const renderedPages = await Promise.all(
                 pages.map(page => {
                     if (!page) return null;

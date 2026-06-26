@@ -39,6 +39,7 @@ import {
     getMarkingExtent,
 } from "./shared/render-utils";
 import { createOverviewCalloutImage } from "./shared/callout-placement";
+import { applyReportPdfMetadata } from "./shared/page-builders";
 import {
     toCssColor,
     escapeHtml,
@@ -549,6 +550,13 @@ export const generateShoeprintReportPdfWithDialog = async (
 
             stage = "render-pdf";
             const pdf = await PDFDocument.create();
+            applyReportPdfMetadata(
+                pdf,
+                appVersion,
+                options.reportTitle?.trim() ||
+                    tReport("Shoeprint report title"),
+                reportId
+            );
             const renderedPages = await Promise.all(
                 pages.map(page =>
                     html2canvas(page, { scale: 2, backgroundColor: "#ffffff" })

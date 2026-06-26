@@ -39,6 +39,7 @@ import {
     createStyles,
     createFigurePage,
     ensureImagesLoaded,
+    applyReportPdfMetadata,
 } from "./shared/page-builders";
 import { resolveMetadataComparison } from "./shared/resolve-marking-metadata";
 
@@ -477,6 +478,12 @@ export const generateEarprintReportPdfWithDialog = async (
 
             stage = "render-pdf";
             const pdf = await PDFDocument.create();
+            applyReportPdfMetadata(
+                pdf,
+                appVersion,
+                options.reportTitle?.trim() || tReport("Earprint report title"),
+                reportId
+            );
             const renderedPages = await Promise.all(
                 pages.map(page =>
                     html2canvas(page, { scale: 2, backgroundColor: "#ffffff" })

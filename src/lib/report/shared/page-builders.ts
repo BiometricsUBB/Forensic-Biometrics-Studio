@@ -1,8 +1,25 @@
 import type { TFunction } from "i18next";
+import type { PDFDocument } from "pdf-lib";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { PAGE, LANDSCAPE, IMAGE_CELL_SIZE } from "./types";
 
 type ReportT = TFunction<"report">;
+
+export const APP_NAME = "Forensic Biometrics Studio";
+
+export const applyReportPdfMetadata = (
+    pdf: PDFDocument,
+    appVersion: string,
+    title: string,
+    reportId: string
+) => {
+    const producer = `${APP_NAME} ${appVersion}`;
+    pdf.setProducer(producer);
+    pdf.setCreator(producer);
+    pdf.setTitle(title);
+    pdf.setSubject(`${APP_NAME} report ${reportId}`);
+    pdf.setKeywords([APP_NAME, "forensic", "report", appVersion]);
+};
 
 export const toCssColor = (value: unknown, fallback: string) => {
     if (typeof value === "number" && Number.isFinite(value)) {
