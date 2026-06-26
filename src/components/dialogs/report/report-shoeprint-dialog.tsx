@@ -68,6 +68,7 @@ export function ReportShoeprintDialog({
         setAddressLine4(reportDefaults?.addressLine4 ?? "");
         setReportLanguage(i18n.language);
         setReportTitle(t("Shoeprint report title", { ns: "report" }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, reportDefaults]);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);

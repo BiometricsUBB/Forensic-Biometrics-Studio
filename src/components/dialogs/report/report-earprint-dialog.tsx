@@ -65,6 +65,7 @@ export function ReportEarprintDialog({ className }: ReportEarprintDialogProps) {
         setAddressLine4(reportDefaults?.addressLine4 ?? "");
         setReportLanguage(i18n.language);
         setReportTitle(t("Earprint report title", { ns: "report" }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, reportDefaults]);
 
     const workingMode = WorkingModeStore.use(state => state.workingMode);
