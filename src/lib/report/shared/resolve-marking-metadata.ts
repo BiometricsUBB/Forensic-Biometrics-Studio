@@ -51,36 +51,30 @@ const PLACEHOLDER = "—";
 export const resolveMetadataComparison = (
     left: MarkingClass,
     right: MarkingClass,
-    markingType: MarkingType | undefined
+    leftType: MarkingType | undefined,
+    rightType: MarkingType | undefined
 ): MetadataComparisonRow[] => {
-    const attributes = markingType?.attributes ?? [];
+    const leftRows = resolveMarkingMetadata(left, leftType);
+    const rightRows = resolveMarkingMetadata(right, rightType);
 
-    return attributes.flatMap(attribute => {
-        const items =
-            attribute.kind === MARKING_ATTRIBUTE_KIND.CHOICE
-                ? attribute.options
-                : attribute.ranges ?? [];
-        const labelFor = (marking: MarkingClass) => {
-            const id = marking.attributeValues?.[attribute.id];
-            if (!id) return "";
-            return items.find(item => item.id === id)?.label ?? "";
-        };
+    const leftByField = new Map(
+        leftRows.map(row => [row.fieldLabel, row.selectedLabel])
+    );
+    const rightByField = new Map(
+        rightRows.map(row => [row.fieldLabel, row.selectedLabel])
+    );
 
-        const leftLabel = labelFor(left);
-        const rightLabel = labelFor(right);
-        if (!leftLabel && !rightLabel) return [];
-
-        const unit =
-            attribute.kind === MARKING_ATTRIBUTE_KIND.SIZE && attribute.unit
-                ? ` (${attribute.unit})`
-                : "";
-
-        return [
-            {
-                fieldLabel: `${attribute.label}${unit}`,
-                leftLabel: leftLabel || PLACEHOLDER,
-                rightLabel: rightLabel || PLACEHOLDER,
-            },
-        ];
+    const orderedFields: string[] = [];
+    const seen = new Set<string>();
+    [...leftRows, ...rightRows].forEach(row => {
+        if (seen.has(row.fieldLabel)) return;
+        seen.add(row.fieldLabel);
+        orderedFields.push(row.fieldLabel);
     });
+
+    return orderedFields.map(fieldLabel => ({
+        fieldLabel,
+        leftLabel: leftByField.get(fieldLabel) || PLACEHOLDER,
+        rightLabel: rightByField.get(fieldLabel) || PLACEHOLDER,
+    }));
 };

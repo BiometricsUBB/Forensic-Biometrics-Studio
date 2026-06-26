@@ -400,22 +400,26 @@ export const generateEarprintReportPdfWithDialog = async (
             }
 
             paired.forEach((feature, idx) => {
-                const featureTypeDefinition = markingTypes.find(
+                const leftTypeDefinition = markingTypes.find(
                     t => t.id === feature.left.typeId
                 );
+                const rightTypeDefinition = markingTypes.find(
+                    t => t.id === feature.right.typeId
+                );
                 const featureType = resolveFeatureTypeName(
-                    featureTypeDefinition,
+                    leftTypeDefinition,
                     tReport
                 );
                 const markerRing = toCssColor(
-                    featureTypeDefinition?.backgroundColor,
+                    leftTypeDefinition?.backgroundColor,
                     "#c0392b"
                 );
                 const crop = featureCrops[idx];
                 const comparison = resolveMetadataComparison(
                     feature.left,
                     feature.right,
-                    featureTypeDefinition
+                    leftTypeDefinition,
+                    rightTypeDefinition
                 );
 
                 const metaTableHtml =
