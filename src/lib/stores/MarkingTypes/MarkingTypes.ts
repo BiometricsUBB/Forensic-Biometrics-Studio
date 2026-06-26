@@ -1,4 +1,7 @@
-import { MarkingType } from "@/lib/markings/MarkingType";
+import {
+    MarkingType,
+    MARKING_ATTRIBUTE_KIND,
+} from "@/lib/markings/MarkingType";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { _useMarkingTypesStore } from "./MarkingTypes.store";
@@ -105,6 +108,14 @@ class StoreClass {
                         Object.assign(type, newValues);
                     }
                 });
+                if ("attributes" in newValues) {
+                    const updatedType = this.state.types.find(
+                        type => type.id === typeId
+                    );
+                    if (updatedType) {
+                        this.reconcileAttributeValues(updatedType);
+                    }
+                }
             },
         },
         visibility: {
@@ -125,6 +136,44 @@ class StoreClass {
             },
         },
     };
+
+    private reconcileAttributeValues(type: MarkingType) {
+        const validValueIds = new Map<string, Set<string>>();
+        (type.attributes ?? []).forEach(attribute => {
+            const items =
+                attribute.kind === MARKING_ATTRIBUTE_KIND.CHOICE
+                    ? attribute.options
+                    : attribute.ranges ?? [];
+            validValueIds.set(
+                attribute.id,
+                new Set(items.map(item => item.id))
+            );
+        });
+
+        [CANVAS_ID.LEFT, CANVAS_ID.RIGHT].forEach(canvasId => {
+            MarkingsStore(canvasId).state.markings.forEach(marking => {
+                if (marking.typeId !== type.id || !marking.attributeValues) {
+                    return;
+                }
+                const validEntries = Object.entries(
+                    marking.attributeValues
+                ).filter(([attributeId, valueId]) =>
+                    validValueIds.get(attributeId)?.has(valueId)
+                );
+                if (
+                    validEntries.length !==
+                    Object.keys(marking.attributeValues).length
+                ) {
+                    MarkingsStore(
+                        canvasId
+                    ).actions.markings.updateAttributeValues(
+                        marking.label,
+                        Object.fromEntries(validEntries)
+                    );
+                }
+            });
+        });
+    }
 }
 
 const Store = new StoreClass();
