@@ -32,7 +32,7 @@ const PYTHON_VERSION = process.env.PYFING_PYTHON_VERSION || "3.11";
 
 function run(cmd, args, opts = {}) {
     const printable = `${cmd} ${args.join(" ")}`;
-    console.log(`> ${printable}`);
+    console.info(`> ${printable}`);
     const result = spawnSync(cmd, args, {
         stdio: "inherit",
         shell: false,
@@ -82,7 +82,7 @@ function ensureUv() {
         shell: false,
     });
     if (probe.status === 0) {
-        console.log(`uv detected: ${(probe.stdout || "").trim()}`);
+        console.info(`uv detected: ${(probe.stdout || "").trim()}`);
         return;
     }
     throw new Error(
@@ -103,10 +103,10 @@ function venvPython() {
 
 function ensureVenv() {
     if (fs.existsSync(venvPython())) {
-        console.log(`venv exists at ${VENV_DIR}`);
+        console.info(`venv exists at ${VENV_DIR}`);
         return;
     }
-    console.log(`creating venv at ${VENV_DIR} with Python ${PYTHON_VERSION}`);
+    console.info(`creating venv at ${VENV_DIR} with Python ${PYTHON_VERSION}`);
     run("uv", ["venv", "--python", PYTHON_VERSION, VENV_DIR]);
 }
 
@@ -130,7 +130,7 @@ function installDeps() {
             { stdio: "inherit", shell: false }
         );
         if (result.status !== 0) {
-            console.log(`(skipped uninstall: ${pkg} not present)`);
+            console.info(`(skipped uninstall: ${pkg} not present)`);
         }
     }
 }
@@ -173,13 +173,13 @@ function copySidecar(triple) {
             // Tauri requires sidecar binaries to be executable on Unix.
             fs.chmodSync(target, 0o755);
         }
-        console.log(`copied -> ${target}`);
+        console.info(`copied -> ${target}`);
     }
 }
 
 function smokeTest() {
     const exe = path.join(BIN_DIR, `pyfing_enhance${EXE_EXT}`);
-    console.log(`smoke test: ${exe} --check`);
+    console.info(`smoke test: ${exe} --check`);
     const result = spawnSync(exe, ["--check"], { stdio: "inherit" });
     if (result.status !== 0) {
         throw new Error(`smoke test failed (exit ${result.status})`);
@@ -188,14 +188,14 @@ function smokeTest() {
 
 function main() {
     const triple = detectTargetTriple();
-    console.log(`target triple: ${triple}`);
+    console.info(`target triple: ${triple}`);
     ensureUv();
     ensureVenv();
     installDeps();
     buildExe();
     copySidecar(triple);
     smokeTest();
-    console.log("OK: pyfing sidecar built");
+    console.info("OK: pyfing sidecar built");
 }
 
 try {

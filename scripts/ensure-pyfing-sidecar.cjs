@@ -18,11 +18,11 @@ const SIDECAR = path.join(
 );
 
 if (fs.existsSync(SIDECAR)) {
-    console.log(`pyfing sidecar already present: ${SIDECAR}`);
+    console.info(`pyfing sidecar already present: ${SIDECAR}`);
     process.exit(0);
 }
 
-console.log("pyfing sidecar missing, building it now...");
+console.info("pyfing sidecar missing, building it now...");
 const result = spawnSync(
     "node",
     [path.join(__dirname, "build-pyfing-sidecar.cjs")],
