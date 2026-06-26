@@ -39,6 +39,17 @@ const d: Dictionary = {
     "Note title": "Note",
     "Note body":
         "The report identifier confirms the authenticity of the report and is calculated from the input data and the system identifier.",
+    "Signature verification report title":
+        "Technical report on signature comparison (Grafotype method)",
+    "Parameters summary": "Parameters summary and conformity verification",
+    "Sample A": "Sample A",
+    "Sample B": "Sample B",
+    "Rank correlation analysis": "Rank correlation analysis (outline segments)",
+    "Segment length": "Segment length [px]",
+    Rank: "Rank",
+    "Signature A figure": "Figure: signature A with outline and axes",
+    "Signature B figure": "Figure: signature B with outline and axes",
+    "Not available": "n/a",
     "Shoeprint report title":
         "Technical report of forensic shoeprint image comparison",
     "Shoeprint paired features count": "Number of paired features (by label):",

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import {
     ArrowRight,
     Ear,
+    FileSignature,
     Fingerprint,
     Footprints,
     type LucideIcon,
@@ -12,6 +13,7 @@ export enum WORKING_MODE {
     FINGERPRINT = "FINGERPRINT",
     EAR = "EAR",
     SHOEPRINT = "SHOEPRINT",
+    SIGNATURE = "SIGNATURE",
 }
 
 interface ISelectModeProps {
@@ -22,6 +24,7 @@ const MODE_ICONS: Record<WORKING_MODE, LucideIcon> = {
     [WORKING_MODE.FINGERPRINT]: Fingerprint,
     [WORKING_MODE.EAR]: Ear,
     [WORKING_MODE.SHOEPRINT]: Footprints,
+    [WORKING_MODE.SIGNATURE]: FileSignature,
 };
 
 export default function SelectMode({
