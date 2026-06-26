@@ -43,6 +43,7 @@ import {
 } from "./shared/render-utils";
 import {
     toCssColor,
+    escapeHtml,
     createPage,
     createReportRoot,
     createFooter,
@@ -1179,14 +1180,6 @@ export const generateFingerprintReportPdfWithDialog = async (
             systemId,
         ].join("|");
         const reportId = md5String(reportIdInput);
-
-        const escapeHtml = (value: string) =>
-            value
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
 
         const decodeUnicodeEscapes = (value: string) =>
             value.replace(/\\u([0-9a-fA-F]{4})/g, (_m, hex) =>
