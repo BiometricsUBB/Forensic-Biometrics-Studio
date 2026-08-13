@@ -1,7 +1,7 @@
 {
     "name": "forensic-biometrics-studio",
     "description": "Application for forensic trace comparison",
-    "version": "0.6.10",
+    "version": "0.6.11",
     "author": {
         "name": "Cyprian Zdebski",
         "email": "cyprianz5mail@gmail.com",

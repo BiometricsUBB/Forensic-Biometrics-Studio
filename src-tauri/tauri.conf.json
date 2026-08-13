@@ -1,7 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "Forensic Biometrics Studio",
-    "version": "0.6.10",
+    "version": "0.6.11",
     "identifier": "com.biometrics-studio.app",
     "build": {
         "beforeBuildCommand": "bun run sidecar:ensure:pyfing && bun run build",

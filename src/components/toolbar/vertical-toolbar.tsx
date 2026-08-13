@@ -33,6 +33,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportFingerprintDialog } from "@/components/dialogs/report/report-fingerprint-dialog";
+import { ReportSignatureDialog } from "@/components/dialogs/report/report-signature-dialog";
+import { SignatureVerificationDialog } from "@/components/dialogs/signature/signature-verification-dialog";
 import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
 import { ReportEarprintDialog } from "@/components/dialogs/report/report-earprint-dialog";
 import { WORKING_MODE } from "@/views/selectMode";
@@ -504,8 +506,14 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                         <ReportShoeprintDialog />
                     ) : workingMode === WORKING_MODE.EAR ? (
                         <ReportEarprintDialog />
+                    ) : workingMode === WORKING_MODE.SIGNATURE ? (
+                        <ReportSignatureDialog />
                     ) : (
                         <ReportFingerprintDialog />
+                    )}
+
+                    {workingMode === WORKING_MODE.SIGNATURE && (
+                        <SignatureVerificationDialog />
                     )}
 
                     <Toggle
