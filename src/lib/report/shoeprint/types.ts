@@ -8,6 +8,7 @@ export type ShoeprintReportGenerationOptions = {
     addressLines: string[];
     uniqueColor?: "red" | "green";
     reportTitle?: string;
+    includeComparison?: boolean;
 };
 
 export type ImageMeta = {

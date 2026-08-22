@@ -35,6 +35,7 @@ import {
 import { ReportDialog } from "@/components/dialogs/report/report-dialog";
 import { SignatureVerificationDialog } from "@/components/dialogs/signature/signature-verification-dialog";
 import { ReportShoeprintDialog } from "@/components/dialogs/report/report-shoeprint-dialog";
+import { ShoeprintComparisonDialog } from "@/components/dialogs/shoeprint/shoeprint-comparison-dialog";
 import { WORKING_MODE } from "@/views/selectMode";
 import { KeybindingsStore } from "@/lib/stores/Keybindings";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
@@ -500,6 +501,10 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                     >
                         <MeasurementPanel />
                     </div>
+
+                    {workingMode === WORKING_MODE.SHOEPRINT && (
+                        <ShoeprintComparisonDialog />
+                    )}
 
                     {workingMode === WORKING_MODE.SHOEPRINT ? (
                         <ReportShoeprintDialog />

@@ -58,7 +58,8 @@ const d: Dictionary = {
     "Black Point": "Punkt czerni",
     "White Point": "Punkt bieli",
     "Gamma (Midtones)": "Gamma (Półcienie)",
-    "Curves (Click: Add, Right-click: Remove)": "Krzywe (Kliknij: Dodaj, Prawy przycisk: Usuń)",
+    "Curves (Click: Add, Right-click: Remove)":
+        "Krzywe (Kliknij: Dodaj, Prawy przycisk: Usuń)",
     "Reset Zoom": "Resetuj powiększenie",
     ImageLoadPermissionError:
         "Edytowany obraz został zapisany, ale nie można go załadować z powodu ograniczeń dostępności ścieżki. Spróbuj załadować go ręcznie.",
@@ -129,6 +130,21 @@ const d: Dictionary = {
     "GBFEN — Gabor-based enhancement": "GBFEN — wzmocnienie filtrami Gabora",
     "SNFEN — Neural enhancement": "SNFEN — wzmocnienie siecią neuronową",
     "Enhancing image...": "Wzmacnianie obrazu...",
+    "Comparison finished in {{seconds}}s":
+        "Porównanie zakończone w {{seconds}} s",
+    "Comparison cancelled": "Porównanie anulowane",
+    "Comparison failed: {{error}}": "Porównanie nie powiodło się: {{error}}",
+    "Load an image on both canvases first":
+        "Najpierw wczytaj obraz na obu płótnach",
+    "Shoeprint canvas not ready": "Płótno nie jest gotowe.",
+    "Shoeprint load images first": "Najpierw wczytaj obraz na obu płótnach.",
+    "Shoeprint image has no path": "Obraz nie ma ścieżki źródłowej.",
+    "Shoeprint not enough edge points":
+        "W obrazie {{label}} znaleziono tylko {{count}} punktów krawędziowych. Zmień próg binaryzacji lub użyj obrazu o większym kontraście.",
+    "Shoeprint regions too large for resolution":
+        "Obszary porównania są zbyt duże dla obrazu {{label}}. Przy {{dpi}} DPI ślad ma zaledwie {{length}} mm, a podeszwa ma zwykle 250-320 mm, więc ta rozdzielczość jest zbyt wysoka dla tego obrazu. Wyczyść pole rozdzielczości, aby skalować według rozmiaru obrazu, albo podaj rzeczywistą rozdzielczość obrazu.",
+    "Shoeprint regions too large for print":
+        "Obszary porównania są zbyt duże dla obrazu {{label}}. Zmniejsz promień obszaru — obecnie {{radius}} jednostek przy śladzie o wymiarach {{width}}x{{height}} jednostek.",
 };
 
 export default d;

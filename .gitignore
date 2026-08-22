@@ -56,3 +56,8 @@ src-tauri/gen/schemas/capabilities.json
 # local installer / toolchain artifacts (not project files)
 /Setup.msix
 /rustup-init.exe
+
+# r runtime
+/src-tauri/r-runtime/
+/.cache-r/
+/.tmp-e2e/

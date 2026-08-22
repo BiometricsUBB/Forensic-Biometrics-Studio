@@ -4,7 +4,7 @@
     "version": "0.6.10",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "pnpm build",
+        "beforeBuildCommand": "pnpm r:ensure && pnpm build",
         "beforeDevCommand": "pnpm dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
@@ -69,7 +69,11 @@
             "timestampUrl": ""
         },
         "longDescription": "",
-        "resources": { "../presets/**/*": "presets/" },
+        "resources": {
+            "../presets/**/*": "presets/",
+            "../r/shoeprint_compare.R": "r/shoeprint_compare.R",
+            "r-runtime": "r-runtime"
+        },
         "shortDescription": "",
         "linux": {
             "deb": {

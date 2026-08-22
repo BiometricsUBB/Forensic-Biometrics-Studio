@@ -66,10 +66,23 @@ const d: Dictionary = {
         "Cechy strukturalne o znaczeniu klasyfikacyjnym",
     "Shoeprint group features title":
         "Cechy grupowe o znaczeniu klasyfikacyjnym",
-    "Shoeprint feature type prefix": 
-        "Cechy typu:",
-    "Shoeprint no unique features": 
-        "Brak cech unikalnych.",
+    "Shoeprint feature type prefix": "Cechy typu:",
+    "Shoeprint no unique features": "Brak cech unikalnych.",
+    "Shoeprint comparison title": "Automatyczne porównanie statystyczne",
+    "Shoeprint comparison method":
+        "Porównanie wykonano algorytmem shoeprintr (Park i Carriquiry, CSAFE, Iowa State University). Na śladzie Q wyznaczane są trzy obszary zainteresowania; dla każdego z nich algorytm wyszukuje w śladzie K obszar odpowiadający, znajdując największy zbiór wzajemnie zgodnych odpowiedniości punktowych (klikę maksymalną), a następnie szacuje kąt obrotu oraz stopień pokrycia obu obszarów.",
+    "Shoeprint comparison summary": "Podsumowanie cech podobieństwa",
+    "Shoeprint comparison regions": "Dopasowane obszary",
+    "Shoeprint comparison distances": "Odległości między środkami obszarów",
+    "Shoeprint comparison figure":
+        "Obszary wyznaczone na śladzie Q oraz odpowiadające im obszary odnalezione w śladzie K.",
+    "Shoeprint comparison parameters": "Parametry analizy",
+    "Shoeprint comparison disclaimer":
+        "Powyższe wartości opisują stopień zgodności geometrycznej zmierzonej pomiędzy dwoma śladami. Nie są prawdopodobieństwem wspólnego pochodzenia i same w sobie nie stanowią identyfikacji. Interpretacja pozostaje w gestii biegłego.",
+    "Shoeprint comparison scale warning":
+        "Dla co najmniej jednego obrazu nie ustawiono rozdzielczości, dlatego poniższe odległości wyrażono w jednostkach roboczych, a nie w milimetrach, i nie należy ich traktować jako pomiarów fizycznych.",
+    "Shoeprint comparison scale mismatch":
+        "Oba ślady zostały sprowadzone do różnych skal roboczych, dlatego odległości między obszarami nie są bezpośrednio porównywalne.",
 };
 
 export default d;

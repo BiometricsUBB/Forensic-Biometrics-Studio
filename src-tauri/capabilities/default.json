@@ -37,7 +37,13 @@
             "identifier": "fs:allow-read-text-file",
             "allow": ["**", "**/*", "/**/*"]
         },
-        "fs:allow-write-text-file",
+        {
+            "identifier": "fs:allow-write-text-file",
+            "allow": [
+                "$APPLOCALDATA/shoeprint-comparison",
+                "$APPLOCALDATA/shoeprint-comparison/*"
+            ]
+        },
         {
             "identifier": "fs:allow-write-file",
             "allow": ["**", "**/*", "/**/*"]

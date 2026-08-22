@@ -35,6 +35,8 @@
         "sidecar:sync": "node ./scripts/sidecar-sync.cjs",
         "sidecar:build:pyfing": "node ./scripts/build-pyfing-sidecar.cjs",
         "sidecar:ensure:pyfing": "node ./scripts/ensure-pyfing-sidecar.cjs",
+        "r:build": "node ./scripts/build-r-runtime.cjs",
+        "r:ensure": "node ./scripts/ensure-r-runtime.cjs",
         "tsc:check": "tsc --noEmit",
         "tsc:watch": "tsc --noEmit --watch",
         "eslint:fix": "eslint --fix .",

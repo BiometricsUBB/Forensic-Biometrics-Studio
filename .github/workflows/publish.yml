@@ -59,11 +59,24 @@ jobs:
                       build-pyinstaller
                   key: ${{ runner.os }}-pyfing-${{ hashFiles('scripts/pyfing-requirements.txt', 'scripts/pyfing_enhance.spec', 'scripts/pyfing_enhance.py') }}
 
+            - name: cache R runtime downloads
+              uses: actions/cache@v4
+              with:
+                  path: .cache-r
+                  key: ${{ runner.os }}-r-installer-${{ hashFiles('scripts/build-r-runtime.cjs') }}
+
+            - name: install R (macOS)
+              if: runner.os == 'macOS'
+              run: brew install --quiet r
+
             - name: install frontend dependencies
               run: pnpm install
 
             - name: build pyfing sidecar
               run: pnpm sidecar:build:pyfing
+
+            - name: build R runtime for shoeprint comparison
+              run: pnpm r:build
 
             - uses: tauri-apps/tauri-action@v0
               env:

@@ -27,6 +27,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils/shadcn";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
 import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
+import { ShoeprintComparisonStore } from "@/lib/stores/ShoeprintComparison";
+import { Switch } from "@/components/ui/switch";
 import i18n from "@/lib/locales/i18n";
 
 type ReportShoeprintDialogProps = {
@@ -56,6 +58,9 @@ export function ReportShoeprintDialog({
     const [reportLanguage, setReportLanguage] = useState(i18n.language);
     const [reportTitle, setReportTitle] = useState("");
     const [uniqueColor, setUniqueColor] = useState<"red" | "green">("red");
+    const [includeComparison, setIncludeComparison] = useState(true);
+
+    const comparisonRun = ShoeprintComparisonStore.use(state => state.run);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -109,6 +114,7 @@ export function ReportShoeprintDialog({
                 ],
                 uniqueColor,
                 reportTitle: reportTitle.trim() || undefined,
+                includeComparison: includeComparison && comparisonRun !== null,
             });
             toast.success(t("Report generated", { ns: "tooltip" }));
             setIsOpen(false);
@@ -174,20 +180,31 @@ export function ReportShoeprintDialog({
                                     : <strong>{rightCount}</strong>
                                 </div>
                                 <div>
-                                    {t("Shoeprint paired features count", { ns: "report" })}: <strong>{pairedCount}</strong>
+                                    {t("Shoeprint paired features count", {
+                                        ns: "report",
+                                    })}
+                                    : <strong>{pairedCount}</strong>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 gap-3">
                                 <div className="flex flex-col gap-1.5">
-                                    <label htmlFor="shoeprint-report-title" className="text-sm font-medium">
+                                    <label
+                                        htmlFor="shoeprint-report-title"
+                                        className="text-sm font-medium"
+                                    >
                                         {t("Report title", { ns: "keywords" })}
                                     </label>
                                     <Input
                                         id="shoeprint-report-title"
                                         value={reportTitle}
-                                        onChange={e => setReportTitle(e.target.value)}
-                                        placeholder={t("Shoeprint report title", { ns: "report" })}
+                                        onChange={e =>
+                                            setReportTitle(e.target.value)
+                                        }
+                                        placeholder={t(
+                                            "Shoeprint report title",
+                                            { ns: "report" }
+                                        )}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
@@ -211,17 +228,61 @@ export function ReportShoeprintDialog({
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-sm font-medium">
-                                        {t("Unique features color", { ns: "keywords" })}
+                                    <label
+                                        htmlFor="shoeprint-report-unique-color"
+                                        className="text-sm font-medium"
+                                    >
+                                        {t("Unique features color", {
+                                            ns: "keywords",
+                                        })}
                                     </label>
                                     <select
+                                        id="shoeprint-report-unique-color"
                                         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                                         value={uniqueColor}
-                                        onChange={e => setUniqueColor(e.target.value as "red" | "green")}
+                                        onChange={e =>
+                                            setUniqueColor(
+                                                e.target.value as
+                                                    | "red"
+                                                    | "green"
+                                            )
+                                        }
                                     >
-                                        <option value="red">{t("Color red", { ns: "keywords" })}</option>
-                                        <option value="green">{t("Color green", { ns: "keywords" })}</option>
+                                        <option value="red">
+                                            {t("Color red", { ns: "keywords" })}
+                                        </option>
+                                        <option value="green">
+                                            {t("Color green", {
+                                                ns: "keywords",
+                                            })}
+                                        </option>
                                     </select>
+                                </div>
+
+                                <div className="flex items-center justify-between gap-3 rounded-md border border-border/60 p-3">
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-medium">
+                                            {t("Include comparison in report", {
+                                                ns: "keywords",
+                                            })}
+                                        </span>
+                                        {!comparisonRun && (
+                                            <span className="text-xs text-muted-foreground">
+                                                {t(
+                                                    "No comparison has been run yet",
+                                                    { ns: "keywords" }
+                                                )}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <Switch
+                                        checked={
+                                            includeComparison &&
+                                            comparisonRun !== null
+                                        }
+                                        disabled={comparisonRun === null}
+                                        onCheckedChange={setIncludeComparison}
+                                    />
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">

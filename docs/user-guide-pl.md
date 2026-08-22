@@ -6,8 +6,8 @@
 
 Aplikacja wymaga:
 
-* Windows 10 lub nowszy
-* Zalecana rozdzielczość ekranu co najmniej 1920×1080
+-   Windows 10 lub nowszy
+-   Zalecana rozdzielczość ekranu co najmniej 1920×1080
 
 > **Uwaga:** Wersja macOS może działać, jednak wersja Windows jest zalecana dla stabilnego działania.
 
@@ -20,7 +20,7 @@ Aplikacja wymaga:
 
 ![Strona GitHub Releases](images/common/github-releases.png)
 
-*Pobieranie aplikacji ze strony GitHub Releases.*
+_Pobieranie aplikacji ze strony GitHub Releases._
 
 ### 1.3 Uruchamianie instalatora
 
@@ -32,11 +32,11 @@ Aplikacja wymaga:
 
 ![Ostrzeżenie Windows SmartScreen](images/polish/smartscreen-warning.png)
 
-*Ostrzeżenie Windows SmartScreen.*
+_Ostrzeżenie Windows SmartScreen._
 
 ![Kreator instalacji](images/common/installer.png)
 
-*Kreator instalacji.*
+_Kreator instalacji._
 
 ### 1.4 Pierwsze uruchomienie
 
@@ -48,21 +48,21 @@ Tryb ten można zmienić później za pomocą menu **Tryb pracy**.
 
 ![Wybór trybu pracy](images/polish/select-working-mode.png)
 
-*Wybór trybu pracy.*
+_Wybór trybu pracy._
 
 ### 1.5 Ustawienia aplikacji
 
 Okno Ustawień umożliwia konfigurację:
 
-* Języka
-* Motywu jasnego lub ciemnego
-* Zachowania interfejsu
+-   Języka
+-   Motywu jasnego lub ciemnego
+-   Zachowania interfejsu
 
 Aby otworzyć okno Ustawień, kliknij ikonę zębatki na pasku narzędzi.
 
 ![Ustawienia aplikacji](images/common/settings.png)
 
-*Ustawienia aplikacji.*
+_Ustawienia aplikacji._
 
 ### 1.6 Importowanie predefiniowanych typów cech
 
@@ -78,11 +78,11 @@ Aby zaimportować ustawienia wstępne:
 
 ![Okno typów cech](images/polish/types-window.png)
 
-*Zarządzanie typami cech.*
+_Zarządzanie typami cech._
 
 ![Importowanie ustawień wstępnych](images/polish/import-types.png)
 
-*Importowanie predefiniowanych ustawień odcisków palców.*
+_Importowanie predefiniowanych ustawień odcisków palców._
 
 Zaimportowane definicje obejmują standardowe typy cech odcisków palców używane w całym niniejszym podręczniku.
 
@@ -92,10 +92,10 @@ Zaimportowane definicje obejmują standardowe typy cech odcisków palców używa
 
 Dla najbardziej komfortowego przepływu pracy:
 
-* Używaj aplikacji w trybie zmaksymalizowanego okna.
-* Używaj myszy zamiast touchpada, gdy tylko jest to możliwe.
-* Włącz Tryb ciemny podczas pracy w warunkach słabego oświetlenia.
-* Używaj wyświetlacza wysokiej rozdzielczości do szczegółowych badań kryminalistycznych.
+-   Używaj aplikacji w trybie zmaksymalizowanego okna.
+-   Używaj myszy zamiast touchpada, gdy tylko jest to możliwe.
+-   Włącz Tryb ciemny podczas pracy w warunkach słabego oświetlenia.
+-   Używaj wyświetlacza wysokiej rozdzielczości do szczegółowych badań kryminalistycznych.
 
 ---
 
@@ -118,7 +118,7 @@ Po wczytaniu oba obrazy powinny być widoczne obok siebie.
 
 ![Wczytywanie obrazów do porównania](images/common/load-images.png)
 
-*Wczytywanie dwóch obrazów odcisków palców.*
+_Wczytywanie dwóch obrazów odcisków palców._
 
 ### 2.2 Nawigacja po obrazach
 
@@ -135,7 +135,7 @@ Podczas porównywania odcisków palców zaleca się ustawienie obrazu tak, aby p
 
 ![Narzędzie przesuwania](images/polish/pan-tool.png)
 
-*Narzędzie przesuwania.*
+_Narzędzie przesuwania._
 
 ### 2.3 Powiększanie
 
@@ -143,11 +143,11 @@ Używaj kółka myszy do powiększania i pomniejszania.
 
 Powiększanie jest niezbędne podczas oznaczania:
 
-* Minucji
-* Porów
-* Cech krawędziowych
-* Małych blizn
-* Szczegółów listewek
+-   Minucji
+-   Porów
+-   Cech krawędziowych
+-   Małych blizn
+-   Szczegółów listewek
 
 Oprogramowanie zachowuje położenie cech niezależnie od poziomu powiększenia.
 
@@ -163,7 +163,7 @@ Oba obrazy powinny być w przybliżeniu wyrównane przed rozpoczęciem porównan
 
 ![Centrowanie na Core](images/common/core-centering.png)
 
-*Wyrównywanie obrazów wokół obszaru Core.*
+_Wyrównywanie obrazów wokół obszaru Core._
 
 ### 2.5 Blokowanie obrazów
 
@@ -175,15 +175,15 @@ Aby włączyć synchronizację:
 
 Gdy blokowanie obrazu jest aktywne:
 
-* Przesuwanie jednego obrazu przesuwa oba obrazy.
-* Powiększanie jednego obrazu powiększa oba obrazy.
-* Nawigacja pozostaje zsynchronizowana.
+-   Przesuwanie jednego obrazu przesuwa oba obrazy.
+-   Powiększanie jednego obrazu powiększa oba obrazy.
+-   Nawigacja pozostaje zsynchronizowana.
 
 Znacznie upraszcza to porównywanie cech.
 
 ![Blokowanie obrazów](images/polish/lock-tool.png)
 
-*Narzędzie blokowania.*
+_Narzędzie blokowania._
 
 ### 2.6 Przełączanie do trybu oznaczania cech
 
@@ -196,7 +196,7 @@ Aktualnie wybrany typ cechy jest wyświetlany w polu wyboru cech.
 
 ![Tryb oznaczania cech](images/polish/marking-mode.png)
 
-*Tryb oznaczania cech.*
+_Tryb oznaczania cech._
 
 ### 2.7 Zalecana procedura oznaczania
 
@@ -228,7 +228,7 @@ Core jest reprezentowany jako cecha punktowa, dlatego wymaga tylko jednego klikn
 
 ![Oznaczanie Core](images/common/core-feature.png)
 
-*Oznaczanie cechy Core.*
+_Oznaczanie cechy Core._
 
 ### 2.9 Oznaczanie Delty
 
@@ -245,7 +245,7 @@ Podobnie jak Core, Delta jest reprezentowana jako cecha punktowa.
 
 ![Oznaczanie Delty](images/common/delta-feature.png)
 
-*Oznaczanie cechy Delty.*
+_Oznaczanie cechy Delty._
 
 ### 2.10 Skierowane minucje
 
@@ -258,10 +258,10 @@ W odróżnieniu od cech punktowych, cechy kierunkowe wymagają dwóch kliknięć
 
 Przykłady obejmują:
 
-* Początek linii
-* Zakończenie linii
-* Rozwidlenie
-* Złączenie linii
+-   Początek linii
+-   Zakończenie linii
+-   Rozwidlenie
+-   Złączenie linii
 
 ### 2.11 Zakończenie linii
 
@@ -276,7 +276,7 @@ Aby oznaczyć Zakończenie linii:
 
 ![Zakończenie linii](images/common/ridge-ending.png)
 
-*Zakończenie linii.*
+_Zakończenie linii._
 
 ### 2.12 Początek listewki
 
@@ -291,7 +291,7 @@ Aby oznaczyć Początek listewki:
 
 ![Początek linii](images/common/ridge-beginning.png)
 
-*Początek linii.*
+_Początek linii._
 
 ### 2.13 Rozwidlenie
 
@@ -306,7 +306,7 @@ Aby oznaczyć Rozwidlenie:
 
 ![Rozwidlenie](images/common/bifurcation.png)
 
-*Rozwidlenie.*
+_Rozwidlenie._
 
 ### 2.14 Złączenie linii
 
@@ -321,7 +321,7 @@ Aby oznaczyć Złączenie linii:
 
 ![Złączenie linii](images/common/ridge-joining.png)
 
-*Złączenie linii.*
+_Złączenie linii._
 
 ### 2.15 Zrozumienie parowania cech
 
@@ -338,7 +338,7 @@ Ten przepływ pracy automatycznie tworzy pasujące identyfikatory cech.
 
 ![Naprzemienny przepływ pracy](images/common/alternating-marking.png)
 
-*Naprzemienny sposób wprowadzania cech.*
+_Naprzemienny sposób wprowadzania cech._
 
 ### 2.16 Wybieranie istniejących cech
 
@@ -346,13 +346,13 @@ Każda oznaczona cecha pojawia się w tabeli cech poniżej obrazu.
 
 Wybranie wiersza w tabeli:
 
-* Podświetla cechę na obrazie.
-* Ułatwia przeglądanie adnotacji.
-* Umożliwia korekty i usunięcia.
+-   Podświetla cechę na obrazie.
+-   Ułatwia przeglądanie adnotacji.
+-   Umożliwia korekty i usunięcia.
 
 ![Tabela cech](images/polish/feature-table.png)
 
-*Tabela cech i selekcja.*
+_Tabela cech i selekcja._
 
 ### 2.17 Usuwanie cech
 
@@ -366,7 +366,7 @@ Aby usunąć cechę:
 
 ![Usuwanie cech](images/common/delete-feature.png)
 
-*Usuwanie adnotacji.*
+_Usuwanie adnotacji._
 
 ### 2.18 Praca z adnotacjami nieprzemiennymi
 
@@ -388,7 +388,7 @@ Aby to skorygować:
 
 ![Ręczne przypisanie pary](images/polish/manual-pairing.png)
 
-*Korygowanie przypisań par cech.*
+_Korygowanie przypisań par cech._
 
 ---
 
@@ -410,7 +410,7 @@ Oryginalny obraz pozostaje niezmieniony.
 
 ![Zapisywanie adnotacji](images/common/save-json.png)
 
-*Zapisywanie adnotacji cech.*
+_Zapisywanie adnotacji cech._
 
 ### 3.2 Zalecana organizacja plików
 
@@ -435,7 +435,7 @@ Aplikacja przywraca wszystkie zapisane informacje o cechach.
 
 ![Wczytywanie adnotacji](images/common/load-json.png)
 
-*Wczytywanie poprzednio zapisanej pracy.*
+_Wczytywanie poprzednio zapisanej pracy._
 
 ### 3.4 Praca z wieloma porównaniami
 
@@ -443,9 +443,9 @@ Typowy przepływ pracy polega na porównywaniu wielu odcisków z tego samego źr
 
 Na przykład:
 
-* Odcisk A vs Odcisk B
-* Odcisk A vs Odcisk C
-* Odcisk B vs Odcisk C
+-   Odcisk A vs Odcisk B
+-   Odcisk A vs Odcisk C
+-   Odcisk B vs Odcisk C
 
 Każde porównanie może generować oddzielne pliki adnotacji JSON, które można później połączyć za pomocą funkcji Scalania opisanej w następnym rozdziale.
 
@@ -459,9 +459,9 @@ Funkcja scalania pozwala na ujednolicenie identyfikatorów cech z różnych plik
 
 Jest to szczególnie przydatne gdy:
 
-* Przeprowadzono wiele niezależnych porównań.
-* Ta sama cecha fizyczna otrzymała różne identyfikatory.
-* Istniejące adnotacje wymagają uzgodnienia.
+-   Przeprowadzono wiele niezależnych porównań.
+-   Ta sama cecha fizyczna otrzymała różne identyfikatory.
+-   Istniejące adnotacje wymagają uzgodnienia.
 
 ### 4.2 Typowy scenariusz scalania
 
@@ -469,8 +469,8 @@ Rozważmy dwie wcześniej opatrzone adnotacjami pary obrazów.
 
 Ta sama cecha Core może mieć:
 
-* Identyfikator 1 w jednym porównaniu
-* Identyfikator 7 w innym porównaniu
+-   Identyfikator 1 w jednym porównaniu
+-   Identyfikator 7 w innym porównaniu
 
 Funkcja scalania pozwala połączyć te identyfikatory w jeden wspólny identyfikator.
 
@@ -487,15 +487,15 @@ Oprogramowanie aktualizuje identyfikatory tak, aby odpowiadające cechy miały t
 
 ![Przepływ pracy scalania](images/polish/merge-function.png)
 
-*Scalanie identyfikatorów cech.*
+_Scalanie identyfikatorów cech._
 
 ### 4.4 Weryfikacja wyników scalania
 
 Po scaleniu:
 
-* Pasujące cechy powinny wyświetlać identyczne identyfikatory.
-* Tabele powinny wykazywać spójną numerację.
-* Relacje między cechami powinny pozostać niezmienione.
+-   Pasujące cechy powinny wyświetlać identyczne identyfikatory.
+-   Tabele powinny wykazywać spójną numerację.
+-   Relacje między cechami powinny pozostać niezmienione.
 
 Zapisz zaktualizowane adnotacje po zakończeniu procesu scalania.
 
@@ -526,7 +526,7 @@ Aby uzyskać dostęp do narzędzia:
 
 ![Narzędzie obrotu](images/polish/rotation-tool.png)
 
-*Otwieranie narzędzia obrotu.*
+_Otwieranie narzędzia obrotu._
 
 ### Wybieranie linii referencyjnych
 
@@ -534,10 +534,10 @@ Algorytm obrotu wymaga linii referencyjnej na obu obrazach.
 
 Dla najlepszych wyników:
 
-* Wybierz dwa wyraźnie identyfikowalne punkty.
-* Użyj punktów widocznych na obu obrazach.
-* Narysuj jak najdłuższą linię.
-* Upewnij się, że obie linie zaczynają się i kończą w odpowiadających sobie miejscach.
+-   Wybierz dwa wyraźnie identyfikowalne punkty.
+-   Użyj punktów widocznych na obu obrazach.
+-   Narysuj jak najdłuższą linię.
+-   Upewnij się, że obie linie zaczynają się i kończą w odpowiadających sobie miejscach.
 
 Aby zdefiniować linię referencyjną:
 
@@ -546,7 +546,7 @@ Aby zdefiniować linię referencyjną:
 
 ![Linie referencyjne](images/common/reference-lines.png)
 
-*Definiowanie linii referencyjnych.*
+_Definiowanie linii referencyjnych._
 
 ### Obliczanie obrotu
 
@@ -558,7 +558,7 @@ Po utworzeniu obu linii referencyjnych:
 
 ![Wynik obrotu](images/common/rotation-result.png)
 
-*Wynik automatycznego wyrównania.*
+_Wynik automatycznego wyrównania._
 
 Po obróceniu oba wzory odcisków palców powinny mieć w przybliżeniu tę samą orientację.
 
@@ -585,7 +585,7 @@ Wcześniej oznaczone cechy pozostają poprawnie ustawione względem wzoru odcisk
 
 ![Resetowanie obrotu](images/polish/reset-rotation.png)
 
-*Resetowanie obrotu obrazu.*
+_Resetowanie obrotu obrazu._
 
 ---
 
@@ -599,7 +599,7 @@ Obsługiwane formaty obrazów zależą od wersji aplikacji.
 
 ![Otwieranie obrazu](images/polish/open-image.png)
 
-*Narzędzie otwierania obrazu.*
+_Narzędzie otwierania obrazu._
 
 ### 5.2 Otwieranie plików adnotacji
 
@@ -609,7 +609,7 @@ Obraz i plik adnotacji można wczytywać niezależnie.
 
 ![Otwieranie adnotacji](images/common/load-json.png)
 
-*Narzędzie otwierania adnotacji.*
+_Narzędzie otwierania adnotacji._
 
 ### 5.3 Zapisywanie pliku adnotacji
 
@@ -621,21 +621,21 @@ Obraz źródłowy pozostaje niezmieniony.
 
 ![Zapisywanie adnotacji](images/common/save-json.png)
 
-*Narzędzie zapisywania adnotacji.*
+_Narzędzie zapisywania adnotacji._
 
 ### 5.4 Dopasowywanie obrazu do okna
 
 Oprogramowanie zapewnia kilka opcji automatycznego dopasowania:
 
-* Dopasuj cały obraz
-* Dopasuj szerokość
-* Dopasuj wysokość
+-   Dopasuj cały obraz
+-   Dopasuj szerokość
+-   Dopasuj wysokość
 
 Narzędzia te upraszczają nawigację po wczytaniu nowego obrazu.
 
 ![Dopasowanie obrazu](images/polish/fit-image.png)
 
-*Narzędzia dopasowywania obrazu.*
+_Narzędzia dopasowywania obrazu._
 
 ### 5.5 Kontrola widoczności cech
 
@@ -645,34 +645,34 @@ Kontrola widoczności cech pozwala ekspertowi zmniejszyć wizualną dominację w
 
 Typowe przypadki użycia:
 
-* Gęste obszary minucji
-* Analiza porów
-* Badanie edgeskopowe
+-   Gęste obszary minucji
+-   Analiza porów
+-   Badanie edgeskopowe
 
 ![Widoczność cech](images/common/feature-visibility.png)
 
-*Kontrolki widoczności cech.*
+_Kontrolki widoczności cech._
 
 ### 5.6 Ukrywanie nakładek informacyjnych
 
 Aplikacja może wyświetlać:
 
-* Poziom powiększenia
-* Współrzędne obrazu
-* Wskaźniki pozycji
+-   Poziom powiększenia
+-   Współrzędne obrazu
+-   Wskaźniki pozycji
 
 Te nakładki można ukryć, gdy nie są potrzebne.
 
 ![Ukrywanie nakładek](images/common/hide-overlays.png)
 
-*Kontrolki nakładek interfejsu.*
+_Kontrolki nakładek interfejsu._
 
 ### 5.7 Motywy jasny i ciemny
 
 Aplikacja obsługuje oba motywy:
 
-* Motyw jasny
-* Motyw ciemny
+-   Motyw jasny
+-   Motyw ciemny
 
 Tryb ciemny jest zalecany podczas długich sesji badawczych i w warunkach słabego oświetlenia.
 
@@ -700,7 +700,7 @@ Core jest oznaczane za pomocą pojedynczego punktu.
 
 ![Core](images/common/core.png)
 
-*Core.*
+_Core._
 
 ---
 
@@ -714,7 +714,7 @@ Cecha jest oznaczana za pomocą pojedynczego punktu.
 
 ![Delta](images/common/delta.png)
 
-*Delta.*
+_Delta._
 
 ---
 
@@ -730,7 +730,7 @@ Drugie kliknięcie wskazuje kierunek listewki.
 
 ![Początek linii](images/common/ridge-beginning.png)
 
-*Początek linii.*
+_Początek linii._
 
 ---
 
@@ -742,7 +742,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Zakończenie linii](images/common/ridge-ending.png)
 
-*Zakończenie linii.*
+_Zakończenie linii._
 
 ---
 
@@ -754,7 +754,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Rozwidlenie](images/common/bifurcation.png)
 
-*Rozwidlenie.*
+_Rozwidlenie._
 
 ---
 
@@ -766,7 +766,7 @@ Oznaczane jako cecha kierunkowa.
 
 ![Złączenie linii](images/common/ridge-joining.png)
 
-*Złączenie linii.*
+_Złączenie linii._
 
 ---
 
@@ -780,7 +780,7 @@ Cecha jest oznaczana od punktu rozwidlenia do zakończenia listewki.
 
 ![Haczyk](images/common/hook.png)
 
-*Haczyk.*
+_Haczyk._
 
 ---
 
@@ -794,7 +794,7 @@ Cecha jest oznaczana od rozwidlenia do połączenia listewek.
 
 ![Oczko](images/common/lake.png)
 
-*Oczko.*
+_Oczko._
 
 ---
 
@@ -804,15 +804,15 @@ Odcinek to izolowany segment listewki.
 
 Cecha:
 
-* Zaczyna się niezależnie.
-* Kończy się niezależnie.
-* Nie łączy się z sąsiednimi grzbietami.
+-   Zaczyna się niezależnie.
+-   Kończy się niezależnie.
+-   Nie łączy się z sąsiednimi grzbietami.
 
 Cecha jest oznaczana od początku do zakończenia.
 
 ![Odcinek](images/common/island.png)
 
-*Odcinek.*
+_Odcinek._
 
 ---
 
@@ -824,7 +824,7 @@ Cecha jest oznaczana od punktu rozwidlenia do punktu połączenia listewek.
 
 ![Mostek](images/common/bridge.png)
 
-*Mostek.*
+_Mostek._
 
 ---
 
@@ -838,7 +838,7 @@ Cecha jest oznaczana za pomocą pojedynczego punktu.
 
 ![Punkt](images/common/point.png)
 
-*Punkt.*
+_Punkt._
 
 ### Linia szczątkowa
 
@@ -850,7 +850,7 @@ Linie szczątkowe mogą być wysoce charakterystyczne i mogą być przydatne pod
 
 ![Linia szczątkowa](images/common/incipient-ridge.png)
 
-*Linia szczątkowa.*
+_Linia szczątkowa._
 
 ---
 
@@ -866,7 +866,7 @@ Cecha jest oznaczana od jej początku do jej końca.
 
 ![Pęknięcie](images/common/crease.png)
 
-*Pęknięcie.*
+_Pęknięcie._
 
 ---
 
@@ -882,7 +882,7 @@ Blizny są często wysoce indywidualizującymi cechami i mogą stanowić silne w
 
 ![Blizna](images/common/scar.png)
 
-*Blizna.*
+_Blizna._
 
 ---
 
@@ -894,11 +894,11 @@ Chociaż poszczególne pory mogą nie zawsze nadawać się do porównania, niezw
 
 Przykłady obejmują:
 
-* Wyjątkowo duże pory
-* Pory zlokalizowane przy krawędziach listewek
-* Nieregularne kształty porów
-* Charakterystyczne grupowania porów
-* Nierównomierne rozkłady porów
+-   Wyjątkowo duże pory
+-   Pory zlokalizowane przy krawędziach listewek
+-   Nieregularne kształty porów
+-   Charakterystyczne grupowania porów
+-   Nierównomierne rozkłady porów
 
 Gdy pora lub układ porów pojawia się konsekwentnie na obu obrazach, może być używany jako cecha porównawcza.
 
@@ -906,7 +906,7 @@ Pory są oznaczane za pomocą adnotacji punktowych.
 
 ![Pory](images/common/pores.png)
 
-*Pory.*
+_Pory._
 
 ---
 
@@ -920,7 +920,7 @@ Cecha jest oznaczana w miejscu wypukłości.
 
 ![Wypust krawędzi](images/common/ridge-protrusions.png)
 
-*Wypust krawędzi.*
+_Wypust krawędzi._
 
 ---
 
@@ -934,7 +934,7 @@ Cecha jest oznaczana w miejscu wgłębienia.
 
 ![Wgłębienie krawędzi](images/common/ridge-indentations.png)
 
-*Wgłębienie krawędzi.*
+_Wgłębienie krawędzi._
 
 ---
 
@@ -946,7 +946,7 @@ Układ i rozmieszczenie tych plamek może być charakterystyczne i dlatego może
 
 ![Plamki](images/common/spots.png)
 
-*Plamki.*
+_Plamki._
 
 ---
 
@@ -991,43 +991,114 @@ Typowe cechy odcisków butów obejmują:
 
 Charakterystyki wpływające na cały wzór podeszwy:
 
-* Kształt podeszwy
-* Kształt pięty
-* Ogólne wymiary
-* Układ wzoru
+-   Kształt podeszwy
+-   Kształt pięty
+-   Ogólne wymiary
+-   Układ wzoru
 
 #### Cechy produkcyjne
 
 Charakterystyki wynikające z procesu produkcji:
 
-* Cechy formy
-* Elementy wzoru
-* Geometria wzoru
+-   Cechy formy
+-   Elementy wzoru
+-   Geometria wzoru
 
 #### Cechy zużycia
 
 Charakterystyki wynikające z normalnego użytkowania:
 
-* Ścieranie
-* Wzory zużycia
-* Zaokrąglenie krawędzi
-* Lokalne pogorszenie stanu
+-   Ścieranie
+-   Wzory zużycia
+-   Zaokrąglenie krawędzi
+-   Lokalne pogorszenie stanu
 
 #### Cechy uszkodzeń
 
 Indywidualizujące charakterystyki spowodowane uszkodzeniem:
 
-* Nacięcia
-* Rozdarcia
-* Brakujące sekcje
-* Wbudowane obiekty
-* Ślady naprawy
+-   Nacięcia
+-   Rozdarcia
+-   Brakujące sekcje
+-   Wbudowane obiekty
+-   Ślady naprawy
 
 Te charakterystyki mogą być reprezentowane za pomocą adnotacji punktowych, liniowych lub obszarowych w zależności od wymagań badania.
 
 ![Porównanie odcisków butów](images/common/shoeprints-comparison.png)
 
-*Przepływ pracy porównania odcisków butów.*
+_Przepływ pracy porównania odcisków butów._
+
+### Automatyczne porównanie statystyczne
+
+Oprócz ręcznego oznaczania cech tryb odcisków butów pozwala uruchomić
+automatyczne porównanie statystyczne obu wczytanych śladów. Wykorzystuje ono
+algorytm `shoeprintr` opracowany w CSAFE (Iowa State University), dołączony do
+aplikacji — nie trzeba instalować niczego dodatkowo.
+
+#### Na czym polega algorytm
+
+Na śladzie kwestionowanym (Q) wyznaczane są trzy koliste obszary
+zainteresowania. Dla każdego z nich algorytm wyszukuje w śladzie porównawczym
+(K) obszar odpowiadający, szukając największego zbioru odpowiedniości punktowych
+wzajemnie zgodnych pod względem odległości (tzw. _kliki maksymalnej_). Na tej
+podstawie szacuje, o jaki kąt oba obszary są względem siebie obrócone oraz jak
+dobrze pokrywają się po wyrównaniu.
+
+#### Uruchamianie porównania
+
+1. Wczytaj oba ślady i w razie potrzeby popraw najpierw ich kontrast.
+2. Wybierz **Porównanie automatyczne** na pasku narzędzi po prawej stronie.
+3. Opcjonalnie podaj **rozdzielczość obrazu (DPI)** dla każdego obrazu. Przy
+   ustawieniu _Automatycznie_ oba ślady są skalowane według rozmiaru obrazu, co
+   jest właściwym wyborem, gdy rozdzielczość nie jest znana — wyniki są wtedy
+   podawane w jednostkach roboczych i raport to zaznacza. Podanie rzeczywistej
+   rozdzielczości (300 DPI dla typowego skanu kryminalistycznego) sprawia, że
+   odległości między obszarami stają się fizycznymi pomiarami w milimetrach.
+4. Sprawdź **podgląd ekstrakcji** obok każdego obrazu. Pokazuje punkty
+   krawędziowe, na których faktycznie pracuje algorytm — powinny układać się w
+   rozpoznawalny zarys wzoru podeszwy. Jeżeli podgląd jest pusty, zbyt gęsty lub
+   zaszumiony, zmień **próg binaryzacji** albo włącz **odwróć ślad i tło**, gdy
+   wzór jest jaśniejszy od otoczenia.
+5. Wybierz **Uruchom porównanie**.
+
+Porównanie trwa zwykle kilka minut i na bieżąco pokazuje postęp. W dowolnym
+momencie można je przerwać przyciskiem **Anuluj**.
+
+#### Odczytywanie wyników
+
+| Wartość              | Znaczenie                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Średnie pokrycie     | Jaka część każdego obszaru pokrywa się po wyrównaniu.                                                                                                          |
+| Spójność kąta obrotu | Rozrzut trzech kątów obrotu. Rzeczywiście odpowiadające sobie ślady są obrócone wszędzie o _tyle samo_, więc mała wartość jest tu równie istotna jak pokrycie. |
+| Zgodność trójkąta    | O ile różnią się odstępy między trzema obszarami w obu śladach. Małe wartości oznaczają ten sam układ obszarów.                                                |
+| Rozmiar kliki        | Ile odpowiadających sobie punktów potwierdziło każde wyrównanie.                                                                                               |
+
+Okno pokazuje także oba ślady z zaznaczonymi trzema obszarami, co pozwala
+wzrokowo skontrolować, gdzie zostały odnalezione.
+
+> **Ważne:** wartości te opisują stopień zgodności geometrycznej między dwoma
+> śladami. Nie są prawdopodobieństwem wspólnego pochodzenia i same w sobie nie
+> stanowią identyfikacji. Interpretacja pozostaje w gestii biegłego.
+
+#### Ustawienia
+
+-   **Promień obszaru** — wielkość trzech obszarów w milimetrach. Większe obszary
+    obejmują więcej wzoru, ale porównanie trwa znacznie dłużej.
+-   **Maksymalny kąt obrotu** — obszary kandydujące obrócone o więcej niż ta
+    wartość są odrzucane podczas wyszukiwania. Zmniejsz ją, gdy wiadomo, że ślady
+    są podobnie zorientowane.
+-   **Ziarno losowości** — algorytm losuje punkty. Stałe ziarno zapewnia
+    powtarzalność porównania; jego zmiana pozwala sprawdzić, czy wynik jest
+    stabilny.
+
+#### Dołączanie porównania do raportu
+
+Po wykonaniu porównania w oknie **Generuj raport** pojawia się opcja **Dołącz
+porównanie do raportu**, domyślnie włączona. Raport zyskuje wtedy sekcję z
+opisem metody, użytymi parametrami, wynikami dla poszczególnych obszarów,
+odległościami między obszarami oraz ilustracją dopasowanych obszarów. Opcja jest
+niedostępna, dopóki porównanie nie zostanie wykonane.
 
 ---
 
@@ -1039,10 +1110,10 @@ Tryb ten ma na celu wsparcie porównywania odcisków usznych i cech morfologii u
 
 Przyszłe wersje mają zawierać:
 
-* Definicje punktów orientacyjnych ucha
-* Specjalistyczne kategorie cech
-* Przepływy pracy porównania odcisków usznych
-* Dedykowane wsparcie raportowania
+-   Definicje punktów orientacyjnych ucha
+-   Specjalistyczne kategorie cech
+-   Przepływy pracy porównania odcisków usznych
+-   Dedykowane wsparcie raportowania
 
 Ponieważ definicje cech są nadal opracowywane, funkcjonalność może się różnić między wydaniami.
 
@@ -1086,15 +1157,15 @@ Wszystkie wnioski powinny być reprodukowalne i niezależnie weryfikowalne przez
 
 Możliwe przyczyny:
 
-* Obrazy nie są prawidłowo wyśrodkowane.
-* Obrót nie został zastosowany.
-* Nieprawidłowe przypisanie pary cech.
+-   Obrazy nie są prawidłowo wyśrodkowane.
+-   Obrót nie został zastosowany.
+-   Nieprawidłowe przypisanie pary cech.
 
 Zalecane działania:
 
-* Ponownie wyśrodkuj oba obrazy.
-* Użyj Narzędzia obrotu.
-* Sprawdź identyfikatory cech.
+-   Ponownie wyśrodkuj oba obrazy.
+-   Użyj Narzędzia obrotu.
+-   Sprawdź identyfikatory cech.
 
 ---
 
@@ -1102,14 +1173,14 @@ Zalecane działania:
 
 Możliwe przyczyny:
 
-* Nie-naprzemienny sposób wprowadzania cech.
-* Nieprawidłowe przypisanie pary.
+-   Nie-naprzemienny sposób wprowadzania cech.
+-   Nieprawidłowe przypisanie pary.
 
 Zalecane działania:
 
-* Usuń nieprawidłowo przypisane cechy.
-* Wybierz zamierzony wiersz tabeli.
-* Odtwórz przypisanie pary.
+-   Usuń nieprawidłowo przypisane cechy.
+-   Wybierz zamierzony wiersz tabeli.
+-   Odtwórz przypisanie pary.
 
 ---
 
@@ -1117,8 +1188,8 @@ Zalecane działania:
 
 Możliwe przyczyny:
 
-* Ustawienia wstępne nie zostały zaimportowane.
-* Pliki ustawień wstępnych zostały zmodyfikowane.
+-   Ustawienia wstępne nie zostały zaimportowane.
+-   Pliki ustawień wstępnych zostały zmodyfikowane.
 
 Zalecane działania:
 
@@ -1131,15 +1202,15 @@ Zalecane działania:
 
 Możliwe przyczyny:
 
-* Wybrany nieprawidłowy plik JSON.
-* Plik adnotacji należy do innego obrazu.
-* Plik adnotacji jest uszkodzony.
+-   Wybrany nieprawidłowy plik JSON.
+-   Plik adnotacji należy do innego obrazu.
+-   Plik adnotacji jest uszkodzony.
 
 Zalecane działania:
 
-* Sprawdź nazwę pliku.
-* Sprawdź powiązany obraz.
-* Przywróć z kopii zapasowej, jeśli jest dostępna.
+-   Sprawdź nazwę pliku.
+-   Sprawdź powiązany obraz.
+-   Przywróć z kopii zapasowej, jeśli jest dostępna.
 
 ---
 
@@ -1147,12 +1218,12 @@ Zalecane działania:
 
 Możliwe przyczyny:
 
-* Bardzo duże obrazy.
-* Wysoki poziom powiększenia.
-* Duża liczba adnotacji.
+-   Bardzo duże obrazy.
+-   Wysoki poziom powiększenia.
+-   Duża liczba adnotacji.
 
 Zalecane działania:
 
-* Zmniejsz rozmiar obrazu.
-* Tymczasowo ukryj etykiety cech.
-* Zamknij nieużywane projekty.
+-   Zmniejsz rozmiar obrazu.
+-   Tymczasowo ukryj etykiety cech.
+-   Zamknij nieużywane projekty.

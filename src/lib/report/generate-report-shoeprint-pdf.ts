@@ -12,6 +12,7 @@ import { MarkingsStore } from "@/lib/stores/Markings";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
 import { WorkingModeStore } from "@/lib/stores/WorkingMode";
+import { ShoeprintComparisonStore } from "@/lib/stores/ShoeprintComparison";
 import { WORKING_MODE } from "@/views/selectMode";
 import {
     formatReportDateTime,
@@ -39,6 +40,7 @@ import {
     getMarkingExtent,
 } from "./shoeprint/render-utils";
 import { createOverviewCalloutImage } from "./shoeprint/callout-placement";
+import { createComparisonPages } from "./shoeprint/comparison-pages";
 import {
     toCssColor,
     escapeHtml,
@@ -538,6 +540,18 @@ export const generateShoeprintReportPdfWithDialog = async (
                 ${createFooter(pages.length + 1, reportId, tReport)}
             `;
             pages.push(noUniquePage);
+        }
+
+        stage = "build-comparison";
+        const comparisonRun = ShoeprintComparisonStore.state.run;
+        if (options.includeComparison && comparisonRun) {
+            createComparisonPages(
+                comparisonRun,
+                pages.length + 1,
+                reportId,
+                tReport,
+                tKeywords
+            ).forEach(page => pages.push(page));
         }
 
         pages.forEach(page => root.appendChild(page));

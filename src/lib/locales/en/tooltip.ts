@@ -56,7 +56,8 @@ const d: Dictionary = {
     "Black Point": "Black Point",
     "White Point": "White Point",
     "Gamma (Midtones)": "Gamma (Midtones)",
-    "Curves (Click: Add, Right-click: Remove)": "Curves (Click: Add, Right-click: Remove)",
+    "Curves (Click: Add, Right-click: Remove)":
+        "Curves (Click: Add, Right-click: Remove)",
     "Reset Zoom": "Reset Zoom",
     ImageLoadPermissionError:
         "The edited image was saved, but cannot be loaded due to path restrictions. Please try loading it manually.",
@@ -127,6 +128,21 @@ const d: Dictionary = {
     "GBFEN — Gabor-based enhancement": "GBFEN — Gabor-based enhancement",
     "SNFEN — Neural enhancement": "SNFEN — Neural enhancement",
     "Enhancing image...": "Enhancing image...",
+    "Comparison finished in {{seconds}}s":
+        "Comparison finished in {{seconds}}s",
+    "Comparison cancelled": "Comparison cancelled",
+    "Comparison failed: {{error}}": "Comparison failed: {{error}}",
+    "Load an image on both canvases first":
+        "Load an image on both canvases first",
+    "Shoeprint canvas not ready": "The canvas is not ready.",
+    "Shoeprint load images first": "Load an image on both canvases first.",
+    "Shoeprint image has no path": "The image has no source path.",
+    "Shoeprint not enough edge points":
+        "Only {{count}} edge points were found in image {{label}}. Adjust the binarisation threshold, or use a higher-contrast image.",
+    "Shoeprint regions too large for resolution":
+        "The comparison regions are too large for image {{label}}. At {{dpi}} dpi the print measures only {{length}} mm, but an outsole is normally 250-320 mm, so that resolution is too high for this image. Clear the resolution to scale by image size instead, or enter the resolution the image was actually captured at.",
+    "Shoeprint regions too large for print":
+        "The comparison regions are too large for image {{label}}. Reduce the region radius, currently {{radius}} units for a print spanning {{width}}x{{height}} units.",
 };
 
 export default d;

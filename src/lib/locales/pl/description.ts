@@ -13,6 +13,8 @@ const d: Dictionary = {
     "Configure default report data": "Ustaw domy\u015blne dane raportu",
     "Generate PDF report": "Wygeneruj raport PDF",
     "Manage marking types": "Zarządzaj typami oznaczeń",
+    "Comparison method description":
+        "Na śladzie A wyznaczane są trzy obszary. Dla każdego z nich algorytm wyszukuje odpowiadający obszar na śladzie B, a następnie podaje stopień ich pokrycia, wzajemny kąt obrotu oraz to, czy trzy obszary tworzą w obu śladach ten sam układ.",
 };
 
 export default d;
