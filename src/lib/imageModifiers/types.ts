@@ -25,6 +25,7 @@ export interface ContrastParams {
 
 export interface FftParams {
     brushSize: number;
+    brushShape?: "circle" | "oval";
     spectrumOpacity: number;
     /** Runtime-only: in-memory mask canvas (not persisted across re-renders) */
     _maskCanvas?: HTMLCanvasElement | null;
@@ -32,6 +33,8 @@ export interface FftParams {
     _fftResult?: FFTResult | null;
     /** Runtime-only: cached processor */
     _processor?: ImageFFT | null;
+    /** Runtime-only: data URL or blob URL of the FFT filtered output */
+    runtimeOutputUrl?: string | null;
 }
 
 export type EnhancementStatus = "pending" | "processing" | "ready" | "failed";

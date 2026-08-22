@@ -48,11 +48,13 @@ export function createFftModifier(): FftModifier {
         label: "FFT Filter",
         enabled: true,
         params: {
-            brushSize: 30,
+            brushSize: 7,
+            brushShape: "circle",
             spectrumOpacity: 75,
             _maskCanvas: null,
             _fftResult: null,
             _processor: null,
+            runtimeOutputUrl: null,
         },
     };
 }

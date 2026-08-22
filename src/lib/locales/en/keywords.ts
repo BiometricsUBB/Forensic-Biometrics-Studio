@@ -147,6 +147,13 @@ const d: Dictionary = {
     "Running comparison": "Running comparison",
     "Comparison run at": "Comparison run at",
     Points: "Points",
+    Draw: "Draw",
+    Pan: "Pan",
+    Eraser: "Eraser",
+    Shape: "Shape",
+    Round: "Round",
+    Oval: "Oval",
+    "Initializing...": "Initializing...",
 };
 
 export default d;

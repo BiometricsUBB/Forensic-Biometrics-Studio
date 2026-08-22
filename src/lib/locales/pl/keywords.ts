@@ -147,6 +147,13 @@ const d: Dictionary = {
     "Running comparison": "Trwa porównanie",
     "Comparison run at": "Porównanie wykonano",
     Points: "Punkty",
+    Draw: "Rysuj",
+    Pan: "Przesuń",
+    Eraser: "Gumka",
+    Shape: "Kształt",
+    Round: "Okrągły",
+    Oval: "Owalny",
+    "Initializing...": "Inicjalizowanie...",
 };
 
 export default d;

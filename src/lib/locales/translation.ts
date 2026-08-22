@@ -151,6 +151,13 @@ export type i18nKeywords = Recordify<
     | "Running comparison"
     | "Comparison run at"
     | "Points"
+    | "Draw"
+    | "Pan"
+    | "Eraser"
+    | "Shape"
+    | "Round"
+    | "Oval"
+    | "Initializing..."
 >;
 
 export type i18nDescription = Recordify<
@@ -277,6 +284,7 @@ export type i18nTooltip = Recordify<
     | "Reset rotation"
     | "Synchronize rotation"
     | "FFT Filter"
+    | "FFT Filter applied"
     | "Paint over bright spots to filter them out"
     | "Preview ready. Return to edit or save."
     | "Polyline requires at least 2 segments"

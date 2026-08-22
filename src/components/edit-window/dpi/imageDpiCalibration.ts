@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { sampleLine, findPeaks, Point } from "./measurementUtils";
 
 interface MeasurementLine {
@@ -28,6 +29,12 @@ export class ImageDpiCalibration {
     constructor(image: HTMLImageElement, canvas: HTMLCanvasElement) {
         this.image = image;
         this.canvas = canvas;
+        if (image.naturalWidth && canvas.width !== image.naturalWidth) {
+            canvas.width = image.naturalWidth;
+        }
+        if (image.naturalHeight && canvas.height !== image.naturalHeight) {
+            canvas.height = image.naturalHeight;
+        }
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Cannot get canvas context");
         this.ctx = ctx;
@@ -175,8 +182,8 @@ export class ImageDpiCalibration {
         if (!this.image) return;
 
         const canvas = document.createElement("canvas");
-        canvas.width = this.image.naturalWidth * scaleFactor;
-        canvas.height = this.image.naturalHeight * scaleFactor;
+        canvas.width = Math.round(this.image.naturalWidth * scaleFactor);
+        canvas.height = Math.round(this.image.naturalHeight * scaleFactor);
         const ctx = canvas.getContext("2d")!;
         ctx.imageSmoothingQuality = "low";
         ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height);
