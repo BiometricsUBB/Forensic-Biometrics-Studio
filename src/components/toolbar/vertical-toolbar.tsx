@@ -5,6 +5,8 @@ import { HTMLAttributes, useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
+import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
+import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
 import {
     matchWithSourceafis,
     resolveSourceafisTypeId,
@@ -975,32 +977,27 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                             zakonczenieTypeId ?? ""
                                         );
 
-                                    const newLeftMarkings = [
-                                        ...leftMarkings,
-                                        ...clonedLeft,
-                                    ];
-                                    const newRightMarkings = [
-                                        ...rightMarkings,
-                                        ...clonedRight,
-                                    ];
+                                    clonedLeft.forEach(marking => {
+                                        GlobalHistoryManager.executeCommand(
+                                            new AddOrUpdateMarkingCommand(
+                                                MarkingsStore(
+                                                    CANVAS_ID.LEFT
+                                                ).actions.markings,
+                                                marking as any
+                                            )
+                                        );
+                                    });
 
-                                    MarkingsStore(
-                                        CANVAS_ID.LEFT
-                                    ).actions.markings.reset();
-                                    MarkingsStore(
-                                        CANVAS_ID.LEFT
-                                    ).actions.markings.addMany(
-                                        newLeftMarkings as any
-                                    );
-
-                                    MarkingsStore(
-                                        CANVAS_ID.RIGHT
-                                    ).actions.markings.reset();
-                                    MarkingsStore(
-                                        CANVAS_ID.RIGHT
-                                    ).actions.markings.addMany(
-                                        newRightMarkings as any
-                                    );
+                                    clonedRight.forEach(marking => {
+                                        GlobalHistoryManager.executeCommand(
+                                            new AddOrUpdateMarkingCommand(
+                                                MarkingsStore(
+                                                    CANVAS_ID.RIGHT
+                                                ).actions.markings,
+                                                marking as any
+                                            )
+                                        );
+                                    });
 
                                     /* eslint-disable-next-line no-alert */
                                     alert(
