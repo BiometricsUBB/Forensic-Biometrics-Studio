@@ -88,19 +88,6 @@ interface ValidPair {
     dist: number;
 }
 
-function detectCoordinatePath(obj: AppMarking) {
-    if (obj.origin && typeof obj.origin.x === "number") {
-        return { x: obj.origin.x, y: obj.origin.y, path: "origin" };
-    }
-    if (obj.position && typeof obj.position.x === "number") {
-        return { x: obj.position.x, y: obj.position.y, path: "position" };
-    }
-    if (typeof obj.x === "number" && typeof obj.y === "number") {
-        return { x: obj.x, y: obj.y, path: "plain" };
-    }
-    return { x: 0, y: 0, path: "unknown" };
-}
-
 function getProcrustesTransform(manualPairs: ManualPair[]) {
     let bestTheta = 0;
     let bestTx = 0;
@@ -893,18 +880,14 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                         const rm = (
                                             rightMarkings as unknown as AppMarking[]
                                         ).find(m => m.label === lm.label);
-                                        if (rm) {
-                                            const lCoords =
-                                                detectCoordinatePath(lm);
-                                            const rCoords =
-                                                detectCoordinatePath(rm);
+                                        if (rm && lm.origin && rm.origin) {
                                             manualPairs.push({
                                                 left: lm,
                                                 right: rm,
-                                                lX: lCoords.x,
-                                                lY: lCoords.y,
-                                                rX: rCoords.x,
-                                                rY: rCoords.y,
+                                                lX: lm.origin.x,
+                                                lY: lm.origin.y,
+                                                rX: rm.origin.x,
+                                                rY: rm.origin.y,
                                             });
                                         }
                                     });
