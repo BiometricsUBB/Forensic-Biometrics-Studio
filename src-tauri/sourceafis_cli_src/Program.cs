@@ -31,7 +31,6 @@ class Program
         string? image2Path = null;
         string? outTemplate = null;
         string? outJson = null;
-        int featureLimitOrThreshold = 10; 
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -39,12 +38,12 @@ class Program
             else if (args[i] == "--image2" && i + 1 < args.Length) image2Path = args[++i];
             else if (args[i] == "--out-template" && i + 1 < args.Length) outTemplate = args[++i];
             else if (args[i] == "--out-json" && i + 1 < args.Length) outJson = args[++i];
-            else if (args[i] == "--limit" && i + 1 < args.Length) int.TryParse(args[++i], out featureLimitOrThreshold);
         }
 
-        if (imagePath == null || outTemplate == null || outJson == null)
+        if (imagePath == null || outJson == null)
         {
-            Console.WriteLine("Missing required arguments.");
+            Console.Error.WriteLine("Missing required arguments: --image and --out-json are mandatory.");
+            Environment.Exit(1);
             return;
         }
 
@@ -67,22 +66,20 @@ class Program
             rightMinutiaeList = ExtractMinutiae(template2);
         }
 
-        File.WriteAllBytes(outTemplate, template1.ToByteArray());
+        if (outTemplate != null)
+        {
+            File.WriteAllBytes(outTemplate, template1.ToByteArray());
+        }
 
         var resultDict = new 
         {
             matchScore = score,
-            thresholdUsed = featureLimitOrThreshold,
             leftMinutiae = leftMinutiaeList,
-            rightMinutiae = rightMinutiaeList,
-            width = 500,
-            height = 500
+            rightMinutiae = rightMinutiaeList
         };
 
         var jsonString = JsonSerializer.Serialize(resultDict);
         File.WriteAllText(outJson, jsonString);
-
-        Console.WriteLine("SUCCESS");
     }
 
     private static List<object> ExtractMinutiae(FingerprintTemplate template)
