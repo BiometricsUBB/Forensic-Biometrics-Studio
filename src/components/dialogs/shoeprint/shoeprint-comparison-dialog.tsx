@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
+import { useDebouncedCallback } from "use-debounce";
 import { ScanSearch, X } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
 import { toast } from "sonner";
@@ -29,6 +30,8 @@ import {
 import type { EdgeExtractionResult } from "@/lib/shoeprint/edge-extraction";
 import { PointCloudPreview } from "./point-cloud-preview";
 import { ComparisonResults } from "./comparison-results";
+
+const PREVIEW_DEBOUNCE_MS = 300;
 
 type ShoeprintComparisonDialogProps = {
     className?: string;
@@ -164,13 +167,17 @@ export function ShoeprintComparisonDialog({
         }
     }, [settings]);
 
+    const debouncedRefreshPreview = useDebouncedCallback(() => {
+        refreshPreview().catch(() => {
+            /* surfaced through preview.error */
+        });
+    }, PREVIEW_DEBOUNCE_MS);
+
     useEffect(() => {
-        if (isOpen) {
-            refreshPreview().catch(() => {
-                /* surfaced through preview.error */
-            });
-        }
-    }, [isOpen, refreshPreview]);
+        if (!isOpen) return undefined;
+        debouncedRefreshPreview();
+        return () => debouncedRefreshPreview.cancel();
+    }, [isOpen, settings, debouncedRefreshPreview]);
 
     const updateSide = (
         side: "left" | "right",

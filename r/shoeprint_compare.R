@@ -474,8 +474,8 @@ count_points_in_circle <- function(data, cx, cy, r) {
 REFERENCE_SEARCH_MARGIN <- 15
 
 assert_regions_fit <- function(print_data, radius, label) {
-    span_x <- max(print_data) - min(print_data)
-    span_y <- max(print_data) - min(print_data)
+    span_x <- max(print_data$x) - min(print_data$x)
+    span_y <- max(print_data$y) - min(print_data$y)
     smallest <- min(span_x, span_y)
 
     if (radius + REFERENCE_SEARCH_MARGIN > smallest / 2) {

@@ -421,7 +421,7 @@ pub async fn run_shoeprint_comparison(
     // rather than on an async runtime thread. The mutex is released between
     // polls so a cancel request can still reach the child while it runs.
     let child_handle = Arc::clone(&state.child);
-    let status = tauri::async_runtime::spawn_blocking(
+    let joined = tauri::async_runtime::spawn_blocking(
         move || -> Result<std::process::ExitStatus, String> {
             let status = loop {
                 {
@@ -445,13 +445,20 @@ pub async fn run_shoeprint_comparison(
             Ok(status)
         },
     )
-    .await
-    .map_err(|e| e.to_string())??;
+    .await;
 
+    let wait_failed = !matches!(joined, Ok(Ok(_)));
     {
         let mut guard = state.child.lock().map_err(|e| e.to_string())?;
-        *guard = None;
+        if let Some(mut child) = guard.take() {
+            if wait_failed {
+                let _ = child.kill();
+                let _ = child.wait();
+            }
+        }
     }
+
+    let status = joined.map_err(|e| e.to_string())??;
 
     if state.cancelled.swap(false, Ordering::SeqCst) {
         return Err("cancelled".to_string());
