@@ -202,7 +202,6 @@ export async function matchWithSourceafis(
     viewportRight: Viewport,
     limit: number
 ) {
-    console.log("1. [Hybryda] Pobieranie ścieżek z widoków...");
     const imagePathLeft = getImagePathFromViewport(viewportLeft);
     const imagePathRight = getImagePathFromViewport(viewportRight);
 
@@ -217,9 +216,6 @@ export async function matchWithSourceafis(
     const matchTemplatePath = await join(baseDir, `match_${stamp}.dat`);
     const matchJsonPath = await join(baseDir, `match_${stamp}.json`);
 
-    console.log(
-        "2. [Hybryda] Wyciągam minucje dla LEWEGO widoku (Stary CLI)..."
-    );
     const cliTool = await createSourceAfisExternalTool();
     const leftExtract = await cliTool.run(
         {
@@ -231,9 +227,6 @@ export async function matchWithSourceafis(
         { timeoutMs: SOURCE_AFIS_TIMEOUT_MS }
     );
 
-    console.log(
-        "3. [Hybryda] Wyciągam minucje dla PRAWEGO widoku (Stary CLI)..."
-    );
     const rightExtract = await cliTool.run(
         {
             imagePath: imagePathRight,
@@ -244,9 +237,6 @@ export async function matchWithSourceafis(
         { timeoutMs: SOURCE_AFIS_TIMEOUT_MS }
     );
 
-    console.log(
-        "4. [Hybryda] Uruchamiam nowy Matcher C# dla obliczenia Score..."
-    );
     const matcherTool = await createSourceAfisMatcherTool();
     const matchResult = await matcherTool.run(
         {
@@ -265,6 +255,7 @@ export async function matchWithSourceafis(
             x: m.x,
             y: m.y,
             type: (m.type ?? "ending").toLowerCase(),
+            direction: m.direction ?? m.angleRad ?? m.angle ?? 0,
         })
     );
 
@@ -274,18 +265,13 @@ export async function matchWithSourceafis(
             x: m.x,
             y: m.y,
             type: (m.type ?? "ending").toLowerCase(),
+            direction: m.direction ?? m.angleRad ?? m.angle ?? 0,
         })
     );
 
-    const finalHybridResult = {
+    return {
         matchScore: matchResult.sourceAfisJson?.matchScore ?? 0,
         leftMinutiae,
         rightMinutiae,
     };
-
-    console.log(
-        "5. [Hybryda] SUKCES! Połączono dane z obu narzędzi:",
-        finalHybridResult
-    );
-    return finalHybridResult;
 }
