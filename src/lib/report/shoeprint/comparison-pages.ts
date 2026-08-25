@@ -19,7 +19,7 @@ const formatNumber = (value: number, digits = 1) => value.toFixed(digits);
  */
 const buildDistanceFormatter = (run: ShoeprintComparisonRun) => {
     const { unitsPerMm } = run.extraction.left;
-    if (!unitsPerMm) {
+    if (run.scaleWarning !== null || !unitsPerMm) {
         return (value: number) => formatNumber(value);
     }
     return (value: number) => `${formatNumber(value / unitsPerMm)} mm`;
