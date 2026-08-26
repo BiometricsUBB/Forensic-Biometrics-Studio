@@ -31,7 +31,7 @@
         "lint": "eslint .",
         "preview": "vite preview",
         "tauri": "tauri",
-        "tauri:dev": "node ./scripts/tauri-dev.cjs",
+        "tauri:dev": "tauri dev",
         "sidecar:sync": "node ./scripts/sidecar-sync.cjs",
         "sidecar:build:pyfing": "node ./scripts/build-pyfing-sidecar.cjs",
         "sidecar:ensure:pyfing": "node ./scripts/ensure-pyfing-sidecar.cjs",

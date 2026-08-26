@@ -316,25 +316,25 @@ export const generateShoeprintReportPdfWithDialog = async (
         const page1 = createPage();
         page1.innerHTML = `
         <div class="report-title">${escapeHtml(options.reportTitle?.trim() || tReport("Shoeprint report title"))}</div>
-    
+
         <div class="meta-block">
             <div class="meta-row"><span class="meta-label">${tReport("Report ID label")}</span><span>${reportId}</span></div>
             <div class="meta-row"><span class="meta-label">${tReport("Report date and time label")}</span><span>${reportDateTime}</span></div>
         </div>
-    
+
         <div class="meta-block">
             <div style="font-weight:700;font-size:11px;margin-bottom:3px;">${tReport("Performed by label")}</div>
             <div style="font-size:11px;">${escapeHtml(performedBy)}</div>
             <div style="font-size:11px;">${escapeHtml(department)}</div>
             ${addressHtml}
         </div>
-    
+
         <div class="section-title">${tReport("Software information")}</div>
         <div class="software-grid">
             <div class="software-row"><span class="software-label">${tReport("Application name")}</span><span>Biometrics-Studio</span></div>
             <div class="software-row"><span class="software-label">${tReport("Application version")}</span><span>${appVersion}</span></div>
         </div>
-    
+
         <div class="section-title">${tReport("Input material")}</div>
         <div class="input-stack">
             <div class="input-block-title">${tReport("Image 1")}:</div>
@@ -354,12 +354,12 @@ export const generateShoeprintReportPdfWithDialog = async (
         <div class="counts">
             <div class="input-row"><span class="input-label">${tReport("Shoeprint paired features count")}</span><span>${reportPaired.length}</span></div>
         </div>
-    
+
         <div class="note">
             <div class="note-title">${tReport("Note title")}</div>
             <div>${tReport("Note body")}</div>
         </div>
-    
+
         ${createFooter(1, reportId, tReport)}
         `;
 

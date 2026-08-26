@@ -7,17 +7,19 @@ export function syncContainedElement(
     naturalWidth: number,
     naturalHeight: number,
     extraStyles: Partial<CSSStyleDeclaration> = {},
-    syncDimensions: boolean = false
+    syncDimensions: boolean = false,
+    allowUpscale: boolean = true
 ) {
     if (!naturalWidth || !naturalHeight) return;
 
     const { clientWidth, clientHeight } = container;
     if (!clientWidth || !clientHeight) return;
 
-    const scale = Math.min(
+    const containedScale = Math.min(
         clientWidth / naturalWidth,
         clientHeight / naturalHeight
     );
+    const scale = allowUpscale ? containedScale : Math.min(1, containedScale);
     const width = Math.max(1, Math.round(naturalWidth * scale));
     const height = Math.max(1, Math.round(naturalHeight * scale));
 
@@ -52,6 +54,7 @@ export interface SyncedElementOptions {
     isFftActive?: boolean;
     extraStyles?: Partial<CSSStyleDeclaration>;
     syncDimensions?: boolean;
+    allowUpscale?: boolean;
 }
 
 export function useSyncedElement(
@@ -60,7 +63,13 @@ export function useSyncedElement(
     containerRef: React.RefObject<HTMLElement | null>,
     options: SyncedElementOptions = {}
 ) {
-    const { displayUrl, isFftActive, extraStyles, syncDimensions } = options;
+    const {
+        displayUrl,
+        isFftActive,
+        extraStyles,
+        syncDimensions,
+        allowUpscale = true,
+    } = options;
     const { syncContainedElement } = useElementSync();
     const extraStylesRef = useRef(extraStyles);
     extraStylesRef.current = extraStyles;
@@ -82,7 +91,8 @@ export function useSyncedElement(
                     source.naturalWidth,
                     source.naturalHeight,
                     extraStylesRef.current,
-                    syncDimensions
+                    syncDimensions,
+                    allowUpscale
                 );
             });
         };
@@ -105,5 +115,6 @@ export function useSyncedElement(
         syncContainedElement,
         targetRef,
         syncDimensions,
+        allowUpscale,
     ]);
 }

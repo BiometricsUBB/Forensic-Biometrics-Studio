@@ -14,6 +14,11 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
+# A PyInstaller one-file executable unpacks native libraries before startup.
+# Keep that extraction off a constrained system drive when the build script
+# provides a dedicated runtime directory.
+runtime_tmpdir = os.environ.get("PYFING_RUNTIME_TMPDIR") or None
+
 EXCLUDED_MODULES = [
     "torch",
     "torchvision",
@@ -79,7 +84,7 @@ exe = EXE(
     strip=False,
     upx=False,
     upx_exclude=[],
-    runtime_tmpdir=None,
+    runtime_tmpdir=runtime_tmpdir,
     console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,

@@ -7,6 +7,8 @@ import {
     EyeOff,
     Sun,
     Contrast,
+    FlipHorizontal,
+    Droplets,
     Waves,
     SlidersHorizontal,
     TrendingUp,
@@ -48,10 +50,38 @@ export function ModifierIcon({
                 className={cls}
             />
         );
+    if (type === "invert")
+        return (
+            <FlipHorizontal
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "desaturate")
+        return (
+            <Droplets
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     if (type === "levels")
-        return <SlidersHorizontal size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+        return (
+            <SlidersHorizontal
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     if (type === "curves")
-        return <TrendingUp size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />;
+        return (
+            <TrendingUp
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     if (type === "gbfen")
         return (
             <Wand2 size={s} strokeWidth={ICON.STROKE_WIDTH} className={cls} />
@@ -198,6 +228,12 @@ function ModifierItem({
             break;
         case "contrast":
             label = t("Contrast", { ns: "tooltip" });
+            break;
+        case "invert":
+            label = t("Invert colors", { ns: "tooltip" });
+            break;
+        case "desaturate":
+            label = t("Desaturate", { ns: "tooltip" });
             break;
         case "levels":
             label = t("Levels", { ns: "tooltip" });

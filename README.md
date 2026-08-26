@@ -6,8 +6,8 @@ The software allows users to open two images side by side, mark corresponding fe
 
 ### The project has two main goals:
 
-* to **support forensic experts** in the documentation and **comparison** of trace evidence where dedicated software is often lacking (e.g., forensic otoscopy).
-* to **support education, training, and research** in forensic image comparison. Serving as a transparent, accessible platform for students and researchers to learn the principles of biometric identification.
+-   to **support forensic experts** in the documentation and **comparison** of trace evidence where dedicated software is often lacking (e.g., forensic otoscopy).
+-   to **support education, training, and research** in forensic image comparison. Serving as a transparent, accessible platform for students and researchers to learn the principles of biometric identification.
 
 ## 🚀 Getting Started
 
@@ -51,9 +51,9 @@ Please send a brief notification to: [biometrics@ubb.edu.pl](mailto:biometrics@u
 
 You can use one of the templates listed below:
 
-* [Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.docx](./docs/Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.docx)
+-   [Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.docx](./docs/Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.docx)
 
-* [Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.pdf](./docs/Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.pdf)
+-   [Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.pdf](./docs/Forensic_Biometrics_Studio_Use_Impact_Report_Template_v1.pdf)
 
 ### Scientific Citation
 

@@ -229,7 +229,7 @@ export function ReportShoeprintDialog({
 
                                 <div className="flex flex-col gap-1.5">
                                     <label
-                                        htmlFor="shoeprint-report-unique-color"
+                                        htmlFor="shoeprint-unique-color"
                                         className="text-sm font-medium"
                                     >
                                         {t("Unique features color", {
@@ -237,7 +237,7 @@ export function ReportShoeprintDialog({
                                         })}
                                     </label>
                                     <select
-                                        id="shoeprint-report-unique-color"
+                                        id="shoeprint-unique-color"
                                         className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                                         value={uniqueColor}
                                         onChange={e =>

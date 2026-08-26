@@ -75,7 +75,10 @@ self.onmessage = (e: MessageEvent<FftWorkerRequest>) => {
                     height,
                     spectrum,
                 },
-                [complexData.buffer, spectrum.buffer]
+                [
+                    complexData.buffer as ArrayBuffer,
+                    spectrum.buffer as ArrayBuffer,
+                ]
             );
         } else if (msg.type === "INVERSE") {
             const processor = new ImageFFT(msg.fftW, msg.fftH);
@@ -99,7 +102,7 @@ self.onmessage = (e: MessageEvent<FftWorkerRequest>) => {
                     outputW: msg.outputW,
                     outputH: msg.outputH,
                 },
-                [pixelData.buffer]
+                [pixelData.buffer as ArrayBuffer]
             );
         }
     } catch (err) {

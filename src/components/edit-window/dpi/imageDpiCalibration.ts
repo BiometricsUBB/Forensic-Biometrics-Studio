@@ -7,6 +7,11 @@ interface MeasurementLine {
     peaks: Point[];
 }
 
+interface ImageDpiCalibrationOptions {
+    referenceMm: number;
+    onScaleComputed?: (scaleFactor: number) => void;
+}
+
 export class ImageDpiCalibration {
     private image: HTMLImageElement;
 
@@ -22,13 +27,35 @@ export class ImageDpiCalibration {
 
     private targetDpi: number = 1000;
 
+    private referenceMm: number = 10;
+
+    private onScaleComputed?: (scaleFactor: number) => void;
+
     public setTargetDpi(dpi: number) {
         this.targetDpi = dpi;
     }
 
-    constructor(image: HTMLImageElement, canvas: HTMLCanvasElement) {
+    public setReferenceMm(referenceMm: number) {
+        if (Number.isFinite(referenceMm) && referenceMm > 0) {
+            this.referenceMm = referenceMm;
+        }
+    }
+
+    public setOnScaleComputed(
+        onScaleComputed: ((scaleFactor: number) => void) | undefined
+    ) {
+        this.onScaleComputed = onScaleComputed;
+    }
+
+    constructor(
+        image: HTMLImageElement,
+        canvas: HTMLCanvasElement,
+        options?: Partial<ImageDpiCalibrationOptions>
+    ) {
         this.image = image;
         this.canvas = canvas;
+        if (options?.referenceMm) this.referenceMm = options.referenceMm;
+        this.onScaleComputed = options?.onScaleComputed;
         if (image.naturalWidth && canvas.width !== image.naturalWidth) {
             canvas.width = image.naturalWidth;
         }
@@ -131,9 +158,7 @@ export class ImageDpiCalibration {
 
         this.drawLine();
 
-        if (peaksIdx.length >= 2) {
-            this.processPeaks(peaksIdx);
-        }
+        this.processPeaks(peaksIdx);
     }
 
     private getImageData(): ImageData {
@@ -166,13 +191,32 @@ export class ImageDpiCalibration {
     }
 
     private processPeaks(peaksIdx: number[]) {
-        if (peaksIdx.length < 2) return;
-        const diffs: number[] = [];
-        for (let i = 0; i < peaksIdx.length - 1; i += 1) {
-            // eslint-disable-next-line security/detect-object-injection
-            diffs.push(peaksIdx[i + 1]! - peaksIdx[i]!);
+        const { line } = this;
+        if (!line) return;
+
+        let pxPerMmOriginal: number;
+        if (peaksIdx.length >= 2) {
+            const diffs: number[] = [];
+            for (let i = 0; i < peaksIdx.length - 1; i += 1) {
+                // eslint-disable-next-line security/detect-object-injection
+                diffs.push(peaksIdx[i + 1]! - peaksIdx[i]!);
+            }
+            const sorted = diffs
+                .filter(value => value > 0)
+                .sort((a, b) => a - b);
+            if (sorted.length === 0) return;
+            const median = sorted[Math.floor(sorted.length / 2)]!;
+            const inliers = sorted.filter(
+                value => value >= median * 0.5 && value <= median * 1.5
+            );
+            pxPerMmOriginal =
+                inliers.reduce((sum, value) => sum + value, 0) / inliers.length;
+        } else {
+            const dx = line.pointB.x - line.pointA.x;
+            const dy = line.pointB.y - line.pointA.y;
+            pxPerMmOriginal = Math.hypot(dx, dy) / this.referenceMm;
         }
-        const pxPerMmOriginal = diffs.reduce((a, b) => a + b, 0) / diffs.length;
+
         const dpiOriginal = pxPerMmOriginal * 25.4;
         const scaleFactor = this.targetDpi / dpiOriginal;
         this.scaleImage(scaleFactor);
@@ -180,6 +224,11 @@ export class ImageDpiCalibration {
 
     public scaleImage(scaleFactor: number) {
         if (!this.image) return;
+
+        if (this.onScaleComputed) {
+            this.onScaleComputed(scaleFactor);
+            return;
+        }
 
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(this.image.naturalWidth * scaleFactor);

@@ -5,6 +5,8 @@ import { ImageFFT, FFTResult } from "@/lib/fftProcessor";
 export type ModifierType =
     | "brightness"
     | "contrast"
+    | "invert"
+    | "desaturate"
     | "fft"
     | "gbfen"
     | "snfen"
@@ -16,11 +18,24 @@ export type EnhancementMethod = "gbfen" | "snfen";
 // ─── Per-modifier param shapes ──────────────────────────────────────────────
 
 export interface BrightnessParams {
-    value: number; // 0-200, default 100
+    value: number; // 0-100, default 50; 100 = white
 }
 
 export interface ContrastParams {
-    value: number; // 0-200, default 100
+    value: number; // 0-100, default 50; 0 = grey, 50 = unchanged
+}
+
+export interface InvertParams {
+    value: number; // 0-100, default 100
+}
+
+export interface DesaturateParams {
+    reds: number; // 0-200 color range weight
+    yellows: number;
+    greens: number;
+    cyans: number;
+    blues: number;
+    magentas: number;
 }
 
 export interface FftParams {
@@ -84,6 +99,8 @@ export interface CurvesParams {
 export type ModifierParams =
     | BrightnessParams
     | ContrastParams
+    | InvertParams
+    | DesaturateParams
     | FftParams
     | EnhancementParams
     | LevelsParams
@@ -105,6 +122,10 @@ export type BrightnessModifier = Modifier<BrightnessParams> & {
 export type ContrastModifier = Modifier<ContrastParams> & {
     type: "contrast";
 };
+export type InvertModifier = Modifier<InvertParams> & { type: "invert" };
+export type DesaturateModifier = Modifier<DesaturateParams> & {
+    type: "desaturate";
+};
 export type FftModifier = Modifier<FftParams> & { type: "fft" };
 export type GbfenModifier = Modifier<EnhancementParams> & { type: "gbfen" };
 export type SnfenModifier = Modifier<EnhancementParams> & { type: "snfen" };
@@ -114,6 +135,8 @@ export type CurvesModifier = Modifier<CurvesParams> & { type: "curves" };
 export type AnyModifier =
     | BrightnessModifier
     | ContrastModifier
+    | InvertModifier
+    | DesaturateModifier
     | FftModifier
     | GbfenModifier
     | SnfenModifier

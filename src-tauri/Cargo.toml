@@ -33,5 +33,9 @@ winreg = "0.52.0"
 # DO NOT REMOVE!!
 custom-protocol = [ "tauri/custom-protocol" ]
 
-[patch.crates-io]
-tauri-plugin-single-instance = { path = 'tauri-plugin-single-instance' }
+[profile.dev]
+# Keep the Windows linker and rustc memory usage predictable on development
+# machines. Full debug info for the Tauri dependency graph can consume several
+# gigabytes and is not needed for ordinary UI development.
+debug = 0
+incremental = true

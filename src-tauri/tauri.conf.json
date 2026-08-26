@@ -5,7 +5,7 @@
     "identifier": "com.biometrics-studio.app",
     "build": {
         "beforeBuildCommand": "pnpm sidecar:ensure:pyfing && pnpm r:ensure && pnpm build",
-        "beforeDevCommand": "pnpm dev",
+        "beforeDevCommand": "pnpm sidecar:ensure:pyfing && pnpm dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
     },

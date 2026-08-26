@@ -5,7 +5,11 @@
 import { ImageFFT } from "@/lib/fftProcessor";
 import {
     AnyModifier,
+    BrightnessModifier,
+    ContrastModifier,
+    DesaturateModifier,
     FftModifier,
+    InvertModifier,
     LevelsModifier,
     CurvesModifier,
     LevelParam,
@@ -58,6 +62,147 @@ function forEachPixel(
         data[i + 2] = nb!;
     }
     ctx.putImageData(imageData, 0, 0);
+}
+
+function applyBrightnessToChannel(channel: number, value: number) {
+    if (value === 50) return channel;
+    if (value > 50) {
+        const amount = (value - 50) / 50;
+        return channel + (255 - channel) * amount;
+    }
+
+    // Retain tonal information while darkening so contrast can still amplify it.
+    const amount = (50 - value) / 50;
+    return channel - 127 * amount;
+}
+
+function applyContrastToChannel(channel: number, value: number) {
+    if (value === 50) return channel;
+    if (value < 50) {
+        const factor = value / 50;
+        return 128 + (channel - 128) * factor;
+    }
+
+    const contrast = ((value - 50) / 50) * 254;
+    const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+    return 128 + factor * (channel - 128);
+}
+
+function applyBrightnessModifier(
+    canvas: HTMLCanvasElement,
+    modifier: BrightnessModifier
+) {
+    const value = Math.max(0, Math.min(100, modifier.params.value));
+    if (value === 50) return;
+    forEachPixel(canvas, (r, g, b) => [
+        applyBrightnessToChannel(r, value),
+        applyBrightnessToChannel(g, value),
+        applyBrightnessToChannel(b, value),
+    ]);
+}
+
+function applyContrastModifier(
+    canvas: HTMLCanvasElement,
+    modifier: ContrastModifier
+) {
+    const value = Math.max(0, Math.min(100, modifier.params.value));
+    if (value === 50) return;
+    forEachPixel(canvas, (r, g, b) => [
+        applyContrastToChannel(r, value),
+        applyContrastToChannel(g, value),
+        applyContrastToChannel(b, value),
+    ]);
+}
+
+function applyBrightnessContrastStage(
+    canvas: HTMLCanvasElement,
+    modifiers: AnyModifier[]
+) {
+    const brightnessModifiers = modifiers.filter(
+        (modifier): modifier is BrightnessModifier =>
+            modifier.enabled && modifier.type === "brightness"
+    );
+    const contrastModifiers = modifiers.filter(
+        (modifier): modifier is ContrastModifier =>
+            modifier.enabled && modifier.type === "contrast"
+    );
+
+    if (brightnessModifiers.length <= 1 && contrastModifiers.length <= 1) {
+        const brightness = brightnessModifiers[0]?.params.value ?? 50;
+        const contrast = contrastModifiers[0]?.params.value ?? 50;
+        if (brightness === 50 && contrast === 50) return;
+        forEachPixel(canvas, (r, g, b) => {
+            const applyPair = (channel: number) =>
+                applyContrastToChannel(
+                    applyBrightnessToChannel(channel, brightness),
+                    contrast
+                );
+            return [applyPair(r), applyPair(g), applyPair(b)];
+        });
+        return;
+    }
+
+    modifiers.forEach(modifier => {
+        if (modifier.enabled && modifier.type === "brightness") {
+            applyBrightnessModifier(canvas, modifier);
+        } else if (modifier.enabled && modifier.type === "contrast") {
+            applyContrastModifier(canvas, modifier);
+        }
+    });
+}
+
+function applyInvertModifier(
+    canvas: HTMLCanvasElement,
+    modifier: InvertModifier
+) {
+    const amount = Math.max(0, Math.min(100, modifier.params.value)) / 100;
+    if (amount === 0) return;
+    forEachPixel(canvas, (r, g, b) => [
+        r + (255 - 2 * r) * amount,
+        g + (255 - 2 * g) * amount,
+        b + (255 - 2 * b) * amount,
+    ]);
+}
+
+function applyDesaturateModifier(
+    canvas: HTMLCanvasElement,
+    modifier: DesaturateModifier
+) {
+    const weights = [
+        modifier.params.reds,
+        modifier.params.yellows,
+        modifier.params.greens,
+        modifier.params.cyans,
+        modifier.params.blues,
+        modifier.params.magentas,
+    ];
+
+    forEachPixel(canvas, (r, g, b) => {
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const chroma = max - min;
+        let hue = 0;
+        if (chroma !== 0) {
+            if (max === r) hue = ((g - b) / chroma + (g < b ? 6 : 0)) * 60;
+            else if (max === g) hue = ((b - r) / chroma + 2) * 60;
+            else hue = ((r - g) / chroma + 4) * 60;
+        }
+
+        const sector = hue / 60;
+        const left = Math.floor(sector) % 6;
+        const right = (left + 1) % 6;
+        const blend = sector - Math.floor(sector);
+        const colorWeight =
+            ((((weights[left] ?? 100) * (1 - blend) +
+                (weights[right] ?? 100) * blend) /
+                100) *
+                chroma) /
+            255;
+        const luminance = r * 0.299 + g * 0.587 + b * 0.114;
+        const average = (r + g + b) / 3;
+        const grey = luminance * (1 - colorWeight) + average * colorWeight;
+        return [grey, grey, grey];
+    });
 }
 
 function buildLevelsLut(param: LevelParam): Uint8Array {
@@ -183,12 +328,8 @@ function applyCurvesModifier(canvas: HTMLCanvasElement, mod: CurvesModifier) {
  * Applies all enabled modifiers to `sourceImg` in sequence.
  * Returns a `Uint8Array` of PNG bytes suitable for writing to disk.
  *
- * The pipeline works as follows:
- *  1. Draw the source image to an offscreen canvas.
- *  2. For each enabled modifier (in order):
- *     - CSS-based modifiers (brightness, contrast): apply via ctx.filter before drawing.
- *     - Canvas-based modifiers (FFT): perform in-place pixel manipulation.
- *  3. Encode the final canvas as a PNG blob and return it.
+ * Brightness and contrast use the editor's Photoshop-like paired semantics;
+ * the remaining pixel modifiers are then applied in list order.
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function applyPipelineToImage(
@@ -198,55 +339,44 @@ export async function applyPipelineToImage(
     const w = sourceImg.naturalWidth || sourceImg.width;
     const h = sourceImg.naturalHeight || sourceImg.height;
 
-    // --- Stage: collect CSS-only modifiers into a single filter string ---
-    const cssFilterParts: string[] = [];
-    modifiers.forEach(mod => {
-        if (mod.enabled) {
-            if (mod.type === "brightness") {
-                cssFilterParts.push(`brightness(${mod.params.value / 100})`);
-            } else if (mod.type === "contrast") {
-                cssFilterParts.push(`contrast(${mod.params.value / 100})`);
-            }
-        }
-    });
-
-    // --- Stage 1: draw source with CSS filters applied ---
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas context unavailable");
 
-    if (cssFilterParts.length > 0) {
-        ctx.filter = cssFilterParts.join(" ");
-    }
     ctx.drawImage(sourceImg, 0, 0, w, h);
-    ctx.filter = "none";
+    applyBrightnessContrastStage(canvas, modifiers);
 
-    // --- Stage 2: apply canvas-based modifiers in order ---
     for (let i = 0; i < modifiers.length; i += 1) {
         const mod = modifiers[i];
-        if (mod && mod.enabled) {
-            if (mod.type === "fft") {
-                // If sourceImg is already the raster output of this FFT modifier, skip to avoid double filtering
-                const fftMod = mod as FftModifier;
+        if (
+            mod &&
+            mod.enabled &&
+            mod.type !== "brightness" &&
+            mod.type !== "contrast"
+        ) {
+            if (mod.type === "invert") {
+                applyInvertModifier(canvas, mod);
+            } else if (mod.type === "desaturate") {
+                applyDesaturateModifier(canvas, mod);
+            } else if (mod.type === "fft") {
                 if (
-                    fftMod.params.runtimeOutputUrl &&
-                    sourceImg.src === fftMod.params.runtimeOutputUrl
+                    mod.params.runtimeOutputUrl &&
+                    sourceImg.src === mod.params.runtimeOutputUrl
                 ) {
                     continue;
                 }
                 // eslint-disable-next-line no-await-in-loop
-                await applyFftModifier(canvas, fftMod);
+                await applyFftModifier(canvas, mod);
             } else if (mod.type === "levels") {
-                applyLevelsModifier(canvas, mod as LevelsModifier);
+                applyLevelsModifier(canvas, mod);
             } else if (mod.type === "curves") {
-                applyCurvesModifier(canvas, mod as CurvesModifier);
+                applyCurvesModifier(canvas, mod);
             }
         }
     }
 
-    // --- Encode to PNG ---
     const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
             b => (b ? resolve(b) : reject(new Error("Canvas toBlob failed"))),

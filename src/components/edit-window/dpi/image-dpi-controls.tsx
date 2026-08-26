@@ -1,5 +1,6 @@
 import React, { RefObject, useEffect, useRef, useState } from "react";
 import { Ruler } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { ICON } from "@/lib/utils/const";
 import { cn } from "@/lib/utils/shadcn";
@@ -8,24 +9,31 @@ import { ImageDpiCalibration } from "./imageDpiCalibration";
 interface ImageDpiControlsProps {
     imageRef: RefObject<HTMLImageElement>;
     canvasRef: RefObject<HTMLCanvasElement>;
+    active: boolean;
+    onActiveChange: (active: boolean) => void;
+    onScaleComputed: (scaleFactor: number) => void;
     disabled?: boolean;
 }
 
 export default function ImageDpiControls({
     imageRef,
     canvasRef,
+    active,
+    onActiveChange,
+    onScaleComputed,
     disabled = false,
 }: ImageDpiControlsProps) {
-    const [active, setActive] = useState(false);
+    const { t } = useTranslation(["tooltip"]);
     const [targetDpi, setTargetDpi] = useState<500 | 1000>(1000);
+    const [referenceMm, setReferenceMm] = useState(10);
     const handlerRef = useRef<ImageDpiCalibration | null>(null);
 
     // Disable dpi when fft editor is active
     useEffect(() => {
         if (disabled && active) {
-            setActive(false);
+            onActiveChange(false);
         }
-    }, [disabled, active]);
+    }, [disabled, active, onActiveChange]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -41,15 +49,22 @@ export default function ImageDpiControls({
                 canvas.height = img.naturalHeight;
             }
             if (!handlerRef.current) {
-                handlerRef.current = new ImageDpiCalibration(img, canvas);
+                handlerRef.current = new ImageDpiCalibration(img, canvas, {
+                    referenceMm,
+                    onScaleComputed,
+                });
             }
             handlerRef.current.setTargetDpi(targetDpi);
+            handlerRef.current.setReferenceMm(referenceMm);
+            handlerRef.current.setOnScaleComputed(onScaleComputed);
             canvas.style.pointerEvents = "auto";
         } else {
             canvas.style.pointerEvents = "none";
             handlerRef.current?.clear();
+            handlerRef.current?.destroy();
+            handlerRef.current = null;
         }
-    }, [active, targetDpi, canvasRef, imageRef]);
+    }, [active, targetDpi, referenceMm, canvasRef, imageRef, onScaleComputed]);
 
     useEffect(() => {
         return () => {
@@ -61,7 +76,7 @@ export default function ImageDpiControls({
     return (
         <div className="space-y-3 w-full max-w-md">
             <Button
-                onClick={() => setActive(prev => !prev)}
+                onClick={() => onActiveChange(!active)}
                 variant={active ? "destructive" : "default"}
                 className="flex items-center justify-center gap-2"
                 disabled={disabled}
@@ -71,7 +86,9 @@ export default function ImageDpiControls({
             </Button>
 
             <div className="space-y-2">
-                <span className="text-sm font-medium">Target DPI</span>
+                <span className="text-sm font-medium">
+                    {t("Target DPI", { ns: "tooltip" })}
+                </span>
 
                 <div className="flex gap-4">
                     {([500, 1000] as const).map(dpi => (
@@ -114,6 +131,32 @@ export default function ImageDpiControls({
                         </label>
                     ))}
                 </div>
+            </div>
+
+            <div className="space-y-1">
+                <span className="block text-sm font-medium">
+                    {t("Reference length (mm)", { ns: "tooltip" })}
+                </span>
+                <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={referenceMm}
+                    disabled={disabled}
+                    aria-label={t("Reference length in millimeters", {
+                        ns: "tooltip",
+                    })}
+                    onChange={event => {
+                        const value = Number(event.target.value);
+                        if (Number.isFinite(value) && value > 0) {
+                            setReferenceMm(value);
+                        }
+                    }}
+                    className="h-9 w-full rounded-md border border-border/40 bg-background px-2 text-sm disabled:opacity-50"
+                />
+                <p className="text-xs text-muted-foreground">
+                    {t("DPI reference length hint", { ns: "tooltip" })}
+                </p>
             </div>
         </div>
     );

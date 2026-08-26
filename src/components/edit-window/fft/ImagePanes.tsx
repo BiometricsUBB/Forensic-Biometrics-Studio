@@ -17,6 +17,7 @@ interface ImagePanesProps {
     imageRef: RefObject<HTMLImageElement>;
     spectrumCanvasRef: RefObject<HTMLCanvasElement>;
     dpiCanvasRef: RefObject<HTMLCanvasElement>;
+    overlayActive?: boolean;
     brightness?: number;
     contrast?: number;
     cssFilter?: string;
@@ -55,6 +56,7 @@ function ImagePanes({
     imageRef,
     spectrumCanvasRef,
     dpiCanvasRef,
+    overlayActive = false,
     brightness = 100,
     contrast = 100,
     cssFilter,
@@ -159,8 +161,9 @@ function ImagePanes({
                 {/* 'dpi canvas' */}
                 <canvas
                     ref={dpiCanvasRef}
-                    className="absolute pointer-events-none z-40"
+                    className="absolute z-40"
                     style={{
+                        pointerEvents: overlayActive ? "auto" : "none",
                         transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
                         transformOrigin: TRANSFORM_ORIGIN,
                         transition: isDragging

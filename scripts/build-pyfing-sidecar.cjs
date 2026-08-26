@@ -19,11 +19,19 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.resolve(__dirname, "..");
-const VENV_DIR = path.join(ROOT, ".venv-pyfing");
+const BUILD_ROOT = process.env.PYFING_BUILD_ROOT
+    ? path.resolve(process.env.PYFING_BUILD_ROOT)
+    : ROOT;
+const VENV_DIR = path.join(BUILD_ROOT, ".venv-pyfing");
 const REQUIREMENTS = path.join(ROOT, "scripts", "pyfing-requirements.txt");
 const SPEC_FILE = path.join(ROOT, "scripts", "pyfing_enhance.spec");
-const DIST_DIR = path.join(ROOT, "dist-pyinstaller");
-const WORK_DIR = path.join(ROOT, "build-pyinstaller");
+const DIST_DIR = path.join(BUILD_ROOT, "dist-pyinstaller");
+const WORK_DIR = path.join(BUILD_ROOT, "build-pyinstaller");
+const RUNTIME_TMPDIR = process.env.PYFING_RUNTIME_TMPDIR
+    ? path.resolve(process.env.PYFING_RUNTIME_TMPDIR)
+    : process.env.PYFING_BUILD_ROOT
+      ? path.join(BUILD_ROOT, "runtime-pyinstaller")
+      : null;
 const BIN_DIR = path.join(ROOT, "src-tauri", "bin");
 const IS_WINDOWS = process.platform === "win32";
 const IS_MAC = process.platform === "darwin";
@@ -106,6 +114,7 @@ function ensureVenv() {
         console.log(`venv exists at ${VENV_DIR}`);
         return;
     }
+    fs.mkdirSync(BUILD_ROOT, { recursive: true });
     console.log(`creating venv at ${VENV_DIR} with Python ${PYTHON_VERSION}`);
     run("uv", ["venv", "--python", PYTHON_VERSION, VENV_DIR]);
 }
@@ -137,22 +146,37 @@ function installDeps() {
 
 function buildExe() {
     const py = venvPython();
+    if (RUNTIME_TMPDIR) {
+        fs.mkdirSync(RUNTIME_TMPDIR, { recursive: true });
+        console.log(`runtime extraction directory: ${RUNTIME_TMPDIR}`);
+    }
     if (fs.existsSync(DIST_DIR)) {
         fs.rmSync(DIST_DIR, { recursive: true, force: true });
     }
     if (fs.existsSync(WORK_DIR)) {
         fs.rmSync(WORK_DIR, { recursive: true, force: true });
     }
-    run(py, [
-        "-m",
-        "PyInstaller",
-        "--noconfirm",
-        "--distpath",
-        DIST_DIR,
-        "--workpath",
-        WORK_DIR,
-        SPEC_FILE,
-    ]);
+    run(
+        py,
+        [
+            "-m",
+            "PyInstaller",
+            "--noconfirm",
+            "--distpath",
+            DIST_DIR,
+            "--workpath",
+            WORK_DIR,
+            SPEC_FILE,
+        ],
+        {
+            env: {
+                ...process.env,
+                ...(RUNTIME_TMPDIR
+                    ? { PYFING_RUNTIME_TMPDIR: RUNTIME_TMPDIR }
+                    : {}),
+            },
+        }
+    );
 }
 
 function copySidecar(triple) {
@@ -163,18 +187,27 @@ function copySidecar(triple) {
     if (!fs.existsSync(built)) {
         throw new Error(`built binary not found: ${built}`);
     }
-    const targets = [
-        path.join(BIN_DIR, `pyfing_enhance-${triple}${EXE_EXT}`),
-        path.join(BIN_DIR, `pyfing_enhance${EXE_EXT}`),
-    ];
-    for (const target of targets) {
-        fs.copyFileSync(built, target);
-        if (!IS_WINDOWS) {
-            // Tauri requires sidecar binaries to be executable on Unix.
-            fs.chmodSync(target, 0o755);
+    const targetSpecific = path.join(
+        BIN_DIR,
+        `pyfing_enhance-${triple}${EXE_EXT}`
+    );
+    const generic = path.join(BIN_DIR, `pyfing_enhance${EXE_EXT}`);
+    fs.copyFileSync(built, targetSpecific);
+    if (!IS_WINDOWS) {
+        fs.chmodSync(targetSpecific, 0o755);
+        fs.copyFileSync(built, generic);
+        fs.chmodSync(generic, 0o755);
+    } else {
+        fs.rmSync(generic, { force: true });
+        try {
+            // Avoid storing a second large TensorFlow executable on Windows.
+            fs.linkSync(targetSpecific, generic);
+        } catch {
+            fs.copyFileSync(built, generic);
         }
-        console.log(`copied -> ${target}`);
     }
+    console.log(`copied -> ${targetSpecific}`);
+    console.log(`linked -> ${generic}`);
 }
 
 function smokeTest() {

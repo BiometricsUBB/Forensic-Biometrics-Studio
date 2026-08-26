@@ -51,6 +51,44 @@ const d: Dictionary = {
     Points: "pkt",
     Brightness: "Jasność",
     Contrast: "Kontrast",
+    "Invert colors": "Inwersja kolorów",
+    Desaturate: "Desaturacja",
+    "Desaturate channel weights":
+        "Konwersja do czerni i bieli z regulacją zakresów kolorów jak w Photoshopie.",
+    Reds: "Czerwienie",
+    Yellows: "Żółcienie",
+    Greens: "Zielenie",
+    Cyans: "Cyjany",
+    Blues: "Błękity",
+    Magentas: "Magenty",
+    "Rotate 90° left": "Obróć o 90° w lewo",
+    "Rotate 90° right": "Obróć o 90° w prawo",
+    "Rotate 180°": "Obróć o 180°",
+    "Flip horizontal": "Odbij poziomo",
+    "Flip vertical": "Odbij pionowo",
+    Transformations: "Przekształcenia",
+    Crop: "Kadrowanie",
+    "Start crop": "Rozpocznij kadrowanie",
+    "Apply crop": "Zastosuj kadrowanie",
+    "Cancel crop": "Anuluj kadrowanie",
+    "Draw a rectangle on the image to crop it":
+        "Narysuj prostokąt na obrazie, aby go przyciąć",
+    "Crop area selected": "Wybrano obszar kadrowania",
+    "Failed to transform image: {{error}}":
+        "Nie udało się przekształcić obrazu: {{error}}",
+    "Failed to crop image: {{error}}":
+        "Nie udało się wykadrować obrazu: {{error}}",
+    "Failed to scale image: {{error}}":
+        "Nie udało się przeskalować obrazu: {{error}}",
+    "DPI scale unchanged":
+        "DPI: skala {{scale}}x, rozmiar bez zmian ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: skala {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Docelowe DPI",
+    "Reference length (mm)": "Długość referencyjna (mm)",
+    "Reference length in millimeters": "Długość referencyjna w milimetrach",
+    "DPI reference length hint":
+        "Używane, gdy wykrycie kresek na linijce jest niejednoznaczne.",
     Levels: "Poziomy",
     levels_desc: "Dostosuj zakres tonalny i balans kolorów obrazu",
     Curves: "Krzywe",

@@ -6,6 +6,8 @@ import {
     Waves,
     Sun,
     Contrast,
+    FlipHorizontal,
+    Droplets,
     Wand2,
     Brain,
     X,
@@ -21,8 +23,10 @@ import {
     AnyModifier,
     BrightnessModifier,
     ContrastModifier,
+    DesaturateModifier,
     EnhancementModifier,
     FftModifier,
+    InvertModifier,
     LevelsModifier,
     CurvesModifier,
     isEnhancementModifier,
@@ -66,7 +70,7 @@ function BrightnessSettings({
                         id="mod-brightness"
                         type="range"
                         min="0"
-                        max="200"
+                        max="100"
                         value={modifier.params.value}
                         onChange={e =>
                             onChange({ value: Number(e.target.value) })
@@ -103,7 +107,7 @@ function ContrastSettings({
                         id="mod-contrast"
                         type="range"
                         min="0"
-                        max="200"
+                        max="100"
                         value={modifier.params.value}
                         onChange={e =>
                             onChange({ value: Number(e.target.value) })
@@ -115,6 +119,127 @@ function ContrastSettings({
                     </span>
                 </div>
             </div>
+        </div>
+    );
+}
+
+// ─── Invert ───────────────────────────────────────────────────────────────────
+
+function InvertSettings({
+    modifier,
+    onChange,
+}: {
+    modifier: InvertModifier;
+    onChange: (params: InvertModifier["params"]) => void;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    return (
+        <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+                <Label htmlFor="mod-invert" className="text-sm font-medium">
+                    {t("Invert colors", { ns: "tooltip" })}
+                </Label>
+                <div className="flex items-center gap-3">
+                    <input
+                        id="mod-invert"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={modifier.params.value}
+                        onChange={e =>
+                            onChange({ value: Number(e.target.value) })
+                        }
+                        className={`flex-1 h-2.5 ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
+                    />
+                    <span className="text-sm text-muted-foreground min-w-[3.5rem] text-right tabular-nums">
+                        {modifier.params.value}%
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ─── Desaturate ───────────────────────────────────────────────────────────────
+
+function ColorWeightSlider({
+    id,
+    label,
+    value,
+    onChange,
+}: {
+    id: string;
+    label: string;
+    value: number;
+    onChange: (value: number) => void;
+}) {
+    return (
+        <div className="flex flex-col gap-1">
+            <Label htmlFor={id} className="text-xs">
+                {label}: {value}%
+            </Label>
+            <input
+                id={id}
+                type="range"
+                min="0"
+                max="200"
+                value={value}
+                onChange={e => onChange(Number(e.target.value))}
+                className={`h-2.5 w-full ${SLIDER_TRACK_CLASS} ${SLIDER_THUMB_CLASS}`}
+            />
+        </div>
+    );
+}
+
+function DesaturateSettings({
+    modifier,
+    onChange,
+}: {
+    modifier: DesaturateModifier;
+    onChange: (params: DesaturateModifier["params"]) => void;
+}) {
+    const { t } = useTranslation(["tooltip"]);
+    const update = (params: Partial<DesaturateModifier["params"]>) =>
+        onChange({ ...modifier.params, ...params });
+
+    return (
+        <div className="flex flex-col gap-3">
+            <ColorWeightSlider
+                id="mod-desaturate-reds"
+                label={t("Reds", { ns: "tooltip" })}
+                value={modifier.params.reds}
+                onChange={reds => update({ reds })}
+            />
+            <ColorWeightSlider
+                id="mod-desaturate-yellows"
+                label={t("Yellows", { ns: "tooltip" })}
+                value={modifier.params.yellows}
+                onChange={yellows => update({ yellows })}
+            />
+            <ColorWeightSlider
+                id="mod-desaturate-greens"
+                label={t("Greens", { ns: "tooltip" })}
+                value={modifier.params.greens}
+                onChange={greens => update({ greens })}
+            />
+            <ColorWeightSlider
+                id="mod-desaturate-cyans"
+                label={t("Cyans", { ns: "tooltip" })}
+                value={modifier.params.cyans}
+                onChange={cyans => update({ cyans })}
+            />
+            <ColorWeightSlider
+                id="mod-desaturate-blues"
+                label={t("Blues", { ns: "tooltip" })}
+                value={modifier.params.blues}
+                onChange={blues => update({ blues })}
+            />
+            <ColorWeightSlider
+                id="mod-desaturate-magentas"
+                label={t("Magentas", { ns: "tooltip" })}
+                value={modifier.params.magentas}
+                onChange={magentas => update({ magentas })}
+            />
         </div>
     );
 }
@@ -517,9 +642,8 @@ function CurvesSettings({
                             className={lineStroke}
                         />
                         {activePoints.map((p, idx) => (
-                            /* eslint-disable-next-line react/no-array-index-key */
                             <circle
-                                key={idx}
+                                key={`${p.x}:${p.y}`}
                                 cx={(p.x / 255) * 100}
                                 cy={100 - (p.y / 255) * 100}
                                 r="3"
@@ -1108,6 +1232,22 @@ function TitleIcon({ type }: { type: AnyModifier["type"] }) {
                 className={cls}
             />
         );
+    if (type === "invert")
+        return (
+            <FlipHorizontal
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "desaturate")
+        return (
+            <Droplets
+                size={ICON.SIZE}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
     if (type === "levels")
         return (
             <SlidersHorizontal
@@ -1181,7 +1321,10 @@ export function ModifierSettingsDialog({
             setIsDragging(false);
             return;
         }
-        if ((modifier.type === "levels" || modifier.type === "curves") && imageRef.current) {
+        if (
+            (modifier.type === "levels" || modifier.type === "curves") &&
+            imageRef.current
+        ) {
             setTimeout(() => {
                 if (imageRef.current) {
                     setHistogram(computeHistogram(imageRef.current));
@@ -1218,16 +1361,18 @@ export function ModifierSettingsDialog({
         onUpdate(modifier.id, params);
     };
 
-    const title =
-        modifier.type === "brightness"
-            ? t("Brightness", { ns: "tooltip" })
-            : modifier.type === "contrast"
-              ? t("Contrast", { ns: "tooltip" })
-              : modifier.type === "fft"
-                ? t("FFT Filter", { ns: "tooltip" })
-                : modifier.type === "gbfen"
-                  ? t("GBFEN", { ns: "tooltip" })
-                  : t("SNFEN", { ns: "tooltip" });
+    const titleKeys = {
+        brightness: "Brightness",
+        contrast: "Contrast",
+        invert: "Invert colors",
+        desaturate: "Desaturate",
+        fft: "FFT Filter",
+        gbfen: "GBFEN",
+        snfen: "SNFEN",
+        levels: "Levels",
+        curves: "Curves",
+    } as const;
+    const title = t(titleKeys[modifier.type], { ns: "tooltip" });
 
     return (
         /*
@@ -1289,6 +1434,18 @@ export function ModifierSettingsDialog({
                     {modifier.type === "contrast" && (
                         <ContrastSettings
                             modifier={modifier as ContrastModifier}
+                            onChange={p => handleChange(p)}
+                        />
+                    )}
+                    {modifier.type === "invert" && (
+                        <InvertSettings
+                            modifier={modifier as InvertModifier}
+                            onChange={p => handleChange(p)}
+                        />
+                    )}
+                    {modifier.type === "desaturate" && (
+                        <DesaturateSettings
+                            modifier={modifier as DesaturateModifier}
                             onChange={p => handleChange(p)}
                         />
                     )}
