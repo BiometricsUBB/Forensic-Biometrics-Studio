@@ -6,6 +6,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { CANVAS_ID } from "@/components/pixi/canvas/hooks/useCanvasContext";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
+import { toast } from "sonner";
+import type { TFunction } from "i18next";
 import { AddOrUpdateMarkingCommand } from "@/lib/stores/History/MarkingCommands";
 import {
     matchWithSourceafis,
@@ -252,12 +254,111 @@ function createTransformedMarkings(
     return { clonedLeft, clonedRight };
 }
 
+function selectAutomatedPairs(
+    sortedValidPairs: ValidPair[],
+    manualPairs: ManualPair[],
+    limit: number
+): ValidPair[] {
+    const automatedPairs: ValidPair[] = [];
+    const seenLeft = new Set<string>();
+    const seenRight = new Set<string>();
+
+    manualPairs.forEach(p => {
+        seenLeft.add(`${p.lX}-${p.lY}`);
+        seenRight.add(`${p.rX}-${p.rY}`);
+    });
+
+    const remainingLimit = limit - manualPairs.length;
+    if (remainingLimit <= 0) {
+        return automatedPairs;
+    }
+
+    for (let k = 0; k < sortedValidPairs.length; k += 1) {
+        const pair = sortedValidPairs[k];
+        if (!pair) break;
+
+        const lKey = `${pair.left.x}-${pair.left.y}`;
+        const rKey = `${pair.right.x}-${pair.right.y}`;
+
+        if (!seenLeft.has(lKey) && !seenRight.has(rKey)) {
+            seenLeft.add(lKey);
+            seenRight.add(rKey);
+            automatedPairs.push(pair);
+        }
+
+        if (automatedPairs.length >= remainingLimit) {
+            break;
+        }
+    }
+
+    return automatedPairs;
+}
+
 export type VerticalToolbarProps = HTMLAttributes<HTMLDivElement>;
+
+function findManualPairs(
+    leftMarkings: AppMarking[],
+    rightMarkings: AppMarking[]
+): ManualPair[] {
+    const manualPairs: ManualPair[] = [];
+    leftMarkings.forEach(lm => {
+        const rm = rightMarkings.find(m => m.label === lm.label);
+        if (rm && lm.origin && rm.origin) {
+            manualPairs.push({
+                left: lm,
+                right: rm,
+                lX: lm.origin.x,
+                lY: lm.origin.y,
+                rX: rm.origin.x,
+                rY: rm.origin.y,
+            });
+        }
+    });
+    return manualPairs;
+}
+
+function getMaxMarkingLabel(
+    leftMarkings: { label: string | number }[],
+    rightMarkings: { label: string | number }[]
+): number {
+    let maxCurrentLabel = 1;
+    leftMarkings.forEach(m => {
+        if (Number(m.label) > maxCurrentLabel)
+            maxCurrentLabel = Number(m.label);
+    });
+    rightMarkings.forEach(m => {
+        if (Number(m.label) > maxCurrentLabel)
+            maxCurrentLabel = Number(m.label);
+    });
+    return maxCurrentLabel;
+}
+
+function getAfisButtonText(
+    isMatching: boolean,
+    isCoreMarkedOnBoth: boolean,
+    currentManualPairsCount: number,
+    t: TFunction
+): string {
+    if (isMatching) {
+        return t("tools.autoAfisMatcher.matching", "Dopasowywanie...");
+    }
+    if (!isCoreMarkedOnBoth) {
+        return t("toolbar.afis.markCoreBoth", "Zaznacz CORE na obu zdjęciach");
+    }
+    if (currentManualPairsCount < 4) {
+        return t("toolbar.afis.markRemainingBasePoints", {
+            count: 4 - currentManualPairsCount,
+            defaultValue: `Zaznacz jeszcze ${4 - currentManualPairsCount} punkty bazowe`,
+        });
+    }
+    return t("toolbar.afis.extractAndMatch", "Wyodrębnij i dopasuj");
+}
 
 export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
     const { t } = useTranslation();
     const formatCombo = useFormatCombo();
     const [afisLimit, setAfisLimit] = useState<number>(20);
+    const [isMatching, setIsMatching] = useState(false);
     const collapsiblePanelTransitionClass =
         "overflow-hidden transition-all duration-300 ease-in-out";
     const collapsiblePanelExpandedClass = "max-h-96 opacity-100 mt-2";
@@ -358,6 +459,110 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
             MarkingTypesStore.actions.selectedType.set(null);
         }
     }, [availableMarkingTypes, selectedTypeId]);
+
+    const handleAfisMatch = async () => {
+        if (isMatching) return;
+        setIsMatching(true);
+
+        try {
+            const canvasLeft = getCanvas(CANVAS_ID.LEFT, true);
+            const canvasRight = getCanvas(CANVAS_ID.RIGHT, true);
+            const viewportLeft = canvasLeft?.viewport;
+            const viewportRight = canvasRight?.viewport;
+
+            if (!viewportLeft || !viewportRight || !leftCore || !rightCore) {
+                return;
+            }
+
+            const data = (await matchWithSourceafis(
+                viewportLeft,
+                viewportRight,
+                afisLimit
+            )) as unknown as SourceAfisData;
+
+            if (!data || !data.leftMinutiae || !data.rightMinutiae) {
+                toast.error(
+                    t(
+                        "tools.autoAfisMatcher.noMinutiaeData",
+                        "Brak danych minucji z systemu AFIS"
+                    )
+                );
+                return;
+            }
+
+            const manualPairs = findManualPairs(
+                leftMarkings as unknown as AppMarking[],
+                rightMarkings as unknown as AppMarking[]
+            );
+
+            const transform = getProcrustesTransform(manualPairs);
+            const sortedValidPairs = matchAutomatedMinutiae(
+                data.leftMinutiae,
+                data.rightMinutiae,
+                manualPairs,
+                transform
+            );
+
+            const automatedPairs = selectAutomatedPairs(
+                sortedValidPairs,
+                manualPairs,
+                afisLimit
+            );
+
+            const maxCurrentLabel = getMaxMarkingLabel(
+                leftMarkings,
+                rightMarkings
+            );
+
+            const { clonedLeft, clonedRight } = createTransformedMarkings(
+                automatedPairs,
+                maxCurrentLabel,
+                rozwidlenieTypeId ?? "",
+                zakonczenieTypeId ?? ""
+            );
+
+            clonedLeft.forEach(marking => {
+                GlobalHistoryManager.executeCommand(
+                    new AddOrUpdateMarkingCommand(
+                        MarkingsStore(CANVAS_ID.LEFT).actions.markings,
+                        marking
+                    )
+                );
+            });
+
+            clonedRight.forEach(marking => {
+                GlobalHistoryManager.executeCommand(
+                    new AddOrUpdateMarkingCommand(
+                        MarkingsStore(CANVAS_ID.RIGHT).actions.markings,
+                        marking
+                    )
+                );
+            });
+
+            toast.success(
+                t(
+                    "tools.autoAfisMatcher.successAlert",
+                    `Dopasowanie udane! Zablokowano ${manualPairs.length} punktów bazowych. Automat dobrał ${automatedPairs.length} kolejnych cech. Score: ${data.matchScore}`,
+                    {
+                        lockedCount: manualPairs.length,
+                        automatedCount: automatedPairs.length,
+                        score: data.matchScore,
+                    }
+                )
+            );
+        } catch (error) {
+            // eslint-disable-next-line no-console
+            console.error("Błąd podczas parowania cech AFIS:", error);
+            toast.error(
+                t(
+                    "toolbar.afis.error",
+                    "Wystąpił błąd podczas automatycznego dopasowywania cech. Sprawdź konsolę."
+                )
+            );
+        } finally {
+            setIsMatching(false);
+        }
+    };
 
     return (
         <div
@@ -826,220 +1031,16 @@ export function VerticalToolbar({ className, ...props }: VerticalToolbarProps) {
                                 variant={
                                     isValidationPassed ? "default" : "secondary"
                                 }
-                                disabled={!isValidationPassed}
+                                disabled={!isValidationPassed || isMatching}
                                 className="w-full h-9 text-xs font-medium rounded-lg transition-all duration-200 cursor-pointer shadow-xs"
-                                /* eslint-disable-next-line */
-                                onClick={async () => {
-                                    /* eslint-disable sonarjs/cognitive-complexity, @typescript-eslint/no-explicit-any, no-empty */
-                                    try {
-                                        const canvasLeft = getCanvas(
-                                            CANVAS_ID.LEFT,
-                                            true
-                                        );
-                                        const canvasRight = getCanvas(
-                                            CANVAS_ID.RIGHT,
-                                            true
-                                        );
-                                        const viewportLeft =
-                                            canvasLeft?.viewport;
-                                        const viewportRight =
-                                            canvasRight?.viewport;
-
-                                        if (
-                                            !viewportLeft ||
-                                            !viewportRight ||
-                                            !leftCore ||
-                                            !rightCore
-                                        )
-                                            return;
-
-                                        const data = (await matchWithSourceafis(
-                                            viewportLeft,
-                                            viewportRight,
-                                            afisLimit
-                                        )) as unknown as SourceAfisData;
-                                        if (
-                                            !data ||
-                                            !data.leftMinutiae ||
-                                            !data.rightMinutiae
-                                        ) {
-                                            /* eslint-disable-next-line no-alert */
-                                            alert(
-                                                t(
-                                                    "tools.autoAfisMatcher.noMinutiaeData",
-                                                    "Brak danych minucji z systemu AFIS"
-                                                )
-                                            );
-                                            return;
-                                        }
-
-                                        const manualPairs: ManualPair[] = [];
-                                        (
-                                            leftMarkings as unknown as AppMarking[]
-                                        ).forEach(lm => {
-                                            const rm = (
-                                                rightMarkings as unknown as AppMarking[]
-                                            ).find(m => m.label === lm.label);
-                                            if (rm && lm.origin && rm.origin) {
-                                                manualPairs.push({
-                                                    left: lm,
-                                                    right: rm,
-                                                    lX: lm.origin.x,
-                                                    lY: lm.origin.y,
-                                                    rX: rm.origin.x,
-                                                    rY: rm.origin.y,
-                                                });
-                                            }
-                                        });
-
-                                        const transform =
-                                            getProcrustesTransform(manualPairs);
-                                        const sortedValidPairs =
-                                            matchAutomatedMinutiae(
-                                                data.leftMinutiae,
-                                                data.rightMinutiae,
-                                                manualPairs,
-                                                transform
-                                            );
-                                        const automatedPairs: ValidPair[] = [];
-                                        const seenLeft = new Set<string>();
-                                        const seenRight = new Set<string>();
-
-                                        manualPairs.forEach(p => {
-                                            seenLeft.add(`${p.lX}-${p.lY}`);
-                                            seenRight.add(`${p.rX}-${p.rY}`);
-                                        });
-
-                                        const remainingLimit =
-                                            afisLimit - manualPairs.length;
-
-                                        if (remainingLimit > 0) {
-                                            for (
-                                                let k = 0;
-                                                k < sortedValidPairs.length;
-                                                k += 1
-                                            ) {
-                                                const pair =
-                                                    sortedValidPairs[k];
-                                                if (!pair) break;
-                                                const lKey = `${pair.left.x}-${pair.left.y}`;
-                                                const rKey = `${pair.right.x}-${pair.right.y}`;
-
-                                                if (
-                                                    !seenLeft.has(lKey) &&
-                                                    !seenRight.has(rKey)
-                                                ) {
-                                                    seenLeft.add(lKey);
-                                                    seenRight.add(rKey);
-                                                    automatedPairs.push(pair);
-                                                }
-                                                if (
-                                                    automatedPairs.length >=
-                                                    remainingLimit
-                                                )
-                                                    break;
-                                            }
-                                        }
-
-                                        let maxCurrentLabel = 1;
-                                        leftMarkings.forEach(m => {
-                                            if (
-                                                Number(m.label) >
-                                                maxCurrentLabel
-                                            )
-                                                maxCurrentLabel = Number(
-                                                    m.label
-                                                );
-                                        });
-                                        rightMarkings.forEach(m => {
-                                            if (
-                                                Number(m.label) >
-                                                maxCurrentLabel
-                                            )
-                                                maxCurrentLabel = Number(
-                                                    m.label
-                                                );
-                                        });
-
-                                        const { clonedLeft, clonedRight } =
-                                            createTransformedMarkings(
-                                                automatedPairs,
-                                                maxCurrentLabel,
-                                                rozwidlenieTypeId ?? "",
-                                                zakonczenieTypeId ?? ""
-                                            );
-
-                                        clonedLeft.forEach(marking => {
-                                            GlobalHistoryManager.executeCommand(
-                                                new AddOrUpdateMarkingCommand(
-                                                    MarkingsStore(
-                                                        CANVAS_ID.LEFT
-                                                    ).actions.markings,
-                                                    marking as any
-                                                )
-                                            );
-                                        });
-
-                                        clonedRight.forEach(marking => {
-                                            GlobalHistoryManager.executeCommand(
-                                                new AddOrUpdateMarkingCommand(
-                                                    MarkingsStore(
-                                                        CANVAS_ID.RIGHT
-                                                    ).actions.markings,
-                                                    marking as any
-                                                )
-                                            );
-                                        });
-
-                                        /* eslint-disable-next-line no-alert */
-                                        alert(
-                                            t(
-                                                "tools.autoAfisMatcher.successAlert",
-                                                `Dopasowanie udane! Zablokowano ${manualPairs.length} punktów bazowych. Automat dobrał ${automatedPairs.length} kolejnych cech. Score: ${data.matchScore}`,
-                                                {
-                                                    lockedCount:
-                                                        manualPairs.length,
-                                                    automatedCount:
-                                                        automatedPairs.length,
-                                                    score: data.matchScore,
-                                                }
-                                            )
-                                        );
-                                    } catch (error) {
-                                        /* eslint-disable-next-line no-console */
-                                        console.error(
-                                            "Błąd podczas parowania cech AFIS:",
-                                            error
-                                        );
-
-                                        /* eslint-disable-next-line no-alert */
-                                        alert(
-                                            t(
-                                                "toolbar.afis.error",
-                                                "Wystąpił błąd podczas automatycznego dopasowywania cech. Sprawdź konsolę."
-                                            )
-                                        );
-                                    }
-                                }}
+                                onClick={handleAfisMatch}
                             >
-                                {!isCoreMarkedOnBoth
-                                    ? t(
-                                          "toolbar.afis.markCoreBoth",
-                                          "Zaznacz CORE na obu zdjęciach"
-                                      )
-                                    : currentManualPairsCount < 4
-                                      ? t(
-                                            "toolbar.afis.markRemainingBasePoints",
-                                            {
-                                                count:
-                                                    4 - currentManualPairsCount,
-                                                defaultValue: `Zaznacz jeszcze ${4 - currentManualPairsCount} punkty bazowe`,
-                                            }
-                                        )
-                                      : t(
-                                            "toolbar.afis.extractAndMatch",
-                                            "Wyodrębnij i dopasuj"
-                                        )}
+                                {getAfisButtonText(
+                                    isMatching,
+                                    isCoreMarkedOnBoth,
+                                    currentManualPairsCount,
+                                    t
+                                )}
                             </Button>
                         </div>
                     )}
