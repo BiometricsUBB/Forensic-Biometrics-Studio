@@ -3,16 +3,23 @@ import { IS_DEV_ENVIRONMENT } from "@/lib/utils/const";
 import useResizeObserver from "@/lib/hooks/useResizeObserver";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { WorkingModeStore } from "@/lib/stores/WorkingMode";
+import { WORKING_MODE } from "@/views/selectMode";
 import { MarkingsInfo } from "./markings-info/markings-info";
 import { DebugInfo } from "./debug-info/debug-info";
+import { SignatureParamsInfo } from "./signature-params/signature-params-info";
 
 const enum TABS {
     MARKINGS = "markings",
+    PARAMETERS = "parameters",
     DEBUG = "debug",
 }
 
 export function InformationTabs() {
     const { t } = useTranslation();
+
+    const workingMode = WorkingModeStore.use(state => state.workingMode);
+    const isSignatureMode = workingMode === WORKING_MODE.SIGNATURE;
 
     const initialTab = TABS.MARKINGS;
     const [tableHeight, setTableHeight] = useState(0);
@@ -42,6 +49,12 @@ export function InformationTabs() {
             <TabsList className="w-fit flex space-x-1">
                 <TabsTrigger value={TABS.MARKINGS}>{t("Markings")}</TabsTrigger>
 
+                {isSignatureMode && (
+                    <TabsTrigger value={TABS.PARAMETERS}>
+                        {t("Parameters")}
+                    </TabsTrigger>
+                )}
+
                 {IS_DEV_ENVIRONMENT && (
                     <TabsTrigger value={TABS.DEBUG}>{t("Debug")}</TabsTrigger>
                 )}
@@ -52,6 +65,15 @@ export function InformationTabs() {
             >
                 <MarkingsInfo tableHeight={tableHeight} />
             </TabsContent>
+
+            {isSignatureMode && (
+                <TabsContent
+                    value={TABS.PARAMETERS}
+                    className="w-full overflow-auto"
+                >
+                    <SignatureParamsInfo />
+                </TabsContent>
+            )}
 
             {IS_DEV_ENVIRONMENT && (
                 <TabsContent

@@ -14,6 +14,7 @@ export const enum CURSOR_MODES {
     AUTOROTATE = "autorotate",
     TRACING = "tracing",
     MEASUREMENT = "measurement",
+    AREA = "area",
 }
 
 type Settings = {

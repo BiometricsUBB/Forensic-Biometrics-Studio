@@ -24,9 +24,14 @@ import { exists } from "@tauri-apps/plugin-fs";
 import { Sprite } from "pixi.js";
 import { GlobalStateStore } from "@/lib/stores/GlobalState";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
+import { GlobalHistoryManager } from "@/lib/stores/History/HistoryManager";
 import { loadSprite } from "./loadSprite";
 
-export async function loadImage(filePath: string, viewport: Viewport) {
+export async function loadImage(
+    filePathOrData: string | Uint8Array,
+    viewport: Viewport,
+    name?: string
+) {
     DashboardToolbarStore.actions.settings.viewport.setLockScaleSync(false);
     DashboardToolbarStore.actions.settings.viewport.setLockedViewport(false);
 
@@ -68,12 +73,13 @@ export async function loadImage(filePath: string, viewport: Viewport) {
             baseTexture: true,
         });
 
-    const sprite = await loadSprite(filePath);
+    const sprite = await loadSprite(filePathOrData, name);
     sprite.anchor.set(0, 0);
     sprite.pivot.set(sprite.width / 2, sprite.height / 2);
     sprite.position.set(sprite.width / 2, sprite.height / 2);
     viewport.addChild(sprite);
 
+    GlobalHistoryManager.clear();
     ShallowViewportStore(canvasId).state.reset();
     CanvasToolbarStore(canvasId).state.reset();
     CachedViewportStore(canvasId).state.reset();
@@ -81,9 +87,10 @@ export async function loadImage(filePath: string, viewport: Viewport) {
     fitWorld(viewport);
     emitFitEvents(viewport, "fit-world");
 
-    const defaultMarkingsFilePath = `${filePath}.json`;
-    if (await exists(defaultMarkingsFilePath)) {
-        await loadMarkingsData(defaultMarkingsFilePath, canvasId);
+    const markingsPath =
+        typeof filePathOrData === "string" ? `${filePathOrData}.json` : null;
+    if (markingsPath && (await exists(markingsPath))) {
+        await loadMarkingsData(markingsPath, canvasId);
     } else {
         MarkingsStore(canvasId).actions.markings.reset();
         MarkingsStore(canvasId).actions.labelGenerator.reset();

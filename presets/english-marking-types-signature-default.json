@@ -1,0 +1,92 @@
+{
+    "metadata": {
+        "software": {
+            "name": "biometrics-studio",
+            "version": "0.6.10"
+        }
+    },
+    "data": {
+        "markingTypes": [
+            {
+                "id": "b6a1e2c0-7f3d-4a51-9c2e-1d0a8b4f6e10",
+                "name": "SignatureOutline",
+                "displayName": "Signature outline",
+                "markingClass": "polygon",
+                "backgroundColor": "#36d938",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "c7b2f3d1-8a4e-4b62-8d3f-2e1b9c5a7f21",
+                "name": "AxisW1",
+                "displayName": "Axis W1",
+                "markingClass": "line_segment",
+                "backgroundColor": "#2871e6",
+                "textColor": "#f5f7ff",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "d8c3a4e2-9b5f-4c73-9e40-3f2c0d6b8a32",
+                "name": "AxisW2",
+                "displayName": "Axis W2",
+                "markingClass": "line_segment",
+                "backgroundColor": "#9d4edd",
+                "textColor": "#f5f7ff",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "e9d4b5f3-a06a-4d84-8f51-4a3d1e7c9b43",
+                "name": "StartPoint",
+                "displayName": "Start point",
+                "markingClass": "point",
+                "backgroundColor": "#e17e3d",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "f0e5c6a4-b17b-4e95-9062-5b4e2f8d0c54",
+                "name": "EndStroke",
+                "displayName": "End stroke",
+                "markingClass": "ray",
+                "backgroundColor": "#d1db3d",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "a1f6d7b5-c28c-4fa6-8173-6c5f3a9e1d65",
+                "name": "Loop",
+                "displayName": "Loop",
+                "markingClass": "point",
+                "backgroundColor": "#60d2b6",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "b2a7e8c6-d39d-40b7-9284-7d6a4b0f2e76",
+                "name": "Diacritic",
+                "displayName": "Diacritic",
+                "markingClass": "point",
+                "backgroundColor": "#f93e98",
+                "textColor": "#0a130a",
+                "size": 10,
+                "category": "SIGNATURE"
+            },
+            {
+                "id": "c3b8f9d7-e4ae-41c8-8395-8e7b5c1a3f87",
+                "name": "Connection",
+                "displayName": "Letter connection",
+                "markingClass": "line_segment",
+                "backgroundColor": "#1f7a8c",
+                "textColor": "#f5f7ff",
+                "size": 10,
+                "category": "SIGNATURE"
+            }
+        ]
+    }
+}

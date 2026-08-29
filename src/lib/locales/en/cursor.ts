@@ -7,6 +7,7 @@ const d: Dictionary = {
         Rotation: "Rotation",
         Tracing: "Tracing",
         Measurement: "Measurement",
+        Area: "Area",
     },
 };
 

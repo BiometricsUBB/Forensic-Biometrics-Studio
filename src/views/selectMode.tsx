@@ -7,6 +7,7 @@ export enum WORKING_MODE {
     FINGERPRINT = "FINGERPRINT",
     EAR = "EAR",
     SHOEPRINT = "SHOEPRINT",
+    SIGNATURE = "SIGNATURE",
 }
 
 interface ISelectModeProps {

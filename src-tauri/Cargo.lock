@@ -5661,7 +5661,3 @@ dependencies = [
  "syn 2.0.117",
  "winnow 0.7.14",
 ]
-
-[[patch.unused]]
-name = "tauri-plugin-single-instance"
-version = "2.0.0"

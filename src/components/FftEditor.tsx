@@ -27,7 +27,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
     const [isDrawing, setIsDrawing] = useState(false);
     const [status, setStatus] = useState<Status>("loading");
     const [errorMsg, setErrorMsg] = useState("");
-    const [brushSize, setBrushSize] = useState(30);
+    const [brushSize, setBrushSize] = useState(7);
     const [viewMode, setViewMode] = useState<ViewMode>("edit");
     const [savedMaskState, setSavedMaskState] = useState<ImageData | null>(
         null
@@ -294,6 +294,7 @@ export function FftEditor({ imageSrc, onClose, onSave }: FftEditorProps) {
             const binaryString = atob(base64Data);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i += 1)
+                // eslint-disable-next-line security/detect-object-injection
                 bytes[i] = binaryString.charCodeAt(i);
             await writeFile(filePath, bytes);
             onSave(dataUrl);

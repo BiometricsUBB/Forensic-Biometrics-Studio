@@ -4,8 +4,8 @@
     "version": "0.6.10",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "pnpm build",
-        "beforeDevCommand": "pnpm dev",
+        "beforeBuildCommand": "pnpm sidecar:ensure:pyfing && pnpm r:ensure && pnpm build",
+        "beforeDevCommand": "pnpm sidecar:ensure:pyfing && pnpm dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
     },
@@ -53,7 +53,7 @@
         "category": "DeveloperTool",
         "copyright": "",
         "targets": "all",
-        "externalBin": ["bin/sourceafis_cli","bin/sourceafis_matcher"],
+        "externalBin": ["bin/sourceafis_cli", "bin/pyfing_enhance", "bin/sourceafis_matcher"],
         "icon": [
             "../public/logo_32.png",
             "../public/logo_128.png",
@@ -67,7 +67,11 @@
             "timestampUrl": ""
         },
         "longDescription": "",
-        "resources": { "../presets/**/*": "presets/" },
+        "resources": {
+            "../presets/**/*": "presets/",
+            "../r/shoeprint_compare.R": "r/shoeprint_compare.R",
+            "r-runtime": "r-runtime"
+        },
         "shortDescription": "",
         "linux": {
             "deb": {
@@ -76,4 +80,3 @@
         }
     }
 }
-

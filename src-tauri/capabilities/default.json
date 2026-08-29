@@ -22,6 +22,14 @@
             "allow": ["**", "**/*", "/**/*"]
         },
         {
+            "identifier": "fs:allow-stat",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        {
+            "identifier": "fs:allow-mkdir",
+            "allow": ["**", "**/*", "/**/*"]
+        },
+        {
             "identifier": "fs:allow-read-file",
             "allow": ["**", "**/*", "/**/*"]
         },
@@ -29,7 +37,13 @@
             "identifier": "fs:allow-read-text-file",
             "allow": ["**", "**/*", "/**/*"]
         },
-        "fs:allow-write-text-file",
+        {
+            "identifier": "fs:allow-write-text-file",
+            "allow": [
+                "$APPLOCALDATA/shoeprint-comparison",
+                "$APPLOCALDATA/shoeprint-comparison/*"
+            ]
+        },
         {
             "identifier": "fs:allow-write-file",
             "allow": ["**", "**/*", "/**/*"]
@@ -45,19 +59,44 @@
         "dialog:allow-ask",
         "dialog:allow-confirm",
         {
-            "identifier": "shell:allow-execute",
-            "allow": [
-                {
-                    "name": "bin/sourceafis_cli",
-                    "sidecar": true,
-                    "args": true
-                },
-                {
-                    "name": "bin/sourceafis_matcher",
-                    "sidecar": true,
-                    "args": true
-                }
-            ]
+          "identifier": "shell:allow-execute",
+          "allow": [
+            {
+              "name": "bin/sourceafis_cli",
+              "sidecar": true,
+              "args": true
+            },
+            {
+              "name": "bin/pyfing_enhance",
+              "sidecar": true,
+              "args": true
+            },
+            {
+              "name": "bin/sourceafis_matcher",
+              "sidecar": true,
+              "args": true
+            }
+          ]
+        },
+        {
+          "identifier": "shell:allow-spawn",
+          "allow": [
+            {
+              "name": "bin/sourceafis_cli",
+              "sidecar": true,
+              "args": true
+            },
+            {
+              "name": "bin/pyfing_enhance",
+              "sidecar": true,
+              "args": true
+            },
+            {
+              "name": "bin/sourceafis_matcher",
+              "sidecar": true,
+              "args": true
+            }
+          ]
         },
         "store:default",
         "dialog:default",

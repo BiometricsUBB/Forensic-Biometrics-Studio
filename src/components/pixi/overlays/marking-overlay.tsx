@@ -2,15 +2,17 @@ import { Container } from "@pixi/react";
 import { MarkingsStore } from "@/lib/stores/Markings";
 import { AutoRotateStore } from "@/lib/stores/AutoRotate/AutoRotate";
 import { MeasurementStore } from "@/lib/stores/Measurement/Measurement";
+import { AreaStore } from "@/lib/stores/Area/Area";
 import { RotationStore } from "@/lib/stores/Rotation/Rotation";
 import { MarkingTypesStore } from "@/lib/stores/MarkingTypes/MarkingTypes";
 import { ShallowViewportStore } from "@/lib/stores/ShallowViewport";
+import { PolygonMarking } from "@/lib/markings/PolygonMarking";
 import * as PIXI from "pixi.js";
+import { AREA_TOOL_TYPE_ID, Markings } from "./markings/markings";
 import { CanvasMetadata } from "../canvas/hooks/useCanvasContext";
 import { useGlobalViewport } from "../viewport/hooks/useGlobalViewport";
 import { useGlobalApp } from "../app/hooks/useGlobalApp";
 import { getViewportPosition } from "./utils/get-viewport-local-position";
-import { Markings } from "./markings/markings";
 
 export type MarkingOverlayProps = {
     canvasMetadata: CanvasMetadata;
@@ -60,6 +62,41 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
         // eslint-disable-next-line security/detect-object-injection
         state => state.finishedLines[canvasId]
     );
+
+    const areaTempPoints = AreaStore.use(
+        // eslint-disable-next-line security/detect-object-injection
+        state => state.tempPoints[canvasId]
+    );
+    const areaCursorPoint = AreaStore.use(
+        // eslint-disable-next-line security/detect-object-injection
+        state => state.cursorPoint[canvasId]
+    );
+    const areaFinishedPolygon = AreaStore.use(
+        // eslint-disable-next-line security/detect-object-injection
+        state => state.finishedPolygon[canvasId]
+    );
+
+    const areaTempMarking =
+        areaTempPoints.length > 0 && areaTempPoints[0]
+            ? new PolygonMarking(
+                  0,
+                  areaTempPoints[0],
+                  AREA_TOOL_TYPE_ID,
+                  areaCursorPoint
+                      ? [...areaTempPoints, areaCursorPoint]
+                      : areaTempPoints
+              )
+            : null;
+
+    const areaFinishedMarking =
+        areaFinishedPolygon && areaFinishedPolygon.length >= 3
+            ? new PolygonMarking(
+                  0,
+                  areaFinishedPolygon[0]!,
+                  AREA_TOOL_TYPE_ID,
+                  areaFinishedPolygon
+              )
+            : null;
 
     const rotation = RotationStore(canvasId).use(state => state.rotation);
 
@@ -148,6 +185,28 @@ export function MarkingOverlay({ canvasMetadata }: MarkingOverlayProps) {
                 <Markings
                     canvasId={canvasId}
                     markings={[finishedMeasurementLine]}
+                    alpha={1}
+                    rotation={rotation}
+                    centerX={centerX}
+                    centerY={centerY}
+                />
+            )}
+            {/* Area polygon being drawn */}
+            {areaTempMarking && (
+                <Markings
+                    canvasId={canvasId}
+                    markings={[areaTempMarking]}
+                    alpha={1}
+                    rotation={rotation}
+                    centerX={centerX}
+                    centerY={centerY}
+                />
+            )}
+            {/* Finished area polygon */}
+            {areaFinishedMarking && (
+                <Markings
+                    canvasId={canvasId}
+                    markings={[areaFinishedMarking]}
                     alpha={1}
                     rotation={rotation}
                     centerX={centerX}
