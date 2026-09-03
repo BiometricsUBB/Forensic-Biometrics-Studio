@@ -40,6 +40,24 @@ const SHOEPRINTR_URL = `https://codeload.github.com/CSAFE-ISU/shoeprintr/tar.gz/
 const SHOEPRINTR_SHA256 =
     "8249222526ed24969a565b3ebcbf01393a31cc4c74c99dcfe97488e1851a0763";
 
+const IS_MACOS = process.platform === "darwin";
+
+const PMC_COMMIT = "06594a0ee1cde5a04f1679aff28072668da96062";
+const PMC_URL = `https://codeload.github.com/ryanrossi/pmc/tar.gz/${PMC_COMMIT}`;
+const PMC_SHA256 =
+    "d6782fc0808274e127a4867681bf40659ab2ab20852c9f3cc33e0aebe7f0e957";
+const PMC_SOURCES = [
+    "pmc_driver.cpp",
+    "pmc_utils.cpp",
+    "pmc_graph.cpp",
+    "pmc_clique_utils.cpp",
+    "pmc_heu.cpp",
+    "pmc_maxclique.cpp",
+    "pmcx_maxclique.cpp",
+    "pmcx_maxclique_basic.cpp",
+    "pmc_cores.cpp",
+];
+
 const REQUIRED_PACKAGES = [
     "jsonlite",
     "hexbin",
@@ -229,6 +247,7 @@ function sha256Of(file) {
 }
 
 const SHOEPRINTR_MARKER = path.join(LIBRARY_DIR, ".shoeprintr-commit");
+const PMC_MARKER = path.join(LIBRARY_DIR, ".pmc-commit");
 
 function shoeprintrIsCurrent() {
     if (!fs.existsSync(path.join(LIBRARY_DIR, "shoeprintr"))) return false;
@@ -291,6 +310,8 @@ async function installShoeprintr() {
 
     fs.writeFileSync(SHOEPRINTR_MARKER, `${SHOEPRINTR_COMMIT}\n`);
 
+    fs.rmSync(PMC_MARKER, { force: true });
+
     // R CMD INSTALL copies inst/bin verbatim; on Unix the solver loses its
     // executable bit when the repo is checked out from a zip.
     if (!IS_WINDOWS) {
@@ -305,6 +326,107 @@ async function installShoeprintr() {
             if (fs.existsSync(binary)) fs.chmodSync(binary, 0o755);
         }
     }
+}
+
+function macPmcPath() {
+    return path.join(LIBRARY_DIR, "shoeprintr", "bin", "mac64", "pmc");
+}
+
+function macPmcIsCurrent() {
+    if (!fs.existsSync(macPmcPath())) return false;
+    if (!fs.existsSync(PMC_MARKER)) return false;
+    return fs.readFileSync(PMC_MARKER, "utf8").trim() === PMC_COMMIT;
+}
+
+function libompPrefix() {
+    const probe = spawnSync("brew", ["--prefix", "libomp"], {
+        encoding: "utf8",
+        shell: false,
+    });
+    const candidates = [];
+    if (!probe.error && probe.status === 0) {
+        candidates.push((probe.stdout || "").trim());
+    }
+    candidates.push("/opt/homebrew/opt/libomp", "/usr/local/opt/libomp");
+
+    for (const prefix of candidates) {
+        if (prefix && fs.existsSync(path.join(prefix, "lib", "libomp.a"))) {
+            return prefix;
+        }
+    }
+    throw new Error(
+        "libomp was not found, so the pmc solver cannot be built:\n" +
+            "  brew install libomp"
+    );
+}
+
+async function buildMacPmc() {
+    const shortCommit = PMC_COMMIT.slice(0, 7);
+    if (macPmcIsCurrent()) {
+        console.log(`pmc ${shortCommit} already built`);
+        return;
+    }
+
+    fs.mkdirSync(CACHE_DIR, { recursive: true });
+    const tarball = path.join(CACHE_DIR, `pmc-${PMC_COMMIT}.tar.gz`);
+
+    if (!fs.existsSync(tarball)) {
+        console.log(`downloading ${PMC_URL}`);
+        await download(PMC_URL, tarball);
+    } else {
+        console.log(`using cached tarball ${tarball}`);
+    }
+
+    const digest = sha256Of(tarball);
+    if (digest !== PMC_SHA256) {
+        fs.rmSync(tarball, { force: true });
+        throw new Error(
+            `pmc tarball checksum mismatch\n` +
+                `  expected ${PMC_SHA256}\n` +
+                `  actual   ${digest}\n` +
+                "The cached copy has been discarded. If the pin was changed on " +
+                "purpose, update PMC_SHA256 in this script."
+        );
+    }
+
+    const sources = path.join(CACHE_DIR, `pmc-${PMC_COMMIT}`);
+    removeIfPresent(sources);
+    run("tar", ["-xzf", path.basename(tarball)], { cwd: CACHE_DIR });
+    if (!fs.existsSync(sources)) {
+        throw new Error(`extracting ${tarball} did not produce ${sources}`);
+    }
+
+    const utils = path.join(sources, "pmc_utils.cpp");
+    const patched = fs
+        .readFileSync(utils, "utf8")
+        .replace("return ifile;", "return static_cast<bool>(ifile);");
+    if (!patched.includes("static_cast<bool>(ifile)")) {
+        throw new Error(`could not patch the stream conversion in ${utils}`);
+    }
+    fs.writeFileSync(utils, patched);
+
+    const omp = libompPrefix();
+    const target = macPmcPath();
+    const staged = `${target}.new`;
+    removeIfPresent(staged);
+    console.log(`building pmc ${shortCommit} for ${process.arch}`);
+    run("clang++", [
+        "-std=c++14",
+        "-O2",
+        "-w",
+        "-fPIC",
+        "-Xpreprocessor",
+        "-fopenmp",
+        `-I${path.join(omp, "include")}`,
+        ...PMC_SOURCES.map(file => path.join(sources, file)),
+        "-o",
+        staged,
+        path.join(omp, "lib", "libomp.a"),
+    ]);
+
+    fs.renameSync(staged, target);
+    fs.chmodSync(target, 0o755);
+    fs.writeFileSync(PMC_MARKER, `${PMC_COMMIT}\n`);
 }
 
 // R ships a lot the app never touches
@@ -360,6 +482,7 @@ async function main() {
     }
     installPackages();
     await installShoeprintr();
+    if (IS_MACOS) await buildMacPmc();
     prune();
     smokeTest();
     console.log("OK: R runtime ready");

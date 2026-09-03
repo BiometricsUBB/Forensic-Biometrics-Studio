@@ -66,9 +66,9 @@ jobs:
                   path: .cache-r
                   key: ${{ runner.os }}-r-installer-${{ hashFiles('scripts/build-r-runtime.cjs') }}
 
-            - name: install R (macOS)
+            - name: install R and libomp (macOS)
               if: runner.os == 'macOS'
-              run: brew install --quiet r
+              run: brew install --quiet r libomp
 
             - name: install frontend dependencies
               run: pnpm install
