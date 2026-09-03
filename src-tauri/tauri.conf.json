@@ -1,7 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "biometrics-studio",
-    "version": "0.6.10",
+    "version": "0.6.12",
     "identifier": "com.biometrics-studio.app",
     "build": {
         "beforeBuildCommand": "pnpm sidecar:ensure:pyfing && pnpm r:ensure && pnpm build",
@@ -53,7 +53,11 @@
         "category": "DeveloperTool",
         "copyright": "",
         "targets": "all",
-        "externalBin": ["bin/sourceafis_cli", "bin/pyfing_enhance", "bin/sourceafis_matcher"],
+        "externalBin": [
+            "bin/sourceafis_cli",
+            "bin/pyfing_enhance",
+            "bin/sourceafis_matcher"
+        ],
         "icon": [
             "../public/logo_32.png",
             "../public/logo_128.png",
