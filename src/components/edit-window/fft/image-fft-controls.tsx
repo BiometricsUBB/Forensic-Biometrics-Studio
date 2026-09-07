@@ -33,7 +33,7 @@ export default function ImageFftControls({
     const { t } = useTranslation(["keywords", "tooltip"]);
 
     const [active, setActive] = useState(false);
-    const [brushSize, setBrushSize] = useState(30);
+    const [brushSize, setBrushSize] = useState(7);
     const [spectrumOpacity, setSpectrumOpacity] = useState(75);
     const [viewMode, setViewMode] = useState<FftViewMode>("edit");
     const [status, setStatus] = useState<FftStatus>("idle");

@@ -51,6 +51,44 @@ const d: Dictionary = {
     Points: "pkt",
     Brightness: "Jasność",
     Contrast: "Kontrast",
+    "Invert colors": "Inwersja kolorów",
+    Desaturate: "Desaturacja",
+    "Desaturate channel weights":
+        "Konwersja do czerni i bieli z regulacją zakresów kolorów jak w Photoshopie.",
+    Reds: "Czerwienie",
+    Yellows: "Żółcienie",
+    Greens: "Zielenie",
+    Cyans: "Cyjany",
+    Blues: "Błękity",
+    Magentas: "Magenty",
+    "Rotate 90° left": "Obróć o 90° w lewo",
+    "Rotate 90° right": "Obróć o 90° w prawo",
+    "Rotate 180°": "Obróć o 180°",
+    "Flip horizontal": "Odbij poziomo",
+    "Flip vertical": "Odbij pionowo",
+    Transformations: "Przekształcenia",
+    Crop: "Kadrowanie",
+    "Start crop": "Rozpocznij kadrowanie",
+    "Apply crop": "Zastosuj kadrowanie",
+    "Cancel crop": "Anuluj kadrowanie",
+    "Draw a rectangle on the image to crop it":
+        "Narysuj prostokąt na obrazie, aby go przyciąć",
+    "Crop area selected": "Wybrano obszar kadrowania",
+    "Failed to transform image: {{error}}":
+        "Nie udało się przekształcić obrazu: {{error}}",
+    "Failed to crop image: {{error}}":
+        "Nie udało się wykadrować obrazu: {{error}}",
+    "Failed to scale image: {{error}}":
+        "Nie udało się przeskalować obrazu: {{error}}",
+    "DPI scale unchanged":
+        "DPI: skala {{scale}}x, rozmiar bez zmian ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: skala {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Docelowe DPI",
+    "Reference length (mm)": "Długość referencyjna (mm)",
+    "Reference length in millimeters": "Długość referencyjna w milimetrach",
+    "DPI reference length hint":
+        "Używane, gdy wykrycie kresek na linijce jest niejednoznaczne.",
     Levels: "Poziomy",
     levels_desc: "Dostosuj zakres tonalny i balans kolorów obrazu",
     Curves: "Krzywe",
@@ -71,6 +109,7 @@ const d: Dictionary = {
     "Reset rotation": "Zresetuj rotację do 0°",
     "Synchronize rotation": "Synchronizuj rotację między widokami",
     "FFT Filter": "Filtr FFT",
+    "FFT Filter applied": "Zastosowano filtr FFT",
     "Paint over bright spots to filter them out":
         "Zamaluj jasne punkty, aby je odfiltrować",
     "Preview ready. Return to edit or save.":
@@ -131,6 +170,21 @@ const d: Dictionary = {
     "GBFEN — Gabor-based enhancement": "GBFEN — wzmocnienie filtrami Gabora",
     "SNFEN — Neural enhancement": "SNFEN — wzmocnienie siecią neuronową",
     "Enhancing image...": "Wzmacnianie obrazu...",
+    "Comparison finished in {{seconds}}s":
+        "Porównanie zakończone w {{seconds}} s",
+    "Comparison cancelled": "Porównanie anulowane",
+    "Comparison failed: {{error}}": "Porównanie nie powiodło się: {{error}}",
+    "Load an image on both canvases first":
+        "Najpierw wczytaj obraz na obu płótnach",
+    "Shoeprint canvas not ready": "Płótno nie jest gotowe.",
+    "Shoeprint load images first": "Najpierw wczytaj obraz na obu płótnach.",
+    "Shoeprint image has no path": "Obraz nie ma ścieżki źródłowej.",
+    "Shoeprint not enough edge points":
+        "W obrazie {{label}} znaleziono tylko {{count}} punktów krawędziowych. Zmień próg binaryzacji lub użyj obrazu o większym kontraście.",
+    "Shoeprint regions too large for resolution":
+        "Obszary porównania są zbyt duże dla obrazu {{label}}. Przy {{dpi}} DPI ślad ma zaledwie {{length}} mm, a podeszwa ma zwykle 250-320 mm, więc ta rozdzielczość jest zbyt wysoka dla tego obrazu. Wyczyść pole rozdzielczości, aby skalować według rozmiaru obrazu, albo podaj rzeczywistą rozdzielczość obrazu.",
+    "Shoeprint regions too large for print":
+        "Obszary porównania są zbyt duże dla obrazu {{label}}. Zmniejsz promień obszaru — obecnie {{radius}} jednostek przy śladzie o wymiarach {{width}}x{{height}} jednostek.",
 };
 
 export default d;

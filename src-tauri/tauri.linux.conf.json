@@ -1,10 +1,10 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "Forensic Biometrics Studio",
-    "version": "0.6.11",
+    "version": "0.6.12",
     "identifier": "com.biometrics-studio.app",
     "build": {
-        "beforeBuildCommand": "bun run build",
+        "beforeBuildCommand": "bun run r:ensure && bun run build",
         "beforeDevCommand": "bun run dev",
         "frontendDist": "../dist",
         "devUrl": "http://localhost:1420"
@@ -69,7 +69,11 @@
             "timestampUrl": ""
         },
         "longDescription": "",
-        "resources": { "../presets/**/*": "presets/" },
+        "resources": {
+            "../presets/**/*": "presets/",
+            "../r/shoeprint_compare.R": "r/shoeprint_compare.R",
+            "r-runtime": "r-runtime"
+        },
         "shortDescription": "",
         "linux": {
             "deb": {

@@ -17,6 +17,7 @@ import { WORKING_MODE } from "@/views/selectMode";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
 import { MARKING_CLASS } from "@/lib/markings/MARKING_CLASS";
+import { TracingStore } from "@/lib/stores/Tracing/Tracing.store";
 import {
     clamp,
     formatReportDateTime,
@@ -51,6 +52,7 @@ import {
     ensureImagesLoaded,
     applyReportPdfMetadata,
 } from "./shared/page-builders";
+import reportStyles from "./report-pdf.css?raw";
 
 type ReportGenerationOptions = {
     includeMatchedOnly: boolean;
@@ -59,12 +61,12 @@ type ReportGenerationOptions = {
     performedBy: string;
     department: string;
     addressLines: string[];
+    selectedLabels: number[];
 };
 
 type RenderedImages = {
     originalDataUrl: string;
     allMarkingsCanvas: HTMLCanvasElement;
-    selectedMarkingsCanvas: HTMLCanvasElement;
 };
 
 const ROWS_PER_PAGE = 4;
@@ -877,51 +879,11 @@ const createLandscapePage = () => {
 const createStyles = () => {
     const style = document.createElement("style");
     style.textContent = `
-        .report-root { position: fixed; left: -10000px; top: 0; width: ${PAGE.width}px; }
-        .report-page { width: ${PAGE.width}px; height: ${PAGE.height}px; background: #fff; color: #111; font-family: "Arial", sans-serif; padding: ${PAGE.margin}px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; }
-        .report-page.landscape { width: ${LANDSCAPE.width}px; height: ${LANDSCAPE.height}px; padding: ${LANDSCAPE.margin}px; }
-        .report-title { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 6px; }
-        .section-title { font-size: 12px; font-weight: 700; margin-top: 4px; }
-        .meta-grid { display: grid; grid-template-columns: 1fr; gap: 6px; font-size: 11px; }
-        .meta-block { display: grid; gap: 2px; }
-        .software-grid, .input-grid { display: grid; gap: 4px; font-size: 11px; }
-        .counts { display: grid; gap: 2px; font-size: 11px; }
-        .fig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
-        .fig { display: grid; gap: 4px; font-size: 10px; text-align: center; }
-        .fig img { width: 100%; height: auto; border: 1px solid #ddd; }
-        .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .overview-grid.landscape { grid-template-columns: 1fr 1fr; align-items: center; }
-        .overview-grid img { width: 100%; height: auto; border: 1px solid #ddd; }
-        .zoom img { width: 100%; height: auto; border: 1px solid #ddd; }
-        .note { font-size: 11px; border-top: 1px solid #ddd; padding-top: 6px; }
-        .table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        .table th, .table td { border: 1px solid #ccc; padding: 4px; vertical-align: middle; }
-        .feature-cell { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-        .feature-index {
-            width: 22px;
-            height: 22px;
-            border-radius: 999px;
-            background: #ffffff;
-            color: var(--marker-text, #7a0000);
-            border: 2px solid var(--marker-ring, #cc0000);
-            box-shadow: 0 0 0 1px var(--marker-outline, #7a0000);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            line-height: 1;
-            font-weight: 700;
-            font-family: Arial, sans-serif;
-            transform: translateY(2px);
-        }
-        .feature-index-value {
-            display: inline-block;
-            line-height: 1;
-            transform: translateY(-7px);
-        }
-        .feature-type { font-size: 9px; }
-        .feature-image { width: ${IMAGE_CELL_SIZE}px; height: ${IMAGE_CELL_SIZE}px; object-fit: cover; border: 1px solid #ddd; }
-        .footer { margin-top: auto; font-size: 10px; display: flex; justify-content: space-between; }
+        ${reportStyles}
+        .report-root { width: ${PAGE.width}px; }
+        .report-page { width: ${PAGE.width}px; height: ${PAGE.height}px; }
+        .report-page.landscape { width: ${LANDSCAPE.width}px; height: ${LANDSCAPE.height}px; }
+        .feature-image { width: ${IMAGE_CELL_SIZE}px; height: ${IMAGE_CELL_SIZE}px; }
     `;
     return style;
 };
@@ -997,10 +959,19 @@ export const generateFingerprintReportPdfWithDialog = async (
             throw new Error("Load both images before generating the report.");
         }
 
-        stage = "collect-markings";
-        const markingsLeft = MarkingsStore(CANVAS_ID.LEFT).state.markings;
-        const markingsRight = MarkingsStore(CANVAS_ID.RIGHT).state.markings;
+        stage = "collect-markings-and-tracings";
+        const markingsLeft = MarkingsStore(
+            CANVAS_ID.LEFT
+        ).state.markings.filter(m => options.selectedLabels.includes(m.label));
+        const markingsRight = MarkingsStore(
+            CANVAS_ID.RIGHT
+        ).state.markings.filter(m => options.selectedLabels.includes(m.label));
+
         const markingTypes = MarkingTypesStore.state.types;
+
+        const leftTracingPaths = TracingStore(CANVAS_ID.LEFT).getState().paths;
+        const rightTracingPaths = TracingStore(CANVAS_ID.RIGHT).getState()
+            .paths;
 
         const matched = options.includeMatchedOnly
             ? getMatchedFeatures(markingsLeft, markingsRight)
@@ -1016,37 +987,23 @@ export const generateFingerprintReportPdfWithDialog = async (
         const rightOriginal = await toDataUrl(rightMeta.bytes, rightMeta.name);
 
         stage = "render-overlays";
-        const [
-            leftAllCanvas,
-            rightAllCanvas,
-            leftSelectedCanvas,
-            rightSelectedCanvas,
-        ] = await Promise.all([
+        const [leftAllCanvas, rightAllCanvas] = await Promise.all([
             renderImageWithMarkings(
                 leftMeta.bytes,
                 markingsLeft,
                 markingTypes,
-                1.6
+                1.6,
+                { tracingPaths: leftTracingPaths }
             ),
             renderImageWithMarkings(
                 rightMeta.bytes,
                 markingsRight,
                 markingTypes,
-                1.6
-            ),
-            renderImageWithMarkings(
-                leftMeta.bytes,
-                selectedFeatures.map(x => x.left),
-                markingTypes,
-                1.6
-            ),
-            renderImageWithMarkings(
-                rightMeta.bytes,
-                selectedFeatures.map(x => x.right),
-                markingTypes,
-                1.6
+                1.6,
+                { tracingPaths: rightTracingPaths }
             ),
         ]);
+
         const detailCrops = await Promise.all(
             selectedFeatures.map(async feature => {
                 const [leftSingleCanvas, rightSingleCanvas] = await Promise.all(
@@ -1157,12 +1114,10 @@ export const generateFingerprintReportPdfWithDialog = async (
         const leftImages: RenderedImages = {
             originalDataUrl: leftOriginal,
             allMarkingsCanvas: leftAllCanvas,
-            selectedMarkingsCanvas: leftSelectedCanvas,
         };
         const rightImages: RenderedImages = {
             originalDataUrl: rightOriginal,
             allMarkingsCanvas: rightAllCanvas,
-            selectedMarkingsCanvas: rightSelectedCanvas,
         };
 
         stage = "report-metadata";
@@ -1228,49 +1183,61 @@ export const generateFingerprintReportPdfWithDialog = async (
         const page1 = createPage();
         page1.innerHTML = `
         <div class="report-title">${tReport("Technical report title")}</div>
-        <div class="meta-grid">
-            <div>${tReport("Report ID label")} <strong>${reportId}</strong></div>
-            <div>${tReport("Report date and time label")} ${reportDateTime}</div>
-            <div>${tReport("Performed by label")}</div>
-            <div class="meta-block">
-                <div>${performedBy || "-"}</div>
-                <div>${department || "-"}</div>
-                ${addressHtml}
-            </div>
+
+        <div class="kv-row">
+            <div class="kv-label">${tReport("Report ID label")}</div>
+            <div class="kv-value">${reportId}</div>
+        </div>
+        <div class="kv-row">
+            <div class="kv-label">${tReport("Report date and time label")}</div>
+            <div class="kv-value">${reportDateTime}</div>
         </div>
 
-        <div class="section-title">${tReport("Software information")}</div>
-        <div class="software-grid">
-            <div>${tReport("Application name")} Biometrics-Studio</div>
-            <div>${tReport("Application version")} ${appVersion}</div>
+        <div class="performer-title">${tReport("Performed by label")}</div>
+        <div class="performer-data">
+            ${performedBy ? `<div>${performedBy}</div>` : ""}
+            ${department ? `<div>${department}</div>` : ""}
+            ${addressHtml}
         </div>
 
-        <div class="section-title">${tReport("Input material")}</div>
-        <div class="input-grid">
-            <div class="meta-block">
-                <div><strong>${tReport("Image 1")}:</strong></div>
-                <div>${tReport("File name")} ${leftMeta.name}</div>
-                <div>${tReport("Image dimensions")} ${leftMeta.width} x ${leftMeta.height} px</div>
-                <div>${tReport("Size")} ${formatBytes(leftMeta.sizeBytes)}</div>
-                <div>${tReport("Checksum")} ${leftMeta.checksum}</div>
-            </div>
-            <div class="meta-block">
-                <div><strong>${tReport("Image 2")}:</strong></div>
-                <div>${tReport("File name")} ${rightMeta.name}</div>
-                <div>${tReport("Image dimensions")} ${rightMeta.width} x ${rightMeta.height} px</div>
-                <div>${tReport("Size")} ${formatBytes(rightMeta.sizeBytes)}</div>
-                <div>${tReport("Checksum")} ${rightMeta.checksum}</div>
-            </div>
+        <div class="software-title">${tReport("Software information")}:</div>
+        <div class="kv-row">
+            <div class="kv-label">${tReport("Application name")}</div>
+            <div class="kv-value">Biometrics-Studio</div>
+        </div>
+        <div class="kv-row">
+            <div class="kv-label">${tReport("Application version")}</div>
+            <div class="kv-value">${appVersion}</div>
         </div>
 
-        <div class="counts">
-            <div>${tReport("Matched features count")} ${matched.length}</div>
-            <div>${tReport("Selected features count")} ${selectedFeatures.length}</div>
+        <div class="section-title-large">${tReport("Input material")}:</div>
+        
+        <div class="performer-title" style="margin-top: 10px;">${tReport("Image 1")}</div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("File name")}</div><div class="kv-value">${leftMeta.name}</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Image dimensions")}</div><div class="kv-value">${leftMeta.width} x ${leftMeta.height} px</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Size")}</div><div class="kv-value">${formatBytes(leftMeta.sizeBytes)}</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Checksum")}</div><div class="kv-value" style="font-family: monospace;">${leftMeta.checksum}</div></div>
+
+        <div class="performer-title" style="margin-top: 15px;">${tReport("Image 2")}</div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("File name")}</div><div class="kv-value">${rightMeta.name}</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Image dimensions")}</div><div class="kv-value">${rightMeta.width} x ${rightMeta.height} px</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Size")}</div><div class="kv-value">${formatBytes(rightMeta.sizeBytes)}</div></div>
+        <div class="kv-row"><div class="kv-label" style="font-weight: normal; width: 220px; padding-left: 20px;">- ${tReport("Checksum")}</div><div class="kv-value" style="font-family: monospace;">${rightMeta.checksum}</div></div>
+
+        <div class="counts" style="margin-top: 30px;">
+            <div class="kv-row">
+                <div class="kv-label" style="width: 350px;">${tReport("Matched features count")}</div>
+                <div class="kv-value"><strong>${matched.length}</strong></div>
+            </div>
+            <div class="kv-row">
+                <div class="kv-label" style="width: 350px;">${tReport("Selected features count")}</div>
+                <div class="kv-value"><strong>${selectedFeatures.length}</strong></div>
+            </div>
         </div>
 
         <div class="note">
-            <div class="section-title">${tReport("Note title")}</div>
-            <div>${tReport("Note body")}</div>
+            <div class="performer-title" style="font-size: 11px; margin-top: 0;">${tReport("Note title")}:</div>
+            <div style="margin-top: 4px;">${tReport("Note body")}</div>
         </div>
 
         ${createFooter(1, reportId, tReport)}

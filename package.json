@@ -1,7 +1,7 @@
 {
     "name": "forensic-biometrics-studio",
     "description": "Application for forensic trace comparison",
-    "version": "0.6.11",
+    "version": "0.6.12",
     "author": {
         "name": "Cyprian Zdebski",
         "email": "cyprianz5mail@gmail.com",
@@ -32,10 +32,12 @@
         "lint:fix": "oxlint --fix",
         "preview": "vite preview",
         "tauri": "tauri",
-        "tauri:dev": "node ./scripts/tauri-dev.cjs",
+        "tauri:dev": "tauri dev",
         "sidecar:sync": "node ./scripts/sidecar-sync.cjs",
         "sidecar:build:pyfing": "node ./scripts/build-pyfing-sidecar.cjs",
         "sidecar:ensure:pyfing": "node ./scripts/ensure-pyfing-sidecar.cjs",
+        "r:build": "node ./scripts/build-r-runtime.cjs",
+        "r:ensure": "node ./scripts/ensure-r-runtime.cjs",
         "tsc:check": "tsgo --noEmit",
         "tsc:watch": "tsgo --noEmit --watch",
         "prettier:write": "prettier --write .",

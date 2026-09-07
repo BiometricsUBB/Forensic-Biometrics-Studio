@@ -1029,6 +1029,75 @@ These characteristics may be represented using point, line, or area annotations 
 
 _Shoeprints comparison workflow._
 
+### Automated Statistical Comparison
+
+In addition to manual marking, Shoeprints Mode can run an automated statistical
+comparison of the two loaded impressions. It uses the `shoeprintr` algorithm
+developed at CSAFE, Iowa State University, which is bundled with the
+application — nothing extra needs to be installed.
+
+#### What the algorithm does
+
+Three circular regions of interest are fixed on the questioned impression (Q).
+For each region, the algorithm searches the known impression (K) for the
+corresponding region by looking for the largest set of point correspondences
+that are mutually consistent in their distances (a _maximum clique_). It then
+estimates how far the two regions are rotated relative to one another and how
+well they overlap once aligned.
+
+#### Running a comparison
+
+1. Load both impressions and, if necessary, improve their contrast first.
+2. Select **Automatic comparison** in the right-hand toolbar.
+3. Optionally enter the **image resolution (DPI)** for each image. With
+   _Automatic_ selected, both impressions are scaled by image size. This is
+   appropriate when the resolution is unknown; results are then reported in
+   working units and the report indicates this. Entering the true resolution
+   makes distances between regions physical measurements in millimetres.
+4. Check the **extraction preview** next to each image. It shows the edge points
+   used by the algorithm and should resemble the outsole pattern. If it looks
+   empty, too dense, or noisy, adjust the **threshold**, or enable
+   **Invert print and background** when the pattern is lighter than its
+   surroundings.
+5. Select **Run comparison**.
+
+A comparison typically takes a few minutes and reports its progress as it runs.
+It can be stopped at any point with **Cancel**.
+
+#### Reading the results
+
+| Value                | Meaning                                                                                                                      |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Mean overlap         | How much of each region coincides after alignment.                                                                           |
+| Rotation consistency | The spread of the three rotation angles. Corresponding impressions rotate by the same amount, so a small value is important. |
+| Triangle agreement   | How much the spacing between the three regions differs between the impressions. Small values indicate the same arrangement.  |
+| Clique size          | How many corresponding points supported each alignment.                                                                      |
+
+The dialog also displays both impressions with the three regions marked, allowing
+the located regions to be checked visually.
+
+> **Important:** These values describe geometric agreement between two
+> impressions. They are not a probability of common origin and do not by
+> themselves constitute an identification. Interpretation remains the
+> responsibility of the examiner.
+
+#### Adjustable settings
+
+-   **Region radius** — the size of the three regions, in millimetres. Larger
+    regions capture more pattern but take considerably longer to compare.
+-   **Maximum rotation angle** — candidate regions rotated beyond this value are
+    rejected during the search.
+-   **Random seed** — keeping the seed fixed makes a comparison reproducible;
+    changing it helps check whether the result is stable.
+
+#### Including the comparison in a report
+
+After a comparison has been run, **Generate report** offers an **Include
+comparison in report** option, enabled by default. The report includes the
+method, parameters, per-region results, distances between regions, and a figure
+showing the matched regions. The option is unavailable until a comparison has
+been run.
+
 ---
 
 ## 6.4 Earprint Mode

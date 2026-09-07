@@ -1029,6 +1029,77 @@ Te charakterystyki mogą być reprezentowane za pomocą adnotacji punktowych, li
 
 _Przepływ pracy porównania odcisków butów._
 
+### Automatyczne porównanie statystyczne
+
+Oprócz ręcznego oznaczania cech tryb odcisków butów pozwala uruchomić
+automatyczne porównanie statystyczne obu wczytanych śladów. Wykorzystuje ono
+algorytm `shoeprintr` opracowany w CSAFE (Iowa State University), dołączony do
+aplikacji — nie trzeba instalować niczego dodatkowo.
+
+#### Na czym polega algorytm
+
+Na śladzie kwestionowanym (Q) wyznaczane są trzy koliste obszary
+zainteresowania. Dla każdego z nich algorytm wyszukuje w śladzie porównawczym
+(K) obszar odpowiadający, szukając największego zbioru odpowiedniości punktowych
+wzajemnie zgodnych pod względem odległości (tzw. _kliki maksymalnej_). Na tej
+podstawie szacuje, o jaki kąt oba obszary są względem siebie obrócone oraz jak
+dobrze pokrywają się po wyrównaniu.
+
+#### Uruchamianie porównania
+
+1. Wczytaj oba ślady i w razie potrzeby popraw najpierw ich kontrast.
+2. Wybierz **Porównanie automatyczne** na pasku narzędzi po prawej stronie.
+3. Opcjonalnie podaj **rozdzielczość obrazu (DPI)** dla każdego obrazu. Przy
+   ustawieniu _Automatycznie_ oba ślady są skalowane według rozmiaru obrazu, co
+   jest właściwym wyborem, gdy rozdzielczość nie jest znana — wyniki są wtedy
+   podawane w jednostkach roboczych i raport to zaznacza. Podanie rzeczywistej
+   rozdzielczości (300 DPI dla typowego skanu kryminalistycznego) sprawia, że
+   odległości między obszarami stają się fizycznymi pomiarami w milimetrach.
+4. Sprawdź **podgląd ekstrakcji** obok każdego obrazu. Pokazuje punkty
+   krawędziowe, na których faktycznie pracuje algorytm — powinny układać się w
+   rozpoznawalny zarys wzoru podeszwy. Jeżeli podgląd jest pusty, zbyt gęsty lub
+   zaszumiony, zmień **próg binaryzacji** albo włącz **odwróć ślad i tło**, gdy
+   wzór jest jaśniejszy od otoczenia.
+5. Wybierz **Uruchom porównanie**.
+
+Porównanie trwa zwykle kilka minut i na bieżąco pokazuje postęp. W dowolnym
+momencie można je przerwać przyciskiem **Anuluj**.
+
+#### Odczytywanie wyników
+
+| Wartość              | Znaczenie                                                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Średnie pokrycie     | Jaka część każdego obszaru pokrywa się po wyrównaniu.                                                                                                          |
+| Spójność kąta obrotu | Rozrzut trzech kątów obrotu. Rzeczywiście odpowiadające sobie ślady są obrócone wszędzie o _tyle samo_, więc mała wartość jest tu równie istotna jak pokrycie. |
+| Zgodność trójkąta    | O ile różnią się odstępy między trzema obszarami w obu śladach. Małe wartości oznaczają ten sam układ obszarów.                                                |
+| Rozmiar kliki        | Ile odpowiadających sobie punktów potwierdziło każde wyrównanie.                                                                                               |
+
+Okno pokazuje także oba ślady z zaznaczonymi trzema obszarami, co pozwala
+wzrokowo skontrolować, gdzie zostały odnalezione.
+
+> **Ważne:** wartości te opisują stopień zgodności geometrycznej między dwoma
+> śladami. Nie są prawdopodobieństwem wspólnego pochodzenia i same w sobie nie
+> stanowią identyfikacji. Interpretacja pozostaje w gestii biegłego.
+
+#### Ustawienia
+
+-   **Promień obszaru** — wielkość trzech obszarów w milimetrach. Większe obszary
+    obejmują więcej wzoru, ale porównanie trwa znacznie dłużej.
+-   **Maksymalny kąt obrotu** — obszary kandydujące obrócone o więcej niż ta
+    wartość są odrzucane podczas wyszukiwania. Zmniejsz ją, gdy wiadomo, że ślady
+    są podobnie zorientowane.
+-   **Ziarno losowości** — algorytm losuje punkty. Stałe ziarno zapewnia
+    powtarzalność porównania; jego zmiana pozwala sprawdzić, czy wynik jest
+    stabilny.
+
+#### Dołączanie porównania do raportu
+
+Po wykonaniu porównania w oknie **Generuj raport** pojawia się opcja **Dołącz
+porównanie do raportu**, domyślnie włączona. Raport zyskuje wtedy sekcję z
+opisem metody, użytymi parametrami, wynikami dla poszczególnych obszarów,
+odległościami między obszarami oraz ilustracją dopasowanych obszarów. Opcja jest
+niedostępna, dopóki porównanie nie zostanie wykonane.
+
 ---
 
 ## 6.4 Tryb odcisków usznych

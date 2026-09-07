@@ -108,7 +108,7 @@ export async function saveAnsiNist(filePath: string, viewport: Viewport) {
             <biom:TransactionUTCDate><nc:DateTime>${currentDateTime}</nc:DateTime></biom:TransactionUTCDate>
         </biom:Transaction>
     </itl:PackageInformationRecord>
-    
+
     <itl:PackageMinutiaeRecord>
         <biom:RecordCategoryCode>9</biom:RecordCategoryCode>
         <biom:ImageReferenceIdentification>

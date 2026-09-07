@@ -7,8 +7,15 @@ import { Menubar } from "@/components/ui/menubar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/shadcn";
 import { ICON } from "@/lib/utils/const";
-import { Edit, Save } from "lucide-react";
-import { listen } from "@tauri-apps/api/event";
+import {
+    Edit,
+    Save,
+    RotateCw,
+    RotateCcw,
+    FlipHorizontal,
+    FlipVertical,
+} from "lucide-react";
+import { listen, emit } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import {
     readFile,
@@ -31,16 +38,20 @@ import { applyCustomTheme } from "@/lib/hooks/useCustomTheme";
 import { toast } from "sonner";
 import { useSettingsSync } from "@/lib/hooks/useSettingsSync";
 import ImageDpiControls from "@/components/edit-window/dpi/image-dpi-controls";
+import { ImageCropControls } from "@/components/edit-window/crop/image-crop-controls";
 import {
     AnyModifier,
-    EnhancementModifier,
     EnhancementParams,
+    FftModifier,
+    FftParams,
     ModifierType,
     isEnhancementModifier,
 } from "@/lib/imageModifiers/types";
 import {
     MODIFIER_REGISTRY,
+    createFftModifier,
     buildCssFilter,
+    hasCanvasModifiers,
 } from "@/lib/imageModifiers/registry";
 import { applyPipelineToImage } from "@/lib/imageModifiers/pipeline";
 import { AddModifierButton } from "@/components/edit-window/modifiers/AddModifierButton";
@@ -50,6 +61,17 @@ import {
     runPyfingEnhancement,
     PyfingMethod,
 } from "@/lib/external-tools/pyfing/runPyfingEnhancement";
+import ImagePanes from "./fft/ImagePanes";
+import { SidebarFFT } from "./components/SidebarFFT";
+import { useFftWorkspace } from "./hooks/useFftWorkspace";
+import { useImagePanZoom } from "./hooks/useImagePanZoom";
+import { useSyncedElement } from "./hooks/useElementSync";
+
+const CANVAS_CONTEXT_UNAVAILABLE = "Canvas context unavailable";
+const FAILED_TO_SAVE_IMAGE_KEY = "Failed to save image: {{error}}";
+const FAILED_TO_TRANSFORM_IMAGE_KEY = "Failed to transform image: {{error}}";
+const FAILED_TO_CROP_IMAGE_KEY = "Failed to crop image: {{error}}";
+const FAILED_TO_SCALE_IMAGE_KEY = "Failed to scale image: {{error}}";
 
 async function generateFilename(p: string) {
     const originalFilename = await basename(p);
@@ -80,6 +102,28 @@ async function pathToBlobUrl(path: string): Promise<string> {
         type: "image/png",
     });
     return URL.createObjectURL(blob);
+}
+
+async function canvasToBlobUrl(canvas: HTMLCanvasElement): Promise<string> {
+    const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+            value =>
+                value
+                    ? resolve(value)
+                    : reject(new Error("Canvas toBlob failed")),
+            "image/png",
+            1.0
+        );
+    });
+    return URL.createObjectURL(blob);
+}
+
+async function loadImageElement(src: string): Promise<HTMLImageElement> {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = src;
+    await image.decode();
+    return image;
 }
 
 function pyfingMethodFromType(type: "gbfen" | "snfen"): PyfingMethod {
@@ -122,164 +166,180 @@ export function EditWindow() {
     );
     const [error, setError] = useState<string | null>(null);
 
-    const [zoom, setZoom] = useState<number>(1);
-    const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState<boolean>(false);
-    const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
-        x: 0,
-        y: 0,
-    });
-
     const [modifiers, setModifiers] = useState<AnyModifier[]>([]);
     const [editingModifierId, setEditingModifierId] = useState<string | null>(
         null
     );
+    const [editingFftModifierId, setEditingFftModifierId] = useState<
+        string | null
+    >(null);
+    const [isFftActive, setIsFftActive] = useState<boolean>(false);
+    const [overlayMode, setOverlayMode] = useState<"none" | "crop" | "dpi">(
+        "none"
+    );
 
     const imageRef = useRef<HTMLImageElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const fftContainerRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const fftCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const dpiCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const TRANSFORM_ORIGIN = "center center";
+    const left = useImagePanZoom(containerRef, imageRef, true);
+    const right = useImagePanZoom(fftContainerRef, fftCanvasRef, isFftActive);
+    const resetLeft = left.reset;
+    const resetRight = right.reset;
 
-    const cssFilter = buildCssFilter(modifiers);
+    useEffect(() => {
+        resetLeft();
+        resetRight();
+    }, [isFftActive, resetLeft, resetRight]);
 
-    const activeEnhancement = [...modifiers]
+    const cssFilter = buildCssFilter();
+
+    const activeFftModifier = modifiers.find(
+        (m): m is FftModifier =>
+            m.id === editingFftModifierId && m.type === "fft"
+    );
+
+    // Find the active raster modifier providing the current base image
+    const activeRasterModifier = [...modifiers]
         .toReversed()
         .find(
-            (m): m is EnhancementModifier =>
-                isEnhancementModifier(m) &&
+            m =>
                 m.enabled &&
-                m.params.status === "ready" &&
-                Boolean(m.params.runtimeOutputUrl)
+                (!isFftActive || m.id !== editingFftModifierId) &&
+                ((isEnhancementModifier(m) &&
+                    m.params.status === "ready" &&
+                    Boolean(m.params.runtimeOutputUrl)) ||
+                    (m.type === "fft" &&
+                        (!isFftActive || m.id !== editingFftModifierId) &&
+                        Boolean(m.params.runtimeOutputUrl)))
         );
 
+    const rasterDisplayUrl =
+        (activeRasterModifier && isEnhancementModifier(activeRasterModifier)
+            ? activeRasterModifier.params.runtimeOutputUrl
+            : activeRasterModifier?.type === "fft"
+              ? (activeRasterModifier as FftModifier).params.runtimeOutputUrl
+              : null) ?? originalUrl;
     const displayUrl =
-        activeEnhancement?.params.runtimeOutputUrl ?? originalUrl;
+        (isFftActive ? null : previewImageUrl) ?? rasterDisplayUrl;
 
-    const loadImage = useCallback(async (path: string) => {
-        try {
-            setError(null);
-            setOriginalUrl(null);
-            const url = await pathToBlobUrl(path);
-            setOriginalUrl(url);
-            setImageName(await basename(path));
-            setZoom(1);
-            setPan({ x: 0, y: 0 });
-        } catch (err) {
-            const msg =
-                err instanceof Error ? err.message : "Failed to load image";
-            setError(`${msg} (Path: ${path})`);
-            setOriginalUrl(null);
-            setPreviewImageUrl(null);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!imageRef.current || !originalUrl) return;
-
-        const hasCanvasModifier = modifiers.some(
-            m => m.enabled && (m.type === "levels" || m.type === "curves")
-        );
-
-        if (!hasCanvasModifier) {
-            setPreviewImageUrl(null);
-            return;
-        }
-
-        let cancelled = false;
-        const runPipeline = async () => {
-            try {
-                const previewModifiers = modifiers.filter(
-                    m => m.type !== "fft"
+    const handleFftApply = useCallback(
+        (dataUrl: string, params?: Partial<FftParams>) => {
+            if (editingFftModifierId) {
+                setModifiers(prev =>
+                    prev.map(m =>
+                        m.id === editingFftModifierId
+                            ? ({
+                                  ...m,
+                                  enabled: true,
+                                  params: {
+                                      ...m.params,
+                                      ...params,
+                                      runtimeOutputUrl: dataUrl,
+                                  },
+                              } as FftModifier)
+                            : m
+                    )
                 );
-                const uint8Array = await applyPipelineToImage(
-                    imageRef.current!,
-                    previewModifiers
-                );
-                if (cancelled) return;
-                const blob = new Blob([uint8Array as BlobPart], {
-                    type: "image/png",
-                });
-                const url = URL.createObjectURL(blob);
-                setPreviewImageUrl(prev => {
-                    if (prev) URL.revokeObjectURL(prev);
-                    return url;
-                });
-            } catch (err) {
-                if (!cancelled) console.error("Preview pipeline failed", err);
+            } else {
+                const newMod = createFftModifier();
+                newMod.params = {
+                    ...newMod.params,
+                    ...params,
+                    runtimeOutputUrl: dataUrl,
+                };
+                setModifiers(prev => [...prev, newMod]);
             }
-        };
+            setEditingFftModifierId(null);
+            setIsFftActive(false);
+            setPreviewImageUrl(null);
+            resetLeft();
+            resetRight();
+            toast.success(
+                t("FFT Filter applied", {
+                    ns: "tooltip",
+                    defaultValue: "FFT filter applied",
+                })
+            );
+        },
+        [editingFftModifierId, resetLeft, resetRight, t]
+    );
 
-        const timer = setTimeout(runPipeline, 100);
-        return () => {
-            cancelled = true;
-            clearTimeout(timer);
-        };
-    }, [modifiers, originalUrl]);
+    const handleCancelFft = useCallback(() => {
+        if (editingFftModifierId) {
+            const mod = modifiers.find(m => m.id === editingFftModifierId);
+            if (mod && mod.type === "fft" && !mod.params.runtimeOutputUrl) {
+                setModifiers(prev =>
+                    prev.filter(m => m.id !== editingFftModifierId)
+                );
+            }
+        }
+        setEditingFftModifierId(null);
+        setIsFftActive(false);
+        resetLeft();
+        resetRight();
+    }, [editingFftModifierId, modifiers, resetLeft, resetRight]);
 
-    useEffect(() => {
-        return () => {
-            if (previewImageUrl) URL.revokeObjectURL(previewImageUrl);
-        };
-    }, [previewImageUrl]);
+    const fft = useFftWorkspace({
+        imageRef,
+        spectrumCanvasRef: canvasRef,
+        previewCanvasRef: fftCanvasRef,
+        isActive: isFftActive,
+        initialParams: activeFftModifier?.params,
+        onToggleActive: setIsFftActive,
+        onApply: handleFftApply,
+        onWheel: left.handleWheel,
+        onMiddleDrag: left.handleMiddleDrag,
+    });
 
-    const handleWheel = (e: React.WheelEvent<HTMLButtonElement>) => {
-        if (!displayUrl || !containerRef.current || !imageRef.current) return;
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newZoom = Math.max(0.1, Math.min(10, zoom * delta));
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const cx = containerRect.width / 2;
-        const cy = containerRect.height / 2;
-        const mx = e.clientX - containerRect.left;
-        const my = e.clientY - containerRect.top;
-        const imageX = (mx - cx - pan.x) / zoom;
-        const imageY = (my - cy - pan.y) / zoom;
-        setZoom(newZoom);
-        setPan({
-            x: mx - cx - imageX * newZoom,
-            y: my - cy - imageY * newZoom,
-        });
-    };
+    useSyncedElement(imageRef, imageRef, containerRef, {
+        displayUrl,
+        isFftActive,
+        allowUpscale: false,
+    });
+    useSyncedElement(imageRef, canvasRef, containerRef, {
+        displayUrl,
+        isFftActive,
+        allowUpscale: false,
+    });
+    useSyncedElement(imageRef, dpiCanvasRef, containerRef, {
+        displayUrl,
+        isFftActive,
+        syncDimensions: true,
+        allowUpscale: false,
+    });
+    useSyncedElement(imageRef, fftCanvasRef, fftContainerRef, {
+        displayUrl,
+        isFftActive,
+        extraStyles: { zIndex: "11" },
+    });
 
-    const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (e.button !== 0) return;
-        setIsDragging(true);
-        setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-    };
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-        if (!isDragging) return;
-        setPan({
-            x: e.clientX - dragStart.x,
-            y: e.clientY - dragStart.y,
-        });
-    };
-
-    const handleMouseUp = () => setIsDragging(false);
-
-    const handleDoubleClick = () => {
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-    };
-    const resetZoom = () => {
-        setZoom(1);
-        setPan({ x: 0, y: 0 });
-    };
-
-    function syncCanvasToImage(img: HTMLImageElement, cvs: HTMLCanvasElement) {
-        const width = img.naturalWidth;
-        const height = img.naturalHeight;
-        Object.assign(cvs, { width, height });
-        Object.assign(cvs.style, {
-            width: `${img.width}px`,
-            height: `${img.height}px`,
-            position: "absolute",
-            zIndex: "10",
-        });
-        const ctx = cvs.getContext("2d")!;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-    }
+    const loadImage = useCallback(
+        async (path: string) => {
+            try {
+                setError(null);
+                setOriginalUrl(null);
+                setPreviewImageUrl(null);
+                setModifiers([]);
+                setOverlayMode("none");
+                const url = await pathToBlobUrl(path);
+                setOriginalUrl(url);
+                setImageName(await basename(path));
+                resetLeft();
+                resetRight();
+            } catch (err) {
+                const msg =
+                    err instanceof Error ? err.message : "Failed to load image";
+                setError(`${msg} (Path: ${path})`);
+                setOriginalUrl(null);
+                setPreviewImageUrl(null);
+            }
+        },
+        [resetLeft, resetRight]
+    );
 
     useEffect(() => {
         const init = async () => {
@@ -338,6 +398,14 @@ export function EditWindow() {
     }, [originalUrl]);
 
     useEffect(() => {
+        return () => {
+            if (previewImageUrl) {
+                URL.revokeObjectURL(previewImageUrl);
+            }
+        };
+    }, [previewImageUrl]);
+
+    useEffect(() => {
         const liveUrls = new Set(
             modifiers
                 .filter(isEnhancementModifier)
@@ -362,26 +430,49 @@ export function EditWindow() {
     }, [displayUrl]);
 
     useEffect(() => {
-        const img = imageRef.current;
-        const canvas = canvasRef.current;
-        if (!img || !canvas) return undefined;
+        let cancelled = false;
 
-        const sync = () => {
-            requestAnimationFrame(() => syncCanvasToImage(img, canvas));
-        };
+        async function renderPreview() {
+            if (
+                isFftActive ||
+                !rasterDisplayUrl ||
+                !hasCanvasModifiers(modifiers)
+            ) {
+                setPreviewImageUrl(null);
+                return;
+            }
 
-        const resizeObserver = new ResizeObserver(sync);
-        resizeObserver.observe(img);
+            try {
+                const source = await loadImageElement(rasterDisplayUrl);
+                const previewModifiers = modifiers.filter(
+                    modifier =>
+                        modifier.type !== "fft" &&
+                        !isEnhancementModifier(modifier)
+                );
+                const bytes = await applyPipelineToImage(
+                    source,
+                    previewModifiers
+                );
+                const nextUrl = URL.createObjectURL(
+                    new Blob([bytes as unknown as ArrayBuffer], {
+                        type: "image/png",
+                    })
+                );
+                if (cancelled) {
+                    URL.revokeObjectURL(nextUrl);
+                    return;
+                }
+                setPreviewImageUrl(nextUrl);
+            } catch {
+                if (!cancelled) setPreviewImageUrl(null);
+            }
+        }
 
-        if (img.complete) sync();
-        img.addEventListener("load", sync);
-
+        renderPreview();
         return () => {
-            resizeObserver.disconnect();
-            img.removeEventListener("load", sync);
+            cancelled = true;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [displayUrl]);
+    }, [isFftActive, modifiers, rasterDisplayUrl]);
 
     const updateModifierParams = useCallback(
         (id: string, params: Partial<AnyModifier["params"]>) => {
@@ -520,10 +611,30 @@ export function EditWindow() {
                 return;
             }
 
+            if (type === "fft") {
+                setEditingFftModifierId(newMod.id);
+                setIsFftActive(true);
+                return;
+            }
+
             // setTimeout so the DropdownMenu close event doesn't immediately dismiss the dialog
             setTimeout(() => setEditingModifierId(newMod.id), 50);
         },
         [runEnhancement]
+    );
+
+    const handleEditModifier = useCallback(
+        (id: string) => {
+            const target = modifiers.find(m => m.id === id);
+            if (!target) return;
+            if (target.type === "fft") {
+                setEditingFftModifierId(id);
+                setIsFftActive(true);
+                return;
+            }
+            setEditingModifierId(id);
+        },
+        [modifiers]
     );
 
     const handleUpdateModifier = useCallback(
@@ -542,13 +653,27 @@ export function EditWindow() {
     const handleRemoveModifier = useCallback((id: string) => {
         setModifiers(prev => {
             const target = prev.find(m => m.id === id);
-            if (target && isEnhancementModifier(target)) {
-                const url = target.params.runtimeOutputUrl;
-                if (url) URL.revokeObjectURL(url);
+            if (target) {
+                if (isEnhancementModifier(target)) {
+                    const url = target.params.runtimeOutputUrl;
+                    if (url) URL.revokeObjectURL(url);
+                } else if (
+                    target.type === "fft" &&
+                    target.params.runtimeOutputUrl?.startsWith("blob:")
+                ) {
+                    URL.revokeObjectURL(target.params.runtimeOutputUrl);
+                }
             }
             return prev.filter(m => m.id !== id);
         });
         setEditingModifierId(prev => (prev === id ? null : prev));
+        setEditingFftModifierId(prev => {
+            if (prev === id) {
+                setIsFftActive(false);
+                return null;
+            }
+            return prev;
+        });
     }, []);
 
     const handleReorderModifiers = useCallback(
@@ -585,13 +710,244 @@ export function EditWindow() {
     const editingModifier =
         modifiers.find(m => m.id === editingModifierId) ?? null;
 
+    const replaceBaseImageFromCanvas = useCallback(
+        async (canvas: HTMLCanvasElement) => {
+            const nextUrl = await canvasToBlobUrl(canvas);
+            setOriginalUrl(nextUrl);
+            setPreviewImageUrl(null);
+            setModifiers(previous => {
+                previous.forEach(modifier => {
+                    if (isEnhancementModifier(modifier)) {
+                        if (modifier.params.runtimeOutputUrl) {
+                            URL.revokeObjectURL(
+                                modifier.params.runtimeOutputUrl
+                            );
+                        }
+                    } else if (
+                        modifier.type === "fft" &&
+                        modifier.params.runtimeOutputUrl?.startsWith("blob:")
+                    ) {
+                        URL.revokeObjectURL(modifier.params.runtimeOutputUrl);
+                    }
+                });
+                return previous.filter(
+                    modifier =>
+                        modifier.type !== "fft" &&
+                        !isEnhancementModifier(modifier)
+                );
+            });
+            setEditingModifierId(null);
+            setEditingFftModifierId(null);
+            setIsFftActive(false);
+
+            const overlayCanvas = dpiCanvasRef.current;
+            const overlayContext = overlayCanvas?.getContext("2d");
+            if (overlayCanvas && overlayContext) {
+                overlayContext.clearRect(
+                    0,
+                    0,
+                    overlayCanvas.width,
+                    overlayCanvas.height
+                );
+            }
+            setOverlayMode("none");
+            resetLeft();
+            resetRight();
+        },
+        [resetLeft, resetRight]
+    );
+
+    const getBaseImage = useCallback(async () => {
+        if (!originalUrl) throw new Error("No image loaded");
+        return loadImageElement(originalUrl);
+    }, [originalUrl]);
+
+    const applyTransform = useCallback(
+        async (
+            operation:
+                | "rotate90cw"
+                | "rotate90ccw"
+                | "rotate180"
+                | "flipHorizontal"
+                | "flipVertical"
+        ) => {
+            try {
+                const source = await getBaseImage();
+                const rotate90 =
+                    operation === "rotate90cw" || operation === "rotate90ccw";
+                const canvas = document.createElement("canvas");
+                canvas.width = rotate90
+                    ? source.naturalHeight
+                    : source.naturalWidth;
+                canvas.height = rotate90
+                    ? source.naturalWidth
+                    : source.naturalHeight;
+                const context = canvas.getContext("2d");
+                if (!context) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+
+                if (operation === "rotate90cw") {
+                    context.translate(canvas.width, 0);
+                    context.rotate(Math.PI / 2);
+                } else if (operation === "rotate90ccw") {
+                    context.translate(0, canvas.height);
+                    context.rotate(-Math.PI / 2);
+                } else if (operation === "rotate180") {
+                    context.translate(canvas.width, canvas.height);
+                    context.rotate(Math.PI);
+                } else if (operation === "flipHorizontal") {
+                    context.translate(canvas.width, 0);
+                    context.scale(-1, 1);
+                } else if (operation === "flipVertical") {
+                    context.translate(0, canvas.height);
+                    context.scale(1, -1);
+                }
+
+                context.drawImage(source, 0, 0);
+                await replaceBaseImageFromCanvas(canvas);
+            } catch (caught) {
+                const message =
+                    caught instanceof Error ? caught.message : String(caught);
+                toast.error(
+                    t(FAILED_TO_TRANSFORM_IMAGE_KEY, {
+                        ns: "tooltip",
+                        error: message,
+                    })
+                );
+            }
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
+    const applyCrop = useCallback(
+        async (rect: {
+            x: number;
+            y: number;
+            width: number;
+            height: number;
+        }) => {
+            try {
+                const source = await getBaseImage();
+                const x = Math.max(
+                    0,
+                    Math.min(source.naturalWidth - 1, rect.x)
+                );
+                const y = Math.max(
+                    0,
+                    Math.min(source.naturalHeight - 1, rect.y)
+                );
+                const width = Math.max(
+                    1,
+                    Math.min(source.naturalWidth - x, rect.width)
+                );
+                const height = Math.max(
+                    1,
+                    Math.min(source.naturalHeight - y, rect.height)
+                );
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext("2d");
+                if (!context) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+                context.drawImage(
+                    source,
+                    x,
+                    y,
+                    width,
+                    height,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+                await replaceBaseImageFromCanvas(canvas);
+            } catch (caught) {
+                const message =
+                    caught instanceof Error ? caught.message : String(caught);
+                toast.error(
+                    t(FAILED_TO_CROP_IMAGE_KEY, {
+                        ns: "tooltip",
+                        error: message,
+                    })
+                );
+            }
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
+    const applyScale = useCallback(
+        (scaleFactor: number) => {
+            getBaseImage()
+                .then(source => {
+                    const canvas = document.createElement("canvas");
+                    const sourceWidth = source.naturalWidth;
+                    const sourceHeight = source.naturalHeight;
+                    canvas.width = Math.max(
+                        1,
+                        Math.round(sourceWidth * scaleFactor)
+                    );
+                    canvas.height = Math.max(
+                        1,
+                        Math.round(sourceHeight * scaleFactor)
+                    );
+                    const context = canvas.getContext("2d");
+                    if (!context) throw new Error(CANVAS_CONTEXT_UNAVAILABLE);
+                    context.imageSmoothingQuality = "low";
+                    context.drawImage(
+                        source,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+                    return replaceBaseImageFromCanvas(canvas).then(() => {
+                        const scale = scaleFactor.toFixed(3);
+                        if (
+                            canvas.width === sourceWidth &&
+                            canvas.height === sourceHeight
+                        ) {
+                            toast.info(
+                                t("DPI scale unchanged", {
+                                    ns: "tooltip",
+                                    scale,
+                                    width: canvas.width,
+                                    height: canvas.height,
+                                })
+                            );
+                            return;
+                        }
+                        toast.success(
+                            t("DPI scale applied", {
+                                ns: "tooltip",
+                                scale,
+                                sourceWidth,
+                                sourceHeight,
+                                width: canvas.width,
+                                height: canvas.height,
+                            })
+                        );
+                    });
+                })
+                .catch(caught => {
+                    const message =
+                        caught instanceof Error
+                            ? caught.message
+                            : String(caught);
+                    toast.error(
+                        t(FAILED_TO_SCALE_IMAGE_KEY, {
+                            ns: "tooltip",
+                            error: message,
+                        })
+                    );
+                });
+        },
+        [getBaseImage, replaceBaseImageFromCanvas, t]
+    );
+
     const saveEditedImage = async () => {
-        if (!displayUrl || !imagePath || !imageRef.current) return;
+        if (!rasterDisplayUrl || !imagePath) return;
         try {
-            const uint8Array = await applyPipelineToImage(
-                imageRef.current,
-                modifiers
-            );
+            const source = await loadImageElement(rasterDisplayUrl);
+            const uint8Array = await applyPipelineToImage(source, modifiers);
 
             const { nameWithoutExt, extWithDot } =
                 await generateFilename(imagePath);
@@ -604,6 +960,10 @@ export function EditWindow() {
                     if (m.type === "snfen") return "SNFEN";
                     if (m.type === "brightness") return "brightness";
                     if (m.type === "contrast") return "contrast";
+                    if (m.type === "invert") return "invert";
+                    if (m.type === "desaturate") return "desaturate";
+                    if (m.type === "levels") return "levels";
+                    if (m.type === "curves") return "curves";
                     return "fft";
                 })
                 .join("_");
@@ -619,11 +979,16 @@ export function EditWindow() {
             if (!fileWasWritten)
                 throw new Error(`File was not created at path: ${finalPath}`);
 
+            await emit("image-reload-requested", {
+                originalPath: imagePath,
+                newPath: finalPath,
+            });
+
             toast.success(t("Image saved successfully", { ns: "tooltip" }));
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             toast.error(
-                t("Failed to save image: {{error}}", {
+                t(FAILED_TO_SAVE_IMAGE_KEY, {
                     ns: "tooltip",
                     error: msg,
                 })
@@ -691,79 +1056,42 @@ export function EditWindow() {
                             </div>
                         </div>
                     ) : displayUrl ? (
-                        <div
-                            ref={containerRef}
-                            className="flex-1 w-full flex items-center justify-center overflow-hidden mb-4 relative"
-                        >
-                            <button
-                                type="button"
-                                className="absolute inset-0 cursor-grab active:cursor-grabbing bg-transparent border-0 p-0"
-                                aria-label="Image viewer with zoom and pan controls"
-                                onWheel={handleWheel}
-                                onMouseDown={handleMouseDown}
-                                onMouseMove={handleMouseMove}
-                                onMouseUp={handleMouseUp}
-                                onMouseLeave={handleMouseUp}
-                                onDoubleClick={handleDoubleClick}
-                                onKeyDown={e => {
-                                    if (e.key === "Escape") {
-                                        resetZoom();
-                                    }
-                                }}
-                            />
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                ref={imageRef}
-                                src={originalUrl || ""}
-                                alt="Original hidden"
-                                className="absolute max-w-full max-h-full object-contain select-none pointer-events-none opacity-0"
-                                style={{
-                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: TRANSFORM_ORIGIN,
-                                    transition: isDragging
-                                        ? "none"
-                                        : "transform 0.1s ease-out",
-                                }}
-                                draggable={false}
-                            />
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={previewImageUrl || displayUrl || ""}
-                                alt={imagePath || "Loaded image"}
-                                className="max-w-full max-h-full object-contain select-none pointer-events-none"
-                                style={{
-                                    filter: previewImageUrl
-                                        ? "none"
-                                        : cssFilter,
-                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: TRANSFORM_ORIGIN,
-                                    transition: isDragging
-                                        ? "none"
-                                        : "transform 0.1s ease-out",
-                                }}
-                                draggable={false}
-                            />
-                            <canvas
-                                ref={canvasRef}
-                                className="absolute pointer-events-none"
-                                style={{
-                                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                                    transformOrigin: TRANSFORM_ORIGIN,
-                                }}
-                            />
-                            {zoom !== 1 && (
-                                <div className="absolute top-2 right-2">
-                                    <Button
-                                        onClick={resetZoom}
-                                        variant="outline"
-                                        size="sm"
-                                        className="bg-background/80 backdrop-blur-sm"
-                                    >
-                                        {t("Reset Zoom", { ns: "tooltip" })}
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
+                        <ImagePanes
+                            imageUrl={displayUrl}
+                            imagePath={imagePath}
+                            isFftActive={isFftActive}
+                            fftStatus={fft.status}
+                            containerRef={containerRef}
+                            imageRef={imageRef}
+                            spectrumCanvasRef={canvasRef}
+                            dpiCanvasRef={dpiCanvasRef}
+                            overlayActive={overlayMode !== "none"}
+                            brightness={100}
+                            contrast={100}
+                            cssFilter={previewImageUrl ? "none" : cssFilter}
+                            zoom={left.zoom}
+                            pan={left.pan}
+                            isDragging={left.isDragging}
+                            onWheel={left.handleWheel}
+                            onMouseDown={left.handleMouseDown}
+                            onMouseMove={left.handleMouseMove}
+                            onMouseUp={left.handleMouseUp}
+                            onDoubleClick={left.reset}
+                            onResetZoom={left.reset}
+                            fftContainerRef={fftContainerRef}
+                            previewCanvasRef={fftCanvasRef}
+                            rightPanZoom={right.zoom}
+                            rightPan={right.pan}
+                            isRightDragging={right.isDragging}
+                            onRightWheel={right.handleWheel}
+                            onRightMouseDown={e =>
+                                right.handleMouseDown(e, [0, 1])
+                            }
+                            onRightMouseMove={right.handleMouseMove}
+                            onRightMouseUp={right.handleMouseUp}
+                            onRightDoubleClick={right.reset}
+                            onResetRightZoom={right.reset}
+                        />
                     ) : (
                         <div className="text-center flex-1 flex items-center justify-center">
                             <div>
@@ -778,7 +1106,7 @@ export function EditWindow() {
                     )}
                 </div>
 
-                <div className="w-64 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col h-[calc(100vh-56px)]">
+                <div className="w-72 border-l border-border/30 bg-background/50 backdrop-blur-md flex flex-col h-[calc(100vh-56px)]">
                     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
                         {imageName && (
                             <div className="flex flex-col gap-1">
@@ -801,25 +1129,143 @@ export function EditWindow() {
 
                         <div className="border-t border-border/30" />
 
+                        {!isFftActive && (
+                            <>
+                                <div className="flex flex-col gap-3">
+                                    <h3 className="text-sm font-semibold text-muted-foreground">
+                                        {t("Transformations", {
+                                            ns: "keywords",
+                                        })}
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!originalUrl}
+                                            title={t("Rotate 90° left", {
+                                                ns: "tooltip",
+                                            })}
+                                            onClick={() =>
+                                                applyTransform("rotate90ccw")
+                                            }
+                                        >
+                                            <RotateCcw size={ICON.SIZE} />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!originalUrl}
+                                            title={t("Rotate 90° right", {
+                                                ns: "tooltip",
+                                            })}
+                                            onClick={() =>
+                                                applyTransform("rotate90cw")
+                                            }
+                                        >
+                                            <RotateCw size={ICON.SIZE} />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!originalUrl}
+                                            title={t("Rotate 180°", {
+                                                ns: "tooltip",
+                                            })}
+                                            onClick={() =>
+                                                applyTransform("rotate180")
+                                            }
+                                        >
+                                            180°
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!originalUrl}
+                                            title={t("Flip horizontal", {
+                                                ns: "tooltip",
+                                            })}
+                                            onClick={() =>
+                                                applyTransform("flipHorizontal")
+                                            }
+                                        >
+                                            <FlipHorizontal size={ICON.SIZE} />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={!originalUrl}
+                                            title={t("Flip vertical", {
+                                                ns: "tooltip",
+                                            })}
+                                            onClick={() =>
+                                                applyTransform("flipVertical")
+                                            }
+                                            className="col-span-2"
+                                        >
+                                            <FlipVertical
+                                                size={ICON.SIZE}
+                                                className="mr-1.5"
+                                            />
+                                            {t("Flip vertical", {
+                                                ns: "tooltip",
+                                            })}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="border-t border-border/30" />
+
+                                <div className="flex flex-col gap-2">
+                                    <h3 className="text-sm font-semibold text-muted-foreground">
+                                        {t("Crop", { ns: "keywords" })}
+                                    </h3>
+                                    <ImageCropControls
+                                        imageRef={imageRef}
+                                        canvasRef={dpiCanvasRef}
+                                        active={overlayMode === "crop"}
+                                        onActiveChange={active =>
+                                            setOverlayMode(
+                                                active ? "crop" : "none"
+                                            )
+                                        }
+                                        onApplyCrop={applyCrop}
+                                    />
+                                </div>
+
+                                <div className="border-t border-border/30" />
+                            </>
+                        )}
+
                         <div className="flex flex-col gap-3">
                             <h3 className="text-sm font-semibold text-muted-foreground">
                                 {t("Adjustments", { ns: "keywords" })}
                             </h3>
-                            <ModifierList
-                                modifiers={modifiers}
-                                onEdit={setEditingModifierId}
-                                onToggle={handleToggleModifier}
-                                onRemove={handleRemoveModifier}
-                                onReorder={handleReorderModifiers}
-                            />
-                            <AddModifierButton
-                                onAdd={handleAddModifier}
-                                disabled={!originalUrl}
-                            />
-                            {enhancing && (
-                                <p className="text-xs text-primary animate-pulse text-center">
-                                    {t("Enhancing image...", { ns: "tooltip" })}
-                                </p>
+                            {!isFftActive ? (
+                                <>
+                                    <ModifierList
+                                        modifiers={modifiers}
+                                        onEdit={handleEditModifier}
+                                        onToggle={handleToggleModifier}
+                                        onRemove={handleRemoveModifier}
+                                        onReorder={handleReorderModifiers}
+                                    />
+                                    <AddModifierButton
+                                        onAdd={handleAddModifier}
+                                        disabled={!originalUrl || isFftActive}
+                                    />
+                                    {enhancing && (
+                                        <p className="text-xs text-primary animate-pulse text-center">
+                                            {t("Enhancing image...", {
+                                                ns: "tooltip",
+                                            })}
+                                        </p>
+                                    )}
+                                </>
+                            ) : (
+                                <SidebarFFT
+                                    fft={fft}
+                                    onCancel={handleCancelFft}
+                                />
                             )}
                         </div>
 
@@ -831,7 +1277,13 @@ export function EditWindow() {
                             </h3>
                             <ImageDpiControls
                                 imageRef={imageRef}
-                                canvasRef={canvasRef}
+                                canvasRef={dpiCanvasRef}
+                                active={overlayMode === "dpi"}
+                                onActiveChange={active =>
+                                    setOverlayMode(active ? "dpi" : "none")
+                                }
+                                onScaleComputed={applyScale}
+                                disabled={isFftActive}
                             />
                         </div>
                     </div>
@@ -841,7 +1293,7 @@ export function EditWindow() {
                             onClick={saveEditedImage}
                             className="w-full"
                             size="lg"
-                            disabled={!displayUrl || !imagePath}
+                            disabled={!displayUrl || !imagePath || isFftActive}
                             id="save-edited-image-button"
                         >
                             <Save size={ICON.SIZE} className="mr-2" />

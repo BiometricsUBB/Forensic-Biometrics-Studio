@@ -1,6 +1,8 @@
 ﻿// Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod shoeprint;
+
 use tauri::Emitter;
 use tauri::Manager;
 use std::fs;
@@ -312,6 +314,7 @@ fn install_macos_menu(app: &tauri::AppHandle) -> tauri::Result<()> {
 fn main() {
     let builder = tauri::Builder::default()
         .manage(WorkingModeState(Mutex::new(None)))
+        .manage(shoeprint::ShoeprintState::default())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
@@ -353,6 +356,9 @@ fn main() {
             get_machine_id,
             set_working_mode,
             get_working_mode,
+            shoeprint::shoeprint_engine_status,
+            shoeprint::run_shoeprint_comparison,
+            shoeprint::cancel_shoeprint_comparison,
         ]);
 
     #[cfg(target_os = "windows")]

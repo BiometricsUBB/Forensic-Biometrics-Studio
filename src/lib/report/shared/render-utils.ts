@@ -3,6 +3,7 @@ import { readFile } from "@tauri-apps/plugin-fs";
 import { drawMarking } from "@/components/pixi/overlays/markings/marking.utils";
 import { MarkingClass } from "@/lib/markings/MarkingClass";
 import { MarkingType } from "@/lib/markings/MarkingType";
+import { TracingPath } from "@/lib/stores/Tracing/Tracing.store";
 import i18n from "@/lib/locales/i18n";
 import { clamp, toBlobBytes, md5Bytes } from "../report-utils";
 import { ImageMeta } from "./types";
@@ -35,12 +36,17 @@ export const renderImageWithMarkings = async (
     markings: MarkingClass[],
     markingTypes: MarkingType[],
     sizeScale: number,
-    options?: { showMarkingLabels?: boolean; markingsAlpha?: number }
+    options?: {
+        showMarkingLabels?: boolean;
+        markingsAlpha?: number;
+        tracingPaths?: TracingPath[];
+    }
 ) => {
     const bitmap = await createImageBitmap(new Blob([toBlobBytes(imageBytes)]));
     const { width, height } = bitmap;
     const showMarkingLabels = options?.showMarkingLabels ?? true;
     const markingsAlpha = options?.markingsAlpha ?? 1;
+    const tracingPaths = options?.tracingPaths;
 
     const app = new PIXI.Application({
         width,
@@ -53,6 +59,31 @@ export const renderImageWithMarkings = async (
     const sprite = new PIXI.Sprite(PIXI.Texture.from(bitmap));
     sprite.position.set(0, 0);
     app.stage.addChild(sprite);
+
+    if (tracingPaths?.length) {
+        const tracingContainer = new PIXI.Container();
+
+        tracingPaths.forEach(path => {
+            const line = new PIXI.Graphics();
+            line.lineStyle({
+                width: path.brushSize,
+                color: Number(path.color.replace("#", "0x")),
+                alpha: path.opacity,
+                join: PIXI.LINE_JOIN.ROUND,
+                cap: PIXI.LINE_CAP.ROUND,
+            });
+
+            const [first, ...rest] = path.points;
+            if (first) {
+                line.moveTo(first.x, first.y);
+                rest.forEach(point => line.lineTo(point.x, point.y));
+            }
+
+            tracingContainer.addChild(line);
+        });
+
+        app.stage.addChild(tracingContainer);
+    }
 
     const g = new PIXI.Graphics();
     g.alpha = markingsAlpha;

@@ -73,6 +73,21 @@ const d: Dictionary = {
     "Earprint attribute": "Attribute",
     "Earprint no features": "No paired features found.",
     "Canvas context error": "Failed to create canvas context.",
+    "Shoeprint comparison title": "Automated statistical comparison",
+    "Shoeprint comparison method":
+        "The comparison was performed with the shoeprintr algorithm (Park & Carriquiry, CSAFE, Iowa State University). Three regions of interest are fixed on print Q; for each one the algorithm searches print K for the corresponding region by finding the largest set of mutually consistent point correspondences (a maximum clique), and then estimates the rotation and the degree of overlap between the two regions.",
+    "Shoeprint comparison summary": "Summary of similarity features",
+    "Shoeprint comparison regions": "Matched regions",
+    "Shoeprint comparison distances": "Distances between region centres",
+    "Shoeprint comparison figure":
+        "Regions fixed on print Q and the corresponding regions located in print K.",
+    "Shoeprint comparison parameters": "Analysis parameters",
+    "Shoeprint comparison disclaimer":
+        "These values describe the degree of geometric agreement measured between the two impressions. They are not a probability of common origin and do not by themselves constitute an identification. Interpretation remains the responsibility of the examiner.",
+    "Shoeprint comparison scale warning":
+        "At least one image had no resolution set, so the distances below are expressed in working units rather than millimetres and should not be read as physical measurements.",
+    "Shoeprint comparison scale mismatch":
+        "The two prints were reduced to different working scales, so region distances are not directly comparable.",
 };
 
 export default d;

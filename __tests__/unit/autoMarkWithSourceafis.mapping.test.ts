@@ -18,6 +18,7 @@ mock.module(
     "@/lib/external-tools/sourceafis/createSourceAfisExternalTool",
     () => ({
         createSourceAfisExternalTool: mock(),
+        createSourceAfisMatcherTool: mock(),
         SOURCE_AFIS_TIMEOUT_MS: 30_000,
     })
 );

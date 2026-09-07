@@ -10,7 +10,6 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useTranslation } from "react-i18next";
 import { FileText, X } from "lucide-react";
 import { ICON } from "@/lib/utils/const";
@@ -27,6 +26,7 @@ import { cn } from "@/lib/utils/shadcn";
 import { showErrorDialog } from "@/lib/errors/showErrorDialog";
 import { GlobalSettingsStore } from "@/lib/stores/GlobalSettings";
 import i18n from "@/lib/locales/i18n";
+import { ReportDialogField } from "./report-dialog-field";
 
 type ReportSignatureDialogProps = {
     className?: string;
@@ -154,28 +154,30 @@ export function ReportSignatureDialog({
             </DialogTrigger>
 
             <DialogPortal>
-                <DialogOverlay />
-                <DialogContent className="w-160 max-w-[92vw] max-h-[90vh] flex flex-col">
-                    <DialogTitle className="text-lg font-semibold">
-                        {t("Report generation", { ns: "keywords" })}
-                    </DialogTitle>
-                    <DialogDescription className="text-sm text-muted-foreground">
-                        {t("Generate PDF report", { ns: "description" })}
-                    </DialogDescription>
+                <DialogOverlay className="bg-black/40 backdrop-blur-sm z-50" />
+                <DialogContent className="w-full max-w-[95vw] max-h-[95vh] md:max-h-[90vh] md:w-[500px] flex flex-col p-0 gap-0 overflow-hidden bg-background border-border shadow-2xl z-50">
+                    <div className="flex flex-col gap-1.5 p-4 sm:p-6 md:px-8 pb-4 border-b border-border bg-muted/10 shrink-0 relative z-10">
+                        <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
+                            {t("Report generation", { ns: "keywords" })}
+                        </DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">
+                            {t("Generate PDF report", { ns: "description" })}
+                        </DialogDescription>
+                    </div>
 
-                    <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-                        <div className="grid gap-3">
-                            <div className="grid grid-cols-1 gap-3">
-                                <div className="flex flex-col gap-1.5">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 md:p-8 flex flex-col gap-6 md:gap-8 bg-background">
+                        <div className="flex flex-col space-y-4 md:space-y-5 pb-2 -ml-[2px]">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="flex flex-col justify-end space-y-1.5">
                                     <label
-                                        htmlFor="report-language"
-                                        className="text-sm font-medium"
+                                        htmlFor="report-language-select"
+                                        className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider"
                                     >
                                         {t("Language", { ns: "keywords" })}
                                     </label>
                                     <select
-                                        id="report-language"
-                                        className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                                        id="report-language-select"
+                                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-2 py-2 text-sm shadow-sm hover:border-primary/50 focus:ring-2 focus:ring-primary focus:outline-none transition-all cursor-pointer"
                                         value={reportLanguage}
                                         onChange={e =>
                                             setReportLanguage(e.target.value)
@@ -185,147 +187,75 @@ export function ReportSignatureDialog({
                                         <option value="en">English</option>
                                     </select>
                                 </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-datetime"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Report date and time", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            id="report-datetime"
-                                            value={reportDateTime}
-                                            readOnly
-                                            placeholder="30.12.2025 - 15:28:31"
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-performed-by"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Performed by", { ns: "keywords" })}
-                                    </label>
-                                    <Input
-                                        id="report-performed-by"
-                                        value={performedBy}
-                                        onChange={e =>
-                                            setPerformedBy(e.target.value)
-                                        }
-                                        placeholder="Jan Kowalski"
-                                    />
-                                </div>
+                                <ReportDialogField
+                                    label={t("Report date and time", {
+                                        ns: "keywords",
+                                    })}
+                                    value={reportDateTime}
+                                    readOnly
+                                />
+                            </div>
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-department"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Department", { ns: "keywords" })}
-                                    </label>
-                                    <Input
-                                        id="report-department"
-                                        value={department}
-                                        onChange={e =>
-                                            setDepartment(e.target.value)
-                                        }
-                                        placeholder="Wydział Badań Daktyloskopijnych i Traseologicznych"
-                                    />
-                                </div>
+                            <ReportDialogField
+                                label={t("Performed by", { ns: "keywords" })}
+                                value={performedBy}
+                                onChange={setPerformedBy}
+                            />
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-1"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 1", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-1"
-                                        value={addressLine1}
-                                        onChange={e =>
-                                            setAddressLine1(e.target.value)
-                                        }
-                                        placeholder="ul. Miła 1"
-                                    />
-                                </div>
+                            <ReportDialogField
+                                label={t("Department", { ns: "keywords" })}
+                                value={department}
+                                onChange={setDepartment}
+                            />
 
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-2"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 2", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-2"
-                                        value={addressLine2}
-                                        onChange={e =>
-                                            setAddressLine2(e.target.value)
-                                        }
-                                        placeholder="02-520 Warszawa"
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-3"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 3", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-3"
-                                        value={addressLine3}
-                                        onChange={e =>
-                                            setAddressLine3(e.target.value)
-                                        }
-                                        placeholder=""
-                                    />
-                                </div>
-
-                                <div className="flex flex-col gap-1.5">
-                                    <label
-                                        htmlFor="report-address-4"
-                                        className="text-sm font-medium"
-                                    >
-                                        {t("Address line 4", {
-                                            ns: "keywords",
-                                        })}
-                                    </label>
-                                    <Input
-                                        id="report-address-4"
-                                        value={addressLine4}
-                                        onChange={e =>
-                                            setAddressLine4(e.target.value)
-                                        }
-                                        placeholder=""
-                                    />
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                <ReportDialogField
+                                    label={t("Address line 1", {
+                                        ns: "keywords",
+                                    })}
+                                    value={addressLine1}
+                                    onChange={setAddressLine1}
+                                />
+                                <ReportDialogField
+                                    label={t("Address line 2", {
+                                        ns: "keywords",
+                                    })}
+                                    value={addressLine2}
+                                    onChange={setAddressLine2}
+                                />
+                                <ReportDialogField
+                                    label={t("Address line 3", {
+                                        ns: "keywords",
+                                    })}
+                                    value={addressLine3}
+                                    onChange={setAddressLine3}
+                                />
+                                <ReportDialogField
+                                    label={t("Address line 4", {
+                                        ns: "keywords",
+                                    })}
+                                    value={addressLine4}
+                                    onChange={setAddressLine4}
+                                />
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-6 flex justify-between shrink-0">
+                    <div className="p-4 sm:p-6 md:px-8 border-t border-border bg-muted/10 flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0 relative z-10">
                         <DialogClose asChild>
-                            <Button type="button" variant="outline">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full sm:w-28 shadow-sm"
+                            >
                                 {t("Cancel", { ns: "keywords" })}
                             </Button>
                         </DialogClose>
                         <Button
                             type="button"
                             onClick={onGenerate}
+                            className="w-full sm:w-44 shadow-sm"
                             disabled={!canGenerate || isGenerating}
                         >
                             {isGenerating
@@ -334,8 +264,8 @@ export function ReportSignatureDialog({
                         </Button>
                     </div>
 
-                    <DialogClose className="absolute top-3 right-3">
-                        <X size={ICON.SIZE} strokeWidth={ICON.STROKE_WIDTH} />
+                    <DialogClose className="absolute top-4 right-4 sm:top-6 sm:right-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none text-muted-foreground hover:bg-muted p-1 z-50">
+                        <X size={20} strokeWidth={ICON.STROKE_WIDTH} />
                     </DialogClose>
                 </DialogContent>
             </DialogPortal>

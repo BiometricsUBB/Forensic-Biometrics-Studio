@@ -49,6 +49,42 @@ const d: Dictionary = {
     Points: "Points",
     Brightness: "Brightness",
     Contrast: "Contrast",
+    "Invert colors": "Invert colors",
+    Desaturate: "Desaturate",
+    "Desaturate channel weights":
+        "Convert to black and white using adjustable Photoshop-style color ranges.",
+    Reds: "Reds",
+    Yellows: "Yellows",
+    Greens: "Greens",
+    Cyans: "Cyans",
+    Blues: "Blues",
+    Magentas: "Magentas",
+    "Rotate 90° left": "Rotate 90° left",
+    "Rotate 90° right": "Rotate 90° right",
+    "Rotate 180°": "Rotate 180°",
+    "Flip horizontal": "Flip horizontal",
+    "Flip vertical": "Flip vertical",
+    Transformations: "Transformations",
+    Crop: "Crop",
+    "Start crop": "Start crop",
+    "Apply crop": "Apply crop",
+    "Cancel crop": "Cancel crop",
+    "Draw a rectangle on the image to crop it":
+        "Draw a rectangle on the image to crop it",
+    "Crop area selected": "Crop area selected",
+    "Failed to transform image: {{error}}":
+        "Failed to transform image: {{error}}",
+    "Failed to crop image: {{error}}": "Failed to crop image: {{error}}",
+    "Failed to scale image: {{error}}": "Failed to scale image: {{error}}",
+    "DPI scale unchanged":
+        "DPI: scale {{scale}}x, size unchanged ({{width}} x {{height}} px)",
+    "DPI scale applied":
+        "DPI: scale {{scale}}x, {{sourceWidth}} x {{sourceHeight}} px -> {{width}} x {{height}} px",
+    "Target DPI": "Target DPI",
+    "Reference length (mm)": "Reference length (mm)",
+    "Reference length in millimeters": "Reference length in millimeters",
+    "DPI reference length hint":
+        "Used when tick detection on the ruler is ambiguous.",
     Levels: "Levels",
     levels_desc: "Adjust the tonal range and color balance of the image",
     Curves: "Curves",
@@ -69,6 +105,7 @@ const d: Dictionary = {
     "Reset rotation": "Reset rotation to 0°",
     "Synchronize rotation": "Synchronize rotation between viewports",
     "FFT Filter": "Open FFT frequency filter editor",
+    "FFT Filter applied": "FFT filter applied",
     "Paint over bright spots to filter them out":
         "Paint over bright spots to filter them out",
     "Preview ready. Return to edit or save.":
@@ -129,6 +166,21 @@ const d: Dictionary = {
     "GBFEN — Gabor-based enhancement": "GBFEN — Gabor-based enhancement",
     "SNFEN — Neural enhancement": "SNFEN — Neural enhancement",
     "Enhancing image...": "Enhancing image...",
+    "Comparison finished in {{seconds}}s":
+        "Comparison finished in {{seconds}}s",
+    "Comparison cancelled": "Comparison cancelled",
+    "Comparison failed: {{error}}": "Comparison failed: {{error}}",
+    "Load an image on both canvases first":
+        "Load an image on both canvases first",
+    "Shoeprint canvas not ready": "The canvas is not ready.",
+    "Shoeprint load images first": "Load an image on both canvases first.",
+    "Shoeprint image has no path": "The image has no source path.",
+    "Shoeprint not enough edge points":
+        "Only {{count}} edge points were found in image {{label}}. Adjust the binarisation threshold, or use a higher-contrast image.",
+    "Shoeprint regions too large for resolution":
+        "The comparison regions are too large for image {{label}}. At {{dpi}} dpi the print measures only {{length}} mm, but an outsole is normally 250-320 mm, so that resolution is too high for this image. Clear the resolution to scale by image size instead, or enter the resolution the image was actually captured at.",
+    "Shoeprint regions too large for print":
+        "The comparison regions are too large for image {{label}}. Reduce the region radius, currently {{radius}} units for a print spanning {{width}}x{{height}} units.",
 };
 
 export default d;

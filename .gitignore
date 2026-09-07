@@ -57,3 +57,12 @@ next-env.d.ts
 # local installer / toolchain artifacts (not project files)
 /Setup.msix
 /rustup-init.exe
+
+# r runtime
+/src-tauri/r-runtime/
+/.cache-r/
+/.tmp-e2e/
+
+# dotnet build artifacts
+src-tauri/sourceafis_cli_src/bin/
+src-tauri/sourceafis_cli_src/obj/

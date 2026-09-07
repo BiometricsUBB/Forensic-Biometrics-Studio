@@ -7,6 +7,8 @@ import {
     EyeOff,
     Sun,
     Contrast,
+    FlipHorizontal,
+    Droplets,
     Waves,
     SlidersHorizontal,
     TrendingUp,
@@ -43,6 +45,22 @@ export function ModifierIcon({
     if (type === "contrast")
         return (
             <Contrast
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "invert")
+        return (
+            <FlipHorizontal
+                size={s}
+                strokeWidth={ICON.STROKE_WIDTH}
+                className={cls}
+            />
+        );
+    if (type === "desaturate")
+        return (
+            <Droplets
                 size={s}
                 strokeWidth={ICON.STROKE_WIDTH}
                 className={cls}
@@ -210,6 +228,12 @@ function ModifierItem({
             break;
         case "contrast":
             label = t("Contrast", { ns: "tooltip" });
+            break;
+        case "invert":
+            label = t("Invert colors", { ns: "tooltip" });
+            break;
+        case "desaturate":
+            label = t("Desaturate", { ns: "tooltip" });
             break;
         case "levels":
             label = t("Levels", { ns: "tooltip" });

@@ -18,12 +18,15 @@ import {
 } from "@/lib/external-tools/core/errors";
 
 const SOURCE_AFIS_SIDECAR_NAME = "bin/sourceafis_cli";
+const SOURCE_AFIS_MATCHER_NAME = "bin/sourceafis_matcher";
 export const SOURCE_AFIS_TIMEOUT_MS = 30_000;
 const SOURCE_AFIS_LOG_PREFIX = "[SourceAFIS ExternalTool]";
 const MAX_LOG_TEXT_LENGTH = 500;
 
 export type SourceAfisRunRequest = {
     imagePath: string;
+    image2Path?: string;
+    limit: number;
     outTemplatePath: string;
     outJsonPath: string;
 };
@@ -37,6 +40,7 @@ export type SourceAfisJson = {
     }>;
     width?: number;
     height?: number;
+    matchScore?: number;
 };
 
 export type SourceAfisRunResult = {
@@ -155,17 +159,37 @@ class WindowsSourceAfisStrategy
     public buildExecutionPlan(
         request: SourceAfisRunRequest
     ): ExternalExecutionPlan {
-        return {
-            command: SOURCE_AFIS_SIDECAR_NAME,
-            args: [
-                "--image",
-                request.imagePath,
-                "--out-template",
-                request.outTemplatePath,
-                "--out-json",
-                request.outJsonPath,
-            ],
-        };
+        const args = [
+            "--image",
+            request.imagePath,
+            "--out-template",
+            request.outTemplatePath,
+            "--out-json",
+            request.outJsonPath,
+        ];
+        return { command: SOURCE_AFIS_SIDECAR_NAME, args: args };
+    }
+}
+
+class WindowsSourceAfisMatcherStrategy
+    implements ExternalToolStrategy<SourceAfisRunRequest>
+{
+    public buildExecutionPlan(
+        request: SourceAfisRunRequest
+    ): ExternalExecutionPlan {
+        const args = [
+            "--image",
+            request.imagePath,
+            "--limit",
+            request.limit.toString(),
+            "--out-template",
+            request.outTemplatePath,
+            "--out-json",
+            request.outJsonPath,
+        ];
+        if (request.image2Path) args.push("--image2", request.image2Path);
+
+        return { command: SOURCE_AFIS_MATCHER_NAME, args: args };
     }
 }
 
@@ -292,6 +316,20 @@ export async function createSourceAfisExternalTool(): Promise<
     ExternalTool<SourceAfisRunRequest, SourceAfisRunResult>
 > {
     const strategy = await resolveSourceAfisStrategy();
+    return new SourceAfisExternalTool(
+        strategy,
+        new TauriProcessAdapter(),
+        new SourceAfisJsonOutputAdapter()
+    );
+}
+export async function createSourceAfisMatcherTool(): Promise<
+    ExternalTool<SourceAfisRunRequest, SourceAfisRunResult>
+> {
+    const currentOs = await Promise.resolve(platform());
+    const strategy =
+        currentOs === "windows"
+            ? new WindowsSourceAfisMatcherStrategy()
+            : new NotImplementedSourceAfisStrategy(currentOs);
     return new SourceAfisExternalTool(
         strategy,
         new TauriProcessAdapter(),
