@@ -84,11 +84,9 @@ const TableRowComponent = <TData,>(rows: Row<TData>[], canvasId: CANVAS_ID) => {
             <TableRow
                 ref={ref}
                 key={row.id}
-                className={cn(
-                    "last:border-b-0 cursor-pointer transition-colors hover:bg-accent/45",
-                    isSelected && "bg-accent/75"
-                )}
+                className="last:border-b-0 cursor-pointer transition-colors hover:bg-accent/45"
                 data-state={isSelected && "selected"}
+                aria-selected={isSelected}
                 onClickCapture={() => {
                     if (selectedMarkingLabel === marking.label) {
                         MarkingsStore(
